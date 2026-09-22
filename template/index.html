@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{BOOK}} Study</title>
+<meta name="description" content="A literary-canonical study translation of the Book of {{BOOK}}.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Frank+Ruhl+Libre:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=2">
+</head>
+<body>
+
+<div class="topbar-wrap">
+  <header class="topbar">
+    <div class="inner">
+      <div class="brand">{{BOOK}} <span>· study translation</span></div>
+      <span class="topbar-actions">
+        <a href="#/search" class="topbar-link">Search</a>
+        <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="unit-nav">
+          Contents <span id="nav-toggle-ctx"></span>
+        </button>
+        <button id="settings-toggle" class="nav-toggle" aria-expanded="false" aria-controls="settings-panel">
+          Settings
+        </button>
+      </span>
+    </div>
+  </header>
+  <nav id="unit-nav" class="unit-nav" aria-label="all units" hidden></nav>
+  <div id="settings-panel" class="settings-panel" role="menu" aria-label="display settings" hidden>
+    <label class="settings-row">
+      <input type="checkbox" id="setting-center-text">
+      Center-align reading text
+    </label>
+  </div>
+</div>
+<div id="nav-backdrop" class="nav-backdrop" hidden></div>
+
+<main id="content" class="wrap" tabindex="-1">
+  <p class="loading">Loading…</p>
+</main>
+
+<nav id="unit-pager" class="unit-pager" aria-label="previous and next unit"></nav>
+
+<a id="fab-prev" class="unit-fab prev" aria-label="Previous unit" hidden>‹</a>
+<a id="fab-next" class="unit-fab next" aria-label="Next unit" hidden>›</a>
+
+<script type="module" src="app/main.js?v=2"></script>
+</body>
+</html>

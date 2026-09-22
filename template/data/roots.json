@@ -1,0 +1,6 @@
+{
+  "_note": "Tracked-thread id sets: policy, same as threads.json. declined{} records candidates deliberately kept local, with why and date, so they aren't re-argued.",
+  "version": 1,
+  "roots": {},
+  "declined": {}
+}

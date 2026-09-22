@@ -1,0 +1,25 @@
+{
+  "book": "Joshua",
+  "osis": "Josh",
+  "abbrev": "Josh",
+  "slug": "joshua",
+  "language": "hebrew",
+  "corpus": {"kind": "oshb", "pin": "morphhb@2.0.2", "word_ids": true},
+  "groupings": ["movement"],
+  "components": ["echo"],
+  "checks": {"opens_note_required": true},
+  "palette": "../bible-core/tests/joshua_well.json",
+  "sync": {
+    "files": ["joshua_study_style_reference.md", "translation-choices.md",
+              "threads-digest.md", "data/roots.json", "Joshua-words.tsv"],
+    "globs": ["canon-leads/canon-leads-unit-*.md"]
+  },
+  "storage_key": "joshua",
+  "paths": {
+    "out": "pipeline/out",
+    "retrofit": "pipeline/retrofit-tags.json",
+    "retro": "pipeline/retro-tags.json",
+    "lexicon": "pipeline/corpus/lexicon/HebrewStrong.xml"
+  },
+  "core": "0.1.0"
+}

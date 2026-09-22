@@ -1,0 +1,8 @@
+{
+  "name": "{{SLUG}}",
+  "private": true,
+  "description": "Pins the OSHB corpus (morphhb). npm ci installs it.",
+  "dependencies": {
+    "morphhb": "2.0.2"
+  }
+}

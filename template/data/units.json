@@ -1,0 +1,7 @@
+{
+  "_note": "Unit registry. groupings[] entries are {kind, n, name, label?, span, units}; each unit row carries an integer per grouping kind (e.g. \"movement\": 2). The first kind listed drives the site's book map. Filled from the unit map once the project side delivers it.",
+  "book": "{{BOOK}}",
+  "unit_count": 0,
+  "groupings": [],
+  "units": []
+}

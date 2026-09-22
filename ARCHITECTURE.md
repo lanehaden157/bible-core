@@ -1,7 +1,7 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** draft 0.1, 2026-09-22. It will be shaped by Numbers, the first book
-built on it. Expect it to change.
+**Status:** core 0.1.0, 2026-09-22. Built and tested (see §8); Numbers, the
+first book on it, will shape it further. Expect it to change.
 
 ## What this is
 
@@ -27,30 +27,35 @@ one of them.
 
 | layer | lives in | who owns it | changes how |
 |---|---|---|---|
-| **Shared package** (`biblecore/`) | this repo, vendored into each book as `core/` at a pinned version | shared | Fix it here and re-vendor. A book adopts a new version when it chooses. |
-| **Starter template** | this repo's `template/`, copied once into a new book | the book, from the moment it's copied | Freely, in the book. Improvements worth sharing come back to the template by hand. |
+| **Shared package** (`biblecore/`) | this repo, vendored into each book as `<book>/biblecore/` at a pinned version | shared | Fix it here and re-vendor (`tools/core_sync.py`). A book adopts a new version when it chooses. |
+| **Starter template** (`template/`) | copied once into a new book | the book, from the moment it's copied | Freely, in the book. Improvements worth sharing come back to the template by hand. |
 | **Book-only** | the book repo | the book | Freely. |
 
-**Shared package: mechanism, not taste.** This is code where a bug fixed once
-should be fixed everywhere:
+**Shared package: mechanism, not taste.** Code where a bug fixed once should
+be fixed everywhere, run from a book's root as `python -m biblecore <command>`:
 
-- the meta block (parse, validate, generate, inject), with core default keys
-  that a book can extend;
-- the fragment checks (endnote pairing, no native script, `data-root`
-  resolves, no inline style, component whitelist read from the book's CSS),
-  each of which a book can switch off;
-- the thread-coverage audit, as set arithmetic in *id* mode or *stem* mode;
-- colour (Lab / CIEDE2000 distance, well selection, collision checks);
-- retrofit ops, the occurrence scan and verify, the thread digest, and the
-  project-side sync;
-- language adapters (`lang/hebrew.py` first) and corpus adapters
-  (`corpus/oshb.py` first).
+- `book.py` — reads `book.json`; every module asks it for paths and settings;
+- `meta.py` — the meta block (parse, validate, generate, inject) and the
+  fragment checks (endnote pairing, no Hebrew *or* Greek script, `data-root`
+  resolves, tracked spans carry `data-w`, pericope ranges, echo anchors and
+  nesting, no inline style, component whitelist read from the book's CSS);
+- `audit.py` — thread coverage as set arithmetic over word ids; `data_w.py`
+  fills `data-w` by alignment; `roots.py` validates the id sets;
+- `colour.py` — CIEDE2000 distance and palette assignment for local roots and
+  newly promoted threads;
+- `port.py` and `build.py` — the default porter and build. They're mechanism
+  too, but a book that needs a different sequence writes its own script that
+  calls the same steps, rather than editing these;
+- `retrofit.py`, `scan.py`, `verify_occurrences.py`, `refresh.py`,
+  `validate_units.py`, `digest.py`, `leads.py` (canon leads), `sync.py`;
+- language adapters (`lang/hebrew.py`) and corpus adapters (`corpus/oshb.py`).
 
-**Starter template: taste, and anything likely to vary by genre.** This covers
-the porter and the build steps, the app shell (JS and `index.html`), the
-stylesheet, a style-reference skeleton, a chat-side instructions skeleton,
-`translation-choices.md` pointing at `canon/conventions.md`, and the
-session-context files.
+**Starter template: taste, and anything likely to vary by genre.** The app
+shell (JS, `index.html`) with generic groupings, the stylesheet (starting as
+Joshua's theme, to be re-themed), empty `data/` seeds and a starter palette,
+the style-reference and chat-side skeletons (✎ marks what the book decides),
+`translation-choices.md` starting from `canon-conventions.md`, `CLAUDE.md`,
+and the session-context files.
 
 **Book-only:** `book.json`, `data/`, `units/`, `source-artifacts/`, the unit
 map, the glossary, the theme, and any scripts only that book needs.
@@ -116,8 +121,10 @@ Joshua A1/A2: a regenerated meta block failed the project's own validator.**)**
   lemma ids (`roots.json`), every tracked-thread span carries `data-w`, and
   the audit does set arithmetic. **(learned:** consonant-substring matching
   hit 0–42% recall on Joshua's weak-root verbs.**)**
-- If it has no word ids, the book supplies a stem matcher (Matthew's
-  `thread-stems.json`) and the audit runs in stem mode.
+- Stem-mode auditing (Matthew's `thread-stems.json`) is **not** built: every
+  planned book has a corpus with word ids (OSHB for Hebrew; a Greek corpus
+  with ids when the first Greek book starts). A corpus without ids would
+  need a stem-matching audit added then.
 - The chat side never hand-chases word ids. The porter fills `data-w` by
   per-verse alignment (Joshua's `assign_data_w.py`).
 - **Never hand-type the original-language script. Pull it by word id.**
@@ -178,7 +185,6 @@ ask Lane" policy.
 |---|---|---|---|
 | language / transliteration | Hebrew, `hebrew.py`, no vowel length | Greek, `greek.py`, ē/ō | from the language adapter. **Schemes are frozen per language, never harmonised (H10).** |
 | corpus | OSHB, word ids | SBLGNT, no word ids | a corpus with word ids whenever one exists |
-| audit mode | id | stem | id |
 | groupings | 4 movements | 3 movements + 5 discourses | `groupings: [{kind, n, label, span, units}]`, where the book picks the kinds (D11) |
 | optional components | echo | ring, table, itinerary, compare, synoptic | none until a unit asks |
 | `opens.note` | required | optional | required |
@@ -194,31 +200,40 @@ If a book diverges on an axis that isn't listed, add a row.
 
 ## 4. `book.json`
 
-One closed-key manifest per book. It holds everything that is currently
-scattered through code (the palette in the porter, the storage key in
-`main.js`, fonts in `index.html`, the `book[:4]` prefix heuristic in the
-audit).
+One closed-key manifest per book (`biblecore/book.py`). It holds everything
+that used to be scattered through Joshua's code.
 
 ```json
 {
-  "book": "Numbers",
-  "abbrev": "Num",
+  "book": "Numbers", "osis": "Num", "abbrev": "Num", "slug": "numbers",
   "language": "hebrew",
-  "corpus": { "kind": "oshb", "pin": "morphhb@2.0.2", "word_ids": true },
-  "audit": "id",
-  "versification": "versification.json",
+  "corpus": {"kind": "oshb", "pin": "morphhb@2.0.2", "word_ids": true},
   "groupings": ["movement"],
-  "components": [],
+  "components": ["echo"],
   "meta_keys": [],
-  "checks": { "opens_note_required": true },
-  "palette": "palette.json",
+  "checks": {"opens_note_required": true},
+  "palette": "data/palette.json",
+  "sync": {"files": ["numbers_study_style_reference.md", "..."],
+           "globs": ["canon-leads/canon-leads-unit-*.md"]},
   "storage_key": "numbers",
+  "paths": {},
   "core": "0.1.0"
 }
 ```
 
-Unknown keys are an error, and every key must be read by some code (H5).
-New keys are easy to add; keys nothing reads don't stay.
+- `groupings` — the kinds of grouping a unit belongs to. Each becomes an
+  optional integer key in the meta block and the unit's `units.json` row;
+  `units.json` `groupings[]` holds `{kind, n, name, label?, span, units}`,
+  and the first kind drives the site's book map. Numbers could use
+  `generation`, Kings `reign`, Psalms `book`.
+- `meta_keys` — extra meta-block keys this book wants; validated and
+  round-tripped by `generate()`.
+- `checks` — switches for checks that reasonably differ by book.
+- `paths` — override any default location (Joshua's layout is expressed
+  this way in `tests/joshua-book.json`).
+
+Unknown keys are an error, and every key is read by code (H5). New keys are
+easy to add in `book.py`; keys nothing reads don't stay.
 
 ---
 
@@ -232,8 +247,8 @@ New keys are easy to add; keys nothing reads don't stay.
 - **Override, don't edit.** To change shared behaviour for one book, wrap or
   replace the function in a book-local module. If the change turns out to be
   right everywhere, move it into core and re-vendor.
-- **Divergence report.** `core_diff.py` lists edits made directly to a book's
-  `core/` copy. It is there to catch accidental forks and never blocks a
+- **Divergence report.** `tools/core_diff.py` lists edits made directly to a
+  book's `biblecore/` copy, against the exact commit in its `CORE_VERSION`. It is there to catch accidental forks and never blocks a
   build.
 - **Shipped units are never silently regenerated into a new shape.** A schema
   change that affects built units comes with an explicit migration script and
@@ -284,7 +299,10 @@ These are notes, not builds. Nothing here is built until a unit asks for it
   census frame (chs. 1 and 26: old generation → new) and geography (Sinai →
   wilderness → plains of Moab); the project side will pick.
 - **Versification.** Hebrew and English chapter/verse numbers diverge in
-  Numbers (around chs. 16–17 and 29–30 at least). The map should be
+  Numbers (around chs. 16–17 and 29–30 at least). A scratch build of
+  morphhb's Numbers gives **1,289 verses** (English Bibles: 1,288), 16,422
+  words, 94 petuḥot and 65 setumot, to be checked against printed BHS during
+  setup. The map should be
   **derived from the corpus and an English versification source, not typed
   from memory**, and built before unit 1.
 - **Canon leads** carry over directly. Numbers' echoes run back into Exodus
@@ -295,7 +313,32 @@ These are notes, not builds. Nothing here is built until a unit asks for it
 
 ---
 
-## 8. Open questions
+## 8. Using it
 
-- Whether the starter template's app shell starts from Joshua's `main.js`
-  with D11 groupings added, or from a fresh cut (to be decided at step 1).
+**Starting a book** (until `new_book.py` exists — it gets written from the
+Numbers setup log, H14):
+
+1. Copy `template/` to the new repo and replace `{{BOOK}}`, `{{OSIS}}`,
+   `{{ABBREV}}`, `{{SLUG}}` in file names and contents
+   (`tests/template_book.py` does exactly this, for tests).
+2. `python tools/core_sync.py <book>` — vendors `biblecore/` and
+   `canon-conventions.md`, records `CORE_VERSION`.
+3. `npm ci` (morphhb), then `python -m biblecore corpus`; check the counts
+   against a printed edition.
+4. Fill `data/units.json` from the unit map; `python -m biblecore build`.
+
+**Testing the core:** `python tests/run.py [filter]` (no pytest needed). The
+suite runs against Joshua's real data, read-only. Its strongest check:
+Joshua rebuilt from the template, porting its four source artifacts through
+the CLI, reproduces Joshua's committed units byte for byte with a clean
+thread audit (`tests/test_template.py`). It also checks the corpus builder
+against Joshua's word table, the audit against Joshua's own audit, and
+generate/scan against Joshua's committed files.
+
+---
+
+## 9. Open questions
+
+- Whether the template's app shell and stylesheet should split into shared
+  structure plus per-book theme tokens (D10, the component registry D5) —
+  wait until Numbers needs its first new component.

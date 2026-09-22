@@ -1,0 +1,33 @@
+{
+  "book": "{{BOOK}}",
+  "osis": "{{OSIS}}",
+  "abbrev": "{{ABBREV}}",
+  "slug": "{{SLUG}}",
+  "language": "hebrew",
+  "corpus": {
+    "kind": "oshb",
+    "pin": "morphhb@2.0.2",
+    "word_ids": true
+  },
+  "groupings": [],
+  "components": [
+    "echo"
+  ],
+  "checks": {
+    "opens_note_required": true
+  },
+  "sync": {
+    "files": [
+      "{{SLUG}}_study_style_reference.md",
+      "translation-choices.md",
+      "canon-conventions.md",
+      "threads-digest.md",
+      "data/roots.json",
+      "{{BOOK}}-words.tsv"
+    ],
+    "globs": [
+      "canon-leads/canon-leads-unit-*.md"
+    ]
+  },
+  "core": "0.1.0"
+}

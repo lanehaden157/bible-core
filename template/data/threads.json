@@ -1,0 +1,5 @@
+{
+  "_note": "Tracked threads: policy. Nothing in the pipeline writes this file; the porter's thread delta proposes, a human applies. Colours come from `python -m biblecore colour <root>`, never picked by eye.",
+  "version": 1,
+  "threads": []
+}
