@@ -13,7 +13,7 @@ Hard steps (the build fails if one does):
 Advisory (reported, never fail the build):
   audit               tracked-thread coverage in built units
   leads               canon-leads for built units + the next one
-  sync-check          chat-side files changed since last pasted
+  sync-check          chat-side files changed since last synced
 
 units/*.html are the source of truth; nothing here regenerates them from
 source-artifacts/. A new unit is `python -m biblecore port N`.

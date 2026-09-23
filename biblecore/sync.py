@@ -1,6 +1,6 @@
 """Keep the Claude.ai project's copy of the book's chat-side files current.
 
-    python -m biblecore sync-check                  # which files changed since last pasted
+    python -m biblecore sync-check                  # which files changed since last synced
     python -m biblecore sync-check --mark-synced [FILE ...]
     python -m biblecore sync                        # mirror into project-side/synced/,
                                                     # commit and push if anything changed
@@ -71,7 +71,7 @@ def check_main(argv=None):
         else:
             ok.append(rel)
     if stale:
-        print("NEEDS RE-PASTE into the Claude.ai project:")
+        print("NEEDS RE-SYNCING (run `python -m biblecore sync`):")
         for rel in stale:
             print(f"  - {rel}")
     if missing:
