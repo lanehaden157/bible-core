@@ -325,6 +325,9 @@ function hoistStructureBlocks(root) {
   let ref = anchor;
   for (const b of article.querySelectorAll("section.block")) {
     if (b.classList.contains("legend") || b.classList.contains("notes")) continue;
+    // A count/list table is read in sequence with the text, so it stays where
+    // the text puts it rather than joining the hoisted structure blocks.
+    if (b.querySelector("table.list")) continue;
     ref.after(b); // re-parents b to sit right after ref, in document order
     ref = b;
   }
