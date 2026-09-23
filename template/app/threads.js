@@ -134,10 +134,9 @@ export function wireRoots(root, unit, units) {
   const resolved = resolveUnit(unit);
   const builtByN = new Map(units.map((u) => [u.n, u]));
 
-  const hoverable = () => window.matchMedia("(hover: hover)").matches;
 
   root.addEventListener("pointerover", (e) => {
-    if (!hoverable() || _popAnchor) return;
+    if (e.pointerType === "touch" || _popAnchor) return;
     const el = e.target.closest("[data-root]");
     if (el && !el.closest("a")) showTip(el, resolved);
   }, opt);

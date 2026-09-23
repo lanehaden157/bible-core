@@ -4,7 +4,7 @@
    any transliteration scheme. Edit the hint text for this book's own
    examples once it has roots. */
 
-import { getOccurrences, getThreadFor, resolveUnit } from "./threads.js?v=3";
+import { getOccurrences, getThreadFor, resolveUnit } from "./threads.js?v=4";
 
 export function renderSearch(container, units, prefix = "study") {
   const KEY = `${prefix}.search.q`;
