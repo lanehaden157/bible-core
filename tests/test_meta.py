@@ -212,6 +212,21 @@ def test_candidates_stems_exclude_rejected():
            any("'exclude'" in e for e in errs), errs)
 
 
+def test_candidates_tsv_id_spelling_normalized():
+    meta = _meta(threads={**_EMPTY_THREADS,
+                          "candidates": [{"root": "wrath", "why": "testing",
+                                         "ids": ["6485 a", "7110", "2763a"]}]})
+    notes = um.normalize_candidates(meta)
+    ids = meta["threads"]["candidates"][0]["ids"]
+    _check("'6485 a' (word-table spelling) must normalize to '6485a'",
+           ids == ["6485a", "7110", "2763a"], ids)
+    _check("one note per rewritten id", len(notes) == 1, notes)
+    _check("normalized candidate must then validate",
+           not um.validate(meta), um.validate(meta))
+    _check("normalize is a no-op on meta without candidates",
+           um.normalize_candidates(_meta()) == [])
+
+
 def test_candidates_ids_refs_valid_passes():
     meta = _meta(threads={**_EMPTY_THREADS,
                           "candidates": [{"root": "give", "why": "testing",

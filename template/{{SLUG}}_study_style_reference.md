@@ -113,7 +113,9 @@ All four present, each a list, empty allowed.
 one-line popover prose.
 
 **`candidates[]`** — `{root, why, ids?, refs?}`. Proposals only; `ids` are the
-lemma ids you saw (evidence), `refs` a few representative verses. **Claude
+lemma ids you saw (evidence), copied as the word table spells them (`"6485 a"`
+is fine; the porter reads it as `6485a`), `refs` a few representative verses
+as bare `C:V`. **Claude
 decides whether a candidate is promoted, biased toward book-wide**, and asks
 Lane only when genuinely unsure.
 

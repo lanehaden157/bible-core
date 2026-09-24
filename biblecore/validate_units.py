@@ -13,6 +13,7 @@ than DE_MIN read as one colour.
 """
 import glob
 import os
+import re
 import sys
 
 from biblecore import meta as um
@@ -125,6 +126,14 @@ def main(argv=None):
             print("  ERROR", e)
         for w in warns:
             print("  warn ", w)
+        # The usual cause is a thread promoted after the port: its spans
+        # predate tracking. Fill them in place; a --force re-port also
+        # works but replaces the whole fragment with the source artifact.
+        if any("with no data-w attribute" in e for e in errs):
+            m = re.search(r"unit-(\d+)", name)
+            if m:
+                print(f"  -> fill in place: python -m biblecore data-w "
+                      f"{int(m.group(1))}   (no re-port needed)")
 
     print(f"\n{len(paths)} unit(s): {total_err} error(s), "
           f"{total_warn} warning(s)")

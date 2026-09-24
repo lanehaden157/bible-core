@@ -180,7 +180,10 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True):
     cands = th.get("candidates", []) or []
     if cands:
         lines += ["", "## New-thread candidates "
-                  "(Claude decides, biased book-wide)", ""]
+                  "(Claude decides, biased book-wide)", "",
+                  f"After promoting any of these into threads.json/roots.json, "
+                  f"`python -m biblecore data-w {n}` fills their spans in "
+                  f"place; no `--force` re-port needed.", ""]
         declined = (um._load("roots.json").get("declined") or {})
         for c in cands:
             root = c.get("root", "?")
@@ -454,6 +457,8 @@ def port_one(n, dry, src=None, force=False):
                  "style reference's hard contract")
     meta.setdefault("unit", n)
     meta.setdefault("slug", f"unit-{n:02d}")
+    for note in um.normalize_candidates(meta):
+        print("  normalized", note)
     errs = um.validate(meta, um._load("threads.json"))
     if errs:
         print("METADATA INVALID:")
@@ -510,7 +515,9 @@ def port_one(n, dry, src=None, force=False):
     if os.path.exists(dest) and not force:
         sys.exit(f"{dest} already exists. Re-porting replaces it wholesale with "
                  f"the source artifact -- make sure the source is current "
-                 f"(not older than the built fragment), then pass --force.")
+                 f"(not older than the built fragment), then pass --force.\n"
+                 f"Just promoted a thread? No re-port needed: "
+                 f"python -m biblecore data-w {n}, then build.")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     with open(dest, "w", encoding="utf-8") as fh:
         fh.write(fragment)

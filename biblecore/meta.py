@@ -132,6 +132,29 @@ _REF_RE = re.compile(r"^\d+:\d+$")
 _WORD_ID_RE = re.compile(r"^[0-9A-Za-z]+$")
 
 
+_SPACED_ID_RE = re.compile(r"^\s*(\d+)\s+([a-z])\s*$")
+
+
+def normalize_candidates(meta):
+    """Rewrite the word table's own id spelling ('6485 a') to the canonical
+    form ('6485a') in threads.candidates[].ids, in place. The chat side
+    copies ids straight out of the TSV, so this is accepted rather than
+    failed. Returns one note per rewritten id."""
+    notes = []
+    th = meta.get("threads") if isinstance(meta, dict) else None
+    for i, c in enumerate((th or {}).get("candidates") or []):
+        ids = c.get("ids") if isinstance(c, dict) else None
+        if not isinstance(ids, list):
+            continue
+        for j, x in enumerate(ids):
+            m = _SPACED_ID_RE.match(x) if isinstance(x, str) else None
+            if m:
+                ids[j] = m.group(1) + m.group(2)
+                notes.append(f"threads.candidates[{i}] ({c.get('root', '?')}): "
+                             f"id '{x}' read as '{ids[j]}'")
+    return notes
+
+
 def validate(meta, threads_json=None):
     """Return a list of human-readable problems ([] == clean). Every
     problem in this list is a hard build failure for whatever calls this
