@@ -15,8 +15,12 @@ import os
 ALLOWED_KEYS = {
     "book", "osis", "abbrev", "slug", "language", "corpus", "groupings",
     "components", "meta_keys", "checks", "palette", "sync", "storage_key",
-    "paths", "core",
+    "paths", "core", "versification",
 }
+# Which verse numbering the book displays and cites: "kjv" (English Bibles;
+# the corpus numbering is converted through the corpus's own map) or
+# "source" (the corpus numbering as is).
+VERSIFICATIONS = ("kjv", "source")
 REQUIRED_KEYS = {"book", "osis", "slug", "language", "corpus"}
 
 CORPUS_KEYS = {"kind", "pin", "word_ids"}
@@ -46,6 +50,7 @@ PATH_DEFAULTS = {
     "reading": None,
     "boundaries": "candidate-boundaries.md",
     "style_reference": None,
+    "verse_map": None,
 }
 
 
@@ -82,6 +87,8 @@ def validate_config(cfg):
         errs.append(f"paths: unknown path '{k}' (known: {sorted(PATH_DEFAULTS)})")
     for k in sorted(set(cfg.get("sync") or {}) - SYNC_KEYS):
         errs.append(f"sync: unknown key '{k}'")
+    if "versification" in cfg and cfg["versification"] not in VERSIFICATIONS:
+        errs.append(f"'versification' must be one of {list(VERSIFICATIONS)}")
     if "palette" in cfg and not isinstance(cfg["palette"], (str, list)):
         errs.append("'palette' must be a path or a list of hex colours")
     return errs
@@ -126,6 +133,10 @@ class Book:
         return self.cfg["language"]
 
     @property
+    def versification(self):
+        return self.cfg.get("versification", "kjv")
+
+    @property
     def word_ids(self):
         return bool(self.cfg["corpus"].get("word_ids", True))
 
@@ -157,6 +168,7 @@ class Book:
             rel = {"words": f"{self.name}-words.tsv",
                    "reading": f"{self.name}-reading.txt",
                    "style_reference": f"{self.slug}_study_style_reference.md",
+                   "verse_map": f"{self.slug}-versification.md",
                    }[key]
         return os.path.join(self.root, rel)
 

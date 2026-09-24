@@ -26,7 +26,8 @@
       "{{BOOK}}-words.tsv"
     ],
     "globs": [
-      "canon-leads/canon-leads-unit-*.md"
+      "canon-leads/canon-leads-unit-*.md",
+      "*-versification.md"
     ]
   },
   "core": "0.1.0"

@@ -27,7 +27,7 @@ Additive, so it's safe to re-run as the map grows: existing unit rows are
 never touched (a built unit's row belongs to the porter), existing
 groupings are kept and only compared, and anything it can't read is
 reported rather than guessed. A `[Heb ...]` bracket is dropped from the
-passage and reported, since the corpus is in Hebrew numbering.
+passage (which stays in English numbering; versify.py converts) and reported.
 """
 import argparse
 import glob
@@ -115,9 +115,9 @@ def parse(md):
              "title": title, "under": dict(current)}
         if heb:
             u["heb"] = heb.group(1).strip()
-            notes.append(f"unit {n}: passage {u['passage']} is English numbering "
-                         f"(Hebrew {u['heb']}); the corpus is Hebrew -- check "
-                         f"leads/audit for this unit")
+            notes.append(f"unit {n}: passage {u['passage']} (Hebrew {u['heb']}) "
+                         f"-- English numbering, converted through versify.py; "
+                         f"check the generated versification table agrees")
         if not title:
             notes.append(f"unit {n}: no title in the map")
         units.append(u)

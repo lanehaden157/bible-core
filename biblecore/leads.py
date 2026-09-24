@@ -36,6 +36,7 @@ import sys
 
 from biblecore.audit import parse_range
 from biblecore.book import book as current_book
+from biblecore import versify
 from biblecore.lang import hebrew
 
 BOOKS = ["Gen", "Exod", "Lev", "Num", "Deut", "Josh", "Judg", "Ruth", "1Sam",
@@ -71,8 +72,13 @@ def load_bible(wlc=None):
     wlc = wlc or current_book().path("wlc")
     if not os.path.isdir(wlc):
         sys.exit(f"morphhb not found at {wlc} -- run `npm ci` (package.json pins it)")
+    # refs are relabelled into the displayed numbering (versify.py), so the
+    # unit's passage selects the right verses and every lead cites the
+    # numbers an English reader will look up
+    vmaps = {} if current_book().versification == "source" else versify.load(wlc)
     bible = {}
     for book in BOOKS:
+        vmap = vmaps.get(book, {})
         with open(os.path.join(wlc, f"{book}.xml"), encoding="utf-8") as fh:
             text = fh.read()
         verses = []
@@ -81,6 +87,10 @@ def load_bible(wlc=None):
             for lemma, morph, surface in WORD_RE.findall(body):
                 for i in bare_ids(lemma):
                     words.append((i, surface, lemma, morph))
+            if vmap:
+                _b, c, v = ref.split(".")
+                c, v = versify.to_display(int(c), int(v), vmap)
+                ref = f"{book}.{c}.{v}"
             verses.append((ref, words))
         bible[book] = verses
     return bible

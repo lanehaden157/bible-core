@@ -146,7 +146,8 @@ NUM_CV = re.compile(r'<span class="n">\s*(?:(\d+):)?(\d+)\s*</span>')
 
 
 def parse_range(passage):
-    m = re.search(r"(\d+):(\d+)\s*[-–]\s*(?:(\d+):)?(\d+)", passage)
+    # a half-verse letter ('26:1b', '26:1a') is read as the whole verse
+    m = re.search(r"(\d+):(\d+)[a-z]?\s*[-–]\s*(?:(\d+):)?(\d+)", passage)
     if not m:
         m2 = re.search(r"(\d+):(\d+)", passage)
         c, v = int(m2.group(1)), int(m2.group(2))

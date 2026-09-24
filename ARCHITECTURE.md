@@ -199,7 +199,7 @@ ask Lane" policy.
 | unit map | Lane-authored | Lane-authored | from the book's own project side, once its resources are compiled |
 | palette / theme | clay, bronze, Jordan teal | its own | the book's own. A new book is a new token block. |
 | glossary | own file | own file | starts from `canon/conventions.md`, records deviations |
-| versification | matches English | matches English | a map from Hebrew to English wherever they differ (E1) |
+| versification | matches English | matches English | `book.json` `versification`: `kjv` (default) converts the corpus numbering through morphhb's `VerseMap.xml` (`biblecore/versify.py`); `source` keeps it |
 
 If a book diverges on an axis that isn't listed, add a row.
 
@@ -236,6 +236,12 @@ that used to be scattered through Joshua's code.
 - `meta_keys` — extra meta-block keys this book wants; validated and
   round-tripped by `generate()`.
 - `checks` — switches for checks that reasonably differ by book.
+- `versification` — `kjv` (default): fragments, threads, unit rows and
+  leads cite English numbering, and every corpus read converts through
+  morphhb's `wlc/VerseMap.xml`; `python -m biblecore corpus` writes the
+  differences to `<slug>-versification.md`. `source` keeps the corpus
+  numbering (Joshua's sheets were written that way). The generated word
+  table, reading text and boundaries stay in source numbering.
 - `paths` — override any default location (Joshua's layout is expressed
   this way in `tests/joshua-book.json`).
 
