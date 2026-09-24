@@ -299,6 +299,11 @@ def _append_coverage(lines, slug, html, passage, retrofit_applied=True):
     if cov["warnings"]:
         lines.append("**alignment warnings — check these first:**")
         lines += [f"- {w}" for w in cov["warnings"]] + [""]
+    if cov.get("covered"):
+        lines.append(f"_{len(cov['covered'])} occurrence(s) fall in verses a "
+                     f"component declares with `data-verses` (e.g. a table), "
+                     f"so they aren't gaps._")
+        lines.append("")
     if not cov["gaps"] and not cov["wrong"] and not cov["strays"] and not cov["missing_data_w"]:
         lines.append("Every tracked-thread occurrence in this passage is tagged. ✓")
         return

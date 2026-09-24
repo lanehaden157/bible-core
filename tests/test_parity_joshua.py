@@ -89,6 +89,9 @@ def test_audit_matches_joshuas_own_audit():
             c = audit.coverage_for_unit(u["slug"])
             c["local"] = {k: [list(x) for x in v] for k, v in c["local"].items()}
             ours[u["slug"]] = c
+    for slug, c in ours.items():
+        if c.pop("covered"):  # a core-only key; Joshua declares no verses
+            return [f"{slug}: unexpected covered verses"]
     ours = json.loads(json.dumps(ours, ensure_ascii=False, sort_keys=True))
     if ours != theirs:
         diffs = [s for s in theirs if ours.get(s) != theirs[s]]

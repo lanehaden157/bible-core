@@ -262,6 +262,26 @@ def test_stray_outside_passage_detected():
     return []
 
 
+def test_declared_verses_are_covered_not_gaps():
+    """A component that presents 1:3 in place of verse text (a table with
+    data-verses) turns the real kol word there from a gap into 'covered'.
+    A verse outside the declaration still gaps."""
+    html = ('<article class="unit" data-unit="1">'
+            '<table class="list" data-verses="1:3"></table>'
+            '</article>')
+    cov = audit.coverage_for_fragment("fx", html, "Joshua 1:3", _SYNTHETIC_THREADS, _SYNTHETIC_ROOTS)
+    fails = []
+    if cov["gaps"]:
+        fails.append(f"expected no gaps, got {[g['word_id'] for g in cov['gaps']]}")
+    if {c["word_id"] for c in cov["covered"]} != {"06XR4"}:
+        fails.append(f"expected 06XR4 covered, got {cov['covered']}")
+    html2 = html.replace('data-verses="1:3"', 'data-verses="1:4"')
+    cov2 = audit.coverage_for_fragment("fx", html2, "Joshua 1:3-4", _SYNTHETIC_THREADS, _SYNTHETIC_ROOTS)
+    if "06XR4" not in {g["word_id"] for g in cov2["gaps"]}:
+        fails.append("a verse outside the declaration must still gap")
+    return fails
+
+
 def test_nonexistent_id_detected():
     """A tagged data-w that doesn't correspond to any real word id at all
     is a stray for a different reason (doesn't exist), not out-of-range."""

@@ -150,6 +150,15 @@ a whitelist entry in the same commit, and the build reports unknown classes.
 | notes | `<div class="notes"><h2>Notes</h2><ol><li id="n3"><strong>hid him (v4).</strong> …</li></ol></div>` | every `href` resolves to an `id` in the fragment |
 | echo | `<aside class="echo" data-anchor="C:V">…</aside>` | cross-book echo; verse sibling like `.gloss`, never nested, `data-anchor` = the verse it follows. The site prepends "cf." — don't write it |
 
+**`data-verses`** — any component that presents verses *in place of*
+verse-by-verse text (a table that condenses a repeated formula, say) carries
+`data-verses="C:V–V"` (or `C:V–C:V`) naming exactly the verses it replaces.
+Tracked-thread occurrences in those verses are then reported as covered by
+the component, not as untagged gaps. The build fails if a declared verse is
+also written out as a `p.v`, or if the range reaches outside the unit's
+passage, so the declaration can't quietly excuse text a reader actually sees.
+Say in the pericope's gloss that the verses are condensed.
+
 ✎ **This book's optional components.** None beyond echo until a unit needs one.
 Likely candidates are listed in `bible-core/ARCHITECTURE.md` §7. Add each here
 when it ships.

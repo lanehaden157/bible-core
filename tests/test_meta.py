@@ -407,6 +407,41 @@ def test_greek_script_fails_too():
     _check("Greek script in a fragment must fail", len(errs) == 1, errs)
 
 
+def test_declared_verses_clean():
+    m = _meta()
+    html = _fragment(m, body_extra='<table class="list" data-verses="1:2–17"></table>\n')
+    errs = um.check_declared_verses(html, m)
+    _check("a well-formed declaration inside the passage should pass", not errs, errs)
+    _check("declared_ranges parses it",
+           um.declared_ranges(html) == [((1, 2), (1, 17))], um.declared_ranges(html))
+
+
+def test_declared_verses_malformed_fails():
+    m = _meta()
+    for bad in ("22-43", "1:43–22", "one"):
+        html = _fragment(m, body_extra=f'<table class="list" data-verses="{bad}"></table>\n')
+        errs = um.check_declared_verses(html, m)
+        _check(f"data-verses={bad!r} must fail", len(errs) == 1, errs)
+
+
+def test_declared_verses_outside_passage_fails():
+    m = _meta()
+    html = _fragment(m, body_extra='<table class="list" data-verses="2:1–3"></table>\n')
+    errs = um.check_declared_verses(html, m)
+    _check("a declaration outside the passage must fail",
+           any("outside" in e for e in errs), errs)
+
+
+def test_declared_verse_also_written_out_fails():
+    """_fragment writes verse 1 as a .v block, so declaring 1:1 would excuse
+    a verse that is really there from the audit."""
+    m = _meta()
+    html = _fragment(m, body_extra='<table class="list" data-verses="1:1–5"></table>\n')
+    errs = um.check_declared_verses(html, m)
+    _check("a declared verse that is also a verse block must fail",
+           any("written out" in e for e in errs), errs)
+
+
 def test_clean_fragment_no_hebrew():
     html = _fragment(_meta())
     errs = um.check_no_native_script(html)

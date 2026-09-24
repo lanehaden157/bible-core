@@ -565,6 +565,81 @@ def check_echo(html, meta=None):
     return errs
 
 
+DECLARED_RE = re.compile(r'\bdata-verses="([^"]*)"')
+_DECLARED_RANGE_RE = re.compile(r"^\s*(\d+):(\d+)\s*(?:[-–]\s*(?:(\d+):)?(\d+))?\s*$")
+_PASSAGE_RANGE_RE = re.compile(r"(\d+):(\d+)\s*[-–]\s*(?:(\d+):)?(\d+)")
+
+
+def _parse_declared(value):
+    """'1:22–43' -> ((1, 22), (1, 43)); '1:22–2:3' and '1:22' too. None if
+    malformed or backwards."""
+    m = _DECLARED_RANGE_RE.match(value)
+    if not m:
+        return None
+    lo = (int(m.group(1)), int(m.group(2)))
+    hi = (int(m.group(3) or m.group(1)), int(m.group(4) or m.group(2)))
+    return (lo, hi) if lo <= hi else None
+
+
+def declared_ranges(html):
+    """[(lo, hi)] for every element carrying data-verses: verses a component
+    (a table.list, say) presents in place of verse-by-verse text. The audit
+    reports tracked-thread occurrences there as covered, not as gaps."""
+    out = []
+    for m in DECLARED_RE.finditer(html):
+        r = _parse_declared(m.group(1))
+        if r:
+            out.append(r)
+    return out
+
+
+def check_declared_verses(html, meta=None):
+    """data-verses: well-formed C:V[–[C:]V], inside the unit's passage, and
+    no declared verse also appears as a verse block. That last rule is what
+    keeps the declaration honest: a verse shown in full must be tagged in
+    full, so it can't also be excused from the audit."""
+    errs = []
+    passage = None
+    default_ch = None
+    if meta and meta.get("passage"):
+        pm = _PASSAGE_RANGE_RE.search(meta["passage"])
+        if pm:
+            passage = ((int(pm.group(1)), int(pm.group(2))),
+                       (int(pm.group(3) or pm.group(1)), int(pm.group(4))))
+        fm = PASSAGE_FIRST_CH_RE.search(meta["passage"])
+        if fm:
+            default_ch = int(fm.group(1))
+
+    ranges = []
+    for m in DECLARED_RE.finditer(html):
+        r = _parse_declared(m.group(1))
+        if r is None:
+            errs.append(f"data-verses={m.group(1)!r} is not 'C:V', 'C:V–V' or "
+                        f"'C:V–C:V' (in order)")
+            continue
+        if passage and not (passage[0] <= r[0] and r[1] <= passage[1]):
+            errs.append(f"data-verses={m.group(1)!r} reaches outside this unit's "
+                        f"passage {meta['passage']!r}")
+        ranges.append((m.group(1), r))
+
+    if ranges and default_ch is not None:
+        ch, prev_v = default_ch, None
+        for m in NUM_RE.finditer(html):
+            this_v = int(m.group(2))
+            if m.group(1):
+                ch, prev_v = int(m.group(1)), None
+            elif prev_v is not None and this_v < prev_v:
+                ch += 1
+            prev_v = this_v
+            for raw, (lo, hi) in ranges:
+                if lo <= (ch, this_v) <= hi:
+                    errs.append(f"verse {ch}:{this_v} is written out as a verse "
+                                f"AND declared covered by data-verses={raw!r} -- "
+                                f"narrow the declaration to the verses the "
+                                f"component actually replaces")
+    return errs
+
+
 def check_no_inline_style(html):
     """No inline style=, no --c-* colour vars (checklist 13)."""
     errs = []
@@ -606,6 +681,7 @@ def validate_fragment(html, css_path=None, meta=None, threads_json=None):
     errs += check_tracked_spans_have_data_w(html, threads_json)
     errs += check_pericope_headings(html)
     errs += check_echo(html, meta)
+    errs += check_declared_verses(html, meta)
     errs += check_no_inline_style(html)
     return errs
 

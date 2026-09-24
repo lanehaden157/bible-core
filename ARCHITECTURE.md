@@ -144,6 +144,13 @@ These are in every book, and the app depends on them:
 | legend | `<section class="block legend"><ul></ul></section>`. It is **required even as a stub**. **(learned:** Matthew unit 11 shipped with no colour key.**)** |
 | notes | `<div class="notes"><h2>Notes</h2><ol><li id="nK"><strong>lead (vN).</strong> …</li></ol></div>` (C7) |
 
+**Declared verses.** A component that stands in for verse-by-verse text (a
+table condensing a repeated formula) names the verses it replaces with
+`data-verses="C:V–V"`. The audit then reports thread occurrences there as
+*covered*, not as gaps; the build fails if a declared verse is also written
+out as a verse, or falls outside the unit (Lane, 2026-09-23, from Numbers
+1:22–43).
+
 **Optional components are enabled per book** in `book.json`. Each ships as
 one piece: CSS, a check, a JS handler and a style-reference snippet, in the
 same commit, and only when a unit actually wants it. **(learned:** Matthew

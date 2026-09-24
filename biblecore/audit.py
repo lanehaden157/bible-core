@@ -37,6 +37,7 @@ import sys
 
 from biblecore import corpus, lang
 from biblecore.book import book
+from biblecore.meta import declared_ranges
 from biblecore.roots import bare_id, lemma_key, load_roots, split_ids
 
 
@@ -336,7 +337,9 @@ def coverage_for_fragment(slug, html, passage, threads_json=None, roots_json=Non
     spans = parse_tagged_spans(html)
 
     gaps, wrong, strays, warnings = [], [], [], []
+    covered = []
     missing_data_w = 0
+    declared = declared_ranges(html)
 
     local, local_warnings = local_root_verses(html, lo, hi, set(tracked.values()), slug)
     warnings += local_warnings
@@ -362,6 +365,10 @@ def coverage_for_fragment(slug, html, passage, threads_json=None, roots_json=Non
 
         for wid, cv in sorted(in_range_hits.items(), key=lambda kv: kv[1]):
             if wid not in tagged_ids:
+                if any(a <= cv <= b for a, b in declared):
+                    covered.append({"thread": tid, "root": root_slug, "word_id": wid,
+                                    "ch": cv[0], "v": cv[1]})
+                    continue
                 gaps.append({"thread": tid, "root": root_slug, "word_id": wid,
                              "ch": cv[0], "v": cv[1], "surface": wbi[wid]["surface"],
                              "translit": _translit_row(wbi[wid]),
@@ -382,7 +389,7 @@ def coverage_for_fragment(slug, html, passage, threads_json=None, roots_json=Non
                 wrong.append({"thread": tid, "root": root_slug, "word_id": wid,
                                "ch": cv[0], "v": cv[1], "surface": row["surface"]})
 
-    return {"gaps": gaps, "wrong": wrong, "strays": strays,
+    return {"gaps": gaps, "wrong": wrong, "strays": strays, "covered": covered,
             "missing_data_w": missing_data_w, "local": local, "warnings": warnings}
 
 
@@ -392,7 +399,7 @@ def coverage_for_unit(slug, threads_json=None, roots_json=None):
     uj = _data("units.json")
     row = next((u for u in uj["units"] if u["slug"] == slug), None)
     if row is None:
-        return {"gaps": [], "wrong": [], "strays": [], "missing_data_w": 0,
+        return {"gaps": [], "wrong": [], "strays": [], "covered": [], "missing_data_w": 0,
                 "local": {}, "warnings": [f"{slug}: not in units.json"]}
     with open(os.path.join(book().path("units"), slug + ".html"), encoding="utf-8") as f:
         html = f.read()
@@ -469,6 +476,16 @@ def audit(only=None, stub_for=None, unit_slugs=None):
         if cov["missing_data_w"]:
             print(f"  ✗ {u['slug']}: {cov['missing_data_w']} tracked-thread "
                   f"span(s) with no data-w attribute (hard error)")
+        covered = [c for c in cov["covered"] if not only or c["thread"] in only]
+        if covered:
+            by = {}
+            for c in covered:
+                by[c["thread"]] = by.get(c["thread"], 0) + 1
+            ranges = ", ".join(f"{a[0]}:{a[1]}–{b[0]}:{b[1]}"
+                               for a, b in declared_ranges(html))
+            print(f"  · {u['slug']}: {len(covered)} occurrence(s) in verses a "
+                  f"component presents in place of verse text ({ranges}), not "
+                  f"gaps: " + ", ".join(f"{t} {n}" for t, n in sorted(by.items())))
         for warning in cov["warnings"]:
             print(f"  ⚠ {u['slug']}: {warning}")
         if cov["local"] and not only:
