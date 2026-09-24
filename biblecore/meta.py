@@ -616,6 +616,41 @@ def declared_ranges(html):
     return out
 
 
+TABLE_LIST_RE = re.compile(r'<table\s+class="list"[^>]*>(.*?)</table>', re.S)
+SECTION_BLOCK_OPEN_RE = re.compile(r'<section\s+class="block"[^>]*>')
+TR_RE = re.compile(r'<tr[^>]*>(.*?)</tr>', re.S)
+CELL_RE = re.compile(r'<t([hd])[^>]*>')
+
+
+def check_table_list(html):
+    """`table.list` -- style reference §4: a count/list table (Numbers'
+    censuses first). What the site relies on:
+    1. it sits inside a `<section class="block">` (the app keeps such a
+       block in line with the text; a bare table gets no block styling);
+    2. its first row is a header row of `<th>`;
+    3. every row has the same number of cells, since the last column is
+       the right-aligned count."""
+    errs = []
+    for i, m in enumerate(TABLE_LIST_RE.finditer(html), 1):
+        where = f"table.list #{i}"
+        before = html[:m.start()]
+        opens = [s.end() for s in SECTION_BLOCK_OPEN_RE.finditer(before)]
+        if not opens or "</section>" in before[opens[-1]:]:
+            errs.append(f"{where}: not inside <section class=\"block\"> -- wrap it "
+                        f"(style reference §4)")
+        rows = [CELL_RE.findall(r.group(1)) for r in TR_RE.finditer(m.group(1))]
+        if not rows:
+            errs.append(f"{where}: has no rows")
+            continue
+        if not rows[0] or any(c != "h" for c in rows[0]):
+            errs.append(f"{where}: first row must be a header row of <th> cells")
+        widths = sorted({len(r) for r in rows})
+        if len(widths) > 1:
+            errs.append(f"{where}: rows have {widths} cells -- every row needs "
+                        f"the same count (the last column is the number)")
+    return errs
+
+
 def check_declared_verses(html, meta=None):
     """data-verses: well-formed C:V[–[C:]V], inside the unit's passage, and
     no declared verse also appears as a verse block. That last rule is what
@@ -705,6 +740,7 @@ def validate_fragment(html, css_path=None, meta=None, threads_json=None):
     errs += check_pericope_headings(html)
     errs += check_echo(html, meta)
     errs += check_declared_verses(html, meta)
+    errs += check_table_list(html)
     errs += check_no_inline_style(html)
     return errs
 

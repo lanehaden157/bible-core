@@ -151,6 +151,7 @@ a whitelist entry in the same commit, and the build reports unknown classes.
 | legend | `<section class="block legend" aria-label="color key"><ul></ul></section>` | **required, even as an empty stub** |
 | notes | `<div class="notes"><h2>Notes</h2><ol><li id="n3"><strong>hid him (v4).</strong> …</li></ol></div>` | every `href` resolves to an `id` in the fragment |
 | echo | `<aside class="echo" data-anchor="C:V">…</aside>` | cross-book echo; verse sibling like `.gloss`, never nested, `data-anchor` = the verse it follows. The site prepends "cf." — don't write it |
+| count table | `<section class="block"><h2>Title <span class="cap">· 1:20–46</span></h2><table class="list" data-verses="…"><thead><tr><th>…</th></tr></thead><tbody>…</tbody><tfoot>…</tfoot></table></section>` | a census, roster or list of repeated formula. Header row of `<th>`, same cell count in every row, last column the number (right-aligned). Stays in line with the text. A total the text gives goes in `<tfoot>`. `data-verses` when it replaces verses (below) |
 
 **`data-verses`** — any component that presents verses *in place of*
 verse-by-verse text (a table that condenses a repeated formula, say) carries
@@ -161,7 +162,7 @@ also written out as a `p.v`, or if the range reaches outside the unit's
 passage, so the declaration can't quietly excuse text a reader actually sees.
 Say in the pericope's gloss that the verses are condensed.
 
-✎ **This book's optional components.** None beyond echo until a unit needs one.
+✎ **This book's optional components.** None beyond echo and the count table until a unit needs one.
 Likely candidates are listed in `bible-core/ARCHITECTURE.md` §7. Add each here
 when it ships.
 

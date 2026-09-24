@@ -422,6 +422,40 @@ def test_greek_script_fails_too():
     _check("Greek script in a fragment must fail", len(errs) == 1, errs)
 
 
+_TABLE = ('<section class="block"><h2>Count <span class="cap">· 1:20–46</span></h2>'
+          '<table class="list"><thead><tr><th>Tribe</th><th>Count</th></tr></thead>'
+          '<tbody><tr><td>Reuven</td><td>46,500</td></tr></tbody>'
+          '<tfoot><tr><td>Total</td><td>603,550</td></tr></tfoot></table></section>')
+
+
+def test_table_list_clean_passes():
+    errs = um.check_table_list(_TABLE)
+    _check("a wrapped table.list with a header row passes", not errs, errs)
+
+
+def test_table_list_outside_block_fails():
+    bare = _TABLE.replace('<section class="block">', "").replace("</section>", "")
+    errs = um.check_table_list(bare)
+    _check("table.list outside section.block must fail",
+           any("section class" in e for e in errs), errs)
+    closed = '<section class="block"></section>' + bare
+    errs = um.check_table_list(closed)
+    _check("a section.block closed before the table doesn't count",
+           any("section class" in e for e in errs), errs)
+
+
+def test_table_list_needs_header_row():
+    errs = um.check_table_list(_TABLE.replace("<th>", "<td>").replace("</th>", "</td>"))
+    _check("table.list without a <th> header row must fail",
+           any("header row" in e for e in errs), errs)
+
+
+def test_table_list_ragged_rows_fail():
+    errs = um.check_table_list(_TABLE.replace("<td>46,500</td>", "<td>1:21</td><td>46,500</td>"))
+    _check("table.list rows with different cell counts must fail",
+           any("same count" in e for e in errs), errs)
+
+
 def test_declared_verses_clean():
     m = _meta()
     html = _fragment(m, body_extra='<table class="list" data-verses="1:2–17"></table>\n')
