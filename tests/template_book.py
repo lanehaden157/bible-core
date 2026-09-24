@@ -7,36 +7,16 @@ tools/core_sync.py does minus the git bookkeeping.
 """
 import os
 import shutil
+import sys
 
 import support
 
-TEMPLATE = os.path.join(support.CORE, "template")
-TEXT_EXT = (".md", ".json", ".html", ".js", ".css", ".gitignore")
+sys.path.insert(0, os.path.join(support.CORE, "tools"))
+from new_book import instantiate  # noqa: E402
 
 
 def make_book(dest, name, osis, slug, abbrev=None):
-    subs = {"{{BOOK}}": name, "{{OSIS}}": osis, "{{ABBREV}}": abbrev or osis,
-            "{{SLUG}}": slug}
-
-    def fill(s):
-        for k, v in subs.items():
-            s = s.replace(k, v)
-        return s
-
-    for d, _dirs, files in os.walk(TEMPLATE):
-        rel_dir = os.path.relpath(d, TEMPLATE)
-        out_dir = os.path.join(dest, fill(rel_dir)) if rel_dir != "." else dest
-        os.makedirs(out_dir, exist_ok=True)
-        for f in files:
-            src = os.path.join(d, f)
-            dst = os.path.join(out_dir, fill(f))
-            if f.endswith(TEXT_EXT) or f == ".gitignore":
-                with open(src, encoding="utf-8") as fh:
-                    text = fill(fh.read())
-                with open(dst, "w", encoding="utf-8", newline="\n") as fh:
-                    fh.write(text)
-            else:
-                shutil.copyfile(src, dst)
+    instantiate(dest, name, osis, slug, abbrev)
     shutil.copytree(os.path.join(support.CORE, "biblecore"), os.path.join(dest, "biblecore"),
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     shutil.copyfile(os.path.join(support.CORE, "canon", "conventions.md"),

@@ -10,8 +10,11 @@ Matthew are the reference implementations and don't use it.
 - `biblecore/` — the shared package, vendored into each book and run from the
   book's root as `python -m biblecore <command>`.
 - `template/` — the starter a new book copies once and then owns.
-- `tools/core_sync.py`, `tools/core_diff.py` — vendor the package into a
-  book; report local edits to a book's copy.
+- `tools/new_book.py` — start a new book (§8). `tools/core_sync.py`,
+  `tools/core_diff.py` — vendor the package into a book; report local edits
+  to a book's copy.
+- `corpus/` — shared corpus files a new book gets a copy of (the Strong's
+  lexicon).
 - `tests/` — `python tests/run.py`. Runs against the sibling `../Joshua`
   checkout, read-only.
 

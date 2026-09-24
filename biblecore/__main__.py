@@ -15,6 +15,8 @@ Commands:
   colour ROOT [...]     colours for threads about to be promoted
   leads [N|--all]       canon leads (Hebrew books)
   corpus                build the word table and reading text from the corpus
+  units-from-map [MAP] [--kinds outer,inner] [--dry]
+                        unit rows + groupings from the literary unit map
   sync-check [--mark-synced [FILE ...]]
   sync                  mirror chat-side files, commit, push
   book                  show the resolved book.json settings
@@ -37,6 +39,7 @@ COMMANDS = {
     "digest": ("biblecore.digest", "main"),
     "colour": ("biblecore.colour", "main"),
     "leads": ("biblecore.leads", "main"),
+    "units-from-map": ("biblecore.units_map", "main"),
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }

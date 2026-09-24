@@ -304,6 +304,19 @@ exists. Until then the shape is:
 ## 9. The Literary Unit Map ✎
 
 Comes from the project side once resources are compiled, as
-`{{SLUG}}_literary_unit_map.md`. Renumbering after units ship means editing
+`{{SLUG}}-literary-unit-map.md`. `python -m biblecore units-from-map` loads it
+from its **Overview** table, so keep that table in this shape (Numbers' map is
+the model):
+
+    | # | Passage | Working title |
+    |---|---|---|
+    | | **PART ONE — Label (1:1–25:18)** | |
+    | | *I. Label (1:1–10:10)* | |
+    | 01 | 1:1–54 | Title |
+    | 17 | 16:36–17:13 [Heb 17:1–28] | Title |
+
+Bold rows open an outer grouping, italic rows an inner one; both are
+optional. Passages are in English numbering, with any Hebrew difference in
+`[Heb ...]`. Renumbering after units ship means editing
 `threads.json` opens/payoffs, every `retro` entry, and every fragment's meta
 block, so confirm it before unit 1.

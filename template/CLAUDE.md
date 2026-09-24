@@ -19,6 +19,7 @@ differ are in `bible-core/ARCHITECTURE.md`; shared wording defaults in
     python -m biblecore colour ROOT      # colour for a thread about to be promoted
     python -m biblecore data-w 5         # after promoting: fill the new thread's spans in place
     python -m biblecore leads            # canon-leads for built units + the next one
+    python -m biblecore units-from-map --kinds part,movement   # unit rows + groupings from the unit map
     python -m biblecore corpus           # rebuild the word table from morphhb (npm ci first)
     python -m biblecore sync             # push chat-side files to the synced mirror
     python -m biblecore book             # show resolved settings

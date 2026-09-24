@@ -322,17 +322,21 @@ These are notes, not builds. Nothing here is built until a unit asks for it
 
 ## 8. Using it
 
-**Starting a book** (until `new_book.py` exists — it gets written from the
-Numbers setup log, H14):
+**Starting a book** comes in two stages, because the unit map arrives from the
+project side after bootstrap (the order Numbers went in):
 
-1. Copy `template/` to the new repo and replace `{{BOOK}}`, `{{OSIS}}`,
-   `{{ABBREV}}`, `{{SLUG}}` in file names and contents
-   (`tests/template_book.py` does exactly this, for tests).
-2. `python tools/core_sync.py <book>` — vendors `biblecore/` and
-   `canon-conventions.md`, records `CORE_VERSION`.
-3. `npm ci` (morphhb), then `python -m biblecore corpus`; check the counts
+1. `python tools/new_book.py ../<Book> --book <Book> --osis <OSIS> [--github]`
+   copies the template with its placeholders filled, vendors the core, copies
+   the Strong's lexicon (`corpus/lexicon/`, sha1-checked), runs `npm install` +
+   `python -m biblecore corpus` + `build`, and makes the first commit.
+   `--github` also creates the public repo, enables Pages and runs the first
+   sync; without it the script prints those commands. Check the corpus counts
    against a printed edition.
-4. Fill `data/units.json` from the unit map; `python -m biblecore build`.
+2. Once the map is delivered, run `python -m biblecore units-from-map --kinds
+   <outer>,<inner>` in the book. It reads the map's Overview table, adds
+   unit rows and groupings to `data/units.json` (additive: existing rows and
+   groupings are kept), fills `book.json` groupings, and writes the next
+   unit's canon leads. Rename the generated grouping names freely.
 
 **Testing the core:** `python tests/run.py [filter]` (no pytest needed). The
 suite runs against Joshua's real data, read-only. Its strongest check:
