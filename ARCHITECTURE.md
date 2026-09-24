@@ -1,7 +1,8 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.1.0, 2026-09-22. Built and tested (see §8); Numbers, the
-first book on it, will shape it further. Expect it to change.
+**Status:** core 0.2.0, 2026-09-24, shaped by Numbers unit 1: `data-verses`,
+in-place promotion, `new_book.py` + `units-from-map`, `table.list`, and
+versification (E1). Built and tested (see §8). Expect it to change.
 
 ## What this is
 
@@ -224,7 +225,7 @@ that used to be scattered through Joshua's code.
            "globs": ["canon-leads/canon-leads-unit-*.md"]},
   "storage_key": "numbers",
   "paths": {},
-  "core": "0.1.0"
+  "core": "0.2.0"
 }
 ```
 
