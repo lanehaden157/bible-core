@@ -1,0 +1,186 @@
+{
+  "_note": "Type-scene index (review F4). Instances with source 'hand' are curated here; instances from books on core (source 'meta') are rewritten by canon_collect.py from each book's data/canon.json. unit is null for a passage no book has built yet.",
+  "typescenes": [
+    {
+      "id": "commissioning",
+      "label": "Commissioning",
+      "arc": "covenant",
+      "note": "A successor charged: 'be strong and firm', 'I will be with you'.",
+      "instances": [
+        {
+          "book": "numbers",
+          "ref": "Num 27:18–23",
+          "unit": null,
+          "note": "Moses lays hands on Joshua",
+          "source": "hand"
+        },
+        {
+          "book": "deuteronomy",
+          "ref": "Deut 31:7–8",
+          "unit": null,
+          "note": "before all Israel",
+          "source": "hand"
+        },
+        {
+          "book": "joshua",
+          "ref": "Josh 1:1–9",
+          "unit": 1,
+          "note": "Yahweh's charge",
+          "source": "hand"
+        },
+        {
+          "book": "matthew",
+          "ref": "Matt 28:18–20",
+          "unit": null,
+          "note": "the mountain of commission",
+          "source": "hand"
+        }
+      ]
+    },
+    {
+      "id": "scouts",
+      "label": "Scouts sent into the land",
+      "arc": "covenant",
+      "note": "Spies sent ahead; their report decides what the people do.",
+      "instances": [
+        {
+          "book": "numbers",
+          "ref": "Num 13:1–33",
+          "unit": null,
+          "note": "the twelve and the bad report",
+          "source": "hand"
+        },
+        {
+          "book": "deuteronomy",
+          "ref": "Deut 1:22–25",
+          "unit": null,
+          "note": "Moses retells it",
+          "source": "hand"
+        },
+        {
+          "book": "joshua",
+          "ref": "Josh 2:1–24",
+          "unit": 2,
+          "note": "two spies and Rahab",
+          "source": "hand"
+        }
+      ]
+    },
+    {
+      "id": "water-crossing",
+      "label": "Crossing through water",
+      "arc": "creation",
+      "note": "The waters stand up and a people crosses on dry ground.",
+      "instances": [
+        {
+          "book": "exodus",
+          "ref": "Exod 14:21–22",
+          "unit": null,
+          "note": "the sea",
+          "source": "hand"
+        },
+        {
+          "book": "joshua",
+          "ref": "Josh 3:14–17",
+          "unit": 3,
+          "note": "the Jordan",
+          "source": "hand"
+        },
+        {
+          "book": "2 kings",
+          "ref": "2 Kgs 2:8, 14",
+          "unit": null,
+          "note": "Elijah, then Elisha",
+          "source": "hand"
+        }
+      ]
+    },
+    {
+      "id": "census",
+      "label": "Counting the people",
+      "arc": "covenant",
+      "note": "A head-count, and the danger that attends it (Exod 30:12).",
+      "instances": [
+        {
+          "book": "numbers",
+          "ref": "Num 1:1–46",
+          "unit": 1,
+          "note": "the first accounting",
+          "source": "hand"
+        },
+        {
+          "book": "numbers",
+          "ref": "Num 26:1–51",
+          "unit": null,
+          "note": "the second accounting",
+          "source": "hand"
+        },
+        {
+          "book": "2 samuel",
+          "ref": "2 Sam 24:1–9",
+          "unit": null,
+          "note": "David's census and the plague",
+          "source": "hand"
+        }
+      ]
+    },
+    {
+      "id": "mountain-theophany",
+      "label": "God on the mountain",
+      "arc": "presence",
+      "note": "A mountain, cloud or fire, and a voice.",
+      "instances": [
+        {
+          "book": "exodus",
+          "ref": "Exod 19:16–20",
+          "unit": null,
+          "note": "Sinai",
+          "source": "hand"
+        },
+        {
+          "book": "1 kings",
+          "ref": "1 Kgs 19:8–12",
+          "unit": null,
+          "note": "Elijah at Horeb",
+          "source": "hand"
+        },
+        {
+          "book": "matthew",
+          "ref": "Matt 17:1–8",
+          "unit": null,
+          "note": "the transfiguration",
+          "source": "hand"
+        }
+      ]
+    },
+    {
+      "id": "annunciation",
+      "label": "A birth announced",
+      "arc": "covenant",
+      "note": "A messenger announces a son and names his task.",
+      "instances": [
+        {
+          "book": "genesis",
+          "ref": "Gen 18:9–15",
+          "unit": null,
+          "note": "Sarah",
+          "source": "hand"
+        },
+        {
+          "book": "judges",
+          "ref": "Judg 13:3–5",
+          "unit": null,
+          "note": "Manoah's wife",
+          "source": "hand"
+        },
+        {
+          "book": "matthew",
+          "ref": "Matt 1:20–21",
+          "unit": 1,
+          "note": "to Joseph",
+          "source": "hand"
+        }
+      ]
+    }
+  ]
+}

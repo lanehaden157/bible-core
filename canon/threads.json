@@ -1,0 +1,43 @@
+{
+  "_note": "Canon threads (review F1): one canon-level thread linking book-level threads, which keep their own slugs and colours. A member is {book, thread?, ref?, lemma?}; a member with only a ref marks a passage not yet built or not tracked. Hand-curated; canon_collect.py checks that named book threads exist.",
+  "threads": [
+    {"id": "inheritance", "label": "Inheritance", "arc": "covenant",
+     "note": "The land given as an inheritance, and the gentle who inherit the earth.",
+     "members": [
+       {"book": "joshua", "thread": "inherit", "ref": "Josh 1:6", "lemma": "heb:5157"},
+       {"book": "matthew", "thread": "gentle", "ref": "Matt 5:5", "lemma": "grc:klēronomeō"},
+       {"book": "numbers", "ref": "Num 26:52–56", "lemma": "heb:5159"}
+     ]},
+    {"id": "rest", "label": "Rest", "arc": "covenant",
+     "note": "Rest in the land as promise kept; 'I will give you rest.'",
+     "members": [
+       {"book": "joshua", "thread": "rest", "ref": "Josh 1:13", "lemma": "heb:5117"},
+       {"book": "matthew", "thread": "rest", "ref": "Matt 11:28"}
+     ]},
+    {"id": "fear", "label": "Fear, and 'do not fear'", "arc": "presence",
+     "note": "Fear of Yahweh, and the 'do not fear' that comes with a presence.",
+     "members": [
+       {"book": "joshua", "thread": "fear", "ref": "Josh 4:24", "lemma": "heb:3372"},
+       {"book": "matthew", "thread": "fear", "ref": "Matt 28:5"}
+     ]},
+    {"id": "torah", "label": "Torah", "arc": "covenant",
+     "note": "The scroll of the torah kept day and night, and the law and prophets fulfilled.",
+     "members": [
+       {"book": "joshua", "thread": "torah", "ref": "Josh 1:8", "lemma": "heb:8451"},
+       {"book": "matthew", "thread": "law-prophets", "ref": "Matt 5:17"},
+       {"book": "matthew", "thread": "fulfill", "ref": "Matt 5:17"}
+     ]},
+    {"id": "tassels", "label": "Tassels", "arc": "covenant",
+     "note": "The tassels that recall the commandments, touched for healing and worn for show.",
+     "members": [
+       {"book": "numbers", "ref": "Num 15:38–39"},
+       {"book": "matthew", "thread": "fringe", "ref": "Matt 9:20"}
+     ]},
+    {"id": "charge", "label": "The charge", "arc": "presence",
+     "note": "mishmeret, the guard-duty around the holy things; kept by the eastern tribes at Josh 22:3.",
+     "members": [
+       {"book": "numbers", "thread": "charge", "ref": "Num 1:53", "lemma": "heb:4931"},
+       {"book": "joshua", "ref": "Josh 22:3", "lemma": "heb:4931"}
+     ]}
+  ]
+}

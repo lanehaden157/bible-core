@@ -26,13 +26,14 @@ Per unit — four passes, pause and present after each
 
 4. Artifact skeleton. Only after Lane confirms. Draft it in `{{SLUG}}_study_style_reference.md`'s shape — that file holds every artifact rule. Mark roots with data-root only; don't hand-chase data-w ids (the porter fills them). Keep glosses short; longer material goes in footnotes with a bold lead. Any wording/data call Lane needs to make goes in `questions[]`, not asked in chat. Lane's Claude Code session handles transliteration, validation, colours, word ids, and porting.
 
-Six standing moves during pass 2 — each turns an observation into an action:
+Seven standing moves during pass 2 — each turns an observation into an action:
 
 - A tracked thread opens or pays off → name it and draft the one-line popover note now.
 - A root recurs across units but isn't tracked → flag it as a candidate with the lemma ids you saw.
 - A single notable translation choice → flag it for a local roots[] entry.
 - A word with an earlier-Scripture history, or a distinctive later reuse → note it for the intertext pass's ledger.
 - A missed or wrong tag in an earlier unit → a threads.retro entry, not a prose aside.
+- A quotation, allusion or type-scene (commissioning, scouts, water crossing, census, …) → an `intertext[]` or `typescenes[]` entry in the meta block. Echo asides are harvested automatically; don't repeat them.
 - A wording or data call only Lane can make → don't ask here. Render your best provisional choice, flag it in-fragment, and add a `questions[]` entry.
 
 Scope

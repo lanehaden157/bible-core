@@ -96,6 +96,24 @@ and `discourse` were authored for eleven units and silently discarded.**)**
 | `slug` | — | str | `"unit-06"`; derived from `unit` if omitted |
 | ✎ grouping keys | — | int | one per grouping kind in `book.json` (e.g. `movement`); looked up from the unit map if omitted |
 | `questions` | — | array | wording/data calls only Lane can make, §3a |
+| `intertext` | — | array | cross-book links worth recording, below |
+| `typescenes` | — | array | type-scene instances in this unit, below |
+
+### `intertext[]` and `typescenes[]` — canon rows (optional)
+
+The porter moves these into `data/canon.json` and the canon registries in
+`bible-core/canon/`; they aren't re-emitted in the built meta block.
+
+- `intertext[]` — `{ref, to, kind, note?}`: `ref` a bare `"C:V"` in this
+  book, `to` a reference like `"Ps 67:1"`, `kind` one of `quotation`,
+  `allusion`, `echo`, `type-scene`. An `aside.echo` or a root's `echo` is
+  already harvested as an `echo` edge, so list here only what those don't
+  say: a quotation, an allusion without an aside, a link worth keeping
+  without cluttering the page.
+- `typescenes[]` — `{id, ref, note?, label?}`: `id` from the type-scene
+  index (`commissioning`, `scouts`, `water-crossing`, `census`,
+  `mountain-theophany`, `annunciation`, ...). A new `id` is fine; give it a
+  `label` and it's added to the index for Lane to place under an arc.
 
 ### `roots[]` — every entry `{root, translit, gloss, example?, echo?}`
 

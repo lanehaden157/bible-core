@@ -7,6 +7,9 @@ Matthew are the reference implementations and don't use it.
   changes, and how to start a book (§8).
 - `canon/conventions.md` — shared wording defaults each book's glossary
   starts from.
+- `canon/*.json` — the canon registries: arcs, canon threads, intertext
+  edges, type-scenes (ARCHITECTURE.md §2). `python tools/canon_collect.py`
+  refreshes them from the books.
 - `biblecore/` — the shared package, vendored into each book and run from the
   book's root as `python -m biblecore <command>`.
 - `template/` — the starter a new book copies once and then owns.

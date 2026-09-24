@@ -113,6 +113,8 @@ REQUIRED = ("unit", "passage", "title", "roots", "threads")
 # key and having it silently pass.
 CORE_TOP_LEVEL_KEYS = {
     "unit", "slug", "passage", "title", "roots", "threads", "questions",
+    # canon rows (G9), consumed at port like questions -- see canon.py
+    "intertext", "typescenes",
 }
 
 
@@ -266,6 +268,9 @@ def validate(meta, threads_json=None):
             if not isinstance(q["options"], list) or not all(
                     isinstance(x, str) for x in q["options"]):
                 errs.append(f"{where}: 'options' must be a list of strings")
+
+    from biblecore import canon
+    errs += canon.validate_meta(meta)
 
     if threads_json is not None:
         ids = {t["id"] for t in threads_json["threads"]}

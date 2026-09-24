@@ -175,6 +175,18 @@ itinerary, compare and `aside.synoptic` (Matthew).
   text's own markers (Masoretic breaks, formulae) over patterns you've
   noticed. **(learned:** Matthew `e9105a5` cut eight over-reaching chiasms.**)**
 
+### Canon registries (G9)
+
+`bible-core/canon/` holds the cross-book layer as flat JSON, no UI until
+the hub: `arcs.json` (creation, covenant, exile, presence; extendable),
+`threads.json` (canon threads linking book threads, F1), `intertext.json`
+(edges, F3) and `typescenes.json` (F4). Each book keeps its own rows in
+`data/canon.json`: `echo` edges re-harvested from its `aside.echo` lines and
+root echoes on every build, `meta` rows from the optional `intertext[]` /
+`typescenes[]` meta keys, merged by the porter. `tools/canon_collect.py`
+rolls the books up (Joshua's echoes read-only), keeps rows marked `hand`,
+and warns on unknown arcs, missing book threads and new type-scene ids.
+
 ### Editorial firewall
 
 `threads.json`, `roots.json` and each book's glossary are **policy**. The

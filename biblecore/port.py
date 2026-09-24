@@ -523,6 +523,11 @@ def port_one(n, dry, src=None, force=False):
         fh.write(fragment)
     print(f"wrote {dest}")
     print(f"local hues: { {k: v['color'] for k, v in local_roots.items()} }")
+    if meta.get("intertext") or meta.get("typescenes"):
+        from biblecore import canon
+        n_it, n_ts = canon.merge_meta(meta, n)
+        print(f"canon: {n_it} intertext edge(s), {n_ts} type-scene instance(s) "
+              f"-> data/canon.json")
     written, skips = merge_retro(meta, dry=False)
     if written:
         print(f"merged {written} retro fix(es) for earlier units -> "

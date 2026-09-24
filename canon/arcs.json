@@ -1,0 +1,9 @@
+{
+  "_note": "Metanarrative arcs (review F5). Canon threads and type-scenes carry an 'arc' from this list. Extend it by adding a row; canon_collect.py warns on an arc that isn't listed.",
+  "arcs": [
+    {"id": "creation", "label": "Creation", "note": "order out of chaos, the waters divided, life given and ordered"},
+    {"id": "covenant", "label": "Covenant", "note": "promise, oath, law, land and inheritance; the loyal-love that binds them"},
+    {"id": "exile", "label": "Exile", "note": "rebellion, judgement, wilderness, loss of land and place"},
+    {"id": "presence", "label": "Presence", "note": "God dwelling with a people: tent, cloud, mountain, 'I will be with you'"}
+  ]
+}

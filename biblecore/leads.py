@@ -221,7 +221,10 @@ def render(n, passage, rare_list, phrase_list, glosses, rare):
          "intertext pass's job. Every lead gets a verdict in the ledger, a rejection included.", "",
          f"It cannot see: common words (rare cutoff: {rare} verses in the Hebrew Bible), "
          "links by theme or type-scene, or the New Testament. Search for those separately. "
-         "Glosses are rough Strong's identifiers, not renderings.", ""]
+         "Glosses are rough Strong's identifiers, not renderings."
+         + ("" if current_book().versification == "source" else
+            " References use English verse numbering (Hebrew numbering differs in "
+            "places, e.g. English Deut 29:9 is Hebrew 29:8)."), ""]
 
     L += [f"## Shared phrases with the Torah ({len(phrase_list)})", ""]
     if not phrase_list:

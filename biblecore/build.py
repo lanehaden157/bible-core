@@ -10,6 +10,7 @@ Hard steps (the build fails if one does):
   verify-occurrences  independent recount + tagged-flag check
   roots               data/roots.json integrity
   digest              data/threads.json -> threads-digest.md
+  canon               echo edges -> data/canon.json (canon.py)
 Advisory (reported, never fail the build):
   audit               tracked-thread coverage in built units
   leads               canon-leads for built units + the next one
@@ -21,7 +22,7 @@ source-artifacts/. A new unit is `python -m biblecore port N`.
 A book that needs a different sequence writes its own build script that
 calls these steps (ARCHITECTURE.md §5: override, don't edit).
 """
-from biblecore import (audit, digest, leads, refresh, retrofit, roots, scan,
+from biblecore import (audit, canon, digest, leads, refresh, retrofit, roots, scan,
                        sync, validate_units, verify_occurrences)
 
 STEPS = [
@@ -32,6 +33,7 @@ STEPS = [
     ("verify-occurrences", verify_occurrences.main),
     ("roots", roots.main),
     ("digest", digest.main),
+    ("canon", canon.main),
 ]
 ADVISORY = [
     ("audit", lambda: audit.main(["--check"])),

@@ -15,7 +15,6 @@
     "globs": ["canon-leads/canon-leads-unit-*.md"]
   },
   "storage_key": "joshua",
-  "versification": "source",
   "paths": {
     "out": "pipeline/out",
     "retrofit": "pipeline/retrofit-tags.json",
