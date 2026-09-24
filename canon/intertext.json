@@ -927,6 +927,132 @@
       "unit": 12,
       "note": "my servant whom I chose",
       "source": "hand"
+    },
+    {
+      "from": "Num 1:2",
+      "to": "Exod 30:12",
+      "kind": "echo",
+      "unit": 1,
+      "note": "root polls",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:2",
+      "to": "Exod 38:26",
+      "kind": "echo",
+      "unit": 1,
+      "note": "root polls",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:2",
+      "to": "Gen 15:5",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:2",
+      "to": "Gen 22:17",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:2",
+      "to": "Isa 40:26",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:2",
+      "to": "Ps 147:4",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:7",
+      "to": "1 Chr 2:10–11",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:7",
+      "to": "Luke 3:32–33",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:7",
+      "to": "Matt 1:4",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:7",
+      "to": "Ruth 4:19–20",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:46",
+      "to": "1 Chr 21:1–8",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:46",
+      "to": "2 Sam 24:1–10",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:46",
+      "to": "Num 26:64–65",
+      "kind": "echo",
+      "unit": 1,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 1:52",
+      "to": "Song 2:4",
+      "kind": "echo",
+      "unit": 1,
+      "note": "root banner",
+      "source": "echo",
+      "book": "numbers"
     }
   ]
 }
