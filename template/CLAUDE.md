@@ -22,6 +22,9 @@ differ are in `bible-core/ARCHITECTURE.md`; shared wording defaults in
     python -m biblecore units-from-map --kinds part,movement   # unit rows + groupings from the unit map
     python -m biblecore corpus           # rebuild the word table from morphhb (npm ci first)
     python -m biblecore sync             # push chat-side files to the synced mirror
+    python -m biblecore sync-check --mark-pasted   # after pasting CHAT_SIDE_INSTRUCTIONS.md into the project
+    python -m biblecore test [--quick]   # check the book: pin, units, contracts, build idempotence
+    python -m biblecore migrate [--dry]  # after re-vendoring: move built units to the new contract
     python -m biblecore book             # show resolved settings
 
 `book.json` holds everything book-specific (closed keys: an unknown key is an

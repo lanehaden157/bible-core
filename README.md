@@ -5,8 +5,10 @@ Matthew are the reference implementations and don't use it.
 
 - `ARCHITECTURE.md` — the shared shape, where books differ, how the core
   changes, and how to start a book (§8).
-- `canon/conventions.md` — shared wording defaults each book's glossary
-  starts from.
+- `canon/conventions.md`, `canon/decisions.md`, `canon/workflow.md` —
+  shared wording defaults, settled cross-book calls, and the chat-side
+  loop. Each book gets a copy (`canon-conventions.md`, `canon-decisions.md`,
+  `core-workflow.md`) that syncs to its project side.
 - `canon/*.json` — the canon registries: arcs, canon threads, intertext
   edges, type-scenes (ARCHITECTURE.md §2). `python tools/canon_collect.py`
   refreshes them from the books.
@@ -16,6 +18,7 @@ Matthew are the reference implementations and don't use it.
 - `tools/new_book.py` — start a new book (§8). `tools/core_sync.py`,
   `tools/core_diff.py` — vendor the package into a book; report local edits
   to a book's copy.
+- `docs/data-shapes.md` — the published `data/*.json` shapes.
 - `corpus/` — shared corpus files a new book gets a copy of (the Strong's
   lexicon).
 - `tests/` — `python tests/run.py`. Runs against the sibling `../Joshua`

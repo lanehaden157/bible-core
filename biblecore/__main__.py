@@ -15,6 +15,10 @@ Commands:
   colour ROOT [...]     colours for threads about to be promoted
   leads [N|--all]       canon leads (Hebrew books)
   canon                 echo edges + meta rows -> data/canon.json
+  manifest              -> data/manifest.json (index to the data files)
+  migrate [--to X.Y.Z] [--dry] [--unit N]
+                        move built units to a newer contract
+  test [--quick]        check this book: core pin, units, audit, build idempotence
   corpus                build the word table and reading text from the corpus
   units-from-map [MAP] [--kinds outer,inner] [--dry]
                         unit rows + groupings from the literary unit map
@@ -42,6 +46,9 @@ COMMANDS = {
     "leads": ("biblecore.leads", "main"),
     "canon": ("biblecore.canon", "main"),
     "units-from-map": ("biblecore.units_map", "main"),
+    "manifest": ("biblecore.manifest", "main"),
+    "migrate": ("biblecore.migrate", "main"),
+    "test": ("biblecore.selftest", "main"),
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }

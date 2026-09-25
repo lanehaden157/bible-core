@@ -7,7 +7,7 @@ Written from Numbers' setup log (H14). In order:
 
   1. copy template/ to the new folder, filling {{BOOK}} {{OSIS}} {{ABBREV}}
      {{SLUG}} in file names and contents
-  2. vendor biblecore/ + canon conventions (core_sync.py); book.json "core"
+  2. vendor biblecore/ + canon files (core_sync.py); book.json "core"
      set to this checkout's version
   3. copy the Strong's lexicon from corpus/lexicon/ (sha1-checked); canon
      leads' glosses read it (learned: Numbers' glosses were all "?" until

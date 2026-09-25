@@ -125,8 +125,12 @@ def merge_units_json(meta, dry, fragment_html=None):
             if r.get(k):
                 local_roots[name][k] = r[k]
 
+    # A port writes the unit under this core's contract (D7), whatever
+    # version the artifact or an earlier port claimed.
+    from biblecore import contract
     row.update({"slug": meta.get("slug", row["slug"]), "passage": meta["passage"],
-                "title": meta["title"], "built": True, "roots": local_roots})
+                "title": meta["title"], "built": True, "roots": local_roots,
+                "contract": contract.current()})
     for g in book().groupings + book().meta_keys:
         if meta.get(g) is not None:
             row[g] = meta[g]
@@ -459,6 +463,8 @@ def port_one(n, dry, src=None, force=False):
     meta.setdefault("slug", f"unit-{n:02d}")
     for note in um.normalize_candidates(meta):
         print("  normalized", note)
+    from biblecore import contract
+    meta["contract"] = contract.current()   # stamped by the port (D7)
     errs = um.validate(meta, um._load("threads.json"))
     if errs:
         print("METADATA INVALID:")

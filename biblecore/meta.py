@@ -35,6 +35,9 @@ Shape (style reference §3):
              EARLIER units; `w` is optional in the artifact because the
              porter fills data-w. candidates/retro are consumed by the
              porter and never regenerated.
+  contract   str      core version the unit was ported under ("0.3.0");
+                        stamped by the porter, moved only by migrations
+                        (contract.py). Absent on units ported before 0.3.0.
   questions  [ {topic, note, options?} ]
              Wording/data calls only Lane can make, surfaced at port time in
              Claude Code rather than asked on the project side. Consumed and
@@ -115,6 +118,8 @@ CORE_TOP_LEVEL_KEYS = {
     "unit", "slug", "passage", "title", "roots", "threads", "questions",
     # canon rows (G9), consumed at port like questions -- see canon.py
     "intertext", "typescenes",
+    # core version the unit was written against (D7) -- see contract.py
+    "contract",
 }
 
 
@@ -269,8 +274,9 @@ def validate(meta, threads_json=None):
                     isinstance(x, str) for x in q["options"]):
                 errs.append(f"{where}: 'options' must be a list of strings")
 
-    from biblecore import canon
+    from biblecore import canon, contract
     errs += canon.validate_meta(meta)
+    errs += contract.check_stamp(meta.get("contract"))
 
     if threads_json is not None:
         ids = {t["id"] for t in threads_json["threads"]}
@@ -729,24 +735,39 @@ def warnings_for_fragment(html):
     return warnings
 
 
+# Every fragment check with the core version it arrived in (D7). A unit is
+# held to the checks at or below its `contract`; a check added in a later
+# core applies to it only after a migration moves its stamp forward. Add
+# new checks at the bottom with the version they ship in.
+FRAGMENT_CHECKS = [
+    ("0.1.0", "whitelist", lambda h, m, t, c: check_component_whitelist(h, c)),
+    ("0.1.0", "endnotes", lambda h, m, t, c: check_endnote_integrity(h)),
+    ("0.1.0", "native-script", lambda h, m, t, c: check_no_native_script(h)),
+    ("0.1.0", "data-root", lambda h, m, t, c: check_data_root_resolves(h, m, t)),
+    ("0.1.0", "data-w", lambda h, m, t, c: check_tracked_spans_have_data_w(h, t)),
+    ("0.1.0", "pericope", lambda h, m, t, c: check_pericope_headings(h)),
+    ("0.1.0", "echo", lambda h, m, t, c: check_echo(h, m)),
+    ("0.2.0", "data-verses", lambda h, m, t, c: check_declared_verses(h, m)),
+    ("0.2.0", "table.list", lambda h, m, t, c: check_table_list(h)),
+    ("0.1.0", "inline-style", lambda h, m, t, c: check_no_inline_style(h)),
+]
+
+
 def validate_fragment(html, css_path=None, meta=None, threads_json=None):
     """All fragment-level HARD checks in one call: component whitelist,
     endnote integrity, zero native script, data-root resolution, tracked-
     span data-w, pericope headings, aside.echo anchors/nesting, no inline
-    style/--c-* vars. Does not include validate()'s meta-dict checks, and
-    does not include warnings_for_fragment()'s non-fatal warnings -- run
-    all three when checking a real fragment."""
+    style/--c-* vars, plus whatever FRAGMENT_CHECKS gains later -- each
+    only if the unit's `contract` is at or past the version it arrived in.
+    Does not include validate()'s meta-dict checks, and does not include
+    warnings_for_fragment()'s non-fatal warnings -- run all three when
+    checking a real fragment."""
+    from biblecore import contract
+    unit_contract = contract.of(meta if meta is not None else parse(html))
     errs = []
-    errs += check_component_whitelist(html, css_path)
-    errs += check_endnote_integrity(html)
-    errs += check_no_native_script(html)
-    errs += check_data_root_resolves(html, meta, threads_json)
-    errs += check_tracked_spans_have_data_w(html, threads_json)
-    errs += check_pericope_headings(html)
-    errs += check_echo(html, meta)
-    errs += check_declared_verses(html, meta)
-    errs += check_table_list(html)
-    errs += check_no_inline_style(html)
+    for since, _name, fn in FRAGMENT_CHECKS:
+        if contract.at_least(unit_contract, since):
+            errs += fn(html, meta, threads_json, css_path)
     return errs
 
 
@@ -809,6 +830,8 @@ def generate(n, units_json=None, threads_json=None):
     for k in book().meta_keys:
         if row.get(k) is not None:
             meta[k] = row[k]
+    if row.get("contract"):
+        meta["contract"] = row["contract"]
     meta["roots"] = roots
     meta["threads"] = {"opens": opens, "payoffs": payoffs, "candidates": [], "retro": []}
     return meta

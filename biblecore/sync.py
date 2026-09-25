@@ -2,11 +2,16 @@
 
     python -m biblecore sync-check                  # which files changed since last synced
     python -m biblecore sync-check --mark-synced [FILE ...]
+    python -m biblecore sync-check --mark-pasted    # after pasting the instruction field
     python -m biblecore sync                        # mirror into project-side/synced/,
                                                     # commit and push if anything changed
 
 The file list is book.json "sync" (files + globs). The mirror is flat and
 deliberately duplicated so a GitHub-connector "sync" source sees plain files.
+
+The project's instruction field can't be synced; it's pasted by hand from
+CHAT_SIDE_INSTRUCTIONS.md (book.json paths.chat_side). sync-check says when
+that file has changed since the last `--mark-pasted`.
 Seeded from Joshua's check_project_sync.py + sync_to_github.py.
 """
 import json
@@ -52,11 +57,31 @@ def mark_synced(rels):
     save_state(state)
 
 
+PASTED_KEY = "__pasted__"
+
+
+def _chat_side_rel():
+    root = Path(book().root)
+    p = Path(book().path("chat_side"))
+    return p.relative_to(root).as_posix() if p.exists() else None
+
+
 def check_main(argv=None):
     args = list(argv or [])
     root = Path(book().root)
     tracked = book().sync_files()
     state = load_state()
+
+    if args and args[0] == "--mark-pasted":
+        rel = _chat_side_rel()
+        if rel is None:
+            print("no chat-side instructions file to mark")
+            return 1
+        state[PASTED_KEY] = {"file": rel, "hash": hash_file(root / rel),
+                             "pasted_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        save_state(state)
+        print(f"  marked pasted: {rel}")
+        return 0
 
     if args and args[0] == "--mark-synced":
         now = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -96,6 +121,11 @@ def check_main(argv=None):
         print(f"\n({len(ok)} file(s) already in sync)")
     if not tracked:
         print("book.json lists no sync files.")
+    rel = _chat_side_rel()
+    if rel and state.get(PASTED_KEY, {}).get("hash") != hash_file(root / rel):
+        print(f"PASTE BY HAND: {rel} changed since it was last pasted into the "
+              f"project's instruction field. Paste it, then run "
+              f"`python -m biblecore sync-check --mark-pasted`.")
     return 1 if stale else 0
 
 

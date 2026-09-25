@@ -35,8 +35,9 @@ def test_vendor_diff_and_refusal_round_trip():
         rc, out = _quiet(core_sync.main, [d])
         if rc or not os.path.exists(os.path.join(d, "biblecore", "CORE_VERSION")):
             return [f"vendoring failed: {out}"]
-        if not os.path.exists(os.path.join(d, "canon-conventions.md")):
-            fails.append("canon-conventions.md not copied")
+        for f in core_sync.CANON_FILES.values():
+            if not os.path.exists(os.path.join(d, f)):
+                fails.append(f"{f} not copied")
         pinned = open(os.path.join(d, "biblecore", "CORE_VERSION")).read().split()
         if pinned[1] != core_sync.core_commit():
             fails.append(f"CORE_VERSION pins {pinned[1]}, HEAD is {core_sync.core_commit()}")

@@ -1,10 +1,10 @@
 """Vendor bible-core into a book (ARCHITECTURE.md §5).
 
-    python tools/core_sync.py ../Numbers          # copy biblecore/ + canon conventions in
+    python tools/core_sync.py ../Numbers          # copy biblecore/ + the canon files in
     python tools/core_sync.py ../Numbers --check  # say what would change, write nothing
 
 Copies this checkout's `biblecore/` package into `<book>/biblecore/` and
-`canon/conventions.md` into `<book>/canon-conventions.md`, then writes
+the shared chat-side files in CANON_FILES into the book root, then writes
 `<book>/biblecore/CORE_VERSION`: the package version plus the bible-core
 commit it came from, so core_diff.py can compare against exactly that.
 
@@ -25,6 +25,19 @@ import sys
 
 CORE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, CORE)
+
+# bible-core canon/ file -> its name in the book root (all synced to the
+# project side; the book never edits them)
+CANON_FILES = {
+    "conventions.md": "canon-conventions.md",
+    "decisions.md": "canon-decisions.md",
+    "workflow.md": "core-workflow.md",
+}
+
+
+def copy_canon_files(book_root):
+    for src, dst in CANON_FILES.items():
+        shutil.copyfile(os.path.join(CORE, "canon", src), os.path.join(book_root, dst))
 
 
 def core_commit():
@@ -61,10 +74,10 @@ def plan(book_root):
             acts.append(("update", rel))
     for rel in sorted(have - want):
         acts.append(("remove", rel))
-    conv_src = os.path.join(CORE, "canon", "conventions.md")
-    conv_dst = os.path.join(book_root, "canon-conventions.md")
-    if not os.path.exists(conv_dst) or not filecmp.cmp(conv_src, conv_dst, shallow=False):
-        acts.append(("update" if os.path.exists(conv_dst) else "add", "../canon-conventions.md"))
+    for src, dst in CANON_FILES.items():
+        s, d = os.path.join(CORE, "canon", src), os.path.join(book_root, dst)
+        if not os.path.exists(d) or not filecmp.cmp(s, d, shallow=False):
+            acts.append(("update" if os.path.exists(d) else "add", f"../{dst}"))
     return acts
 
 
@@ -109,8 +122,7 @@ def main(argv=None):
         shutil.rmtree(dst)
     shutil.copytree(os.path.join(CORE, "biblecore"), dst,
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    shutil.copyfile(os.path.join(CORE, "canon", "conventions.md"),
-                    os.path.join(book_root, "canon-conventions.md"))
+    copy_canon_files(book_root)
     from biblecore import __version__
     commit = core_commit() or "unknown"
     with open(os.path.join(dst, "CORE_VERSION"), "w", encoding="utf-8", newline="\n") as f:

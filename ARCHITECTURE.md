@@ -1,8 +1,11 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.2.0, 2026-09-24, shaped by Numbers unit 1: `data-verses`,
-in-place promotion, `new_book.py` + `units-from-map`, `table.list`, and
-versification (E1). Built and tested (see §8). Expect it to change.
+**Status:** core 0.3.0, 2026-09-24. Numbers unit 1 shaped 0.2.0 (`data-verses`,
+in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
+versification E1). 0.3.0 adds contract versions and migrations, the data
+manifest, the book-side `test`, the synced core workflow and canon
+decisions, and Aramaic word language. Built and tested (see §8). Expect it to
+change. The remaining plan is in `../core-plan-remaining.md`.
 
 ## What this is
 
@@ -281,13 +284,31 @@ easy to add in `book.py`; keys nothing reads don't stay.
   a report, or it applies only to new units. **(learned:** Joshua A1, and
   Matthew's `extract_units` incident, where eight units silently
   diverged.**)**
+- **Contract versions (D7, 0.3.0).** The porter stamps each unit's meta
+  block and `units.json` row with `contract`, the core version that ported it.
+  `meta.FRAGMENT_CHECKS` records the version each check arrived in, and a unit
+  is held only to the checks at or below its stamp (unstamped units count as
+  0.2.0). A new check therefore never fails a shipped unit. To hold old units
+  to it, add a migration to `biblecore/migrate.py` and run
+  `python -m biblecore migrate`, which runs the migrations, moves the stamps and
+  refreshes the meta blocks.
+- **Data as an API (F17).** The build writes `data/manifest.json` (book,
+  core, progress, schema version per file). Shapes are in
+  `docs/data-shapes.md`. Bump a file's schema in `manifest.SCHEMAS` on any
+  incompatible change.
 - **No submodules (H2).** Vendor a copy.
 
 ---
 
 ## 6. Workflow defaults (chat side + Claude Code)
 
-The template's chat-side skeleton carries Joshua's current loop, as a default:
+The shared loop lives in `canon/workflow.md`, vendored into each book as
+`core-workflow.md` and synced to the project side (D6). The project's
+instruction field (`CHAT_SIDE_INSTRUCTIONS.md`, pasted by hand) keeps only the
+study's language rules, the lens and the book's departures, and points at
+that file. `sync-check` says when the field needs re-pasting (`--mark-pasted`
+after pasting). Settled cross-book calls go in `canon/decisions.md`
+(`canon-decisions.md`, F22). The loop, as a default:
 
 1. Pre-read briefing (flowing prose).
 2. Verse-by-verse (flowing prose; commentators named freely).
@@ -356,6 +377,12 @@ project side after bootstrap (the order Numbers went in):
    unit rows and groupings to `data/units.json` (additive: existing rows and
    groupings are kept), fills `book.json` groupings, and writes the next
    unit's canon leads. Rename the generated grouping names freely.
+
+**Checking a book:** `python -m biblecore test` in the book (`--quick` skips
+the build rerun). It checks that the core pin agrees, the corpus loads, the
+data parses, every built unit validates, the contract stamps, the style
+reference's worked example, and that re-running the build changes no file.
+Audit gaps are reported but don't fail it.
 
 **Testing the core:** `python tests/run.py [filter]` (no pytest needed). The
 suite runs against Joshua's real data, read-only. Its strongest check:

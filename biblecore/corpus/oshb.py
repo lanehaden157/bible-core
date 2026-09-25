@@ -12,6 +12,12 @@ reading text substitutes the pointed Qere (what is read aloud). The word
 table keeps a row for every <w>, Ketiv and Qere alike, each with its own
 OSHB id, Ketiv first. load_words() drops the Ketiv rows again by that
 adjacency (same ref, unpointed row immediately followed by a pointed one).
+
+Aramaic (review E16): OSHB marks each word's language in the first letter
+of its morph code, H for Hebrew and A for Aramaic (Dan 2:4b-7:28, Ezra
+4:8-6:18 and 7:12-26, Jer 10:11, Gen 31:47). Lemma ids share Strong's one
+number space, so roots and the audit need nothing new. load_words() gives
+every row a `lang` from language_of(), and the word table stays as it is.
 """
 import csv
 import os
@@ -177,6 +183,11 @@ def _pin(b):
 _CANTILLATION_RANGE = range(0x0591, 0x05B0)
 
 
+def language_of(morph):
+    """'aramaic' for an OSHB morph code starting with A, else 'hebrew'."""
+    return "aramaic" if (morph or "").startswith("A") else "hebrew"
+
+
 def has_niqqud(s):
     return any(unicodedata.combining(c) != 0 and ord(c) not in _CANTILLATION_RANGE
                for c in s)
@@ -210,7 +221,7 @@ def load_words(b=None):
             continue
         _bk, ch, v = row["ref"].split(".")
         ch, v = versify.to_display(int(ch), int(v), vmap)
-        out.append({**row, "ch": ch, "v": v})
+        out.append({**row, "ch": ch, "v": v, "lang": language_of(row["morph"])})
     _words_cache[path] = out
     return out
 

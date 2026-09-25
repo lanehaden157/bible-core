@@ -44,6 +44,8 @@ PATH_DEFAULTS = {
     "lexicon": "corpus/lexicon/HebrewStrong.xml",
     "synced": "project-side/synced",
     "sync_state": "project-side/sync-state.json",
+    # pasted by hand into the Claude.ai project's instruction field
+    "chat_side": "CHAT_SIDE_INSTRUCTIONS.md",
     "palette": "data/palette.json",
     # Derived from the book name unless overridden; see Book.path().
     "words": None,

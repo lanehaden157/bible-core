@@ -10,6 +10,7 @@ Slow (it ports four units and scans the Hebrew Bible for canon leads).
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -107,6 +108,11 @@ def test_joshua_from_template_reproduces_joshua():
             fails.append("audit not clean after build")
         for n in (1, 2, 3, 4):
             ours = support.read(os.path.join(d, "units", f"unit-{n:02d}.html"))
+            # the contract stamp (D7) is the one intended difference:
+            # Joshua's own porter predates it
+            if '"contract": "' not in ours:
+                fails.append(f"unit {n} carries no contract stamp")
+            ours = re.sub(r'\n  "contract": "[0-9.]+",', "", ours)
             theirs = support.read(os.path.join(J, "units", f"unit-{n:02d}.html"))
             if ours != theirs:
                 fails.append(f"unit {n} differs from Joshua's committed fragment")
