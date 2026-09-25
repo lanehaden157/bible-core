@@ -12,7 +12,9 @@
      #/search           references, lemmas across books, tracked threads
    No native script anywhere; lexicon glosses are identifiers. */
 
-const DATA = (f) => new URL(`../data/${f}`, import.meta.url);
+// always revalidate, like the book sites: the data changes whenever the hub
+// is rebuilt and pushed, and a stale cached copy is invisible
+const DATA = (f) => { const u = new URL(`../data/${f}`, import.meta.url); u.searchParams.set("v", Date.now()); return u; };
 const content = document.getElementById("content");
 let books = [], byOsis = new Map(), bySlug = new Map(), canon = {}, conc = null;
 
