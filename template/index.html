@@ -31,10 +31,14 @@
   </header>
   <nav id="unit-nav" class="unit-nav" aria-label="all units" hidden></nav>
   <div id="settings-panel" class="settings-panel" role="menu" aria-label="display settings" hidden>
+    <div class="settings-h">Reading mode</div>
+    <div id="setting-modes" class="settings-modes"></div>
+    <div class="settings-h">Layout</div>
     <label class="settings-row">
       <input type="checkbox" id="setting-center-text">
       Center-align reading text
     </label>
+    <a class="settings-row settings-link" href="#/print">Print the whole study</a>
   </div>
 </div>
 <div id="nav-backdrop" class="nav-backdrop" hidden></div>
@@ -48,6 +52,6 @@
 <a id="fab-prev" class="unit-fab prev" aria-label="Previous unit" hidden>‹</a>
 <a id="fab-next" class="unit-fab next" aria-label="Next unit" hidden>›</a>
 
-<script type="module" src="app/main.js?v=5"></script>
+<script type="module" src="app/main.js?v=6"></script>
 </body>
 </html>

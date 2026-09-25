@@ -16,14 +16,18 @@
    cached module is invisible in the DOM and easy to mistake for a real bug. */
 
 import { loadThreadData, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=5";
-import { enhanceSpotlights } from "./spotlight.js?v=5";
+import { enhanceSpotlights, openAll } from "./spotlight.js?v=5";
 import { renderSearch } from "./search.js?v=5";
+import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
+         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js?v=5";
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
 // which components are verse asides (collapsed with the glosses) and which
 // blocks stay in line instead of being hoisted
 const COMPONENTS_URL = new URL("../data/components.json", import.meta.url);
+// book identity (name, osis, abbrev) and data versions, from the build
+const MANIFEST_URL = new URL("../data/manifest.json", import.meta.url);
 
 // always revalidate — a no-build static site changes the moment files are pushed
 // no build step: always fetch the current file, never a cached copy
@@ -39,11 +43,15 @@ const navToggleCtx = document.getElementById("nav-toggle-ctx");
 
 let manifest = null;
 let comps = [];       // [{name, role, selector}] from data/components.json
+let bookInfo = {};    // data/manifest.json: {book, osis, abbrev, ...}
 let groups = [];      // the primary grouping kind's entries, in order
 let groupKind = null; // e.g. "movement"
 
 const storagePrefix = () => (manifest?.book || "study").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const CENTER_TEXT_KEY = () => `${storagePrefix()}:centerText`;
+const MODE_KEY = () => `${storagePrefix()}:mode`;
+const readMode = () => { try { return localStorage.getItem(MODE_KEY()) || "notes"; } catch (e) { return "notes"; } };
+const bookRef = () => ({ name: bookInfo.book || manifest?.book || "", osis: bookInfo.osis, abbrev: bookInfo.abbrev });
 const siteTitle = () => `${manifest?.book || ""} Study`.trim();
 
 applySettings();
@@ -51,13 +59,15 @@ init();
 
 async function init() {
   try {
-    let c;
-    [manifest, c] = await Promise.all([
+    let c, bm;
+    [manifest, c, bm] = await Promise.all([
       fetch(bust(UNITS_URL)).then((r) => r.json()),
       fetch(bust(COMPONENTS_URL)).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      fetch(bust(MANIFEST_URL)).then((r) => (r.ok ? r.json() : null)).catch(() => null),
       loadThreadData(),
     ]);
     comps = c?.components || [];
+    bookInfo = bm || {};
   } catch (e) {
     content.innerHTML = `<p class="missing">Could not load site data (<code>data/*.json</code>).</p>`;
     return;
@@ -68,6 +78,7 @@ async function init() {
   buildUnitNav();
   wireNavToggle();
   wireSettingsToggle();
+  wireModes();
   window.addEventListener("hashchange", route);
   route();
 }
@@ -79,6 +90,25 @@ function applySettings() {
   document.body.classList.toggle("text-center", centered);
   const checkbox = document.getElementById("setting-center-text");
   if (checkbox) checkbox.checked = centered;
+  applyMode(readMode());
+}
+
+/* reading-mode radios, built from reader.js MODES */
+function wireModes() {
+  const box = document.getElementById("setting-modes");
+  if (!box) return;
+  const cur = readMode();
+  box.innerHTML = MODES.map(([m, label]) =>
+    `<label class="settings-row"><input type="radio" name="mode" value="${m}"${m === cur ? " checked" : ""}> ${label}</label>`).join("");
+  box.addEventListener("change", (e) => {
+    const m = e.target.value;
+    try { localStorage.setItem(MODE_KEY(), m); } catch (err) { /* private mode */ }
+    applyMode(m);
+    if (!content.querySelector("article.unit")) return;
+    if (m === "interlinear") mountInterlinear(content);
+    else unmountInterlinear(content);
+    openAll(content, m === "open");
+  });
 }
 
 function wireSettingsToggle() {
@@ -260,19 +290,55 @@ function route() {
     else searchLink.removeAttribute("aria-current");
   }
 
-  if (slug === "search") {
+  if (slug === "search" || slug === "lemma") {
     markCurrent(null);
     pager.innerHTML = "";
-    document.title = `Concordance — ${siteTitle()}`;
-    renderSearch(content, manifest.units, storagePrefix());
+    document.title = `Search — ${siteTitle()}`;
+    renderSearch(content, manifest.units, storagePrefix(), {
+      book: bookRef(),
+      initial: slug === "lemma" && anchor ? `=${decodeURIComponent(anchor)}` : null,
+    });
     content.scrollIntoView({ block: "start" });
+    return;
+  }
+
+  if (slug === "print") {
+    markCurrent(null);
+    pager.innerHTML = "";
+    document.title = `Whole study — ${siteTitle()}`;
+    renderPrint(content, manifest.units, bookRef(), (wrap, u) => {
+      hoistStructureBlocks(wrap);
+      indexVerses(wrap, u);
+      injectPalette(u, resolveUnit(u), `unit-palette-${u.n}`);
+      rebuildLegend(wrap, resolveUnit(u));
+      enhanceSpotlights(wrap, selectorsFor("verse-aside"));
+      openAll(wrap, true);
+    });
+    return;
+  }
+
+  if (slug === "ref" && anchor) {
+    const q = decodeURIComponent(anchor);
+    const r = parseRef(q, bookRef()) || (/^\d+:\d+$/.test(q) ? q.split(":").map(Number) : null);
+    const u = r && unitForRef(r[0], r[1], manifest.units);
+    if (u?.built) { location.replace(`#/${u.slug}/${r[0]}:${r[1]}`); return; }
+    content.innerHTML = u
+      ? `<p class="missing">${escapeHtml(bookRef().name)} ${r[0]}:${r[1]} is in Unit ${u.n} (${escapeHtml(u.title)}), not built yet.</p>`
+      : `<p class="missing">No unit covers “${escapeHtml(q)}”.</p>`;
+    markCurrent(null);
     return;
   }
 
   const unit = manifest.units.find((u) => u.slug === slug && u.built);
   if (!unit) {
     const first = manifest.units.find((u) => u.built);
-    if (first && !slug) { location.replace(`#/${first.slug}`); return; }
+    if (first && !slug) {
+      // continue where the reader left off, else the first built unit
+      const last = lastPosition(storagePrefix());
+      const again = last && manifest.units.find((u) => u.slug === last.slug && u.built);
+      location.replace(again ? `#/${again.slug}${last.ref ? "/" + last.ref : ""}` : `#/${first.slug}`);
+      return;
+    }
     content.innerHTML = first
       ? `<p class="missing">Unit not found. Pick one from Contents.</p>`
       : `<p class="missing">No units built yet.</p>`;
@@ -299,20 +365,22 @@ async function loadUnit(unit, anchor) {
   content.innerHTML = html;
   renderPlacement(content, unit);
   hoistStructureBlocks(content);
+  indexVerses(content, unit);
   const resolved = resolveUnit(unit);
   injectPalette(unit, resolved);
   rebuildLegend(content, resolved);
   enhanceSpotlights(content, selectorsFor("verse-aside"));
+  const mode = readMode();
+  if (mode === "open") openAll(content, true);
+  if (mode === "interlinear") mountInterlinear(content);
   wireRoots(content, unit, manifest.units);
   wireFootnotes();
   buildPager(unit);
   document.title = `Unit ${unit.n} · ${unit.title} — ${siteTitle()}`;
 
+  rememberPosition(storagePrefix(), unit.slug, anchor && /^\d+:\d+$/.test(anchor) ? anchor : null);
   if (anchor) {
-    const vm = anchor.match(/^v(\d+)$/);
-    const el = vm
-      ? [...content.querySelectorAll(".v")].find((v) => v.querySelector(".n")?.textContent.trim() === vm[1])
-      : document.getElementById(anchor);
+    const el = findVerse(content, anchor) || document.getElementById(anchor);
     if (el) requestAnimationFrame(() => jumpTo(el));
     else content.scrollIntoView({ block: "start" });
   } else {

@@ -53,8 +53,8 @@ export function resolveUnit(unit) {
 /** Inject `.unit[data-unit=N] [data-root=x]{color}` + legend swatch colours.
     Tracked-thread roots also get a dotted underline in their own colour
     (a "thread" stitched under the word) that glows on hover. */
-export function injectPalette(unit, resolved) {
-  document.getElementById("unit-palette")?.remove();
+export function injectPalette(unit, resolved, styleId = "unit-palette") {
+  document.getElementById(styleId)?.remove();
   const rules = [];
   const sel = `.unit[data-unit="${unit.n}"]`;
   for (const [root, m] of resolved) {
@@ -75,7 +75,7 @@ export function injectPalette(unit, resolved) {
     }
   }
   const s = document.createElement("style");
-  s.id = "unit-palette";
+  s.id = styleId;
   s.textContent = rules.join("\n");
   document.head.appendChild(s);
 }

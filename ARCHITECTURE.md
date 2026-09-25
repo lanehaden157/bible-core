@@ -1,7 +1,8 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.4.0, 2026-09-24. 0.4.0 adds the component registry and the
-core.css/theme.css split, with poem, itin and textform alongside echo and list. Numbers unit 1 shaped 0.2.0 (`data-verses`,
+**Status:** core 0.5.0, 2026-09-24. 0.4.0 added the component registry and the
+core.css/theme.css split, with poem, itin and textform alongside echo and list.
+0.5.0 adds the reading data layer (`emit`) and the reader features (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
 manifest, the book-side `test`, the synced core workflow and canon
@@ -385,6 +386,18 @@ project side after bootstrap (the order Numbers went in):
    unit rows and groupings to `data/units.json` (additive: existing rows and
    groupings are kept), fills `book.json` groupings, and writes the next
    unit's canon leads. Rename the generated grouping names freely.
+
+**Reader features (0.5.0).** The build's `emit` step writes the reading
+data layer (`data/words/<ch>.json`, `lemmas.json`, `text.json`;
+`docs/data-shapes.md`), and the template's `app/reader.js` uses it:
+- reading modes: notes, every note open, translation only, interlinear;
+- the interlinear itself, with transliteration, Strong's senses (labelled as
+  an identifier, not the translation) and morphology in plain words
+  (`lang/hebrew_morph.py`). Tap a word for every occurrence of its lemma;
+- search across references, tagged roots, lemmas and the study's English;
+- `#/ref/<C:V>` and `#/lemma/<key>` routes;
+- "continue where you left off";
+- `#/print`, the whole study on one page with every note open.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
 the build rerun). It checks that the core pin agrees, the corpus loads, the

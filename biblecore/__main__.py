@@ -16,6 +16,7 @@ Commands:
   colour ROOT [...]     colours for threads about to be promoted
   leads [N|--all]       canon leads (Hebrew books)
   canon                 echo edges + meta rows -> data/canon.json
+  emit                  -> data/words/, lemmas.json, text.json (interlinear, search)
   manifest              -> data/manifest.json (index to the data files)
   migrate [--to X.Y.Z] [--dry] [--unit N]
                         move built units to a newer contract
@@ -48,6 +49,7 @@ COMMANDS = {
     "leads": ("biblecore.leads", "main"),
     "canon": ("biblecore.canon", "main"),
     "units-from-map": ("biblecore.units_map", "main"),
+    "emit": ("biblecore.emit", "main"),
     "manifest": ("biblecore.manifest", "main"),
     "migrate": ("biblecore.migrate", "main"),
     "test": ("biblecore.selftest", "main"),

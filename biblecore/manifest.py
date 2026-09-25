@@ -25,6 +25,9 @@ SCHEMAS = {
     "canon.json": 1,
     "palette.json": 1,
     "components.json": 1,
+    "lemmas.json": 1,
+    "text.json": 1,
+    "words/": 1,
 }
 
 
@@ -33,7 +36,7 @@ def build():
     units = json.load(open(b.data("units.json"), encoding="utf-8"))
     rows = units.get("units", [])
     files = {name: {"schema": v} for name, v in SCHEMAS.items()
-             if os.path.exists(b.data(name))}
+             if os.path.exists(b.data(name.rstrip("/")))}
     # data files written by later steps (text/, words/, lemmas.json) add
     # themselves here as they arrive
     return {
@@ -42,6 +45,7 @@ def build():
         "book": b.name,
         "slug": b.slug,
         "osis": b.osis,
+        "abbrev": b.abbrev,
         "language": b.cfg.get("language"),
         "versification": b.cfg.get("versification", "kjv"),
         "core": __version__,

@@ -57,6 +57,17 @@ function setOpen(box, btn, open) {
   btn.classList.toggle("is-open", open);
 }
 
+/* open (or close) every verse note under root: the "every note open"
+   reading mode and the print page */
+export function openAll(root, open = true) {
+  boxes(root).forEach((b) => setOpen(b, b._btn, open));
+  const btn = root.querySelector(".spot-all");
+  if (btn) {
+    btn.textContent = open ? "Hide all notes" : "Show all notes";
+    btn.dataset.mode = open ? "hide" : "show";
+  }
+}
+
 function boxes(root) {
   return [...root.querySelectorAll(".verse-note")];
 }

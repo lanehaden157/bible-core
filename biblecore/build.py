@@ -13,6 +13,7 @@ Hard steps (the build fails if one does):
   roots               data/roots.json integrity
   digest              data/threads.json -> threads-digest.md
   canon               echo edges -> data/canon.json (canon.py)
+  emit                -> data/words/<ch>.json, lemmas.json, text.json (emit.py)
   manifest            -> data/manifest.json (manifest.py)
 Advisory (reported, never fail the build):
   audit               tracked-thread coverage in built units
@@ -25,7 +26,7 @@ source-artifacts/. A new unit is `python -m biblecore port N`.
 A book that needs a different sequence writes its own build script that
 calls these steps (ARCHITECTURE.md §5: override, don't edit).
 """
-from biblecore import (assets, audit, canon, digest, leads, manifest, refresh,
+from biblecore import (assets, audit, canon, digest, emit, leads, manifest, refresh,
                        retrofit, roots, scan, sync, validate_units, verify_occurrences)
 
 STEPS = [
@@ -38,6 +39,7 @@ STEPS = [
     ("roots", roots.main),
     ("digest", digest.main),
     ("canon", canon.main),
+    ("emit", emit.main),
     ("manifest", manifest.main),
 ]
 ADVISORY = [

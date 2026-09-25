@@ -477,3 +477,63 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
   .note-toggle, .spot-controls { display: none !important; }
   .verse-note { break-inside: avoid; }
 }
+
+/* ======================================================= reader features
+   (app/reader.js): settings, reading modes, interlinear, search, print */
+
+.settings-h { font-family: var(--display); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); margin: 10px 0 4px; }
+.settings-h:first-child { margin-top: 0; }
+.settings-modes .settings-row { display: flex; gap: 8px; align-items: baseline; }
+.settings-link { display: block; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--rule-soft); border-bottom: none; font-size: 14px; }
+
+/* reading modes: body.mode-notes (default) / -open / -plain / -interlinear */
+body.mode-plain .unit .note-toggle,
+body.mode-plain .unit .verse-note,
+body.mode-plain .unit .spot-controls,
+body.mode-plain .unit sup.en,
+body.mode-plain .unit .notes { display: none !important; }
+
+/* interlinear: one row of word cells under each verse */
+.unit .il { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: -6px 0 16px 42px; }
+.unit .il-w { display: inline-flex; flex-direction: column; min-width: 3.2em; padding: 3px 6px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--panel); line-height: 1.25; border-bottom: 1px solid var(--rule-soft); }
+.unit .il-w:hover { border-color: var(--ink-soft); }
+.unit .il-w i { font-size: 15px; color: var(--ink); }
+.unit .il-w b { font-weight: 400; font-size: 12.5px; color: var(--accent-bronze); }
+.unit .il-w small { font-size: 10.5px; color: var(--ink-soft); max-width: 14em; }
+.unit .il-w b { max-width: 14em; }
+.unit .il-w.il-arc { border-style: dashed; }
+.unit .il-key { font-size: 13.5px; font-style: italic; color: var(--ink-soft); margin: 0 0 18px; }
+body.text-center .unit .il { justify-content: center; margin-left: 0; }
+
+/* search: grouped result blocks */
+.sr-block { margin: 0 0 30px; }
+.sr-block > h3 { font-family: var(--display); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 10px; display: flex; gap: 8px; align-items: baseline; }
+.sr-lemma { margin: 0 0 8px; padding: 6px 10px; border: 1px solid var(--rule-soft); border-radius: 6px; background: var(--panel); }
+.sr-lemma summary { cursor: pointer; font-size: 16px; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.sr-lemma summary i { font-weight: 600; }
+.sr-refs { margin: 8px 0 2px; font-size: 14px; line-height: 1.9; word-spacing: 4px; }
+.sr-refs a { color: var(--accent-bronze); }
+.sr-unbuilt { color: var(--ink-soft); opacity: .6; }
+.sr-text { list-style: none; margin: 0; padding: 0; }
+.sr-text li a { display: block; padding: 5px 8px; border: none; border-radius: 4px; font-size: 15.5px; }
+.sr-text li a:hover { background: var(--panel); }
+.sr-text b { background: color-mix(in srgb, var(--flash) 55%, transparent); font-weight: 600; }
+
+/* whole-study print page (#/print) */
+.print-head { text-align: center; margin-bottom: 28px; }
+.print-head h1 { font-family: var(--display); font-weight: 600; font-size: 34px; margin: 0 0 4px; }
+.print-head p { color: var(--ink-soft); font-style: italic; margin: 0 0 14px; }
+.print-unit + .print-unit { margin-top: 60px; padding-top: 30px; border-top: 2px solid var(--rule); }
+
+@media (max-width: 720px) {
+  .unit .il { margin-left: 26px; }
+  .unit .il-w small { display: none; }
+}
+
+@media print {
+  .print-head .print-go, .settings-panel { display: none !important; }
+  .print-unit { break-before: page; }
+  .print-unit:first-child { break-before: auto; }
+  .print-unit + .print-unit { border-top: none; margin-top: 0; padding-top: 0; }
+  .unit .il { break-inside: avoid; }
+}
