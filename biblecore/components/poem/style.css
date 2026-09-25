@@ -1,0 +1,17 @@
+/* div.poem -- verse blocks set in lines. The verse number hangs in the
+   gutter; each span.l is one line, and .in indents a continuing line. */
+.unit .poem { margin: 18px 0 22px; }
+.unit .poem .v { position: relative; padding-left: 42px; text-indent: 0; margin-bottom: 10px; }
+.unit .poem .v .n { position: absolute; left: 0; top: 0; }
+.unit .poem .l { display: block; padding-left: 1.4em; text-indent: -1.4em; }
+.unit .poem .l.in { padding-left: 2.8em; }
+.unit .poem .verse-note, .unit .poem .gloss { margin-left: 42px; }
+body.text-center .unit .poem .v { padding-left: 0; }
+body.text-center .unit .poem .v .n { position: static; display: block; margin: 0 auto 2px; }
+body.text-center .unit .poem .l, body.text-center .unit .poem .l.in { padding-left: 0; text-indent: 0; }
+@media (max-width: 720px) {
+  .unit .poem .v { padding-left: 26px; }
+  .unit .poem .l { padding-left: 1em; text-indent: -1em; }
+  .unit .poem .l.in { padding-left: 2em; }
+  .unit .poem .verse-note, .unit .poem .gloss { margin-left: 26px; }
+}

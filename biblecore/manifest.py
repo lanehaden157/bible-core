@@ -24,6 +24,7 @@ SCHEMAS = {
     "occurrences.json": 1,
     "canon.json": 1,
     "palette.json": 1,
+    "components.json": 1,
 }
 
 

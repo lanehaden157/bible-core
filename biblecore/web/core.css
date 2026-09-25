@@ -1,41 +1,17 @@
 /* ============================================================================
-   Study site stylesheet -- bible-core starter template.
+   core.css -- shared structure for every book site (bible-core biblecore/web/).
 
-   STARTS AS JOSHUA'S THEME. Give the book its own look: replace the :root
-   colour tokens and the two font families (here and in index.html's Google
-   Fonts link). The structural rules below are shared mechanism (topbar, unit
-   nav, book map, pager, root popover, search, verse-note toggle) and rarely
-   need changing.
+   GENERATED COPY: the build writes css/core.css from the vendored package.
+   Don't edit it in a book; change it in bible-core and re-vendor, or override
+   a rule in the book's own css/theme.css (loaded after this file).
+
+   Every colour and font here is a custom property from theme.css. Component
+   rules (echo, list, poem, ...) live with their components and arrive in the
+   generated css/components.css, only for the components book.json enables.
 
    Per-unit root colours are injected at runtime by app/threads.js as
      .unit[data-unit="N"] [data-root="x"] { color: ... }
-   Every class a fragment uses must be defined here: meta.py's whitelist
-   check reads this file. A new component class is a decision -- add its
-   CSS, its check and its snippet in the same commit.
    ========================================================================== */
-
-:root {
-  --bg: #e9dfc3;
-  --panel: #f4eed9;
-  --panel-2: #e3d5ab;
-  --ink: #2e2717;
-  --ink-soft: #6b5d40;
-  --rule: #cab883;
-  --rule-soft: #ddcda0;
-
-  /* stable chrome accents — independent of any unit's root palette */
-  --accent-clay: #b1481f;     /* verse numbers, endnote markers */
-  --accent-bronze: #8c6d1f;   /* pericope headings, spotlight-adjacent accents */
-  --accent-jordan: #2f5f6b;   /* movement labels, structural chrome */
-  --accent-olive: #55642f;
-  --accent-wine: #7a3f5c;
-
-  --display: "Cinzel", Georgia, serif;
-  --serif: "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
-
-  --maxw: 100%;
-  --flash: #f0c877;
-}
 
 * { box-sizing: border-box; }
 
@@ -44,8 +20,8 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 16% -5%, #f7f0da 0%, transparent 55%),
-    radial-gradient(circle at 106% 104%, #ddc98f 0%, transparent 52%),
+    radial-gradient(circle at 16% -5%, var(--glow-1) 0%, transparent 55%),
+    radial-gradient(circle at 106% 104%, var(--glow-2) 0%, transparent 52%),
     var(--bg);
   color: var(--ink);
   font-family: var(--serif);
@@ -63,7 +39,7 @@ a.lex:hover { border-bottom-color: var(--ink-soft); }
 
 .topbar-wrap { position: sticky; top: 0; z-index: 30; }
 .topbar {
-  background: rgba(233, 223, 195, 0.94);
+  background: var(--topbar-bg);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--rule);
 }
@@ -293,15 +269,6 @@ sup.en a { border: none; }
 .unit section.block h2 { font-family: var(--display); font-size: 15px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 4px; }
 .unit section.block .cap { font-style: italic; color: var(--ink-soft); font-size: 15px; margin: 0 0 16px; }
 
-/* table.list -- count/list tables (a census, a roster; first built for Numbers 1).
-   Two or three columns; the last column is numeric and right-aligned. */
-.unit table.list { width: 100%; border-collapse: collapse; font-size: 16px; line-height: 1.4; }
-.unit table.list th { font-family: var(--display); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; text-align: left; padding: 0 10px 6px 0; border-bottom: 1px solid var(--rule); }
-.unit table.list td { padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule-soft); color: var(--ink); }
-.unit table.list tbody tr:last-child td { border-bottom: none; }
-.unit table.list tfoot td { border-top: 2px solid var(--ink); border-bottom: none; padding-top: 8px; font-weight: 700; }
-.unit table.list th:last-child, .unit table.list td:last-child { text-align: right; padding-right: 0; font-variant-numeric: tabular-nums; }
-
 /* legend */
 .unit .block.legend ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px; }
 .unit .block.legend li { font-size: 15.5px; line-height: 1.4; }
@@ -333,8 +300,6 @@ sup.en a { border: none; }
 body.text-center .unit .v { text-align: center; padding-left: 0; text-indent: 0; }
 body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; }
 .unit .gloss { display: block; text-indent: 0; margin: 3px 0 14px 0; padding: 6px 14px; border-left: 2px solid var(--rule); color: var(--ink-soft); font-style: italic; font-size: 15px; line-height: 1.5; }
-.unit aside.echo { display: block; text-indent: 0; margin: 3px 0 14px 0; padding: 6px 14px; border-left: 2px solid var(--accent-jordan); color: var(--ink-soft); font-size: 15px; line-height: 1.5; }
-.unit aside.echo::before { content: "cf. "; font-family: var(--display); font-weight: 600; font-style: normal; color: var(--accent-jordan); }
 .unit sup.en { font-size: .62em; font-style: normal; color: var(--accent-clay); font-weight: 700; vertical-align: super; line-height: 0; }
 
 /* ---- collapsed per-verse aside: light "note" (*) ---- */
@@ -365,10 +330,6 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
 }
 .unit .verse-note .gloss { display: block; margin: 0; padding: 0; border: none; }
 .unit .verse-note .gloss + .gloss { margin-top: 8px; }
-.unit .verse-note aside.echo { display: block; margin: 0; padding-left: 14px; border: none; border-left: 2px solid var(--accent-jordan); }
-.unit .verse-note .gloss + aside.echo,
-.unit .verse-note aside.echo + .gloss,
-.unit .verse-note aside.echo + aside.echo { margin-top: 8px; }
 
 /* ---- root hover tip + click popover ---- */
 
@@ -380,7 +341,7 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
   border-radius: 2px;
 }
 @supports not (background: color-mix(in srgb, white, black)) {
-  .unit [data-root].root-active { background: rgba(139, 109, 31, .12); }
+  .unit [data-root].root-active { background: var(--root-active-bg); }
 }
 
 .root-tip {

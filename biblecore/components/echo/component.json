@@ -1,0 +1,8 @@
+{
+  "name": "echo",
+  "summary": "a verse-level cross-book echo (\"cf.\")",
+  "classes": ["echo"],
+  "role": "verse-aside",
+  "selector": "aside.echo",
+  "since": "0.1.0"
+}

@@ -3,6 +3,8 @@
     python -m biblecore build
 
 Hard steps (the build fails if one does):
+  assets              css/core.css, css/components.css, data/components.json,
+                      components-reference.md for the enabled components
   retrofit            fragment edits from the retrofit specs (idempotent)
   refresh             regenerate each built fragment's meta block
   validate            every built fragment against the contract
@@ -23,10 +25,11 @@ source-artifacts/. A new unit is `python -m biblecore port N`.
 A book that needs a different sequence writes its own build script that
 calls these steps (ARCHITECTURE.md §5: override, don't edit).
 """
-from biblecore import (audit, canon, digest, leads, manifest, refresh, retrofit,
-                       roots, scan, sync, validate_units, verify_occurrences)
+from biblecore import (assets, audit, canon, digest, leads, manifest, refresh,
+                       retrofit, roots, scan, sync, validate_units, verify_occurrences)
 
 STEPS = [
+    ("assets", assets.main),
     ("retrofit", retrofit.main),
     ("refresh", refresh.main),
     ("validate", validate_units.main),

@@ -1,0 +1,8 @@
+{
+  "name": "poem",
+  "summary": "poetry set in lines (cola) inside ordinary verse blocks",
+  "classes": ["poem", "l", "in"],
+  "role": "verse",
+  "selector": "div.poem",
+  "since": "0.3.0"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "list",
+  "summary": "a count or list table (census, roster, allotment)",
+  "classes": ["list"],
+  "role": "inline-block",
+  "selector": "table.list",
+  "since": "0.2.0"
+}

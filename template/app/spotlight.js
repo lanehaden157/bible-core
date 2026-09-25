@@ -1,15 +1,15 @@
 /* Per-verse asides, collapsed by default behind one toggle per verse:
-   .gloss (a light note) and aside.echo (a cross-book echo, "cf."). A book
-   that enables another verse-sibling component adds its selector to
-   ASIDE_SEL, with its CSS and check, in the same commit
-   (ARCHITECTURE.md §2: optional components ship as one piece). Runs on the
-   freshly loaded fragment; the fragments themselves are untouched. */
+   .gloss (a light note) plus every enabled component whose role is
+   "verse-aside" (aside.echo, aside.textform, ...), passed in by main.js from
+   data/components.json. Runs on the freshly loaded fragment; the fragments
+   themselves are untouched. */
 
-const ASIDE_SEL = ".gloss, aside.echo";
+const BASE_SEL = ".gloss";
 const STOP_SEL =
   "p.v, div.v, h3, section, header, .verses, table";
 
-export function enhanceSpotlights(root) {
+export function enhanceSpotlights(root, extraSel = "") {
+  const ASIDE_SEL = extraSel ? `${BASE_SEL}, ${extraSel}` : BASE_SEL;
   let count = 0;
 
   for (const verse of root.querySelectorAll("p.v, div.v")) {

@@ -1,0 +1,8 @@
+{
+  "name": "textform",
+  "summary": "a text-form note: where another witness (LXX, Samaritan, Qumran, Qere) reads differently",
+  "classes": ["textform"],
+  "role": "verse-aside",
+  "selector": "aside.textform",
+  "since": "0.3.0"
+}

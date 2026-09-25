@@ -15,11 +15,15 @@
    together, whenever threads.js/spotlight.js/search.js changes -- a stale
    cached module is invisible in the DOM and easy to mistake for a real bug. */
 
-import { loadThreadData, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=4";
-import { enhanceSpotlights } from "./spotlight.js?v=4";
-import { renderSearch } from "./search.js?v=4";
+import { loadThreadData, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=5";
+import { enhanceSpotlights } from "./spotlight.js?v=5";
+import { renderSearch } from "./search.js?v=5";
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
+// written by the build from book.json "components" (biblecore/components):
+// which components are verse asides (collapsed with the glosses) and which
+// blocks stay in line instead of being hoisted
+const COMPONENTS_URL = new URL("../data/components.json", import.meta.url);
 
 // always revalidate — a no-build static site changes the moment files are pushed
 // no build step: always fetch the current file, never a cached copy
@@ -34,6 +38,7 @@ const navToggle = document.getElementById("nav-toggle");
 const navToggleCtx = document.getElementById("nav-toggle-ctx");
 
 let manifest = null;
+let comps = [];       // [{name, role, selector}] from data/components.json
 let groups = [];      // the primary grouping kind's entries, in order
 let groupKind = null; // e.g. "movement"
 
@@ -46,10 +51,13 @@ init();
 
 async function init() {
   try {
-    [manifest] = await Promise.all([
+    let c;
+    [manifest, c] = await Promise.all([
       fetch(bust(UNITS_URL)).then((r) => r.json()),
+      fetch(bust(COMPONENTS_URL)).then((r) => (r.ok ? r.json() : null)).catch(() => null),
       loadThreadData(),
     ]);
+    comps = c?.components || [];
   } catch (e) {
     content.innerHTML = `<p class="missing">Could not load site data (<code>data/*.json</code>).</p>`;
     return;
@@ -294,7 +302,7 @@ async function loadUnit(unit, anchor) {
   const resolved = resolveUnit(unit);
   injectPalette(unit, resolved);
   rebuildLegend(content, resolved);
-  enhanceSpotlights(content);
+  enhanceSpotlights(content, selectorsFor("verse-aside"));
   wireRoots(content, unit, manifest.units);
   wireFootnotes();
   buildPager(unit);
@@ -325,12 +333,18 @@ function hoistStructureBlocks(root) {
   let ref = anchor;
   for (const b of article.querySelectorAll("section.block")) {
     if (b.classList.contains("legend") || b.classList.contains("notes")) continue;
-    // A count/list table is read in sequence with the text, so it stays where
-    // the text puts it rather than joining the hoisted structure blocks.
-    if (b.querySelector("table.list")) continue;
+    // A count table or an itinerary is read in sequence with the text, so it
+    // stays where the text puts it rather than joining the hoisted blocks.
+    const inline = selectorsFor("inline-block");
+    if (inline && b.querySelector(inline)) continue;
     ref.after(b); // re-parents b to sit right after ref, in document order
     ref = b;
   }
+}
+
+/* "aside.echo, aside.textform" for a role, or "" if the book enables none */
+function selectorsFor(role) {
+  return comps.filter((c) => c.role === role).map((c) => c.selector).join(", ");
 }
 
 function renderPlacement(root, unit) {

@@ -31,6 +31,10 @@ def _pinned_text(commit, rel):
     return r.stdout if r.returncode == 0 else None
 
 
+# vendored file types: code, plus the components' css/json/md and web/ assets
+EXTS = (".py", ".css", ".json", ".md", ".js")
+
+
 def local_edits(book_root):
     """['modified x.py', 'added y.py', 'removed z.py'] against the pin."""
     dst = os.path.join(book_root, "biblecore")
@@ -43,12 +47,12 @@ def local_edits(book_root):
                             cwd=CORE, capture_output=True, text=True)
     if listed.returncode:
         return [f"pinned commit {commit[:10]} not found in this bible-core checkout"]
-    pinned = {p[len("biblecore/"):] for p in listed.stdout.split() if p.endswith(".py")}
+    pinned = {p[len("biblecore/"):] for p in listed.stdout.split() if p.endswith(EXTS)}
     have = set()
     for d, dirs, files in os.walk(dst):
         dirs[:] = [x for x in dirs if x != "__pycache__"]
         for f in files:
-            if f.endswith(".py"):
+            if f.endswith(EXTS):
                 have.add(os.path.relpath(os.path.join(d, f), dst).replace(os.sep, "/"))
     out = []
     for rel in sorted(have & pinned):

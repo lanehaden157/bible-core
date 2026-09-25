@@ -11,7 +11,8 @@
   },
   "groupings": [],
   "components": [
-    "echo"
+    "echo",
+    "list"
   ],
   "checks": {
     "opens_note_required": true
@@ -23,6 +24,7 @@
       "canon-conventions.md",
       "canon-decisions.md",
       "core-workflow.md",
+      "components-reference.md",
       "threads-digest.md",
       "data/roots.json",
       "{{BOOK}}-words.tsv"
@@ -32,5 +34,5 @@
       "*-versification.md"
     ]
   },
-  "core": "0.2.0"
+  "core": "0.4.0"
 }

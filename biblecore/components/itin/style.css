@@ -1,0 +1,10 @@
+/* div.itin -- a row of stops with arrows, inside a section.block
+   (Matthew's itinerary chips). A stop's <sup> is its verse. */
+.unit .itin { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 4px; }
+.unit .itin .stop { font-family: var(--display); font-size: 16px; font-weight: 600; padding: 4px 11px; border-radius: 20px; background: var(--panel-2); border: 1px solid var(--rule); white-space: nowrap; }
+.unit .itin .stop sup { font-family: var(--serif); font-size: 10.5px; color: var(--accent-jordan); font-weight: 700; margin-left: 2px; }
+.unit .itin .arr { color: var(--ink-soft); font-size: 15px; }
+@media (max-width: 720px) {
+  .unit .itin { justify-content: flex-start; }
+  .unit .itin .stop { font-size: 14.5px; padding: 3px 9px; }
+}

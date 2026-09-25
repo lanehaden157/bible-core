@@ -1,6 +1,7 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.3.0, 2026-09-24. Numbers unit 1 shaped 0.2.0 (`data-verses`,
+**Status:** core 0.4.0, 2026-09-24. 0.4.0 adds the component registry and the
+core.css/theme.css split, with poem, itin and textform alongside echo and list. Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
 manifest, the book-side `test`, the synced core workflow and canon
@@ -47,6 +48,12 @@ be fixed everywhere, run from a book's root as `python -m biblecore <command>`:
   fills `data-w` by alignment; `roots.py` validates the id sets;
 - `colour.py` — CIEDE2000 distance and palette assignment for local roots and
   newly promoted threads;
+- `components/` — the component registry (D5): one folder per optional
+  component (`component.json`, `style.css`, a `check()`, `snippet.md`).
+  `book.json` `components` enables a set; `assets.py` (first build step)
+  writes `css/core.css` (shared structure, `web/core.css`),
+  `css/components.css`, `data/components.json` (roles for the app shell)
+  and `components-reference.md` (synced). Echo, list, poem, itin, textform so far;
 - `port.py` and `build.py` — the default porter and build. They're mechanism
   too, but a book that needs a different sequence writes its own script that
   calls the same steps, rather than editing these;
@@ -55,8 +62,9 @@ be fixed everywhere, run from a book's root as `python -m biblecore <command>`:
 - language adapters (`lang/hebrew.py`) and corpus adapters (`corpus/oshb.py`).
 
 **Starter template: taste, and anything likely to vary by genre.** The app
-shell (JS, `index.html`) with generic groupings, the stylesheet (starting as
-Joshua's theme, to be re-themed), empty `data/` seeds and a starter palette,
+shell (JS, `index.html`) with generic groupings, `css/theme.css` (colour and
+font tokens plus book-only rules, starting as Joshua's look; the structure
+is the shared, generated `core.css`, D10), empty `data/` seeds and a starter palette,
 the style-reference and chat-side skeletons (✎ marks what the book decides),
 `translation-choices.md` starting from `canon-conventions.md`, `CLAUDE.md`,
 and the session-context files.
@@ -209,7 +217,7 @@ ask Lane" policy.
 | language / transliteration | Hebrew, `hebrew.py`, no vowel length | Greek, `greek.py`, ē/ō | from the language adapter. **Schemes are frozen per language, never harmonised (H10).** |
 | corpus | OSHB, word ids | SBLGNT, no word ids | a corpus with word ids whenever one exists |
 | groupings | 4 movements | 3 movements + 5 discourses | `groupings: [{kind, n, label, span, units}]`, where the book picks the kinds (D11) |
-| optional components | echo | ring, table, itinerary, compare, synoptic | none until a unit asks |
+| optional components | echo | ring, table, itinerary, compare, synoptic | from the registry (`biblecore/components/`), enabled in `book.json`; template enables echo + list |
 | `opens.note` | required | optional | required |
 | promotion policy | Claude decides, biased book-wide | Lane decides | Joshua's: Claude decides, asks when unsure |
 | unit map | Lane-authored | Lane-authored | from the book's own project side, once its resources are compiled |
@@ -396,6 +404,6 @@ generate/scan against Joshua's committed files.
 
 ## 9. Open questions
 
-- Whether the template's app shell and stylesheet should split into shared
-  structure plus per-book theme tokens (D10, the component registry D5) —
-  wait until Numbers needs its first new component.
+- ~~Whether the stylesheet splits into shared structure plus theme tokens
+  (D10, D5).~~ Done in 0.4.0: `web/core.css` + per-book `theme.css` + the
+  registry.

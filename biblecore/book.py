@@ -33,7 +33,8 @@ SYNC_KEYS = {"files", "globs"}
 PATH_DEFAULTS = {
     "data": "data",
     "units": "units",
-    "css": "css/styles.css",
+    # a folder (theme.css + generated core.css/components.css), or one file
+    "css": "css",
     "source": "source-artifacts",
     "out": "out",
     "retrofit": "retrofit/retrofit-tags.json",
@@ -53,6 +54,7 @@ PATH_DEFAULTS = {
     "boundaries": "candidate-boundaries.md",
     "style_reference": None,
     "verse_map": None,
+    "components_ref": "components-reference.md",
 }
 
 

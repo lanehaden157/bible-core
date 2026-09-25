@@ -357,16 +357,25 @@ ID_ATTR_RE = re.compile(r'id="([\w-]*n\d+[a-z]?)"')
 HREF_ATTR_RE = re.compile(r'href="#([\w-]*n\d+[a-z]?)"')
 
 def _css_classes(css_path=None):
+    """Every class selector in the book's stylesheet(s): one file, or every
+    *.css in a folder (theme.css + the generated core.css/components.css)."""
     css_path = css_path or book().path("css")
-    if not os.path.exists(css_path):
+    if os.path.isdir(css_path):
+        files = sorted(os.path.join(css_path, f) for f in os.listdir(css_path)
+                       if f.endswith(".css"))
+    elif os.path.exists(css_path):
+        files = [css_path]
+    else:
+        files = []
+    if not files:
         return None  # caller turns this into a hard failure, not a silent pass
-    css = open(css_path, encoding="utf-8").read()
+    css = "".join(open(f, encoding="utf-8").read() for f in files)
     return set(CSS_CLASS_RE.findall(css))
 
 
 def check_component_whitelist(html, css_path=None):
     """1) every class used in the fragment must be defined in
-    css/styles.css (grep-diff, not a CSS parser -- see CSS_CLASS_RE).
+    the book's stylesheet(s) (grep-diff, not a CSS parser -- see CSS_CLASS_RE).
     2) every class in REQUIRED_COMPONENT_CLASSES must actually appear."""
     errs = []
     css_classes = _css_classes(css_path)
@@ -382,14 +391,26 @@ def check_component_whitelist(html, css_path=None):
 
     unstyled = sorted(fragment_classes - css_classes)
     for cls in unstyled:
-        errs.append(f"fragment uses class '{cls}' which css/styles.css does "
-                    f"not define -- typo, or a class that needs adding there")
+        owner = next((c.name for c in _components_registry().values()
+                      if cls in c.spec["classes"]), None)
+        if owner:
+            errs.append(f"fragment uses class '{cls}' from the '{owner}' component, "
+                        f"which book.json doesn't enable -- add it to "
+                        f"\"components\" and rebuild")
+        else:
+            errs.append(f"fragment uses class '{cls}' which no stylesheet in "
+                        f"css/ defines -- typo, or a class that needs a component")
 
     missing_required = sorted(REQUIRED_COMPONENT_CLASSES - fragment_classes)
     for cls in missing_required:
         errs.append(f"required component missing: no element with class "
                     f"'{cls}' in this fragment")
     return errs
+
+
+def _components_registry():
+    from biblecore import components
+    return components.registry()
 
 
 def check_endnote_integrity(html):
@@ -537,8 +558,12 @@ def _verse_at(html, pos, default_ch):
 
 
 def check_echo(html, meta=None):
-    """`aside.echo` — style reference §4: optional, a verse sibling like
-    `.gloss`, "ship it only with its nesting-depth check."
+    return check_anchored_aside(html, meta, "echo") + check_asides_balanced(html)
+
+
+def check_anchored_aside(html, meta, cls):
+    """`aside.<cls>` (echo, textform) — a verse sibling like `.gloss`,
+    "ship it only with its nesting-depth check."
 
     Three things, all part of that check:
     1. `data-anchor="C:V"` is present and well-formed.
@@ -554,6 +579,8 @@ def check_echo(html, meta=None):
        not it was meant to -- because that mismatch is the failure mode,
        not a hypothetical one.
     """
+    label = f"aside.{cls}"
+    open_re = re.compile(r'<aside\s+class="' + re.escape(cls) + r'"([^>]*)>')
     errs = []
     default_ch = None
     if meta and meta.get("passage"):
@@ -567,36 +594,44 @@ def check_echo(html, meta=None):
         end = next((p for p in span_closes if p >= m.end()), len(html))
         gloss_ranges.append((m.start(), end))
 
-    for m in ECHO_OPEN_RE.finditer(html):
+    for m in open_re.finditer(html):
         attrs = m.group(1)
         am = ECHO_ANCHOR_RE.search(attrs)
         if not am:
-            errs.append("aside.echo has no data-anchor=\"C:V\" attribute")
+            errs.append(f"{label} has no data-anchor=\"C:V\" attribute")
             continue
         anchor = am.group(1)
         if not _REF_RE.match(anchor):
-            errs.append(f"aside.echo data-anchor={anchor!r} is not 'C:V' "
+            errs.append(f"{label} data-anchor={anchor!r} is not 'C:V' "
                         f"(e.g. '3:2')")
             continue
 
         if default_ch is not None:
             ch, v = _verse_at(html, m.start(), default_ch)
             if v is not None and anchor != f"{ch}:{v}":
-                errs.append(f"aside.echo data-anchor={anchor!r} doesn't match "
-                            f"the verse it follows ({ch}:{v}) -- an echo "
+                errs.append(f"{label} data-anchor={anchor!r} doesn't match "
+                            f"the verse it follows ({ch}:{v}) -- an aside "
                             f"anchors the verse it's a sibling of")
 
         if any(gs < m.start() < ge for gs, ge in gloss_ranges):
-            errs.append(f"aside.echo at data-anchor={anchor!r} starts inside "
+            errs.append(f"{label} at data-anchor={anchor!r} starts inside "
                         f"an unclosed .gloss span -- the exact 67b2712 "
                         f"failure mode (style reference §4): close the "
                         f".gloss's </span> before the aside, don't nest it")
 
-    if len(ECHO_CLOSE_RE.findall(html)) != len(ECHO_OPEN_RE.findall(html)):
-        errs.append("aside.echo open/close count mismatch -- an unclosed "
-                    "or stray </aside>")
-
     return errs
+
+
+ASIDE_TAG_RE = re.compile(r"<aside\b")
+
+
+def check_asides_balanced(html):
+    """Every <aside ...> has its </aside> -- an unclosed aside swallows the
+    verses after it."""
+    if len(ECHO_CLOSE_RE.findall(html)) != len(ASIDE_TAG_RE.findall(html)):
+        return ["<aside> open/close count mismatch -- an unclosed "
+                "or stray </aside>"]
+    return []
 
 
 DECLARED_RE = re.compile(r'\bdata-verses="([^"]*)"')
@@ -746,10 +781,12 @@ FRAGMENT_CHECKS = [
     ("0.1.0", "data-root", lambda h, m, t, c: check_data_root_resolves(h, m, t)),
     ("0.1.0", "data-w", lambda h, m, t, c: check_tracked_spans_have_data_w(h, t)),
     ("0.1.0", "pericope", lambda h, m, t, c: check_pericope_headings(h)),
-    ("0.1.0", "echo", lambda h, m, t, c: check_echo(h, m)),
     ("0.2.0", "data-verses", lambda h, m, t, c: check_declared_verses(h, m)),
-    ("0.2.0", "table.list", lambda h, m, t, c: check_table_list(h)),
     ("0.1.0", "inline-style", lambda h, m, t, c: check_no_inline_style(h)),
+    ("0.1.0", "asides", lambda h, m, t, c: check_asides_balanced(h)),
+    # each enabled component's own check, gated by its `since`
+    # (biblecore/components; echo arrived in 0.1.0, list in 0.2.0)
+    ("0.1.0", "components", None),
 ]
 
 
@@ -765,8 +802,13 @@ def validate_fragment(html, css_path=None, meta=None, threads_json=None):
     from biblecore import contract
     unit_contract = contract.of(meta if meta is not None else parse(html))
     errs = []
-    for since, _name, fn in FRAGMENT_CHECKS:
-        if contract.at_least(unit_contract, since):
+    for since, name, fn in FRAGMENT_CHECKS:
+        if not contract.at_least(unit_contract, since):
+            continue
+        if name == "components":
+            from biblecore import components
+            errs += components.check(html, meta, unit_contract)
+        else:
             errs += fn(html, meta, threads_json, css_path)
     return errs
 

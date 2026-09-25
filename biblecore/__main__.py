@@ -2,6 +2,7 @@
 
 Commands:
   build                 re-derive everything downstream of the fragments
+  assets                css + component list for the enabled components
   port N [--dry|--src X|--force]   port a research artifact
   audit [...]           tracked-thread coverage (--ids ROOT, --unit unit-06, --stub)
   data-w N [--dry]      fill data-w on a built unit by alignment
@@ -32,6 +33,7 @@ import sys
 
 COMMANDS = {
     "build": ("biblecore.build", "main"),
+    "assets": ("biblecore.assets", "main"),
     "port": ("biblecore.port", "main"),
     "audit": ("biblecore.audit", "main"),
     "data-w": ("biblecore.data_w", "main"),

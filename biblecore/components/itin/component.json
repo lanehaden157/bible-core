@@ -1,0 +1,8 @@
+{
+  "name": "itin",
+  "summary": "an itinerary as a row of stops (journeys, stations, campaigns)",
+  "classes": ["itin", "stop", "arr"],
+  "role": "inline-block",
+  "selector": "div.itin",
+  "since": "0.3.0"
+}

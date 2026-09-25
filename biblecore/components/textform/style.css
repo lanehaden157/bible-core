@@ -1,0 +1,16 @@
+/* aside.textform -- another witness reads differently. A verse sibling,
+   collapsed into the verse note with the glosses; the site prints the
+   witness from data-src. */
+.unit aside.textform { display: block; text-indent: 0; margin: 3px 0 14px 0; padding: 6px 14px; border-left: 2px dashed var(--accent-bronze); color: var(--ink-soft); font-size: 15px; line-height: 1.5; }
+.unit aside.textform::before { font-family: var(--display); font-weight: 600; font-style: normal; font-size: 12.5px; letter-spacing: .06em; color: var(--accent-bronze); margin-right: 6px; }
+.unit aside.textform[data-src="mt"]::before { content: "MT"; }
+.unit aside.textform[data-src="lxx"]::before { content: "LXX"; }
+.unit aside.textform[data-src="sp"]::before { content: "Samaritan"; }
+.unit aside.textform[data-src="dss"]::before { content: "Qumran"; }
+.unit aside.textform[data-src="qere"]::before { content: "Qere"; }
+.unit aside.textform[data-src="ketiv"]::before { content: "Ketiv"; }
+.unit aside.textform[data-src="targum"]::before { content: "Targum"; }
+.unit aside.textform[data-src="peshitta"]::before { content: "Peshitta"; }
+.unit aside.textform[data-src="vulgate"]::before { content: "Vulgate"; }
+.unit .verse-note aside.textform { display: block; margin: 0; padding-left: 14px; border: none; border-left: 2px dashed var(--accent-bronze); }
+.unit .verse-note > * + aside.textform, .unit .verse-note aside.textform + * { margin-top: 8px; }

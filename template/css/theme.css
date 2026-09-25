@@ -1,0 +1,43 @@
+/* ============================================================================
+   theme.css -- this book's look. Book-owned: edit freely.
+
+   STARTS AS JOSHUA'S THEME. Give the book its own look: replace the tokens
+   below and the two font families (here and in index.html's Google Fonts
+   link). Loaded after css/core.css and css/components.css (both generated
+   by the build), so a book-only rule or override can go at the bottom.
+
+   The whitelist check reads every css/*.css: a class a fragment uses must be
+   defined in one of them. A new component belongs in bible-core's component
+   registry (biblecore/components/), enabled in book.json.
+   ========================================================================== */
+
+:root {
+  --bg: #e9dfc3;
+  --panel: #f4eed9;
+  --panel-2: #e3d5ab;
+  --ink: #2e2717;
+  --ink-soft: #6b5d40;
+  --rule: #cab883;
+  --rule-soft: #ddcda0;
+
+  /* stable chrome accents — independent of any unit's root palette */
+  --accent-clay: #b1481f;     /* verse numbers, endnote markers */
+  --accent-bronze: #8c6d1f;   /* pericope headings, spotlight-adjacent accents */
+  --accent-jordan: #2f5f6b;   /* movement labels, structural chrome */
+  --accent-olive: #55642f;
+  --accent-wine: #7a3f5c;
+
+  --display: "Cinzel", Georgia, serif;
+  --serif: "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+
+  --maxw: 100%;
+  --flash: #f0c877;
+
+  /* surfaces that used to be hard-coded */
+  --glow-1: #f7f0da;                        /* body background, top-left glow */
+  --glow-2: #ddc98f;                        /* body background, bottom-right glow */
+  --topbar-bg: rgba(233, 223, 195, 0.94);   /* sticky bar, over the text */
+  --root-active-bg: rgba(139, 109, 31, .12);/* clicked root, where color-mix is missing */
+}
+
+/* ---- book-only rules and overrides below ---- */

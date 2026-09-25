@@ -1,0 +1,8 @@
+/* aside.echo -- a cross-book echo, a verse sibling like .gloss; collapsed
+   into the verse note by app/spotlight.js. The site prepends "cf.". */
+.unit aside.echo { display: block; text-indent: 0; margin: 3px 0 14px 0; padding: 6px 14px; border-left: 2px solid var(--accent-jordan); color: var(--ink-soft); font-size: 15px; line-height: 1.5; }
+.unit aside.echo::before { content: "cf. "; font-family: var(--display); font-weight: 600; font-style: normal; color: var(--accent-jordan); }
+.unit .verse-note aside.echo { display: block; margin: 0; padding-left: 14px; border: none; border-left: 2px solid var(--accent-jordan); }
+.unit .verse-note .gloss + aside.echo,
+.unit .verse-note aside.echo + .gloss,
+.unit .verse-note aside.echo + aside.echo { margin-top: 8px; }

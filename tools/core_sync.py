@@ -56,7 +56,7 @@ def package_files(root):
     for d, dirs, files in os.walk(root):
         dirs[:] = [x for x in dirs if x != "__pycache__"]
         for f in files:
-            if f.endswith(".py"):
+            if f.endswith((".py", ".css", ".json", ".md", ".js")):
                 out.append(os.path.relpath(os.path.join(d, f), root).replace(os.sep, "/"))
     return sorted(out)
 
