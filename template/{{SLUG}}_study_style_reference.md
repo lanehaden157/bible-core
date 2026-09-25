@@ -1,9 +1,9 @@
 # {{BOOK}} Study — Style Reference
 
 > **The artifact contract.** What a unit artifact must contain and must not.
-> `CHAT_SIDE_INSTRUCTIONS.md` says how to work; `resources.md` (project side
-> only) says what's on hand; `CLAUDE.md` says how the repo behaves. Each rule
-> lives in one of them.
+> `CHAT_SIDE_INSTRUCTIONS.md` and `core-workflow.md` say how to work;
+> `resources.md` says what's on hand; `CLAUDE.md` says how the repo behaves.
+> Each rule lives in one of them. `synced-index.md` lists every synced file.
 
 A guide, not a spec: where a rule gives a reason, the reason outranks the rule.
 Rules marked **(learned)** cost something to find in an earlier book — read

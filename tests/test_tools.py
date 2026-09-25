@@ -59,3 +59,37 @@ def test_vendor_diff_and_refusal_round_trip():
         return fails
     finally:
         shutil.rmtree(d)
+
+
+def test_every_template_sync_file_has_a_role():
+    """synced-index.md is the one list of synced files; each file the template
+    syncs needs a role there (biblecore/sync.py ROLES), or the index says
+    'book file' and the chat side learns nothing. Also: every template sync
+    file exists in a fresh book, apart from those the build generates."""
+    import json
+    import tempfile
+    from template_book import make_book
+    from biblecore import book as bookmod
+    from biblecore import sync
+    d = tempfile.mkdtemp(prefix="bc-roles-")
+    try:
+        make_book(d, "Leviticus", "Lev", "leviticus")
+        b = bookmod.Book.from_file(os.path.join(d, "book.json"))
+        cfg = json.load(open(os.path.join(d, "book.json"), encoding="utf-8"))
+        fails = []
+        names = list(cfg["sync"]["files"]) + [
+            "canon-leads/canon-leads-unit-01.md", "leviticus-versification.md"]
+        for rel in names:
+            if not sync.role_for(os.path.basename(rel), b):
+                fails.append(f"{rel}: no role in sync.ROLES")
+        generated = {"threads-digest.md", "Leviticus-words.tsv", "components-reference.md"}
+        for rel in cfg["sync"]["files"]:
+            if rel not in generated and not os.path.exists(os.path.join(d, rel)):
+                fails.append(f"{rel}: missing from a fresh book")
+        text = sync.index_text(b)
+        if "resources.md" not in text or "core-workflow.md" not in text:
+            fails.append("index misses resources.md or core-workflow.md")
+        return fails
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+        support.joshua_book()

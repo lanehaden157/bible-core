@@ -20,6 +20,7 @@
   "sync": {
     "files": [
       "{{SLUG}}_study_style_reference.md",
+      "resources.md",
       "translation-choices.md",
       "canon-conventions.md",
       "canon-decisions.md",
@@ -35,5 +36,5 @@
     ]
   },
   "hub": "https://lanehaden157.github.io/bible/",
-  "core": "0.7.0"
+  "core": "0.7.1"
 }

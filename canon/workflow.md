@@ -13,11 +13,10 @@ good for. Read it before pass 1. Cite only commentaries listed there. Say where
 readings diverge and why. Where the set can't reach something, say so and search
 the web in pass 2.
 
-The synced folder also carries the book's style reference (every artifact
-rule), `translation-choices.md` (wording, starting from
-`canon-conventions.md`), `canon-decisions.md` (calls already settled across
-books), `threads-digest.md` (tracked threads so far), the word table, and the
-canon-leads sheets.
+`synced-index.md` in the synced folder lists every synced file and what it's
+for. It's generated on every sync, so it's always complete. Everything in that
+folder round-trips from the repo automatically; nothing there is uploaded by
+hand. The style reference holds every artifact rule.
 
 ## Per unit: four passes, pause and present after each
 
