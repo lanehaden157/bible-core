@@ -25,6 +25,37 @@ _SLUG_RE = re.compile(r"^[a-z0-9-]+$")
 _ID_RE = re.compile(r"^(\d+)\s?([a-z]|\+)?$")
 
 
+# ---- the id scheme belongs to the language (review G7) --------------------
+# Hebrew ids are Strong's numbers with OSHB's letter (the functions below).
+# Another language's adapter may define bare_id / lemma_key /
+# is_id_segment / is_precise to use its own scheme (Greek: transliterated
+# lemmas, lang/greek.py); anything it leaves out falls back to these.
+
+def _override(name):
+    try:
+        lang = book().language
+    except Exception:
+        return None
+    if lang == "hebrew":
+        return None
+    from biblecore.lang import adapter
+    return getattr(adapter(lang), name, None)
+
+
+def is_id_segment(seg: str) -> bool:
+    """Is this '/'-separated lemma segment an id (not a bound prefix like
+    'c', 'b', 'l')?"""
+    f = _override("is_id_segment")
+    return f(seg) if f else bool(seg) and seg[0].isdigit()
+
+
+def is_precise(key: str) -> bool:
+    """Does this lemma key name exactly one lexeme (Hebrew: a trailing
+    letter, '2416e'), rather than every variant under a bare id?"""
+    f = _override("is_precise")
+    return f(key) if f else key[-1:].isalpha()
+
+
 def bare_id(id_str: str) -> str:
     """'2763a' -> '2763'; '310 a' -> '310'; '2764' -> '2764'; '1007+' ->
     '1007'. The trailing letter is an opaque OSHB disambiguator
@@ -36,6 +67,9 @@ def bare_id(id_str: str) -> str:
     (e.g. "בֵּית" "1007+" + the next word, together "Bethel") -- also just
     stripped, same as the letter. Raises ValueError if id_str doesn't
     match digits plus one of these optional trailing markers."""
+    f = _override("bare_id")
+    if f:
+        return f(id_str)
     m = _ID_RE.match(id_str)
     if not m:
         raise ValueError(
@@ -66,6 +100,9 @@ def lemma_key(id_str: str) -> str:
     and number. Writing the bare id still covers those, because a bare id
     in a root's id set matches every letter variant. Precision is opt-in.
     """
+    f = _override("lemma_key_of_id")
+    if f:
+        return f(id_str)
     m = _ID_RE.match(id_str)
     if not m:
         raise ValueError(
@@ -86,7 +123,7 @@ def split_ids(ids):
     bare, exact = set(), set()
     for i in ids:
         key = lemma_key(i)
-        if key[-1:].isalpha():
+        if is_precise(key):
             exact.add(key)
         else:
             bare.add(key)
@@ -116,7 +153,7 @@ def known_lemma_ids(words_tsv: str = None) -> set:
         for row in reader:
             for seg in row["lemma"].split("/"):
                 seg = seg.strip()
-                if not seg or not seg[0].isdigit():
+                if not is_id_segment(seg):
                     continue
                 known.add(bare_id(seg))
                 known.add(lemma_key(seg))
@@ -165,7 +202,7 @@ def validate(data: dict, words_tsv: str = None, threads_data: dict = None) -> li
                     f"{slug}: id {id_str!r} (bare {bare}) is not a lemma in "
                     f"{os.path.basename(words_tsv)}"
                 )
-            elif lemma_key(id_str)[-1:].isalpha() and                     lemma_key(id_str) not in known_ids:
+            elif is_precise(lemma_key(id_str)) and lemma_key(id_str) not in known_ids:
                 # The number exists but not this lexeme. Under A7 a
                 # suffixed id matches only its own lexeme, so this would
                 # match nothing at all -- a silent zero, which is worse
@@ -177,7 +214,7 @@ def validate(data: dict, words_tsv: str = None, threads_data: dict = None) -> li
                     f"id {bare!r} to match every variant."
                 )
             key = lemma_key(id_str)
-            precise = key[-1:].isalpha()
+            precise = is_precise(key)
 
             # A bare id claims every lexeme under that number; a suffixed
             # id claims exactly one. So 3885a and 3885b may sit in

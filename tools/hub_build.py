@@ -148,6 +148,7 @@ def build():
         typescenes=canon_file("typescenes").get("typescenes", []),
         intertext=canon_file("intertext").get("edges", []),
         paths=canon_file("paths").get("paths", []),
+        bridge=canon_file("bridge").get("rows", []),
     )
     conc = OrderedDict(
         _note="Hebrew lemmas across the books with word tables, keyed heb:<Strong's+letter>; "

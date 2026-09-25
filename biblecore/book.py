@@ -44,6 +44,7 @@ PATH_DEFAULTS = {
     "digest": "threads-digest.md",
     "canon_leads": "canon-leads",
     "wlc": "node_modules/morphhb/wlc",
+    "morphgnt": "corpus/morphgnt",
     "lexicon": "corpus/lexicon/HebrewStrong.xml",
     "synced": "project-side/synced",
     "sync_state": "project-side/sync-state.json",

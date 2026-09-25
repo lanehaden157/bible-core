@@ -38,7 +38,7 @@ import sys
 from biblecore import corpus, lang
 from biblecore.book import book
 from biblecore.meta import declared_ranges
-from biblecore.roots import bare_id, lemma_key, load_roots, split_ids
+from biblecore.roots import bare_id, is_id_segment, lemma_key, load_roots, split_ids
 
 
 def _translit_row(row):
@@ -91,7 +91,7 @@ def _lemma_bare_ids(lemma_field):
     ids = set()
     for seg in lemma_field.split("/"):
         seg = seg.strip()
-        if not seg or not seg[0].isdigit():
+        if not is_id_segment(seg):
             continue
         try:
             ids.add(bare_id(seg))
@@ -112,7 +112,7 @@ def _lemma_id_forms(lemma_field):
     bares, keys = set(), set()
     for seg in lemma_field.split("/"):
         seg = seg.strip()
-        if not seg or not seg[0].isdigit():
+        if not is_id_segment(seg):
             continue
         try:
             bares.add(bare_id(seg))

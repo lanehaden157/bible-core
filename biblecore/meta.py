@@ -142,6 +142,16 @@ _WORD_ID_RE = re.compile(r"^[0-9A-Za-z]+$")
 _SPACED_ID_RE = re.compile(r"^\s*(\d+)\s+([a-z])\s*$")
 
 
+def _lemma_id_re():
+    """The book's lemma-id shape: Strong's + letter for Hebrew, or the
+    language adapter's LEMMA_ID_RE (Greek: a transliterated lemma)."""
+    from biblecore.lang import adapter
+    try:
+        return getattr(adapter(), "LEMMA_ID_RE", _ID_RE)
+    except Exception:
+        return _ID_RE
+
+
 def normalize_candidates(meta):
     """Rewrite the word table's own id spelling ('6485 a') to the canonical
     form ('6485a') in threads.candidates[].ids, in place. The chat side
@@ -249,10 +259,12 @@ def validate(meta, threads_json=None):
                             "(id-based, style reference §2/§3), not Hebrew "
                             "consonant-skeleton stems")
         if "ids" in c:
+            id_re = _lemma_id_re()
             if not isinstance(c["ids"], list) or not all(
-                    isinstance(x, str) and _ID_RE.match(x) for x in c["ids"]):
-                errs.append(f"{where}: 'ids' must be a list of strings matching "
-                            f"^\\d+[a-z]?$ (e.g. '2763', '2763a')")
+                    isinstance(x, str) and id_re.match(x) for x in c["ids"]):
+                errs.append(f"{where}: 'ids' must be a list of lemma ids matching "
+                            f"{id_re.pattern} (Hebrew: '2763', '2763a'; "
+                            f"Greek: 'klēronomeō')")
         if "refs" in c:
             if not isinstance(c["refs"], list) or not all(
                     isinstance(x, str) and _REF_RE.match(x) for x in c["refs"]):

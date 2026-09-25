@@ -1,0 +1,26 @@
+{
+  "_note": "Hebrew -> LXX -> NT lexical bridge (review F2): one row per canon thread's key word, hand-seeded. `heb` are Strong's ids (the Hebrew books' lemma ids); `lxx` are lemma keys in the CenterBLC Rahlfs LXX, transliterated by the Greek scheme; `nt` are MorphGNT lemma keys (lang/greek.lemma_key). Each row cites one verse per corpus where the pairing can be seen; tests/test_bridge.py checks every cited word is really in that verse, when the corpora are on disk. A fuller table needs a licensed Hatch-Redpath-style dataset and is a later question.",
+  "rows": [
+    {"thread": "inheritance", "heb": ["5159", "5157"], "heb_gloss": "naḥalah, naḥal: inheritance, to inherit",
+     "lxx": ["klēronomeō"], "lxx_ref": "Num 26:53", "nt": ["klēronomeō"], "nt_ref": "Matt 5:5",
+     "note": "the land as inheritance becomes the gentle inheriting the earth"},
+    {"thread": null, "heb": ["2617"], "heb_gloss": "ḥesed: loyal love",
+     "lxx": ["eleos"], "lxx_ref": "Hos 6:6", "nt": ["eleos"], "nt_ref": "Matt 9:13",
+     "note": "Hos 6:6 is the verse Matthew quotes twice (9:13, 12:7)"},
+    {"thread": "tassels", "heb": ["6734"], "heb_gloss": "tsitsit: tassel",
+     "lxx": ["kraspedon"], "lxx_ref": "Num 15:38", "nt": ["kraspedon"], "nt_ref": "Matt 9:20",
+     "note": "the woman touches the tassel of his garment"},
+    {"thread": "charge", "heb": ["2388", "553"], "heb_gloss": "ḥazaq, ʾamats: be strong, be firm",
+     "lxx": ["ischyō", "andrizomai"], "lxx_ref": "Josh 1:6", "nt": ["andrizomai"], "nt_ref": "1 Cor 16:13",
+     "note": "the commissioning charge, carried into Paul's closing exhortation"},
+    {"thread": "torah", "heb": ["8451"], "heb_gloss": "torah: instruction",
+     "lxx": ["nomos"], "lxx_ref": "Josh 1:8", "nt": ["nomos"], "nt_ref": "Matt 5:17",
+     "note": "the book of the torah; not come to abolish the law"},
+    {"thread": "rest", "heb": ["4496", "5117"], "heb_gloss": "menuḥah, nuaḥ: rest, to give rest",
+     "lxx": ["katapausis"], "lxx_ref": "Deut 12:9", "nt": ["anapausis"], "nt_ref": "Matt 11:29",
+     "note": "the LXX's katapausis (Hebrews' word) against Matthew's anapausis: same promise, different Greek"},
+    {"thread": "fear", "heb": ["3372"], "heb_gloss": "yareʾ: fear",
+     "lxx": ["phobeō"], "lxx_ref": "Deut 31:6", "nt": ["phobeomai"], "nt_ref": "Matt 10:28",
+     "note": "the LXX build's lemma is the active phobeō, MorphGNT's the deponent phobeomai: one verb"}
+  ]
+}

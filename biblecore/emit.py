@@ -38,9 +38,23 @@ FORM_RE = re.compile(r'<entry id="H(\d+)">.*?<w[^>]*>(.*?)</w>', re.S)
 
 
 def main_lemma(lemma):
-    """'c/1696' -> '1696'; 'l/6485 a' -> '6485a'; '' if none."""
-    segs = [s for s in (lemma or "").split("/") if re.search(r"\d", s)]
-    return roots.lemma_key(segs[-1].strip()) if segs else ""
+    """'c/1696' -> '1696'; 'l/6485 a' -> '6485a'; a Greek key as is; '' if none."""
+    segs = [s.strip() for s in (lemma or "").split("/") if roots.is_id_segment(s.strip())]
+    return roots.lemma_key(segs[-1]) if segs else ""
+
+
+def _describe():
+    """The book language's morphology-in-words function."""
+    if book().language == "greek":
+        from biblecore.lang.greek_morph import describe
+    else:
+        from biblecore.lang.hebrew_morph import describe
+    return describe
+
+
+def _sort_key(k):
+    m = re.match(r"\d+", k)
+    return (0, int(m.group()), k) if m else (1, 0, k)
 
 
 def _lexicon_forms(path):
@@ -51,14 +65,15 @@ def _lexicon_forms(path):
 
 
 def words_by_chapter(b):
-    from biblecore.lang import hebrew
-    from biblecore.lang.hebrew_morph import describe
+    from biblecore.lang import adapter
+    lang = adapter(b.language)
+    describe = _describe()
     by_ch = defaultdict(lambda: defaultdict(list))
     lemma_refs = defaultdict(list)
     for w in corpus.adapter().load_words(b):
         key = main_lemma(w["lemma"])
         row = OrderedDict(w=w["word_id"],
-                          t=hebrew.transliterate_word(w["surface"], w["lemma"], w["morph"]),
+                          t=lang.transliterate_word(w["surface"], w["lemma"], w["morph"]),
                           l=key, m=describe(w["morph"]))
         if w.get("lang") == "aramaic":
             row["a"] = 1
@@ -71,12 +86,20 @@ def words_by_chapter(b):
 
 
 def lemmas(b, lemma_refs, counts):
+    """Hebrew: lexical form and Strong's senses from the lexicon. Greek: the
+    lemma key is already the transliterated lexical form, and there's no
+    lexicon on hand yet, so no gloss."""
+    out = OrderedDict()
+    if b.language != "hebrew":
+        for key in sorted(lemma_refs, key=_sort_key):
+            out[key] = OrderedDict(t=key.rstrip("0123456789"), g="", n=counts[key],
+                                   refs=lemma_refs[key])
+        return out
     from biblecore import leads
     from biblecore.lang import hebrew
     glosses = leads.load_glosses(b.path("lexicon"))
     forms = _lexicon_forms(b.path("lexicon"))
-    out = OrderedDict()
-    for key in sorted(lemma_refs, key=lambda k: (int(re.match(r"\d+", k).group()), k)):
+    for key in sorted(lemma_refs, key=_sort_key):
         bare = re.match(r"\d+", key).group()
         form = forms.get(bare)
         out[key] = OrderedDict(

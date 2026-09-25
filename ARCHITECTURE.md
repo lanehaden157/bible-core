@@ -3,7 +3,9 @@
 **Status:** core 0.5.0, 2026-09-24. 0.4.0 added the component registry and the
 core.css/theme.css split, with poem, itin and textform alongside echo and list.
 0.5.0 added the reading data layer (`emit`) and the reader features (§8).
-0.6.0 adds the canon hub (§8) and links each book site back to it. Numbers unit 1 shaped 0.2.0 (`data-verses`,
+0.6.0 added the canon hub (§8) and linked each book site back to it.
+0.7.0 adds Greek: a second language adapter and corpus adapter, proven on
+Matthew's data read-only, and the Hebrew -> LXX -> NT bridge (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
 manifest, the book-side `test`, the synced core workflow and canon
@@ -417,6 +419,36 @@ Book sites whose `book.json` has `"hub"` get an "All books" link (F13), and a
 thread popover row, "In the canon: …" (F15), read from the hub's
 `data/canon.json`. Starting a new book: add its site/repo/kind to
 `canon/books.json`, then rebuild the hub.
+
+**Greek (0.7.0, G7/E12).** `lang/greek.py` is Matthew's transliteration
+scheme, frozen (H10). `tests/test_greek.py` defines it: 25 hand-worked
+cases, plus parity with Matthew's own `pipeline/greek.py` over every word of
+Matthew. `corpus/morphgnt.py` reads MorphGNT (SBLGNT) with the same
+interface as `corpus/oshb.py`:
+- word ids are `bbccvv` plus position;
+- lemma ids are transliterated lemmas (`klēronomeō`), with a digit only when
+  two NT lemmas share a transliteration;
+- morphology is `<pos>:<parse>`, spelled out by `lang/greek_morph.py`.
+
+A language adapter can now define its own id scheme (`is_id_segment`,
+`is_precise`, `bare_id`, `lemma_key_of_id`, `LEMMA_ID_RE`), so roots, the
+audit and candidate validation work on Greek ids unchanged. Proof, on
+Matthew's MorphGNT and SBLGNT files read-only (`tests/test_corpus_morphgnt.py`):
+- the reading text matches Matthew's SBLGNT text word for word, differing only
+  in a few punctuation marks;
+- `roots.validate` and the audit find *klēronomeō* at 5:5 and *eleos* at 9:13;
+- `emit` writes a Greek interlinear with no native script.
+
+A Greek book sets `"language": "greek"`, `"corpus": {"kind": "morphgnt", …}`,
+`"versification": "source"` and `paths.morphgnt`. The template's chat-side
+text and style reference are still Hebrew-shaped, so adapt them when the
+first NT book starts (G12).
+
+**Lexical bridge (F2).** `canon/bridge.json` holds one row per canon thread's
+key word: the Hebrew ids, the LXX lemma(s) with a verse, and the NT lemma(s)
+with a verse. `tests/test_bridge.py` checks every cited word against Numbers'
+and Joshua's word tables, Matthew's LXX build and MorphGNT, all read-only. The
+hub shows the bridge on each canon-thread page and at `#/bridge`.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
 the build rerun). It checks that the core pin agrees, the corpus loads, the

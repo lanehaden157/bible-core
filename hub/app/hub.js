@@ -8,6 +8,7 @@
      #/scene/<id>       a type-scene's instances
      #/intertext        the quotation/allusion/echo graph as a matrix + list
      #/paths, #/path/<id>  curated reading paths
+     #/bridge           the Hebrew -> LXX -> NT lexical bridge
      #/search           references, lemmas across books, tracked threads
    No native script anywhere; lexicon glosses are identifiers. */
 
@@ -47,11 +48,12 @@ function route() {
     const target = a.getAttribute("href").replace(/^#\/?/, "");
     a.toggleAttribute("aria-current", target === (page || "") ||
       (target === "arcs" && ["thread", "scene"].includes(page)) ||
-      (target === "paths" && page === "path"));
+      (target === "paths" && page === "path") ||
+      (target === "arcs" && page === "bridge"));
   }
   const views = {
     "": home, book: bookView, arcs, thread: threadView, scene: sceneView,
-    intertext, paths, path: pathView, search,
+    intertext, paths, path: pathView, search, bridge,
   };
   window.scrollTo(0, 0);
   (views[page || ""] || notFound)(arg);
@@ -163,7 +165,8 @@ function arcs(id) {
     : `<p class="muted">None yet.</p>`;
   content.innerHTML = `<h1 class="page-h">Arcs</h1>
     <p class="lede">Creation, covenant, exile, presence: the one story the studies read every book inside.
-      Each canon thread, type-scene and reading path belongs to an arc.</p>
+      Each canon thread, type-scene and reading path belongs to an arc. The
+      <a href="#/bridge">lexical bridge</a> follows the key words from Hebrew through the Greek Old Testament into the New.</p>
     ${(canon.arcs || []).map((a) => `
       <section class="arc" id="${a.id}"><h2>${esc(a.label)}</h2><p class="muted">${esc(a.note || "")}</p>
         <h3>Canon threads</h3>${list((canon.threads || []).filter((t) => t.arc === a.id), "thread")}
@@ -187,7 +190,34 @@ function threadView(id) {
         ${bt ? `<span class="swatch" style="background:${bt.color || "transparent"}"></span><i>${esc(bt.translit)}</i> — ${esc(bt.gloss)} <span class="n">${bt.count}× tagged</span>`
              : m.thread ? `<span class="muted">thread ${esc(m.thread)}</span>` : `<span class="muted">not a tracked thread there yet</span>`}
         ${m.lemma ? `<span class="tag">${esc(m.lemma)}</span>` : ""}</li>`;
-    }).join("")}</ul>`;
+    }).join("")}</ul>
+    ${bridgeTable((canon.bridge || []).filter((r) => r.thread === t.id), "In the Greek")}`;
+}
+
+/* Hebrew -> LXX -> NT rows; each cell's reference opens the book site when
+   that verse is built */
+function bridgeTable(rows, title) {
+  if (!rows.length) return "";
+  return `<section><h2>${esc(title)}</h2><div class="matrix-wrap"><table class="bridge">
+    <thead><tr><th>Hebrew</th><th>Greek Old Testament (LXX)</th><th>New Testament</th></tr></thead>
+    <tbody>${rows.map((r) => `<tr>
+      <td><i>${esc(r.heb_gloss)}</i> <span class="n">Strong's ${r.heb.map(esc).join(", ")}</span></td>
+      <td><i>${r.lxx.map(esc).join(", ")}</i> ${refLink(r.lxx_ref)}</td>
+      <td><i>${r.nt.map(esc).join(", ")}</i> ${refLink(r.nt_ref)}</td></tr>
+      ${r.note ? `<tr class="note"><td colspan="3">${esc(r.note)}${r.thread ? ` · <a href="#/thread/${r.thread}">${esc(threadLabel(r.thread))}</a>` : ""}</td></tr>` : ""}`).join("")}
+    </tbody></table></div></section>`;
+}
+
+const threadLabel = (id) => (canon.threads || []).find((t) => t.id === id)?.label || id;
+
+function bridge() {
+  document.title = "Lexical bridge — study hub";
+  content.innerHTML = `<p class="crumb"><a href="#/arcs">Arcs</a></p>
+    <h1 class="page-h">Lexical bridge</h1>
+    <p class="lede">A key word followed from the Hebrew, through the Greek translation the New Testament
+      writers read, into the New Testament. Hand-seeded, one row per word; every cited word is checked
+      against the verse it cites.</p>
+    ${bridgeTable(canon.bridge || [], "Words")}`;
 }
 
 function sceneView(id) {
