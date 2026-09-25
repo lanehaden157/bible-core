@@ -2,7 +2,8 @@
 
 **Status:** core 0.5.0, 2026-09-24. 0.4.0 added the component registry and the
 core.css/theme.css split, with poem, itin and textform alongside echo and list.
-0.5.0 adds the reading data layer (`emit`) and the reader features (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
+0.5.0 added the reading data layer (`emit`) and the reader features (§8).
+0.6.0 adds the canon hub (§8) and links each book site back to it. Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
 manifest, the book-side `test`, the synced core workflow and canon
@@ -398,6 +399,24 @@ data layer (`data/words/<ch>.json`, `lemmas.json`, `text.json`;
 - `#/ref/<C:V>` and `#/lemma/<key>` routes;
 - "continue where you left off";
 - `#/print`, the whole study on one page with every note open.
+
+**The canon hub (0.6.0).** `python tools/hub_build.py ../hub` builds
+<https://lanehaden157.github.io/bible/>, its own repo (`lanehaden157/bible`)
+federating the book sites (H8). The page, app and CSS live in this repo's
+`hub/`. Data comes from each started book's `data/*.json` (read-only; Joshua's
+lemma concordance is computed from its word table), plus `canon/books.json`
+(the canon in order, which names each started book's site, repo and kind) and
+the canon registries, including `canon/paths.json` (reading paths, F21). Pages:
+- canon map with progress (F6), and a page per book;
+- arcs, canon threads, type-scenes;
+- intertext, as a book-by-book matrix plus a filtered list (F3);
+- reading paths;
+- cross-book search: references, Hebrew lemmas across books, tracked threads (F7).
+
+Book sites whose `book.json` has `"hub"` get an "All books" link (F13), and a
+thread popover row, "In the canon: …" (F15), read from the hub's
+`data/canon.json`. Starting a new book: add its site/repo/kind to
+`canon/books.json`, then rebuild the hub.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
 the build rerun). It checks that the core pin agrees, the corpus loads, the

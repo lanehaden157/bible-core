@@ -16,6 +16,8 @@ ALLOWED_KEYS = {
     "book", "osis", "abbrev", "slug", "language", "corpus", "groupings",
     "components", "meta_keys", "checks", "palette", "sync", "storage_key",
     "paths", "core", "versification",
+    # the canon hub's URL; the site links to it and reads its canon.json
+    "hub",
 }
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
 # the corpus numbering is converted through the corpus's own map) or

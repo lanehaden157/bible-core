@@ -8,8 +8,8 @@
    any transliteration scheme. "=<lemma key>" is an exact lemma lookup (the
    interlinear links to it as #/lemma/<key>). */
 
-import { getOccurrences, getThreadFor, resolveUnit } from "./threads.js?v=5";
-import { loadLemmas, loadText, parseRef, unitForRef } from "./reader.js?v=5";
+import { getOccurrences, getThreadFor, resolveUnit } from "./threads.js?v=6";
+import { loadLemmas, loadText, parseRef, unitForRef } from "./reader.js?v=6";
 
 export function renderSearch(container, units, prefix = "study", opts = {}) {
   const KEY = `${prefix}.search.q`;

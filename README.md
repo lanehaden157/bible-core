@@ -19,6 +19,8 @@ Matthew are the reference implementations and don't use it.
   `tools/core_diff.py` — vendor the package into a book; report local edits
   to a book's copy.
 - `docs/data-shapes.md` — the published `data/*.json` shapes.
+- `hub/` + `tools/hub_build.py` — the canon hub site (ARCHITECTURE.md §8),
+  built into the sibling `../hub` repo.
 - `corpus/` — shared corpus files a new book gets a copy of (the Strong's
   lexicon).
 - `tests/` — `python tests/run.py`. Runs against the sibling `../Joshua`

@@ -15,11 +15,11 @@
    together, whenever threads.js/spotlight.js/search.js changes -- a stale
    cached module is invisible in the DOM and easy to mistake for a real bug. */
 
-import { loadThreadData, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=5";
-import { enhanceSpotlights, openAll } from "./spotlight.js?v=5";
-import { renderSearch } from "./search.js?v=5";
+import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=6";
+import { enhanceSpotlights, openAll } from "./spotlight.js?v=6";
+import { renderSearch } from "./search.js?v=6";
 import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
-         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js?v=5";
+         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js?v=6";
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
@@ -68,6 +68,10 @@ async function init() {
     ]);
     comps = c?.components || [];
     bookInfo = bm || {};
+    if (bookInfo.hub) {
+      loadCanon(bookInfo.hub, bookInfo.slug);
+      addHubLink(bookInfo.hub);
+    }
   } catch (e) {
     content.innerHTML = `<p class="missing">Could not load site data (<code>data/*.json</code>).</p>`;
     return;
@@ -408,6 +412,17 @@ function hoistStructureBlocks(root) {
     ref.after(b); // re-parents b to sit right after ref, in document order
     ref = b;
   }
+}
+
+/* the book switcher: every book site links back to the canon hub */
+function addHubLink(hub) {
+  const actions = document.querySelector(".topbar-actions");
+  if (!actions || actions.querySelector(".hub-link")) return;
+  const a = document.createElement("a");
+  a.className = "topbar-link hub-link";
+  a.href = hub;
+  a.textContent = "All books";
+  actions.prepend(a);
 }
 
 /* "aside.echo, aside.textform" for a role, or "" if the book enables none */

@@ -1,0 +1,31 @@
+{
+  "_note": "Curated reading paths across books (review F21), shown on the hub. Hand-authored seeds from the design review; Lane adjusts, adds, removes. Each step is a reference plus one line on why it's on the path. `arc` is one of arcs.json's ids.",
+  "paths": [
+    {
+      "id": "the-land",
+      "label": "The land",
+      "arc": "covenant",
+      "note": "The promise of land, from the call of Abram to the gentle who inherit the earth.",
+      "steps": [
+        {"ref": "Gen 12:1–7", "note": "the land shown to Abram, promised to his seed"},
+        {"ref": "Num 26:52–56", "note": "the land divided as an inheritance, by lot and by size"},
+        {"ref": "Deut 1:6–8", "note": "go in and take possession of what was sworn"},
+        {"ref": "Josh 1:2–6", "note": "every place the sole of your foot treads"},
+        {"ref": "Matt 5:5", "note": "the gentle will inherit the earth"}
+      ]
+    },
+    {
+      "id": "be-strong",
+      "label": "Be strong",
+      "arc": "presence",
+      "note": "The commissioning charge, and the presence that grounds it.",
+      "steps": [
+        {"ref": "Deut 31:6–8", "note": "be strong and firm; he will not leave you"},
+        {"ref": "Josh 1:6–9", "note": "the charge repeated three times, with 'I will be with you'"},
+        {"ref": "Hag 2:4", "note": "be strong, all the people of the land, for I am with you"},
+        {"ref": "Matt 28:18–20", "note": "the commission, and 'I am with you always'"},
+        {"ref": "1 Cor 16:13", "note": "stand firm in the faith, be strong"}
+      ]
+    }
+  ]
+}

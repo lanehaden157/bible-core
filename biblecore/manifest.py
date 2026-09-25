@@ -49,6 +49,7 @@ def build():
         "language": b.cfg.get("language"),
         "versification": b.cfg.get("versification", "kjv"),
         "core": __version__,
+        "hub": b.cfg.get("hub"),
         "unit_count": units.get("unit_count", len(rows)),
         "units_built": sum(1 for u in rows if u.get("built")),
         "files": files,
