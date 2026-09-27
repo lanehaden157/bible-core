@@ -25,6 +25,16 @@ def test_parse_refs_continuations_and_prose():
     assert p("verses 22-43 repeat; Rise 1:2") == []
 
 
+def test_parse_refs_comma_before_a_numbered_book():
+    # ', 2 Sam 7:12' starts a new reference, not verse 2 of the one before
+    p = canon.parse_refs
+    assert p("Gen 1:1, 2 Sam 7:12") == ["Gen 1:1", "2 Sam 7:12"], p("Gen 1:1, 2 Sam 7:12")
+    assert p("Heb 13:20, 1 Pet 2:25, Rev 7:17") == ["Heb 13:20", "1 Pet 2:25", "Rev 7:17"]
+    assert p("Isa 40:3, 1John 2:1") == ["Isa 40:3", "1John 2:1"]
+    assert p("Matt 5:17, 3 John 4") == ["Matt 5:17"]  # '3 John 4' has no C:V
+    assert p("Deut 31:6, 8, 23") == ["Deut 31:6", "Deut 31:8", "Deut 31:23"]
+
+
 def test_harvest_joshua_unit_1_echoes():
     path = os.path.join(support.JOSHUA, "units", "unit-01.html")
     html = support.read(path)

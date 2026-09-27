@@ -39,7 +39,11 @@ BOOK_NAMES = (
 _BOOK = r"(?:[1-3]\s?)?(?:" + "|".join(BOOK_NAMES) + r")\b"
 _DASH = r"[–-]"
 _START = re.compile(r"(" + _BOOK + r")\s+(\d+):(\d+)(?:" + _DASH + r"(\d+(?::\d+)?))?")
-_MORE = re.compile(r"\s*([;,])\s*(?:(\d+):)?(\d+)(?:" + _DASH + r"(\d+(?::\d+)?))?(?![\d:])")
+# a continuation ('; 22:17', ', 8') -- but never the number of a numbered
+# book ('Gen 1:1, 2 Sam 7:12' is two references, not Gen 1:2)
+_NAMES = r"(?:" + "|".join(BOOK_NAMES) + r")\b"
+_MORE = re.compile(r"\s*([;,])\s*(?:(\d+):)?(\d+)(?:" + _DASH + r"(\d+(?::\d+)?))?(?![\d:])"
+                   r"(?!\s*" + _NAMES + ")")
 
 ECHO_RE = re.compile(r'<aside\s+class="echo"\s+data-anchor="(\d+):(\d+)"[^>]*>(.*?)</aside>', re.S)
 CV_RE = re.compile(r"^\d+:\d+$")
