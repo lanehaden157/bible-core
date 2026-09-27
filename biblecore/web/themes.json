@@ -73,9 +73,10 @@
         "#2f5d7c",
         "#8a2a2a"
       ],
-      "display": "Uncial Antiqua",
+      "display": "Source Serif 4",
       "text": "Source Serif 4",
-      "motif": "papyrus, lamp light"
+      "motif": "papyrus, lamp light",
+      "title": "Uncial Antiqua"
     }
   },
   "books": {

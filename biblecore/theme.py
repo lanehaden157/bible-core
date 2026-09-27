@@ -202,7 +202,8 @@ def build_css(b):
     div, book = r
     from biblecore import __version__
     fonts = []
-    for f in dict.fromkeys([div["display"], div["text"]]):
+    title = div.get("title", div["display"])
+    for f in dict.fromkeys([title, div["display"], div["text"]]):
         axes = FONT_AXES.get(f)
         fonts.append("family=" + f.replace(" ", "+") + (f":{axes}" if axes else ""))
     light = _palette(div, book, False)
@@ -210,6 +211,8 @@ def build_css(b):
     for tok in (light, dark):
         tok["--display"] = f'"{div["display"]}", Georgia, serif'
         tok["--serif"] = f'"{div["text"]}", Georgia, "Times New Roman", serif'
+        # a decorative face (the NT's uncials) goes on the masthead title only
+        tok["--title"] = f'"{title}", Georgia, serif'
     emblem = emblem_svg(book.get("emblem"))
     orn_light = ornament_svg(div["id"], div["signature"], div["ink"])
     orn_dark = ornament_svg(div["id"], [readable(c, dark["--bg"], div["paper"]) for c in div["signature"]],
@@ -232,7 +235,7 @@ def build_css(b):
 .unit .mast .kicker, .unit .mast .unit, .unit .mast .unit-place, .unit .mast .greek-title,
 .unit .mast h1 { color: var(--mast-fg); }
 .unit .mast .kicker { opacity: .85; }
-.unit .mast h1 { margin: .12em 0 .1em; }
+.unit .mast h1 { margin: .12em 0 .1em; font-family: var(--title); }
 .unit .mast .unit-place { border-color: currentColor; }
 """,
     ]

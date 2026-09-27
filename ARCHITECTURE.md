@@ -477,7 +477,12 @@ The `assets` step turns the book's entry into `css/division.css`
 - **Dark-mode tracked words:** lifted toward white (threads.js sets `--rc`;
   the colours themselves never change).
 
-A book overrides any part in `book.json` `"theme"`. A book with no entry gets
+A division may name a `title` face, used on the masthead title only (the
+NT's uncials). `tools/legacy_theme.py ../Joshua` (or `../Matthew`) opts a
+pre-core site in (Lane, 2026-09-26). It writes its `division.css`, plus
+aliases for the site's own token names and hard-coded colours, adds the
+index.html theme script, stylesheet link and Appearance setting, and makes a
+one-line `threads.js` change. Re-run it after any theme change. A book overrides any part in `book.json` `"theme"`. A book with no entry gets
 no division.css, and its theme.css fallback tokens (`:where(:root)`) apply.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
