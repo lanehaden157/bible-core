@@ -19,6 +19,10 @@ claims (§A5's one-id-one-root rule is about ownership; a phrase's
 constituent word may also, separately, belong to an ordinary root
 elsewhere). audit.py's source_hits_for_seq() does the matching;
 source_hits_for_entry() picks it or the ordinary path by the entry's shape.
+A title that also turns up in another word order gives `alt`, a list of
+further ordered lists ("the Law and the Prophets" 5:17; "the prophets and
+the law" 11:13: {"seq": [nomos, prophētēs], "alt": [[prophētēs, nomos]]}),
+each matched like `seq` with the same `gap`.
 
 Nothing in the pipeline writes this file -- it's policy, same as
 threads.json. This module only reads and validates it.
@@ -200,29 +204,39 @@ def validate(data: dict, words_tsv: str = None, threads_data: dict = None) -> li
         # id claim, so its lemmas never enter the clash bookkeeping below
         # (the same lemma may also be, separately, an ordinary root's own id)
         seq = entry.get("seq")
+        if seq is None and "alt" in entry:
+            errors.append(f"{slug}: 'alt' only goes with 'seq'")
+            continue
         if seq is not None:
             if "ids" in entry:
                 errors.append(f"{slug}: a root has 'ids' or 'seq', never both")
                 continue
-            if not isinstance(seq, list) or len(seq) < 2:
-                errors.append(f"{slug}: 'seq' must be a list of at least two lemma ids")
+            alts = entry.get("alt", [])
+            if not isinstance(alts, list):
+                errors.append(f"{slug}: 'alt' must be a list of lemma-id lists")
+                continue
+            orders = [seq] + alts
+            if any(not isinstance(s, list) or len(s) < 2 for s in orders):
+                errors.append(f"{slug}: 'seq' (and each 'alt') must be a list of "
+                              f"at least two lemma ids")
                 continue
             if not entry.get("note"):
                 errors.append(f"{slug}: missing required 'note'")
             gap = entry.get("gap", 4)
             if not isinstance(gap, int) or gap < 1:
                 errors.append(f"{slug}: 'gap' must be a positive integer")
-            for id_str in seq:
-                try:
-                    bare = bare_id(id_str)
-                except ValueError as exc:
-                    errors.append(f"{slug}: {exc}")
-                    continue
-                if bare not in known_ids:
-                    errors.append(
-                        f"{slug}: seq id {id_str!r} (bare {bare}) is not a "
-                        f"lemma in {os.path.basename(words_tsv)}"
-                    )
+            for order in orders:
+                for id_str in order:
+                    try:
+                        bare = bare_id(id_str)
+                    except ValueError as exc:
+                        errors.append(f"{slug}: {exc}")
+                        continue
+                    if bare not in known_ids:
+                        errors.append(
+                            f"{slug}: seq id {id_str!r} (bare {bare}) is not a "
+                            f"lemma in {os.path.basename(words_tsv)}"
+                        )
             continue
 
         ids = entry.get("ids")

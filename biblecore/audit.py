@@ -193,9 +193,16 @@ def source_hits_for_seq(words, seq, max_gap=4):
 
 def source_hits_for_entry(words, entry):
     """Dispatch on a roots.json entry's shape: `seq` (a phrase, D2) or the
-    ordinary `ids`."""
+    ordinary `ids`. A phrase may also list `alt`: further ordered lemma
+    lists for the same title in another word order ("the Law and the
+    Prophets" 5:17, but "the prophets and the law" 11:13) -- each matched
+    like `seq`, with the same gap, and their hits merged."""
     if entry.get("seq"):
-        return source_hits_for_seq(words, entry["seq"], entry.get("gap", 4))
+        gap = entry.get("gap", 4)
+        hits = source_hits_for_seq(words, entry["seq"], gap)
+        for alt in entry.get("alt", []):
+            hits.update(source_hits_for_seq(words, alt, gap))
+        return hits
     return source_hits_for_root(words, entry["ids"])
 
 
@@ -349,7 +356,10 @@ def ids_report(root_slugs):
             e["n"] += 1
             e["refs"].append(f"{cv[0]}:{cv[1]}")
 
-        label = f"seq: {' -> '.join(entry['seq'])}" if entry.get("seq") else f"ids: {', '.join(entry['ids'])}"
+        if entry.get("seq"):
+            label = "seq: " + " | ".join(" -> ".join(s) for s in [entry["seq"]] + entry.get("alt", []))
+        else:
+            label = f"ids: {', '.join(entry['ids'])}"
         print(f"\n=== {slug}  {label}  "
               f"({len(hits)} word(s) total) ===")
         for surface, e in sorted(by_form.items(), key=lambda kv: -kv[1]["n"]):

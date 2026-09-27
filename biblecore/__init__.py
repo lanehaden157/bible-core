@@ -1,3 +1,3 @@
 """Shared machinery for the Bible study books. See ../ARCHITECTURE.md."""
 
-__version__ = "0.9.3"
+__version__ = "0.9.4"

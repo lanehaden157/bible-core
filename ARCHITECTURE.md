@@ -545,6 +545,9 @@ interlinear and moves two more of its pipeline scripts' jobs into core:
   dispatches on an entry's shape, so `data_w.py` and the rest of the audit
   work unchanged. A `seq` root's lemmas are never checked against other
   roots' id claims (they're a position constraint, not ownership).
+  A title that also occurs in another word order ("the prophets and the
+  law", Matt 11:13) adds `"alt": [[...]]` -- further ordered lists matched
+  the same way, hits merged (core 0.9.4).
 - **The LXX + Greek canon leads (plan D4).** `corpus/lxx.py` reads
   CenterBLC's Text-Fabric build of the LXX (book.json `paths.lxx`);
   `corpus/morphgnt.py`'s `load_nt_corpus()` reads the whole NT the same way
