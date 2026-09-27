@@ -96,19 +96,33 @@ def ciede2000(a, b):
     return math.sqrt((dLp / SL) ** 2 + (dCp / SC) ** 2 + (dHp / SH) ** 2
                      + RT * (dCp / SC) * (dHp / SH))
 
+MIN_L, MIN_C = 30, 20    # Lab lightness / chroma floor for a first-choice colour
+
+
+def readable(h):
+    """True when a colour keeps its hue on both themes: not so dark it reads
+    as body text, not so grey that dark mode's lift washes it out."""
+    L, a, b = _lab(h)
+    return L >= MIN_L and math.hypot(a, b) >= MIN_C
+
 
 def assign_hues(local_roots, taken, well=None):
     """local_roots: [names]; taken: [hex already used in this unit]. Return {name: hex}.
 
-    Picks the first well colour at least DE_MIN from everything already in
+    Picks the first readable() well colour at least DE_MIN from everything in
     play. When the well is exhausted against this unit, falls back to the
     colour *furthest* from what is taken (never an exact duplicate by
     rote), and validate_units reports the compromise.
     """
     well = well if well is not None else book().palette()
+    # Readable colours first, well order kept within each group: a dark,
+    # grey-ish entry (a well's extended tail is full of them) turns into
+    # the same dull grey as its neighbours once dark mode lifts it toward
+    # white. Those are used only once every readable colour is too close.
+    ordered = [c for c in well if readable(c)] + [c for c in well if not readable(c)]
     out, used = {}, list(taken)
     for name in local_roots:
-        pick = next((c for c in well
+        pick = next((c for c in ordered
                      if all(ciede2000(c, u) >= DE_MIN for u in used)), None)
         if pick is None:
             pick = max(well, key=lambda c: min((ciede2000(c, u) for u in used),
