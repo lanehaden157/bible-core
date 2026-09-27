@@ -37,7 +37,9 @@ import sys
 CORE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE = os.path.join(CORE, "template")
 LEXICON = os.path.join(CORE, "corpus", "lexicon", "HebrewStrong.xml")
-LEXICON_SHA1 = "9f3ab556ebc0870d59f3f192ba79b54531faf4ee"
+# sha1 of the file with LF line endings: a checkout with core.autocrlf
+# (Windows) has CRLF on disk, one without has LF, and both must pass
+LEXICON_SHA1 = "15861be1f825151a59513fae0117574ff46b7e56"
 TEXT_EXT = (".md", ".json", ".html", ".js", ".css", ".gitignore")
 
 sys.path.insert(0, CORE)
@@ -73,11 +75,10 @@ def instantiate(dest, name, osis, slug, abbrev=None):
 
 
 def sha1(path):
-    h = hashlib.sha1()
+    """sha1 of a text file's content with CRLF read as LF, so the check
+    doesn't depend on how git checked the file out."""
     with open(path, "rb") as fh:
-        for chunk in iter(lambda: fh.read(1 << 20), b""):
-            h.update(chunk)
-    return h.hexdigest()
+        return hashlib.sha1(fh.read().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def copy_lexicon(dest):
