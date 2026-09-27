@@ -121,7 +121,7 @@ export async function mountInterlinear(root) {
     box.setAttribute("aria-label", `Interlinear, ${c}:${v}`);
     box.innerHTML = words.map((w) => {
       const lem = lemmas[w.l] || {};
-      const title = [lem.g && `Strong's: ${lem.g}`, w.m, lem.n && `${lem.n}× in the book`]
+      const title = [lem.g && `Gloss: ${lem.g}`, w.m, lem.n && `${lem.n}× in the book`]
         .filter(Boolean).join(" · ");
       return `<a class="il-w${w.a ? " il-arc" : ""}" href="#/lemma/${encodeURIComponent(w.l)}" title="${esc(title)}">` +
         `<i>${esc(w.t)}</i><b>${esc(senses(lem.g) || "—")}</b><small>${esc(w.m)}</small></a>`;

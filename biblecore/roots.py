@@ -9,6 +9,17 @@ Schema (data/roots.json):
      "roots": {"<slug>": {"ids": ["2763a", "2764a"], "note": "..."}},
      "declined": {"<slug>": {"why": "...", "date": "...", "unit"?: N, "ids"?: [...]}}}
 
+A phrase thread (plan D2: a fixed multi-word title with no single lemma --
+"son of man", "the Law and the Prophets") gives `seq` instead of `ids`: an
+ORDERED list of lemma ids, one per content word, found in order within
+`gap` words of each other (default 4 -- generous enough for an article or
+conjunction between them, without matching across a whole verse). A `seq`
+root has no `ids` and its lemmas are never checked against other roots'
+claims (§A5's one-id-one-root rule is about ownership; a phrase's
+constituent word may also, separately, belong to an ordinary root
+elsewhere). audit.py's source_hits_for_seq() does the matching;
+source_hits_for_entry() picks it or the ordinary path by the entry's shape.
+
 Nothing in the pipeline writes this file -- it's policy, same as
 threads.json. This module only reads and validates it.
 
@@ -184,9 +195,39 @@ def validate(data: dict, words_tsv: str = None, threads_data: dict = None) -> li
         if "translit" in entry or "gloss" in entry or "color" in entry or "colour" in entry:
             errors.append(f"{slug}: translit/gloss/colour don't belong in roots.json -- this file is id-sets only")
 
+        # a phrase thread (plan D2: "son of man", no single lemma) gives an
+        # ordered `seq` instead of `ids` -- a positional constraint, not an
+        # id claim, so its lemmas never enter the clash bookkeeping below
+        # (the same lemma may also be, separately, an ordinary root's own id)
+        seq = entry.get("seq")
+        if seq is not None:
+            if "ids" in entry:
+                errors.append(f"{slug}: a root has 'ids' or 'seq', never both")
+                continue
+            if not isinstance(seq, list) or len(seq) < 2:
+                errors.append(f"{slug}: 'seq' must be a list of at least two lemma ids")
+                continue
+            if not entry.get("note"):
+                errors.append(f"{slug}: missing required 'note'")
+            gap = entry.get("gap", 4)
+            if not isinstance(gap, int) or gap < 1:
+                errors.append(f"{slug}: 'gap' must be a positive integer")
+            for id_str in seq:
+                try:
+                    bare = bare_id(id_str)
+                except ValueError as exc:
+                    errors.append(f"{slug}: {exc}")
+                    continue
+                if bare not in known_ids:
+                    errors.append(
+                        f"{slug}: seq id {id_str!r} (bare {bare}) is not a "
+                        f"lemma in {os.path.basename(words_tsv)}"
+                    )
+            continue
+
         ids = entry.get("ids")
         if not isinstance(ids, list) or not ids:
-            errors.append(f"{slug}: 'ids' must be a non-empty list")
+            errors.append(f"{slug}: 'ids' or 'seq' must be a non-empty list")
             continue
         if not entry.get("note"):
             errors.append(f"{slug}: missing required 'note'")

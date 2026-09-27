@@ -140,6 +140,65 @@ def source_hits_for_root(words, ids):
     return hits
 
 
+def source_hits_for_seq(words, seq, max_gap=4):
+    """{last_word_id: (ch, v)} for every occurrence of a fixed multi-word
+    title (plan D2: "son of man", "the Law and the Prophets" -- a phrase
+    thread has no single lemma, so roots.json gives it `seq` instead of
+    `ids`: an ORDERED list of lemma ids, one per content word, not
+    necessarily adjacent in the Greek/Hebrew -- an article or conjunction
+    commonly sits between them ('ho huios tou anthropou': huios ... a
+    genitive article ... anthropos). Each seq entry matches like a single
+    root's id (bare or precise, split_ids' rules); a hit needs every entry
+    found in order, each within `max_gap` words of the one before it, never
+    crossing a verse. One hit per occurrence (like a single-word root, one
+    span == one occurrence), keyed by the LAST matched word so a fragment's
+    one `<span data-root>` around the whole phrase still zips 1:1 against it
+    the way data_w.py already expects."""
+    specs = [split_ids([s]) for s in seq]
+    hits = {}
+    by_verse = {}
+    for i, row in enumerate(words):
+        by_verse.setdefault((row["ch"], row["v"]), []).append(i)
+    for _cv, idxs in by_verse.items():
+        pos = 0
+        while pos < len(idxs):
+            bare0, exact0 = specs[0]
+            bares, keys = _lemma_id_forms(words[idxs[pos]]["lemma"])
+            if not ((bares & bare0) or (keys & exact0)):
+                pos += 1
+                continue
+            last = idxs[pos]
+            matched = True
+            for bare_i, exact_i in specs[1:]:
+                found = None
+                for j in idxs:
+                    if j <= last:
+                        continue
+                    if j > last + max_gap:
+                        break  # idxs is ascending -- nothing closer follows
+                    b, k = _lemma_id_forms(words[j]["lemma"])
+                    if (b & bare_i) or (k & exact_i):
+                        found = j
+                        break
+                if found is None:
+                    matched = False
+                    break
+                last = found
+            if matched:
+                row = words[last]
+                hits[row["word_id"]] = (row["ch"], row["v"])
+            pos += 1
+    return hits
+
+
+def source_hits_for_entry(words, entry):
+    """Dispatch on a roots.json entry's shape: `seq` (a phrase, D2) or the
+    ordinary `ids`."""
+    if entry.get("seq"):
+        return source_hits_for_seq(words, entry["seq"], entry.get("gap", 4))
+    return source_hits_for_root(words, entry["ids"])
+
+
 # ----------------------------------------------------------------- fragment side
 
 NUM_CV = re.compile(r'<span class="n">\s*(?:(\d+):)?(\d+)\s*</span>')
@@ -280,7 +339,7 @@ def ids_report(root_slugs):
         if entry is None:
             print(f"  (no data/roots.json entry for '{slug}')")
             continue
-        hits = source_hits_for_root(words, entry["ids"])
+        hits = source_hits_for_entry(words, entry)
         wbi = words_by_id(words)
 
         by_form = {}
@@ -290,7 +349,8 @@ def ids_report(root_slugs):
             e["n"] += 1
             e["refs"].append(f"{cv[0]}:{cv[1]}")
 
-        print(f"\n=== {slug}  ids: {', '.join(entry['ids'])}  "
+        label = f"seq: {' -> '.join(entry['seq'])}" if entry.get("seq") else f"ids: {', '.join(entry['ids'])}"
+        print(f"\n=== {slug}  {label}  "
               f"({len(hits)} word(s) total) ===")
         for surface, e in sorted(by_form.items(), key=lambda kv: -kv[1]["n"]):
             refs = ", ".join(e["refs"][:10])
@@ -354,7 +414,7 @@ def coverage_for_fragment(slug, html, passage, threads_json=None, roots_json=Non
             warnings.append(f"thread '{tid}': root '{root_slug}' has no "
                              f"data/roots.json entry")
             continue
-        source_hits = source_hits_for_root(words, entry["ids"])
+        source_hits = source_hits_for_entry(words, entry)
         in_range_hits = {wid: cv for wid, cv in source_hits.items()
                           if in_range(cv, lo, hi)}
 
@@ -512,8 +572,8 @@ def audit(only=None, stub_for=None, unit_slugs=None):
 
         for tid in targets:
             if not _has_issue(tid):
-                occ = len(source_hits_for_root(
-                    load_words(), roots[tracked[tid]]["ids"]))
+                occ = len(source_hits_for_entry(
+                    load_words(), roots[tracked[tid]]))
                 print(f"  ✓ {tid:14} clean across {scope} ({occ} occ. book-wide)")
 
     if undefined and not unit_slugs:

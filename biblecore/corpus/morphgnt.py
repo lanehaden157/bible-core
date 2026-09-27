@@ -84,6 +84,37 @@ def lemma_ids(b):
     return ids
 
 
+def load_nt_corpus(b):
+    """-> {osis: [(chapter, verse, key, word)]} for every NT book whose file
+    is present in the book's morphgnt folder (usually all 27, vendored for
+    canon leads -- ARCHITECTURE.md plan D4), in file order (verse order).
+    `key` is the transliterated lemma (lemma_ids' scheme); `word` the
+    transliterated inflected surface form, for display. Unlike load_words(),
+    this isn't scoped to the current book -- it's the reference corpus
+    leads.py searches across the whole NT, the same job load_lxx() does for
+    the LXX."""
+    ids = lemma_ids(b)
+    out = {}
+    for osis, stem in FILES:
+        p = _file(b, stem)
+        if not os.path.exists(p):
+            continue
+        verses = []
+        for g in _rows(p):
+            _bk, c, v, _pos, _parse, t, word, _norm, lemma = g
+            verses.append((int(c), int(v), ids[lemma], greek.transliterate(word)))
+        out[osis] = verses
+    return out
+
+
+def lemma_forms(b):
+    """id key -> the Greek lemma text (with accents), the inverse of
+    lemma_ids -- for looking a lemma's gloss up in the morphological lexicon
+    (lang/greek_lexicon.py), the same job _lexicon_forms() does for Hebrew's
+    Strong's numbers in emit.py."""
+    return {v: k for k, v in lemma_ids(b).items()}
+
+
 def _book_stem(b):
     for osis, stem in FILES:
         if osis == b.osis:

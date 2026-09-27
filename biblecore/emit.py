@@ -86,10 +86,23 @@ def words_by_chapter(b):
 
 
 def lemmas(b, lemma_refs, counts):
-    """Hebrew: lexical form and Strong's senses from the lexicon. Greek: the
-    lemma key is already the transliterated lexical form, and there's no
-    lexicon on hand yet, so no gloss."""
+    """Hebrew: lexical form and Strong's senses from HebrewStrong.xml. Greek:
+    the lemma key is already the transliterated lexical form (lang/greek.py);
+    the gloss comes from the MorphGNT morphological lexicon
+    (lang/greek_lexicon.py), keyed by the Greek lemma text, which
+    corpus/morphgnt.py's lemma_forms() maps the id key back to."""
     out = OrderedDict()
+    if b.language == "greek":
+        from biblecore.corpus import morphgnt
+        from biblecore.lang import greek_lexicon
+        glosses = greek_lexicon.load_glosses(b.path("greek_lexicon"))
+        forms = morphgnt.lemma_forms(b)
+        for key in sorted(lemma_refs, key=_sort_key):
+            form = forms.get(key)
+            out[key] = OrderedDict(t=key.rstrip("0123456789"),
+                                   g=glosses.get(form, "") if form else "",
+                                   n=counts[key], refs=lemma_refs[key])
+        return out
     if b.language != "hebrew":
         for key in sorted(lemma_refs, key=_sort_key):
             out[key] = OrderedDict(t=key.rstrip("0123456789"), g="", n=counts[key],

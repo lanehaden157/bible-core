@@ -18,6 +18,7 @@ from biblecore.lang.greek_morph import describe
 
 MATTHEW = os.path.normpath(os.path.join(support.CORE, "..", "Matthew"))
 MGNT = os.path.join(MATTHEW, "pipeline", "corpus", "morphgnt")
+LEXICON = os.path.join(support.CORE, "corpus", "lexicon", "lexemes.yaml")
 GREEK = re.compile("[Ͱ-Ͽἀ-῿]")
 _tmp = None
 
@@ -32,7 +33,7 @@ def setup():
     cfg = {"book": "Matthew", "osis": "Matt", "slug": "matthew", "language": "greek",
            "corpus": {"kind": "morphgnt", "pin": "morphgnt/sblgnt", "word_ids": True},
            "versification": "source", "groupings": [], "components": [],
-           "paths": {"morphgnt": MGNT}}
+           "paths": {"morphgnt": MGNT, "greek_lexicon": LEXICON}}
     os.makedirs(os.path.join(_tmp, "data"))
     json.dump({"book": "Matthew", "unit_count": 0, "units": []},
               open(os.path.join(_tmp, "data", "units.json"), "w"))
@@ -121,7 +122,31 @@ def test_emit_greek():
                    for r, _d, fs in os.walk(os.path.join(_tmp, "data")) for f in fs)
     if GREEK.search(blob):
         fails.append("native Greek script in emitted data")
+    lemmas = json.load(open(os.path.join(_tmp, "data", "lemmas.json"), encoding="utf-8"))["lemmas"]
+    if lemmas.get("klēronomeō", {}).get("g") != "I inherit, obtain":
+        fails.append(f"klēronomeō gloss: {lemmas.get('klēronomeō')}")
     return fails
+
+
+def test_greek_lexicon_covers_matthew():
+    """Every lemma actually in Matthew's own text resolves to a gloss in the
+    morphological lexicon. (Matthew's corpus/morphgnt/ folder holds every NT
+    book, for future books' canon leads; lemma_forms() ids the whole set,
+    so this checks against Matthew's own word table, not that wider set --
+    a gap elsewhere is a future book's problem, worth re-checking then,
+    since MorphGNT sub-projects have occasionally drifted on accentuation.)"""
+    if not _have() or not os.path.exists(LEXICON):
+        return ["Matthew's MorphGNT or the vendored lexicon not found"]
+    from biblecore.lang import greek_lexicon
+    b = bookmod.book()
+    morphgnt.build(b)
+    forms = morphgnt.lemma_forms(b)
+    glosses = greek_lexicon.load_glosses(LEXICON)
+    used = {row["lemma"] for row in morphgnt.load_words(b)}
+    missing = sorted({forms[key] for key in used if forms.get(key) not in glosses})
+    if missing:
+        return [f"{len(missing)} Matthew lemma(s) with no lexicon gloss, e.g. {missing[:5]}"]
+    return []
 
 
 def test_describe():

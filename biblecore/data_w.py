@@ -82,7 +82,7 @@ def plan(html, passage, threads_json=None, roots_json=None):
         if entry is None:
             continue
         hits = {w: cv for w, cv in
-                atc.source_hits_for_root(words, entry["ids"]).items()
+                atc.source_hits_for_entry(words, entry).items()
                 if atc.in_range(cv, lo, hi)}
 
         by_verse = {}

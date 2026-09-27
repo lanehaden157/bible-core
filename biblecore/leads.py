@@ -26,6 +26,13 @@ shared with the *other* four.
 Source: morphhb's whole Hebrew Bible (book.json paths.wlc). Lemma identity
 is the bare Strong's number. Everything printed is transliterated; no
 native script reaches the output. Hebrew books only.
+
+A Greek book (plan D4) gets the same two kinds of lead from a different
+pair of corpora instead: the LXX (the Old Testament in Greek,
+corpus/lxx.py, book.json paths.lxx) in place of the Torah, and the rest of
+the New Testament (corpus/morphgnt.py's load_nt_corpus(), paths.morphgnt)
+in place of "outside this book". See the Greek + LXX section below --
+ported from Matthew's pipeline/canon_leads.py, its own tool before this.
 """
 import argparse
 import collections
@@ -262,7 +269,7 @@ def _units():
         return json.load(fh)["units"]
 
 
-def build(n, rare=RARE_DEFAULT, bible=None, freq=None, glosses=None, out_dir=None):
+def _build_hebrew(n, rare=RARE_DEFAULT, bible=None, freq=None, glosses=None, out_dir=None):
     out_dir = out_dir or current_book().path("canon_leads")
     row = next((u for u in _units() if u["n"] == n), None)
     if row is None:
@@ -290,20 +297,27 @@ def current_units(units):
     return out
 
 
+def build(n, rare=RARE_DEFAULT, out_dir=None, **corpus_kw):
+    """Dispatches on the book's language. `corpus_kw` (bible/freq/glosses for
+    Hebrew, nt/lxx/freq for Greek) lets main() load the corpus once and
+    reuse it across every unit; omit them to have build() load its own."""
+    if current_book().language == "greek":
+        return _build_greek(n, rare, out_dir=out_dir, **corpus_kw)
+    return _build_hebrew(n, rare, out_dir=out_dir, **corpus_kw)
+
+
 def main(argv=None):
-    if current_book().language != "hebrew":
-        print(f"canon leads read the Hebrew Bible; {current_book().name} is "
-              f"{current_book().language} -- skipped")
+    lang = current_book().language
+    if lang not in ("hebrew", "greek"):
+        print(f"canon leads read the Hebrew Bible or the Greek NT+LXX; "
+              f"{current_book().name} is {lang} -- skipped")
         return 0
     ap = argparse.ArgumentParser(prog="biblecore leads")
     ap.add_argument("unit", nargs="?", type=int)
     ap.add_argument("--all", action="store_true", help="every unit in data/units.json")
     ap.add_argument("--rare", type=int, default=RARE_DEFAULT,
-                    help=f"rare-word cutoff, in verses across the Hebrew Bible (default {RARE_DEFAULT})")
+                    help=f"rare-word cutoff, in verses across the reference corpus (default {RARE_DEFAULT})")
     a = ap.parse_args(argv)
-    bible = load_bible()
-    freq = verse_freq(bible)
-    glosses = load_glosses()
     rows = _units()
     if a.unit:
         units = [a.unit]
@@ -311,6 +325,221 @@ def main(argv=None):
         units = [u["n"] for u in rows]
     else:
         units = current_units(rows)
-    for n in units:
-        print("wrote", build(n, a.rare, bible, freq, glosses))
+    if lang == "greek":
+        nt, lxx, _order = load_greek_corpus()
+        freq = verse_freq_greek(nt, lxx)
+        for n in units:
+            print("wrote", build(n, a.rare, nt=nt, lxx=lxx, freq=freq))
+    else:
+        bible = load_bible()
+        freq = verse_freq(bible)
+        glosses = load_glosses()
+        for n in units:
+            print("wrote", build(n, a.rare, bible=bible, freq=freq, glosses=glosses))
     return 0
+
+
+# ============================================================== Greek + LXX
+# Plan D4: Matthew's pipeline/canon_leads.py, generalised. Same rare-word /
+# shared-phrase design as the Hebrew path above, but two corpora instead of
+# one: the LXX (the Old Testament in Greek -- the "background" link, listed
+# first) and the rest of the NT (a book's own words are never a lead for
+# itself; SYNOPTIC_EXCLUDE_GREEK is Matthew-specific tuning -- it has a
+# dedicated synoptic-parallel component, so Mark/Luke echoes are excluded
+# here to avoid duplicating what that already surfaces; reconsider it for a
+# future Synoptic Gospel book). Matching is by transliterated lemma
+# (lang/greek.py), not a shared numeric id -- MorphGNT and the LXX don't
+# share one.
+
+SYNOPTIC_EXCLUDE_GREEK = {"Mark", "Luke"}
+
+
+def load_greek_corpus(lxx_path=None):
+    """-> (nt, lxx, lxx_book_order). nt: corpus/morphgnt.py's
+    load_nt_corpus() (paths.morphgnt, usually all 27 NT books). lxx:
+    corpus/lxx.py's load_lxx() (paths.lxx), keyed by transliterated lemma
+    the same way, so the two corpora -- which don't share a numbering
+    scheme -- match."""
+    from biblecore.corpus import lxx as lxx_mod
+    from biblecore.corpus import morphgnt
+    from biblecore.lang import greek
+
+    b = current_book()
+    nt = morphgnt.load_nt_corpus(b)
+    lxx_all = lxx_mod.load_lxx(lxx_path or b.path("lxx"), lambda w: greek.transliterate(w).lower())
+    order = lxx_all.pop(lxx_mod.BOOKS_KEY)
+    return nt, lxx_all, order
+
+
+def verse_freq_greek(nt, lxx):
+    """Verses touched, not raw occurrences (matches the Hebrew path's
+    verse_freq semantics)."""
+    freq = collections.Counter()
+    for verses in nt.values():
+        by_verse = collections.defaultdict(set)
+        for ch, v, key, _surface in verses:
+            by_verse[(ch, v)].add(key)
+        for keys in by_verse.values():
+            freq.update(keys)
+    for verses in lxx.values():
+        by_verse = collections.defaultdict(set)
+        for ch, v, key in verses:
+            by_verse[(ch, v)].add(key)
+        for keys in by_verse.values():
+            freq.update(keys)
+    return freq
+
+
+def passage_words_greek(nt, passage):
+    """This book's own words in the unit's passage, verse by verse, as
+    (ref_str, [(key, surface), ...]) -- adjacency preserved for phrase
+    leads."""
+    own = current_book().osis
+    lo, hi = parse_range(passage)
+    by_verse = collections.OrderedDict()
+    for ch, v, key, surface in nt[own]:
+        if lo <= (ch, v) <= hi:
+            by_verse.setdefault((ch, v), []).append((key, surface))
+    return [(f"{ch}:{v}", words) for (ch, v), words in by_verse.items()]
+
+
+def rare_leads_greek(nt, lxx, freq, unit_words, rare=RARE_DEFAULT):
+    """Rare lemmas in the passage, with every occurrence outside this book
+    (Synoptic-excluded books skipped too, for a book that has that
+    component; see SYNOPTIC_EXCLUDE_GREEK)."""
+    own = current_book().osis
+    seen = collections.OrderedDict()
+    for ref, words in unit_words:
+        for key, surface in words:
+            if freq[key] <= rare:
+                seen.setdefault(key, {"surface": surface, "refs": []})
+                if ref not in seen[key]["refs"]:
+                    seen[key]["refs"].append(ref)
+
+    leads = []
+    for key, info in seen.items():
+        lxx_hits = []
+        for book in lxx:
+            for ch, v, k in lxx[book]:
+                if k == key:
+                    lxx_hits.append((book, ch, v))
+        nt_hits = []
+        for book, verses in nt.items():
+            if book == own or book in SYNOPTIC_EXCLUDE_GREEK:
+                continue
+            for ch, v, k, surface in verses:
+                if k == key:
+                    nt_hits.append((book, ch, v, surface))
+        if lxx_hits or nt_hits:
+            leads.append({"key": key, "surface": info["surface"], "here": info["refs"],
+                          "freq": freq[key], "lxx": lxx_hits, "nt": nt_hits})
+    # LXX hits first (the older, background link), then rarest overall
+    leads.sort(key=lambda L: (not L["lxx"], L["freq"]))
+    return leads
+
+
+def phrase_leads_greek(lxx, freq, unit_words):
+    """Adjacent lemma pairs in the passage that also stand adjacent in an
+    LXX verse. Both words under PHRASE_WORD_MAX total occurrences; the pair
+    in at most PHRASE_TOTAL_MAX LXX verses. Overlapping pairs in one verse
+    merge into a single phrase lead."""
+    lxx_pairs = collections.defaultdict(list)
+    for book, verses in lxx.items():
+        by_verse = collections.OrderedDict()
+        for ch, v, key in verses:
+            by_verse.setdefault((ch, v), []).append(key)
+        for (ch, v), keys in by_verse.items():
+            for a, b in zip(keys, keys[1:]):
+                lxx_pairs[(a, b)].append((book, ch, v))
+
+    def qualifies(a, b):
+        key = (a[0], b[0])
+        return (a[0] != b[0] and key in lxx_pairs
+                and freq[a[0]] <= PHRASE_WORD_MAX and freq[b[0]] <= PHRASE_WORD_MAX
+                and len(set(lxx_pairs[key])) <= PHRASE_TOTAL_MAX)
+
+    leads = collections.OrderedDict()
+    for ref, words in unit_words:
+        idx = [i for i in range(len(words) - 1) if qualifies(words[i], words[i + 1])]
+        runs = []
+        for i in idx:
+            if runs and runs[-1][-1] == i - 1:
+                runs[-1].append(i)
+            else:
+                runs.append([i])
+        for run in runs:
+            span = words[run[0]:run[-1] + 2]
+            key = tuple(w[0] for w in span)
+            hits = collections.OrderedDict()
+            for i in run:
+                for h in lxx_pairs[(words[i][0], words[i + 1][0])]:
+                    hits.setdefault(h, True)
+            lead = leads.setdefault(key, {"words": span, "here": [], "hits": list(hits)})
+            if ref not in lead["here"]:
+                lead["here"].append(ref)
+    for lead in leads.values():
+        lead["hits"].sort(key=lambda h: (h[0], h[1], h[2]))
+    return list(leads.values())
+
+
+def render_greek(n, passage, rare_list, phrase_list, rare):
+    ab = current_book().abbrev
+    L = [f"# Canon leads — Unit {n} ({passage})", "",
+         "Generated by `python -m biblecore leads` from the LXX (the Old "
+         "Testament in Greek) and the rest of the New Testament. **Leads, "
+         "not conclusions.** This lists where the unit's rare words and "
+         "two-word phrases occur elsewhere. Deciding which ones matter is "
+         "the intertext pass's job. Every lead gets a verdict in the "
+         "ledger, a rejection included.", "",
+         f"It cannot see: common words (rare cutoff: {rare} verses across "
+         "the LXX + NT), links by theme or type-scene, or a Synoptic "
+         "parallel (that has its own comparison path). Search for those "
+         "separately. Lemmas are transliterated only, with no gloss -- "
+         "look them up by hand.", ""]
+
+    L += [f"## Shared phrases with the LXX ({len(phrase_list)})", ""]
+    if not phrase_list:
+        L += ["_None under the cutoffs._", ""]
+    for p in phrase_list:
+        ws = p["words"]
+        here = ", ".join(p["here"])
+        L.append(f"- **{' '.join(w[1] for w in ws)}** ({' + '.join(w[0] for w in ws)}) — "
+                 f"{ab} {here}")
+        for book, ch, v in p["hits"]:
+            L.append(f"  - {book} {ch}:{v}")
+    L.append("")
+
+    L += [f"## Rare words ({len(rare_list)})", ""]
+    if not rare_list:
+        L += ["_None under the cutoff._", ""]
+    for r in rare_list:
+        here = ", ".join(r["here"])
+        L.append(f"- **{r['surface']}** ({r['key']}) — {ab} {here}; "
+                 f"{r['freq']} verses across the LXX + NT")
+        if r["lxx"]:
+            L.append("  - LXX: " + "; ".join(f"{b} {c}:{v}" for b, c, v in r["lxx"][:8])
+                     + (" …" if len(r["lxx"]) > 8 else ""))
+        if r["nt"]:
+            L.append("  - Later (NT): " + "; ".join(
+                f"{b} {c}:{v} ({s})" for b, c, v, s in r["nt"][:8])
+                + (" …" if len(r["nt"]) > 8 else ""))
+    L.append("")
+    return "\n".join(L)
+
+
+def _build_greek(n, rare=RARE_DEFAULT, nt=None, lxx=None, freq=None, out_dir=None):
+    out_dir = out_dir or current_book().path("canon_leads")
+    row = next((u for u in _units() if u["n"] == n), None)
+    if row is None:
+        raise ValueError(f"unit {n} is not in data/units.json")
+    if nt is None or lxx is None:
+        nt, lxx, _order = load_greek_corpus()
+    freq = freq or verse_freq_greek(nt, lxx)
+    uw = passage_words_greek(nt, row["passage"])
+    md = render_greek(n, row["passage"], rare_leads_greek(nt, lxx, freq, uw, rare),
+                      phrase_leads_greek(lxx, freq, uw), rare)
+    os.makedirs(out_dir, exist_ok=True)
+    path = os.path.join(out_dir, f"canon-leads-unit-{n:02d}.md")
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(md)
+    return path

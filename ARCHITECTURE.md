@@ -5,7 +5,11 @@ core.css/theme.css split, with poem, itin and textform alongside echo and list.
 0.5.0 added the reading data layer (`emit`) and the reader features (§8).
 0.6.0 added the canon hub (§8) and linked each book site back to it.
 0.8.0 adds division themes (§8). 0.9.0 puts Joshua and Matthew on the template
-app shell, with an overlay grouping and chip-toggled asides for Matthew (§8). 0.9.1 lets tracked spans inside a `data-verses` component go without `data-w` (colour-only summary tags; Numbers unit 3). 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
+app shell, with an overlay grouping and chip-toggled asides for Matthew (§8). 0.9.1 lets tracked spans inside a `data-verses` component go without `data-w` (colour-only summary tags; Numbers unit 3). 0.9.2 gives Matthew a working Greek
+interlinear (a vendored MorphGNT lexicon, `lang/greek_lexicon.py`), phrase
+threads (`roots.json` `seq`, plan D2), the LXX corpus adapter and Matthew's
+canon leads ported into `leads.py` (plan D4), and a site-wide source-credit
+footer (main.js `SOURCES`) -- see "Matthew fully on bible-core" below. 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
 Matthew's data read-only, and the Hebrew -> LXX -> NT bridge (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
@@ -518,8 +522,47 @@ shell change now reaches every book. Two things came across from Matthew:
 
 A book's one-off fragment styling stays in its own `theme.css` (Matthew's
 rings, triads, exodus tables, prayer block and Greek title). A grouping's
-display name is `label`, falling back to `name`. Greek has no lexicon yet, so
-Matthew's interlinear shows transliteration and morphology without glosses.
+display name is `label`, falling back to `name`.
+
+**Matthew fully on bible-core (0.9.2, `matthew-core-plan.md` phases A/B/D4).**
+Matthew's site runs on core since 0.9.0; 0.9.2 gives it a working Greek
+interlinear and moves two more of its pipeline scripts' jobs into core:
+
+- **Greek glosses (plan D1: MorphGNT).** `corpus/lexicon/lexemes.yaml`, the
+  MorphGNT morphological lexicon (CC BY-SA 3.0, `corpus/README.md`), vendored
+  per book like `HebrewStrong.xml` (book.json `paths.greek_lexicon`).
+  `lang/greek_lexicon.py` reads its `gloss` field; `corpus/morphgnt.py`'s
+  `lemma_forms()` maps a word's lemma id back to the Greek text to look it up
+  by; `emit.py`'s `lemmas()` wires it into `data/lemmas.json`. Checked
+  against every lemma in Matthew's own text: 100% coverage
+  (`tests/test_corpus_morphgnt.py`).
+- **Phrase threads (plan D2: "teach multi word").** A thread with no single
+  lemma ("son of man", "the Law and the Prophets") gives `roots.json` a
+  `"seq"` instead of `"ids"`: an ORDERED list of lemma ids, matched in order
+  within `"gap"` words of each other (default 4 -- room for an article or
+  conjunction between them, never crossing a verse). `audit.py`'s
+  `source_hits_for_seq()` does the matching; `source_hits_for_entry()`
+  dispatches on an entry's shape, so `data_w.py` and the rest of the audit
+  work unchanged. A `seq` root's lemmas are never checked against other
+  roots' id claims (they're a position constraint, not ownership).
+- **The LXX + Greek canon leads (plan D4).** `corpus/lxx.py` reads
+  CenterBLC's Text-Fabric build of the LXX (book.json `paths.lxx`);
+  `corpus/morphgnt.py`'s `load_nt_corpus()` reads the whole NT the same way
+  `paths.morphgnt` already vendors it. `leads.py` gained a parallel Greek
+  path (`rare_leads_greek`, `phrase_leads_greek`, ...), ported from Matthew's
+  own `pipeline/canon_leads.py` -- proven against it over a real unit,
+  structurally identical bar one deliberate improvement (core disambiguates
+  a Greek homograph Matthew's simpler script collapsed,
+  `tests/test_leads_greek.py`).
+- **Source credit (main.js `SOURCES`, `.site-foot`).** Every site now
+  credits its underlying text/morphology/lexicon in a footer, keyed by
+  `manifest.language` -- required by OSHB's and MorphGNT's licences
+  (CC BY 4.0 / CC BY-SA 3.0), which none of the book sites carried before.
+
+Left in Matthew's own `pipeline/`: porting units, `data-w` alignment
+(722 spans, no `roots.json` yet -- **plan B**, still open), colours (checked
+against the theme's accents once Matthew's colours are revisited -- **plan
+E**), and everything else `matthew-core-plan.md` scopes for a future session.
 
 ## 9. Open questions
 

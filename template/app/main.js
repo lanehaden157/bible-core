@@ -17,9 +17,9 @@
 
 import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=9";
 import { enhanceSpotlights, openAll } from "./spotlight.js?v=7";
-import { renderSearch } from "./search.js?v=6";
+import { renderSearch } from "./search.js?v=7";
 import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
-         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js?v=6";
+         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js?v=7";
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
@@ -74,6 +74,7 @@ async function init() {
       loadCanon(bookInfo.hub, bookInfo.slug);
       addHubLink(bookInfo.hub);
     }
+    renderSources(bookInfo.language || manifest.language);
   } catch (e) {
     content.innerHTML = `<p class="missing">Could not load site data (<code>data/*.json</code>).</p>`;
     return;
@@ -507,6 +508,24 @@ function addHubLink(hub) {
   a.href = hub;
   a.textContent = "All books";
   actions.prepend(a);
+}
+
+/* Required attribution for the source text/morphology/lexicon each language
+   reads (review, plan D1/sources): the underlying data is not the study's
+   own, and each licence (CC BY / CC BY-SA) asks for a credit line. Never
+   translations -- the study's English is its own throughout. */
+const SOURCES = {
+  hebrew: "Hebrew text and morphology: <a href=\"https://github.com/openscriptures/morphhb\">Open Scriptures Hebrew Bible</a> (CC BY 4.0). "
+    + "Lexicon glosses: <a href=\"https://github.com/openscriptures/HebrewLexicon\">Open Scriptures HebrewLexicon</a> (Strong's), shown as word identifiers, not translations.",
+  greek: "Greek text and morphology: <a href=\"https://github.com/morphgnt/sblgnt\">MorphGNT: SBLGNT Edition</a> (Tauber, ed., CC BY 4.0). "
+    + "Lexicon glosses: <a href=\"https://github.com/morphgnt/morphological-lexicon\">MorphGNT morphological lexicon</a> (CC BY-SA 3.0).",
+};
+
+function renderSources(language) {
+  const foot = document.getElementById("site-foot");
+  if (!foot) return;
+  const src = SOURCES[language];
+  foot.innerHTML = (src ? `<p>${src}</p>` : "") + `<p>The translation is the study's own.</p>`;
 }
 
 /* "aside.echo, aside.textform" for a role, or "" if the book enables none */

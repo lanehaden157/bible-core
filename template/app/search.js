@@ -9,7 +9,7 @@
    interlinear links to it as #/lemma/<key>). */
 
 import { getOccurrences, getThreadFor, resolveUnit } from "./threads.js?v=9";
-import { loadLemmas, loadText, parseRef, unitForRef } from "./reader.js?v=6";
+import { loadLemmas, loadText, parseRef, unitForRef } from "./reader.js?v=7";
 
 export function renderSearch(container, units, prefix = "study", opts = {}) {
   const KEY = `${prefix}.search.q`;
@@ -79,12 +79,17 @@ function lemmaResults(q, lemmas, units) {
   const one = hits.length === 1;
   return `<section class="sr-block"><h3>Words in the book, by lemma</h3>` + shown.map(([k, e]) => `
     <details class="sr-lemma"${one ? " open" : ""}>
-      <summary><i>${esc(e.t || k)}</i> — ${esc(e.g || "")} <span class="sr-n">${e.n}× · Strong's ${esc(k)}</span></summary>
+      <summary><i>${esc(e.t || k)}</i> — ${esc(e.g || "")} <span class="sr-n">${e.n}× · ${idLabel(k)}</span></summary>
       <p class="sr-refs">${e.refs.map((r) => refLink(r, units)).join(" ")}</p>
     </details>`).join("") +
     (hits.length > shown.length ? `<p class="search-empty">${hits.length - shown.length} more; narrow the search.</p>` : "") +
     `</section>`;
 }
+
+/* Hebrew lemma keys are Strong's numbers ("1696", "6485a"); Greek keys are
+   the transliterated lemma (lang/greek.lemma_key, "klēronomeō") -- label
+   each the way its own reader would recognise it. */
+const idLabel = (k) => /^\d/.test(k) ? `Strong's ${k}` : `lemma ${k}`;
 
 function refLink(ref, units) {
   const [c, v] = ref.split(":").map(Number);

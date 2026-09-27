@@ -52,7 +52,9 @@ PATH_DEFAULTS = {
     "canon_leads": "canon-leads",
     "wlc": "node_modules/morphhb/wlc",
     "morphgnt": "corpus/morphgnt",
+    "lxx": "corpus/lxx",
     "lexicon": "corpus/lexicon/HebrewStrong.xml",
+    "greek_lexicon": "corpus/lexicon/lexemes.yaml",
     "synced": "project-side/synced",
     "sync_state": "project-side/sync-state.json",
     # pasted by hand into the Claude.ai project's instruction field
