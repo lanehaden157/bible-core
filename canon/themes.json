@@ -1,0 +1,39 @@
+{
+  "_note": "Lane's theme picks (2026-09-26, from the picker in chat). Divisions set paper, ink, signature colours and type; each book varies an accent pair (`primary`, `secondary`) and an emblem. Masthead style is shared by every book. Later Prophets and Writings bases are provisional until those divisions are designed. Nothing reads this yet: it's the spec the division themes get built from. Book accents are chrome only (verse numbers, headings, borders, the masthead band); tracked-word colours come from each division's own palette well, checked for legibility on its paper.",
+  "masthead": "banner-emblem",
+  "divisions": {
+    "torah": {"label": "Torah", "paper": "#efe6d2", "ink": "#2b2418", "signature": ["#2c4a78", "#6b2d5c", "#a3322a"],
+              "display": "Cinzel", "text": "EB Garamond", "motif": "linen, acacia, tabernacle dyes"},
+    "former": {"label": "Former Prophets", "paper": "#e4ddcf", "ink": "#231f1b", "signature": ["#5a3b24", "#56606a", "#8c6d1f"],
+               "display": "Cinzel", "text": "Crimson Pro", "motif": "limestone, cedar, iron"},
+    "latter": {"label": "Later Prophets", "provisional": true, "paper": "#e8e1d6", "ink": "#1f1c1a", "signature": ["#a8401f", "#3a3633", "#6b5a45"],
+               "display": "Marcellus", "text": "Spectral", "motif": "charred scroll, ember"},
+    "writings": {"label": "Writings", "provisional": true, "paper": "#f2ecdf", "ink": "#2a241d", "signature": ["#3d5a80", "#a57c2c", "#7a3a4a"],
+                 "display": "Cormorant Garamond", "text": "Cormorant Garamond", "motif": "vellum, lyric and wisdom"},
+    "nt": {"label": "New Testament", "paper": "#f1ead9", "ink": "#26221c", "signature": ["#c79a3c", "#2f5d7c", "#8a2a2a"],
+           "display": "Uncial Antiqua", "text": "Source Serif 4", "motif": "papyrus, lamp light"}
+  },
+  "books": {
+    "Gen":   {"division": "torah",    "pick": "A", "name": "Garden and dawn",          "primary": "#4f6b3a", "secondary": "#c9893a", "emblem": "tree"},
+    "Exod":  {"division": "torah",    "pick": "B", "name": "Blood and hyssop",         "primary": "#8b2323", "secondary": "#6b7a3c", "emblem": "wave"},
+    "Lev":   {"division": "torah",    "pick": "A", "name": "Gold, ash, linen",         "primary": "#b08a2e", "secondary": "#8a8272", "emblem": "altar flame"},
+    "Num":   {"division": "torah",    "pick": "A", "name": "Desert sand, dusk",        "primary": "#b8783a", "secondary": "#5b6f86", "emblem": "banner"},
+    "Deut":  {"division": "torah",    "pick": "B", "name": "Choose life",              "primary": "#3f6b45", "secondary": "#7a2e3a", "emblem": "tablets"},
+    "Josh":  {"division": "former",   "pick": "C", "name": "Scarlet cord, Jericho",    "primary": "#a3322a", "secondary": "#b98d4e", "emblem": "stone heap"},
+    "Judg":  {"division": "former",   "pick": "C", "name": "Downward spiral",          "primary": "#5a2e4a", "secondary": "#6e6862", "emblem": "sword"},
+    "Sam":   {"division": "former",   "pick": "A", "name": "Shepherd to throne",       "primary": "#4d6b3f", "secondary": "#5a3a78", "emblem": "crown"},
+    "Kgs":   {"division": "former",   "pick": "A", "name": "Temple gold to ash",       "primary": "#b08a2e", "secondary": "#5b5752", "emblem": "temple"},
+    "Jonah": {"division": "latter",   "pick": "A", "name": "The deep",                 "primary": "#1f3f5a", "secondary": "#3f7a6a", "emblem": "fish"},
+    "Ps":    {"division": "writings", "pick": "A", "name": "Lapis and gold",           "primary": "#2f4a7a", "secondary": "#b8902a", "emblem": "lyre"},
+    "Ruth":  {"division": "writings", "pick": "C", "name": "Kinsman, hesed",           "primary": "#9a4a4a", "secondary": "#7a5a3a", "emblem": "sheaf"},
+    "Eccl":  {"division": "writings", "pick": "B", "name": "Under the sun",            "primary": "#c2a878", "secondary": "#4a4a4a", "emblem": "sun"},
+    "Esth":  {"division": "writings", "pick": "C", "name": "The feasts",               "primary": "#6a1f3a", "secondary": "#2f7a7a", "emblem": "mask"},
+    "Dan":   {"division": "writings", "pick": "B", "name": "Visions and furnace",      "primary": "#1f2a4a", "secondary": "#c2482b", "emblem": "eye"},
+    "Matt":  {"division": "nt",       "pick": "A", "name": "Royal, the teacher",       "primary": "#5b3f7a", "secondary": "#b0802e", "emblem": "mountain"},
+    "Mark":  {"division": "nt",       "pick": "B", "name": "The way",                  "primary": "#8a7a5a", "secondary": "#a8321f", "emblem": "road"},
+    "Luke":  {"division": "nt",       "pick": "A", "name": "Warm and orderly",         "primary": "#b77a3a", "secondary": "#5f7d5a", "emblem": "scroll"},
+    "John":  {"division": "nt",       "pick": "A", "name": "Night and light",          "primary": "#1f2a4a", "secondary": "#d2a64a", "emblem": "lamp"},
+    "Acts":  {"division": "nt",       "pick": "A", "name": "Mediterranean roads",      "primary": "#2f6d8a", "secondary": "#a5673a", "emblem": "ship"},
+    "Rev":   {"division": "nt",       "pick": "A", "name": "Jewel tones, gold",        "primary": "#3f2a5a", "secondary": "#b8902a", "emblem": "throne"}
+  }
+}
