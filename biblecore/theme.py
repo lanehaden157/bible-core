@@ -18,7 +18,10 @@ division.css carries, in this order:
     set it) stays light;
   - the banner masthead: book colour band, emblem in a circle (CSS mask
     over an inlined SVG, so nothing extra to publish);
-  - the division's ornament above the notes: a light, thin rule;
+  - the division's ornament in place of the straight rules inside a unit:
+    full width above the notes, and a short centre cut (mini_ornament) under
+    each section heading and between the colour key's groups (Lane,
+    2026-09-26: "ornaments used more ... instead of those straight lines");
   - tracked-word colours lifted toward white in dark mode (threads.js sets
     --rc; see core.css).
 
@@ -112,6 +115,12 @@ def resolve(b):
 def emblem_svg(name):
     p = os.path.join(HERE, "emblems", f"{name}.svg")
     return open(p, encoding="utf-8").read().strip() if name and os.path.exists(p) else None
+
+
+def mini_ornament(svg):
+    """The centre of a full ornament (its motif and a little of the rule on
+    each side): the same drawing, cropped by its viewBox."""
+    return svg.replace('viewBox="0 0 600 18"', 'viewBox="200 0 200 18"')
 
 
 def _data_uri(svg):
@@ -261,6 +270,19 @@ def build_css(b):
         f"  background: url(\"{_data_uri(orn_light)}\") center / contain no-repeat; opacity: .8;\n}}\n"
         f':root[data-theme="dark"] .unit .notes::before {{ background-image: url("{_data_uri(orn_dark)}"); }}\n'
         f'@media (prefers-color-scheme: dark) {{ :root[data-theme="auto"] .unit .notes::before {{ background-image: url("{_data_uri(orn_dark)}"); }} }}\n\n')
+    mini_l, mini_d = _data_uri(mini_ornament(orn_light)), _data_uri(mini_ornament(orn_dark))
+    heads = ".unit h3.pericope::after, .unit .legend-group + .legend-group::before"
+    out.append(
+        "/* the short ornament in place of the heading underline and the key's group divider */\n"
+        ".unit h3.pericope { border-bottom: none; padding-bottom: 0; }\n"
+        ".unit .legend-group + .legend-group { border-top: none; padding-top: 0; }\n"
+        f"{heads} {{\n"
+        "  content: \"\"; display: block; height: 12px; width: 170px; margin: 5px 0 0;\n"
+        f"  background: url(\"{mini_l}\") left center / contain no-repeat; opacity: .75;\n}}\n"
+        ".unit .legend-group + .legend-group::before { margin: 0 auto 12px; background-position: center; }\n"
+        "body.text-center .unit h3.pericope::after { margin-left: auto; margin-right: auto; background-position: center; }\n"
+        f':root[data-theme="dark"] :is({heads}) {{ background-image: url("{mini_d}"); }}\n'
+        f'@media (prefers-color-scheme: dark) {{ :root[data-theme="auto"] :is({heads}) {{ background-image: url("{mini_d}"); }} }}\n\n')
     out.append(
         "/* tracked-word colours stay their own palette; in dark mode, lifted toward white */\n"
         ':root[data-theme="dark"] .unit [data-root] { --rc-shown: color-mix(in oklab, var(--rc) 58%, #fff); }\n'
