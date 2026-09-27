@@ -3,6 +3,10 @@
 A test is any module-level function named test_*. It fails if it raises,
 returns a non-empty list of messages, or appends to a module-level failure
 list (`fail` or `_fails` -- the styles Joshua's tests use). No pytest.
+
+The sibling book repos (../Joshua, ../Numbers, ../Matthew) are read-only
+inputs. The run snapshots them first and fails if any file there was
+written, added or removed by the time it ends.
 """
 import glob
 import importlib.util
@@ -14,12 +18,35 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.dirname(HERE))
 
+SIBLINGS = [os.path.normpath(os.path.join(HERE, "..", "..", b))
+            for b in ("Joshua", "Numbers", "Matthew")]
+SKIP_DIRS = {".git", "node_modules", "__pycache__"}
+
+
+def snapshot(roots=SIBLINGS):
+    """{path: (mtime_ns, size)} for every file in the sibling repos."""
+    out = {}
+    for root in roots:
+        for d, dirs, files in os.walk(root):
+            dirs[:] = [x for x in dirs if x not in SKIP_DIRS]
+            for f in files:
+                p = os.path.join(d, f)
+                st = os.stat(p)
+                out[p] = (st.st_mtime_ns, st.st_size)
+    return out
+
+
+def sibling_writes(before, after):
+    changed = sorted(p for p in set(before) | set(after) if before.get(p) != after.get(p))
+    return [os.path.relpath(p, os.path.dirname(os.path.dirname(HERE))) for p in changed]
+
 
 def main(filters):
     files = sorted(glob.glob(os.path.join(HERE, "test_*.py")))
     if filters:
         files = [f for f in files if any(x in os.path.basename(f) for x in filters)]
     total = failed = 0
+    siblings_before = snapshot()
     for path in files:
         name = os.path.splitext(os.path.basename(path))[0]
         spec = importlib.util.spec_from_file_location(name, path)
@@ -59,6 +86,12 @@ def main(filters):
         print(f"{mark} {name}: {len(tests) - len(bad)}/{len(tests)}")
         for tname, msg in bad:
             print(f"    - {tname}: {msg}")
+    touched = sibling_writes(siblings_before, snapshot())
+    if touched:
+        failed += 1
+        total += 1
+        print(f"✗ sibling repos written to (tests must only read them): "
+              + ", ".join(touched[:10]) + (" ..." if len(touched) > 10 else ""))
     print(f"\n{total - failed}/{total} passed")
     return 1 if failed else 0
 
