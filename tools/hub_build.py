@@ -10,11 +10,9 @@ keeps its own site, and the hub links into them.
 Reads, all read-only:
   canon/books.json     the canon in order; started books name their repo
   canon/*.json         arcs, threads, typescenes, intertext, paths
-  ../<repo>/data/      each started book's units, threads, occurrences
-                       (and lemmas.json for core books)
-  ../Joshua words      Joshua's lemma concordance is computed from its
-                       word table through biblecore, since its site
-                       predates emit.py
+  ../<repo>/data/      each started book's units, threads, occurrences,
+                       and lemmas.json where the book's build emits one
+                       (every book on the core pipeline, Joshua included)
 
 Writes into the hub folder:
   index.html, app/hub.js, css/hub.css    copied from bible-core hub/
@@ -93,37 +91,12 @@ def book_entry(b):
 
 # ------------------------------------------------------------ concordance
 
-def joshua_lemmas(repo):
-    """Joshua's lemma refs, computed from its word table through biblecore
-    (read-only), in the same shape as a core book's data/lemmas.json."""
-    from biblecore import book as bookmod
-    from biblecore import emit
-    cfg = _load(os.path.join(CORE, "tests", "joshua-book.json"))
-    root = os.path.join(BIBLE, repo)
-    if not cfg or not os.path.exists(os.path.join(root, "Joshua-words.tsv")):
-        return {}
-    b = bookmod.use(bookmod.Book(cfg, root))
-    by_ch, refs = emit.words_by_chapter(b)
-    counts = {}
-    for ch in by_ch.values():
-        for ws in ch.values():
-            for w in ws:
-                if w["l"]:
-                    counts[w["l"]] = counts.get(w["l"], 0) + 1
-    return emit.lemmas(b, refs, counts)
-
-
 def concordance(books):
     lem = OrderedDict()
     for b in books:
         if b["t"] != "ot":
             continue
-        if b["kind"] == "core":
-            per = _load(os.path.join(BIBLE, b["repo"], "data", "lemmas.json"), {}).get("lemmas", {})
-        elif b["slug"] == "joshua":
-            per = joshua_lemmas(b["repo"])
-        else:
-            per = {}
+        per = _load(os.path.join(BIBLE, b["repo"], "data", "lemmas.json"), {}).get("lemmas", {})
         for key, e in per.items():
             k = f"heb:{key}"
             ent = lem.setdefault(k, OrderedDict(t=e.get("t", ""), g=e.get("g", ""), books=OrderedDict()))

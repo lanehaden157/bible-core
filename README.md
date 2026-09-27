@@ -1,7 +1,8 @@
 # bible-core
 
-The shared architecture for new books in the Bible study platform. Joshua and
-Matthew are the reference implementations and don't use it.
+The shared architecture for the books in the Bible study platform. Numbers
+and Joshua run on it (Joshua since 2026-09-26, keeping its own app shell);
+Matthew is a reference implementation and doesn't use it.
 
 - `ARCHITECTURE.md` — the shared shape, where books differ, how the core
   changes, and how to start a book (§8).

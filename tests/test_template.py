@@ -79,7 +79,7 @@ def test_joshua_from_template_reproduces_joshua():
         for f in os.listdir(os.path.join(J, "source-artifacts")):
             shutil.copyfile(os.path.join(J, "source-artifacts", f),
                             os.path.join(d, "source-artifacts", f))
-        shutil.copyfile(os.path.join(J, "pipeline", "retrofit-tags.json"),
+        shutil.copyfile(os.path.join(J, "retrofit", "retrofit-tags.json"),
                         os.path.join(d, "retrofit", "retrofit-tags.json"))
         for f in ("threads.json", "roots.json"):
             shutil.copyfile(os.path.join(J, "data", f), os.path.join(d, "data", f))
@@ -94,7 +94,7 @@ def test_joshua_from_template_reproduces_joshua():
         _set_paths(d, groupings=["movement"],
                    palette=os.path.join(support.HERE, "joshua_well.json"),
                    paths={"wlc": WLC, "lexicon": os.path.join(
-                       J, "pipeline", "corpus", "lexicon", "HebrewStrong.xml")})
+                       J, "corpus", "lexicon", "HebrewStrong.xml")})
 
         fails = []
         for n in (1, 2, 3, 4):
@@ -108,12 +108,13 @@ def test_joshua_from_template_reproduces_joshua():
             fails.append("audit not clean after build")
         for n in (1, 2, 3, 4):
             ours = support.read(os.path.join(d, "units", f"unit-{n:02d}.html"))
-            # the contract stamp (D7) is the one intended difference:
-            # Joshua's own porter predates it
+            # the contract stamp (D7) may differ: Joshua's units carry the
+            # version they were migrated to, a fresh port the current one
             if '"contract": "' not in ours:
                 fails.append(f"unit {n} carries no contract stamp")
             ours = re.sub(r'\n  "contract": "[0-9.]+",', "", ours)
-            theirs = support.read(os.path.join(J, "units", f"unit-{n:02d}.html"))
+            theirs = re.sub(r'\n  "contract": "[0-9.]+",', "",
+                            support.read(os.path.join(J, "units", f"unit-{n:02d}.html")))
             if ours != theirs:
                 fails.append(f"unit {n} differs from Joshua's committed fragment")
         return fails

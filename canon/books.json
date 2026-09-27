@@ -1,5 +1,5 @@
 {
-  "_note": "The canon in order, for the hub's canon map. A book with a study gets `site` (its Pages URL), `repo` (folder name next to bible-core, read by tools/hub_build.py) and `kind` ('core' for books built on bible-core, 'legacy' for Joshua/Matthew, whose sites predate it). Protestant order and English names; osis ids as morphhb/SBLGNT use them.",
+  "_note": "The canon in order, for the hub's canon map. A book with a study gets `site` (its Pages URL), `repo` (folder name next to bible-core, read by tools/hub_build.py) and `kind` ('core' for books using the template app, 'legacy' for Joshua/Matthew, which keep their own app shells; it sets the link style into the site. Joshua's pipeline is on the core since 2026-09-26). Protestant order and English names; osis ids as morphhb/SBLGNT use them.",
   "books": [
     {"osis": "Gen", "name": "Genesis", "t": "ot"},
     {"osis": "Exod", "name": "Exodus", "t": "ot"},

@@ -1,16 +1,15 @@
 """The core, run read-only against Joshua's real data, agrees with what
-Joshua's own pipeline produced. Joshua is the reference implementation;
-any disagreement here is a porting bug in the core (or a real Joshua bug
-worth knowing about)."""
+Joshua has committed. Joshua was the reference implementation and has run on
+the core itself since 2026-09-26, so the comparison against Joshua's own
+audit script is gone; these still catch a core change that would alter a
+shipped book's output."""
 import glob
 import json
 import os
 import re
-import subprocess
-import sys
 
 import support
-from biblecore import audit, meta, roots, scan
+from biblecore import meta, roots, scan
 
 UNITS = os.path.join(support.JOSHUA, "units")
 
@@ -60,39 +59,3 @@ def test_roots_json_validates():
     return roots.validate(roots.load_roots(), threads_data=tj)
 
 
-_JOSHUA_DUMP = r'''
-import json, sys
-sys.path.insert(0, ".")
-import audit_thread_coverage as a
-uj = json.load(open("../data/units.json", encoding="utf-8"))
-out = {u["slug"]: a.coverage_for_unit(u["slug"]) for u in uj["units"] if u.get("built")}
-for c in out.values():
-    c["local"] = {k: [list(x) for x in v] for k, v in c["local"].items()}
-sys.stdout.reconfigure(encoding="utf-8")
-print(json.dumps(out, ensure_ascii=False, sort_keys=True))
-'''
-
-
-def test_audit_matches_joshuas_own_audit():
-    """Run Joshua's audit (read-only) and the core's on every built unit;
-    the structured coverage must be identical."""
-    r = subprocess.run([sys.executable, "-c", _JOSHUA_DUMP],
-                       cwd=os.path.join(support.JOSHUA, "pipeline"),
-                       capture_output=True, text=True, encoding="utf-8")
-    if r.returncode:
-        return [f"Joshua's audit failed to run: {r.stderr[-400:]}"]
-    theirs = json.loads(r.stdout)
-    uj = meta._load("units.json")
-    ours = {}
-    for u in uj["units"]:
-        if u.get("built"):
-            c = audit.coverage_for_unit(u["slug"])
-            c["local"] = {k: [list(x) for x in v] for k, v in c["local"].items()}
-            ours[u["slug"]] = c
-    for slug, c in ours.items():
-        if c.pop("covered"):  # a core-only key; Joshua declares no verses
-            return [f"{slug}: unexpected covered verses"]
-    ours = json.loads(json.dumps(ours, ensure_ascii=False, sort_keys=True))
-    if ours != theirs:
-        diffs = [s for s in theirs if ours.get(s) != theirs[s]]
-        return [f"coverage differs for {diffs}"]

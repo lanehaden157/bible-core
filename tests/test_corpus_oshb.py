@@ -15,7 +15,7 @@ def test_joshua_rebuild_is_byte_identical():
     real = support.joshua_book()
     tmp = tempfile.mkdtemp(prefix="biblecore-corpus-")
     try:
-        cfg = dict(real.cfg, paths=dict(real.cfg["paths"], wlc=real.path("wlc")))
+        cfg = dict(real.cfg, paths=dict(real.cfg.get("paths", {}), wlc=real.path("wlc")))
         counts = oshb.build(bookmod.Book(cfg, tmp))
         fails = []
         for name in ("Joshua-words.tsv", "Joshua-reading.txt", "candidate-boundaries.md"):
@@ -48,7 +48,7 @@ def test_aramaic_words_carry_lang():
     tmp = tempfile.mkdtemp(prefix="biblecore-dan-")
     try:
         cfg = dict(real.cfg, book="Daniel", osis="Dan", slug="daniel",
-                   paths=dict(real.cfg["paths"], wlc=real.path("wlc"),
+                   paths=dict(real.cfg.get("paths", {}), wlc=real.path("wlc"),
                               words="Daniel-words.tsv", reading="Daniel-reading.txt",
                               verse_map="daniel-versification.md"))
         b = bookmod.Book(cfg, tmp)

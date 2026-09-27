@@ -6,6 +6,7 @@ writes into the Joshua repo; a test that needs to write copies what it needs
 into a temporary book first (scratch_book()).
 """
 import json
+import re
 import os
 import shutil
 import sys
@@ -32,7 +33,7 @@ def joshua_book():
 
 
 def scratch_book(copy=("data", "units", "css", "Joshua-words.tsv",
-                       "Joshua-reading.txt", "pipeline/retrofit-tags.json")):
+                       "Joshua-reading.txt", "retrofit/retrofit-tags.json")):
     """A temporary writable copy of the parts of Joshua a test needs, as the
     current Book. Big read-only inputs (morphhb, the lexicon) stay pointed at
     the real repo. Returns the temp root; the caller removes it."""
@@ -47,12 +48,30 @@ def scratch_book(copy=("data", "units", "css", "Joshua-words.tsv",
             shutil.copyfile(src, dst)
     cfg = json.load(open(FIXTURE, encoding="utf-8"))
     cfg["palette"] = os.path.join(HERE, "joshua_well.json")
-    cfg["paths"] = dict(cfg["paths"],
+    cfg["paths"] = dict(cfg.get("paths", {}),
                         wlc=os.path.join(JOSHUA, "node_modules", "morphhb", "wlc"),
-                        lexicon=os.path.join(JOSHUA, "pipeline", "corpus", "lexicon",
+                        lexicon=os.path.join(JOSHUA, "corpus", "lexicon",
                                              "HebrewStrong.xml"))
     bookmod.use(bookmod.Book(cfg, tmp))
     return tmp
+
+
+def unstamp(root):
+    """Drop the `contract` stamps from a scratch copy's units and units.json,
+    so it looks like a book from before contract versions (Joshua's units are
+    stamped since it moved onto the core, 2026-09-26)."""
+    for f in os.listdir(os.path.join(root, "units")):
+        path = os.path.join(root, "units", f)
+        text = read(path)
+        with open(path, "w", encoding="utf-8", newline="") as fh:
+            fh.write(re.sub(r'\n  "contract": "[^"]*",', "", text))
+    path = os.path.join(root, "data", "units.json")
+    uj = json.load(open(path, encoding="utf-8"))
+    for u in uj["units"]:
+        u.pop("contract", None)
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(uj, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
 
 
 def read(path):

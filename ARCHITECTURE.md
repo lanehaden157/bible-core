@@ -22,9 +22,12 @@ their own approach and will keep changing as units ship. Anything here marked
 book's own style reference.
 
 Joshua and Matthew are the **reference implementations**. Everything here was
-learned there. They are not migrating onto this core (Lane, 2026-09-22). They
-keep their own code, and they copy a core fix across only when it clearly
-helps.
+learned there. **Joshua runs on this core since 2026-09-26** (Lane reversed
+the 2026-09-22 "not migrating" call): vendored package, `book.json`, core
+build and sync, with its own app shell and theme kept (`css/styles.css` as a
+single-file `paths.css`, so no `core.css`/`components.css`). Its units came
+through byte-identical apart from the contract stamp. Matthew keeps its own
+code and copies a core fix across only when it clearly helps.
 
 Where a rule gives a reason, the reason matters more than the rule. Items
 marked **(learned)** each cost a real mistake. Read the lesson before relaxing
@@ -409,8 +412,8 @@ data layer (`data/words/<ch>.json`, `lemmas.json`, `text.json`;
 **The canon hub (0.6.0).** `python tools/hub_build.py ../hub` builds
 <https://lanehaden157.github.io/bible/>, its own repo (`lanehaden157/bible`)
 federating the book sites (H8). The page, app and CSS live in this repo's
-`hub/`. Data comes from each started book's `data/*.json` (read-only; Joshua's
-lemma concordance is computed from its word table), plus `canon/books.json`
+`hub/`. Data comes from each started book's `data/*.json` (read-only;
+`lemmas.json` wherever a book's build emits one, Joshua included), plus `canon/books.json`
 (the canon in order, which names each started book's site, repo and kind) and
 the canon registries, including `canon/paths.json` (reading paths, F21). Pages:
 - canon map with progress (F6), and a page per book;
@@ -461,12 +464,14 @@ reference's worked example, and that re-running the build changes no file.
 Audit gaps are reported but don't fail it.
 
 **Testing the core:** `python tests/run.py [filter]` (no pytest needed). The
-suite runs against Joshua's real data, read-only. Its strongest check:
+suite runs against Joshua's real data, read-only (scratch copies where a test
+writes). Its strongest check:
 Joshua rebuilt from the template, porting its four source artifacts through
 the CLI, reproduces Joshua's committed units byte for byte with a clean
 thread audit (`tests/test_template.py`). It also checks the corpus builder
-against Joshua's word table, the audit against Joshua's own audit, and
-generate/scan against Joshua's committed files.
+against Joshua's word table and generate/scan against Joshua's committed
+files. (The comparison with Joshua's own audit script went when Joshua
+moved onto the core.)
 
 ---
 

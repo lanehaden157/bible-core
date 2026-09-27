@@ -18,6 +18,7 @@ _tmp = None
 def setup():
     global _tmp
     _tmp = support.scratch_book()
+    support.unstamp(_tmp)
 
 
 def teardown():
@@ -50,7 +51,7 @@ def test_stamp_validation():
 def test_new_check_skips_unstamped_units():
     html = _unit(1)
     if um.parse(html).get("contract"):
-        return ["Joshua unit 1 unexpectedly carries a stamp"]
+        return ["unit 1 still carries a stamp after unstamp()"]
     probe = (contract.current(), "probe", lambda h, m, t, c: ["probe fired"])
     um.FRAGMENT_CHECKS.append(probe)
     try:
