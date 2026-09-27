@@ -70,16 +70,26 @@ def test_parity_with_matthews_own_canon_leads():
     our_phrase = leads.phrase_leads_greek(our_lxx, our_freq, our_uw)
 
     fails = []
-    # a KNOWN, correct difference: Matthew's own script keys purely by
-    # transliteration ("ou"), collapsing ou (not) and ou (a distinct
-    # homograph lexeme) into one bucket. Core's lemma_ids() (morphgnt.py)
-    # disambiguates homographs with a digit, same as roots.py/audit.py do
-    # everywhere else -- so core correctly reports "ou2" as its own,
-    # separate rare lead, which Matthew's script silently folds into "ou".
-    KNOWN_HOMOGRAPH_SPLITS = {"ou2"}
-    their_rare_keys = {r["key"]: (len(r["lxx"]), len(r["nt"])) for r in their_rare}
+    # KNOWN, correct differences from Matthew's simpler key scheme:
+    #  * "ou2" -- Matthew's own script keys purely by transliteration
+    #    ("ou"), collapsing ou (not) and ou (a distinct homograph lexeme)
+    #    into one bucket. Core's lemma_ids() (morphgnt.py) disambiguates
+    #    homographs with a digit, same as roots.py/audit.py do everywhere
+    #    else -- so core correctly reports "ou2" as its own, separate rare
+    #    lead, which Matthew's script silently folds into "ou".
+    #  * "mechri(s)" -- Matthew's key keeps MorphGNT's parenthesized movable
+    #    letter literally (its greek_corpus.py never strips it); core's
+    #    lang/greek.lemma_key() strips it (a lemma-id can't contain '(' --
+    #    roots.LEMMA_ID_RE), so "mechri(s)" and any other spelling of the
+    #    same lemma correctly land on one "mechri" id, changing its
+    #    frequency and dropping it out of core's rare-lead threshold. Not a
+    #    lead core is missing -- the word just isn't rare once its
+    #    occurrences are counted correctly under one id.
+    KNOWN_KEY_DIFFERENCES = {"ou2", "mechri(s)"}
+    their_rare_keys = {r["key"]: (len(r["lxx"]), len(r["nt"])) for r in their_rare
+                       if r["key"] not in KNOWN_KEY_DIFFERENCES}
     our_rare_keys = {r["key"]: (len(r["lxx"]), len(r["nt"])) for r in our_rare
-                     if r["key"] not in KNOWN_HOMOGRAPH_SPLITS}
+                     if r["key"] not in KNOWN_KEY_DIFFERENCES}
     if their_rare_keys != our_rare_keys:
         only_theirs = set(their_rare_keys) - set(our_rare_keys)
         only_ours = set(our_rare_keys) - set(their_rare_keys)

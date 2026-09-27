@@ -110,9 +110,20 @@ def transliterate_word(surface, lemma=None, morph=None):
     return transliterate(surface)
 
 
+_MOVABLE = re.compile(r"\(.*?\)")
+
+
 def lemma_key(lemma):
-    """A Greek lemma's id: its transliteration, lower case."""
-    return transliterate(lemma).lower()
+    """A Greek lemma's id: its transliteration, lower case.
+
+    MorphGNT spells a handful of lemmas with a parenthesized movable letter
+    -- ἔξεστι(ν), οὕτω(ς), εἴκοσι(ν), μέχρι(ς), πέρυσι(ν) -- the optional
+    nu/sigma some grammars mark this way. Transliterated as-is that parén
+    survives into the id ('exesti(n)'), which the roots.json id scheme
+    rejects (roots.LEMMA_ID_RE) and which needlessly forks a word's id from
+    the CITED FORM. Stripped before transliterating: same lexeme either
+    way, same as OSHB's own bound-prefix segments are stripped upstream."""
+    return transliterate(_MOVABLE.sub("", lemma)).lower()
 
 
 # ---- the id scheme roots.py and the audit use (see roots._override) ------

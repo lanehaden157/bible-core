@@ -75,6 +75,23 @@ def test_lemma_key():
     return fails
 
 
+def test_lemma_key_strips_movable_letter():
+    # MorphGNT spells a few lemmas with a parenthesized movable nu/sigma --
+    # ἔξεστι(ν), οὕτω(ς), εἴκοσι(ν), μέχρι(ς), πέρυσι(ν). Transliterated
+    # as-is that paren would land in the id, which LEMMA_ID_RE rejects, and
+    # would needlessly fork one lexeme's id by which form MorphGNT happened
+    # to cite.
+    fails = []
+    for lemma, key in {"ἔξεστι(ν)": "exesti", "οὕτω(ς)": "houtō",
+                       "μέχρι(ς)": "mechri"}.items():
+        got = greek.lemma_key(lemma)
+        if got != key:
+            fails.append(f"{lemma}: {got!r} != {key!r}")
+        if not greek.LEMMA_ID_RE.match(got):
+            fails.append(f"{got} doesn't match LEMMA_ID_RE")
+    return fails
+
+
 def test_parity_with_matthew_over_every_word():
     src = os.path.join(MATTHEW, "pipeline", "greek.py")
     if not (os.path.exists(src) and os.path.exists(MORPHGNT)):
