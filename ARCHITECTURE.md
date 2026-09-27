@@ -4,7 +4,7 @@
 core.css/theme.css split, with poem, itin and textform alongside echo and list.
 0.5.0 added the reading data layer (`emit`) and the reader features (§8).
 0.6.0 added the canon hub (§8) and linked each book site back to it.
-0.7.0 adds Greek: a second language adapter and corpus adapter, proven on
+0.8.0 adds division themes (§8). 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
 Matthew's data read-only, and the Hebrew -> LXX -> NT bridge (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
@@ -456,6 +456,29 @@ key word: the Hebrew ids, the LXX lemma(s) with a verse, and the NT lemma(s)
 with a verse. `tests/test_bridge.py` checks every cited word against Numbers'
 and Joshua's word tables, Matthew's LXX build and MorphGNT, all read-only. The
 hub shows the bridge on each canon-thread page and at `#/bridge`.
+
+**Division themes (0.8.0).** `biblecore/web/themes.json` holds Lane's picks:
+- **Five divisions**, each with its own paper, ink, three signature colours and
+  typefaces: Torah, Former Prophets, Later Prophets, Writings and New
+  Testament. The last two are provisional.
+- **Per book:** an accent pair and an emblem. The emblems are in
+  `web/emblems/*.svg`, simplified line drawings.
+
+The `assets` step turns the book's entry into `css/division.css`
+(`theme.py`). That file carries:
+- **Tokens** under core.css's own names. Text-role colours are darkened until
+  they read on the paper, and a test checks every book in light and dark.
+- **Dark palette:** used for `html[data-theme=dark]`, or for `auto` when the
+  system prefers dark. The index.html head script sets data-theme from the
+  shared `bible:theme` choice (Settings → Appearance).
+- **Banner masthead:** the book's colour, with the emblem in a circle (CSS
+  mask over an inlined SVG).
+- **Ornament:** a light rule above the notes.
+- **Dark-mode tracked words:** lifted toward white (threads.js sets `--rc`;
+  the colours themselves never change).
+
+A book overrides any part in `book.json` `"theme"`. A book with no entry gets
+no division.css, and its theme.css fallback tokens (`:where(:root)`) apply.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
 the build rerun). It checks that the core pin agrees, the corpus loads, the

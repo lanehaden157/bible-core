@@ -32,7 +32,7 @@ def _pinned_text(commit, rel):
 
 
 # vendored file types: code, plus the components' css/json/md and web/ assets
-EXTS = (".py", ".css", ".json", ".md", ".js")
+EXTS = (".py", ".css", ".json", ".md", ".js", ".svg")
 
 
 def local_edits(book_root):

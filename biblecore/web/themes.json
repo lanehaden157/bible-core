@@ -1,11 +1,11 @@
 {
-  "_note": "Lane's theme picks (2026-09-26, from the picker in chat). Divisions set paper, ink, signature colours and type; each book varies an accent pair (`primary`, `secondary`) and an emblem. Masthead style is shared by every book. Later Prophets and Writings bases are provisional until those divisions are designed. Nothing reads this yet: it's the spec the division themes get built from. Book accents are chrome only (verse numbers, headings, borders, the masthead band); tracked-word colours come from each division's own palette well, checked for legibility on its paper.",
+  "_note": "Division and per-book themes (Lane's picks, 2026-09-26). Vendored with the package; assets.py turns the book's entry into css/division.css. A division sets paper, ink, signature colours and typefaces; a book sets its accent pair and emblem (biblecore/web/emblems/<emblem>.svg, simplified line drawings, picked by Claude). A book overrides any of it in book.json \"theme\" ({division?, primary?, secondary?, emblem?}) when it starts. Accents are chrome only; tracked-word colours keep their own palette (lightened in dark mode).",
   "decisions": {
     "divisions": "distinct editions: each division has its own paper, ink and typefaces",
     "legacy_books": "Joshua and Matthew opt in (stylesheet + masthead only; units and tracked-word colours unchanged)",
     "dark_mode": "yes, one night palette per division, following the system setting with a toggle in Settings",
-    "emblems": "hand-drawn line emblems, pending Lane's look at samples",
-    "ornaments": "per-division section ornaments (Claude's design, shown to Lane)",
+    "emblems": "simplified line drawings only, one per book, picked by Claude; Lane changes them when a book starts",
+    "ornaments": "light-weight division rules (no chi-rho), picked by Claude",
     "colour_shift": "no"
   },
   "masthead": "banner-emblem",
@@ -93,7 +93,7 @@
       "name": "Blood and hyssop",
       "primary": "#8b2323",
       "secondary": "#6b7a3c",
-      "emblem": "wave"
+      "emblem": "doorway"
     },
     "Lev": {
       "division": "torah",
@@ -101,7 +101,7 @@
       "name": "Gold, ash, linen",
       "primary": "#b08a2e",
       "secondary": "#8a8272",
-      "emblem": "altar flame"
+      "emblem": "altar"
     },
     "Num": {
       "division": "torah",
@@ -125,7 +125,7 @@
       "name": "Scarlet cord, Jericho",
       "primary": "#a3322a",
       "secondary": "#b98d4e",
-      "emblem": "stone heap"
+      "emblem": "cairn"
     },
     "Judg": {
       "division": "former",
@@ -189,7 +189,7 @@
       "name": "The feasts",
       "primary": "#6a1f3a",
       "secondary": "#2f7a7a",
-      "emblem": "mask"
+      "emblem": "goblet"
     },
     "Dan": {
       "division": "writings",

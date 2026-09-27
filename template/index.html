@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{BOOK}} Study</title>
 <meta name="description" content="A literary-canonical study translation of the Book of {{BOOK}}.">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("bible:theme")||"auto"}catch(e){document.documentElement.dataset.theme="auto"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Frank+Ruhl+Libre:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/core.css?v=3">
-<link rel="stylesheet" href="css/components.css?v=3">
-<link rel="stylesheet" href="css/theme.css?v=3">
+<link rel="stylesheet" href="css/core.css?v=4">
+<link rel="stylesheet" href="css/components.css?v=4">
+<link rel="stylesheet" href="css/division.css?v=4">
+<link rel="stylesheet" href="css/theme.css?v=4">
 </head>
 <body>
 
@@ -33,6 +34,8 @@
   <div id="settings-panel" class="settings-panel" role="menu" aria-label="display settings" hidden>
     <div class="settings-h">Reading mode</div>
     <div id="setting-modes" class="settings-modes"></div>
+    <div class="settings-h">Appearance</div>
+    <div id="setting-appearance" class="settings-modes"></div>
     <div class="settings-h">Layout</div>
     <label class="settings-row">
       <input type="checkbox" id="setting-center-text">
@@ -52,6 +55,6 @@
 <a id="fab-prev" class="unit-fab prev" aria-label="Previous unit" hidden>‹</a>
 <a id="fab-next" class="unit-fab next" aria-label="Next unit" hidden>›</a>
 
-<script type="module" src="app/main.js?v=7"></script>
+<script type="module" src="app/main.js?v=8"></script>
 </body>
 </html>

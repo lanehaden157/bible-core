@@ -18,6 +18,9 @@ ALLOWED_KEYS = {
     "paths", "core", "versification",
     # the canon hub's URL; the site links to it and reads its canon.json
     "hub",
+    # overrides for the book's entry in biblecore/web/themes.json
+    # ({division?, primary?, secondary?, emblem?}); see theme.py
+    "theme",
 }
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
 # the corpus numbering is converted through the corpus's own map) or

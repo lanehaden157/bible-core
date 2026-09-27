@@ -1,17 +1,19 @@
 /* ============================================================================
    theme.css -- this book's look. Book-owned: edit freely.
 
-   STARTS AS JOSHUA'S THEME. Give the book its own look: replace the tokens
-   below and the two font families (here and in index.html's Google Fonts
-   link). Loaded after css/core.css and css/components.css (both generated
-   by the build), so a book-only rule or override can go at the bottom.
+   The book's look comes from css/division.css, generated from bible-core's
+   web/themes.json (its division's paper, ink and typefaces, plus this
+   book's accent pair and emblem). To change the accents or emblem, set
+   book.json "theme"; to adjust anything else, override it here: this file
+   loads last. The :root block below is the fallback for a book with no
+   division theme.
 
    The whitelist check reads every css/*.css: a class a fragment uses must be
    defined in one of them. A new component belongs in bible-core's component
    registry (biblecore/components/), enabled in book.json.
    ========================================================================== */
 
-:root {
+:where(:root) {  /* fallback only: division.css wins when present */
   --bg: #e9dfc3;
   --panel: #f4eed9;
   --panel-2: #e3d5ab;

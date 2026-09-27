@@ -6,6 +6,8 @@
   css/components.css       each enabled component's style.css
   data/components.json     [{name, role, selector}] for app/main.js + spotlight.js
   components-reference.md  each enabled component's snippet (synced)
+  css/division.css         the book's division theme: tokens, dark mode,
+                           banner masthead + emblem, ornament (theme.py)
 
 All generated, so don't edit them. The book's own look is css/theme.css. Runs
 first in the build, since validate's whitelist reads every css/*.css.
@@ -44,6 +46,10 @@ def main(argv=None):
             wrote.append("css/core.css")
         if _write(os.path.join(css, "components.css"), components.css_bundle(comps)):
             wrote.append("css/components.css")
+        from biblecore import theme
+        division = theme.build_css(b)
+        if division and _write(os.path.join(css, "division.css"), division):
+            wrote.append("css/division.css")
     data = json.dumps(components.app_manifest(comps), indent=2, ensure_ascii=False) + "\n"
     if _write(b.data("components.json"), data):
         wrote.append("data/components.json")

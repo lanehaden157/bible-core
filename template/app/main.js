@@ -15,7 +15,7 @@
    together, whenever threads.js/spotlight.js/search.js changes -- a stale
    cached module is invisible in the DOM and easy to mistake for a real bug. */
 
-import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=6";
+import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=7";
 import { enhanceSpotlights, openAll } from "./spotlight.js?v=6";
 import { renderSearch } from "./search.js?v=6";
 import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
@@ -83,6 +83,7 @@ async function init() {
   wireNavToggle();
   wireSettingsToggle();
   wireModes();
+  wireAppearance();
   window.addEventListener("hashchange", route);
   route();
 }
@@ -95,6 +96,22 @@ function applySettings() {
   const checkbox = document.getElementById("setting-center-text");
   if (checkbox) checkbox.checked = centered;
   applyMode(readMode());
+}
+
+/* light / dark / follow the system. The choice is shared by every book site
+   (one origin), set on <html data-theme> by index.html's first script so the
+   page never flashes the wrong palette; division.css holds the palettes. */
+function wireAppearance() {
+  const box = document.getElementById("setting-appearance");
+  if (!box) return;
+  const cur = document.documentElement.dataset.theme || "auto";
+  const opts = [["auto", "Match the system"], ["light", "Light"], ["dark", "Dark"]];
+  box.innerHTML = opts.map(([v, label]) =>
+    `<label class="settings-row"><input type="radio" name="appearance" value="${v}"${v === cur ? " checked" : ""}> ${label}</label>`).join("");
+  box.addEventListener("change", (e) => {
+    document.documentElement.dataset.theme = e.target.value;
+    try { localStorage.setItem("bible:theme", e.target.value); } catch (err) { /* private mode */ }
+  });
 }
 
 /* reading-mode radios, built from reader.js MODES */

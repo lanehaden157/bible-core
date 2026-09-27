@@ -333,7 +333,7 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
 
 /* ---- root hover tip + click popover ---- */
 
-.unit [data-root] { cursor: pointer; }
+.unit [data-root] { cursor: pointer; --rc-shown: var(--rc); }
 .unit [data-root]:hover { text-decoration: underline dotted; text-underline-offset: 3px; }
 .unit [data-root].root-active {
   text-decoration: underline; text-underline-offset: 3px;
