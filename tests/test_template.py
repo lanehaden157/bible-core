@@ -87,7 +87,7 @@ def test_joshua_from_template_reproduces_joshua():
         units = [{k: v for k, v in u.items() if k not in ("built", "roots")} | {"built": False}
                  for u in uj["units"]]
         json.dump({"book": "Joshua", "unit_count": uj["unit_count"],
-                   "groupings": [dict(kind="movement", **m) for m in uj["movements"]],
+                   "groupings": uj["groupings"],
                    "units": units},
                   open(os.path.join(d, "data", "units.json"), "w", encoding="utf-8"),
                   indent=2, ensure_ascii=False)

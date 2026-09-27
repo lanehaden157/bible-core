@@ -34,8 +34,7 @@ sys.path.insert(0, CORE)
 from biblecore import book as bookmod  # noqa: E402
 from biblecore import theme  # noqa: E402
 
-BOOKS = {  # folder name -> (osis, display name)
-    "Joshua": ("Josh", "Joshua"),
+BOOKS = {  # folder name -> (osis, display name); Joshua left 0.8.5 (template shell)
     "Matthew": ("Matt", "Matthew"),
 }
 

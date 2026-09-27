@@ -324,7 +324,7 @@ def test_roots_kind_members_rejected():
 def test_component_whitelist_unstyled_class():
     html = _fragment(_meta(), body_extra='<div class="not-a-real-class">x</div>\n')
     errs = um.validate_fragment(html)
-    _check("class absent from css/styles.css must fail",
+    _check("class absent from the book's css/ must fail",
            any("not-a-real-class" in e for e in errs), errs)
 
 
@@ -638,11 +638,11 @@ def test_echo_unclosed_aside_fails():
 
 
 def test_echo_class_is_in_css_whitelist():
-    """echo must be a real css/styles.css class, not just accepted by
+    """echo must be a real class in the book's css/, not just accepted by
     check_echo() -- otherwise check_component_whitelist() would reject
     any fragment that actually uses it."""
     classes = um._css_classes()
-    _check("'echo' must be defined in css/styles.css",
+    _check("'echo' must be defined in the book's css/",
            classes is not None and "echo" in classes, classes)
 
 

@@ -88,7 +88,7 @@ class _ScratchProject:
             "retrofit": os.path.join(d, "retrofit-tags.json"),
             "words": os.path.join(J, "Joshua-words.tsv"),
             "reading": os.path.join(J, "Joshua-reading.txt"),
-            "css": os.path.join(J, "css", "styles.css"),
+            "css": os.path.join(J, "css"),
         }
         self._prev = bookmod._current
         bookmod.use(bookmod.Book(cfg, d))
