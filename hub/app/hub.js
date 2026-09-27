@@ -16,7 +16,7 @@
 // is rebuilt and pushed, and a stale cached copy is invisible
 const DATA = (f) => { const u = new URL(`../data/${f}`, import.meta.url); u.searchParams.set("v", Date.now()); return u; };
 const content = document.getElementById("content");
-let books = [], byOsis = new Map(), bySlug = new Map(), canon = {}, conc = null;
+let books = [], divisions = [], byOsis = new Map(), bySlug = new Map(), canon = {}, conc = null;
 
 init();
 
@@ -27,6 +27,7 @@ async function init() {
       fetch(DATA("canon.json")).then((r) => r.json()),
     ]);
     books = b.books;
+    divisions = b.divisions || [];
     canon = c;
   } catch (e) {
     content.innerHTML = `<p class="missing">Could not load the hub's data.</p>`;
@@ -109,26 +110,31 @@ function refLink(ref, label) {
 function home() {
   document.title = "Canon — study hub";
   const started = books.filter((b) => b.site);
+  // a themed book's accent pair as a stripe; a started book also shows progress
+  const stripe = (b) => b.primary
+    ? `<span class="stripe"><i style="background:${b.primary}"></i><i style="background:${b.secondary}"></i></span>` : "";
   const tile = (b) => {
-    if (!b.site) return `<span class="tile" title="${esc(b.name)}">${esc(b.osis)}</span>`;
+    if (!b.site) return `<span class="tile${b.primary ? " themed" : ""}" title="${esc(b.name)}">${stripe(b)}${esc(b.osis)}</span>`;
     const pct = b.unit_count ? Math.round(100 * b.units_built / b.unit_count) : 0;
-    return `<a class="tile started" href="#/book/${b.slug}" title="${esc(b.name)}: ${b.units_built} of ${b.unit_count} units">
-      ${esc(b.osis)}<span class="bar"><i style="width:${pct}%"></i></span></a>`;
+    return `<a class="tile started" href="#/book/${b.slug}" title="${esc(b.name)}: ${b.units_built} of ${b.unit_count} units"
+      style="border-color:${b.primary || "var(--accent-bronze)"}">${stripe(b)}
+      ${esc(b.osis)}<span class="bar"><i style="width:${pct}%;background:${b.primary || "var(--accent-clay)"}"></i></span></a>`;
   };
-  const grid = (t, label) => `<section class="canon-half"><h2>${label}</h2>
-    <div class="tiles">${books.filter((b) => b.t === t).map(tile).join("")}</div></section>`;
+  const grid = (d) => `<section class="canon-div"><h2><span class="sig">${d.signature.map((c) =>
+      `<i style="background:${c}"></i>`).join("")}</span>${esc(d.label)}${d.provisional ? ` <span class="muted">(theme provisional)</span>` : ""}</h2>
+    <div class="tiles">${books.filter((b) => b.division === d.id).map(tile).join("")}</div></section>`;
   content.innerHTML = `
     <h1 class="page-h">The canon, one book at a time</h1>
     <p class="lede">Literary-canonical study translations, each its own site. This hub
       tracks their progress and what runs between them: the arcs of the one story,
       threads that cross books, type-scenes, and every quotation, allusion and echo.</p>
     <div class="cards">${started.map((b) => `
-      <a class="card" href="#/book/${b.slug}">
+      <a class="card" href="#/book/${b.slug}" style="${b.primary ? `border-left:5px solid ${b.primary}` : ""}">
         <b>${esc(b.name)}</b>
         <span>${b.units_built} of ${b.unit_count} units built · ${b.threads.length} tracked threads</span>
         <span class="bar"><i style="width:${Math.round(100 * b.units_built / (b.unit_count || 1))}%"></i></span>
       </a>`).join("")}</div>
-    ${grid("ot", "Hebrew Bible")}${grid("nt", "New Testament")}
+    ${divisions.map(grid).join("")}
     <section><h2>Arcs</h2><div class="cards">${(canon.arcs || []).map((a) => `
       <a class="card" href="#/arcs/${a.id}"><b>${esc(a.label)}</b><span>${esc(a.note || "")}</span></a>`).join("")}
     </div></section>`;

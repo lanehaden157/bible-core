@@ -48,6 +48,26 @@ def canon_file(name):
 
 # ------------------------------------------------------------------- books
 
+# Hebrew-canon divisions for the canon map (the Tanakh's own grouping; the
+# map keeps canon/books.json's order within each). Themes come from
+# biblecore/web/themes.json: a themed book shows its accent pair.
+FORMER = {"Josh", "Judg", "1Sam", "2Sam", "1Kgs", "2Kgs"}
+LATTER = {"Isa", "Jer", "Ezek", "Hos", "Joel", "Amos", "Obad", "Jonah", "Mic",
+          "Nah", "Hab", "Zeph", "Hag", "Zech", "Mal"}
+TORAH = {"Gen", "Exod", "Lev", "Num", "Deut"}
+THEME_KEY = {"1Sam": "Sam", "2Sam": "Sam", "1Kgs": "Kgs", "2Kgs": "Kgs"}
+
+
+def division_of(osis, t):
+    if t == "nt":
+        return "nt"
+    return ("torah" if osis in TORAH else "former" if osis in FORMER
+            else "latter" if osis in LATTER else "writings")
+
+
+def themes():
+    return _load(os.path.join(CORE, "biblecore", "web", "themes.json"), {"divisions": {}, "books": {}})
+
 def book_groups(units_json):
     """[{label, name, units}] for the first grouping kind; legacy
     'movements' ({n,name,units} in Joshua, {id,label,range} in Matthew)."""
@@ -115,6 +135,15 @@ def build():
     entries = {b["osis"]: book_entry(b) for b in started}
     books = [entries.get(b["osis"]) or OrderedDict(osis=b["osis"], name=b["name"], t=b["t"])
              for b in books_cfg]
+    th = themes()
+    for bk in books:
+        bk["division"] = division_of(bk["osis"], bk["t"])
+        pick = th["books"].get(THEME_KEY.get(bk["osis"], bk["osis"]))
+        if pick:
+            bk["primary"], bk["secondary"] = pick["primary"], pick["secondary"]
+    divisions = [OrderedDict(id=k, label=v["label"], signature=v["signature"],
+                             provisional=bool(v.get("provisional")))
+                 for k, v in th["divisions"].items()]
     canon = OrderedDict(
         arcs=canon_file("arcs").get("arcs", []),
         threads=canon_file("threads").get("threads", []),
@@ -128,7 +157,8 @@ def build():
               "glosses are Strong's short definitions (identifiers, not renderings).",
         lemmas=concordance([entries[b["osis"]] | {"repo": b["repo"]} for b in started]),
     )
-    return {"books.json": {"books": books}, "canon.json": canon, "concordance.json": conc}
+    return {"books.json": {"books": books, "divisions": divisions}, "canon.json": canon,
+            "concordance.json": conc}
 
 
 SOURCE_FILES = ["index.html", "app/hub.js", "css/hub.css", "README.md"]
