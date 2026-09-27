@@ -123,9 +123,18 @@ function addAllControl(root) {
   const firstVerse = article.querySelector("p.v, div.v");
   if (!firstVerse) return;
 
-  // the article-level element that is or contains the first verse
+  // the level the verses sit at: the article, or a wrapper inside it that
+  // also holds the masthead (some fragments wrap everything in div.wrap)
+  let level = article;
+  const mast = article.querySelector("header.mast");
+  for (;;) {
+    const w = [...level.children].find((c) => c.contains(firstVerse));
+    if (w && w !== firstVerse && mast && w.contains(mast)) level = w;
+    else break;
+  }
+  // the element at that level that is or contains the first verse
   let anchor = firstVerse;
-  while (anchor.parentElement && anchor.parentElement !== article) {
+  while (anchor.parentElement && anchor.parentElement !== level) {
     anchor = anchor.parentElement;
   }
   // if a section heading sits right above it, put the bar above that instead,
