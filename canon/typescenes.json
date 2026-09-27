@@ -181,6 +181,28 @@
           "source": "hand"
         }
       ]
+    },
+    {
+      "id": "younger-preferred",
+      "label": "The younger preferred",
+      "arc": "covenant",
+      "note": "The blessing passes over the firstborn to a younger son: Abel, Isaac, Jacob, Ephraim, Judah, David.",
+      "instances": [
+        {
+          "book": "numbers",
+          "ref": "Num 2:18",
+          "unit": 2,
+          "note": "Ephrayim is listed before Menasheh, as Yaakov set him (Gen 48:14–20).",
+          "source": "meta"
+        },
+        {
+          "book": "numbers",
+          "ref": "Num 2:3",
+          "unit": 2,
+          "note": "Yehudah, Leah’s fourth son, leads the march where Reuven the firstborn might (Gen 49:3–10).",
+          "source": "meta"
+        }
+      ]
     }
   ]
 }

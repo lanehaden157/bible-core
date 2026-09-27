@@ -1050,8 +1050,179 @@
       "to": "Song 2:4",
       "kind": "echo",
       "unit": 1,
-      "note": "root banner",
+      "note": "root company",
       "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:2",
+      "to": "Deut 32:52",
+      "kind": "echo",
+      "unit": 2,
+      "note": "root at-a-distance",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:2",
+      "to": "Gen 1:14",
+      "kind": "echo",
+      "unit": 2,
+      "note": "root sign",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:2",
+      "to": "Num 14:11",
+      "kind": "echo",
+      "unit": 2,
+      "note": "root sign",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:2",
+      "to": "Song 2:4",
+      "kind": "echo",
+      "unit": 2,
+      "note": "root company",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:3",
+      "to": "1 Chr 2:10",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:3",
+      "to": "Exod 27:13",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:3",
+      "to": "Exod 38:13",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:3",
+      "to": "Exod 6:23",
+      "kind": "echo",
+      "unit": 2,
+      "note": "Nachshon’s sister Elisheva is Aharon’s wife: the east side of the camp is one family",
+      "source": "meta",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:9",
+      "to": "1 Chr 5:1–2",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:9",
+      "to": "Gen 49:3–4",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:9",
+      "to": "Gen 49:8–10",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:17",
+      "to": "Exod 25:8",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:17",
+      "to": "Exod 33:7",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:17",
+      "to": "John 1:14",
+      "kind": "echo",
+      "unit": 2,
+      "note": "the Word ‘tented’ among us",
+      "source": "meta",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:17",
+      "to": "Rev 21:3",
+      "kind": "echo",
+      "unit": 2,
+      "note": "the tent of God with humans",
+      "source": "meta",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:18",
+      "to": "Ps 80:1–2",
+      "kind": "echo",
+      "unit": 2,
+      "note": "",
+      "source": "echo",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:18",
+      "to": "1 Chr 7:26",
+      "kind": "echo",
+      "unit": 2,
+      "note": "Ammihud and Elishama in Yehoshua’s ancestry",
+      "source": "meta",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:18",
+      "to": "Gen 48:20",
+      "kind": "allusion",
+      "unit": 2,
+      "note": "Ephrayim set before Menasheh",
+      "source": "meta",
+      "book": "numbers"
+    },
+    {
+      "from": "Num 2:33",
+      "to": "1 Kgs 20:27",
+      "kind": "echo",
+      "unit": 2,
+      "note": "the same rare ‘were accounted’, for Yisrael’s army camped opposite Aram",
+      "source": "meta",
       "book": "numbers"
     }
   ]
