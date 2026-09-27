@@ -170,6 +170,25 @@ a.bm-tick:hover {
 .bm-key-item { color: var(--ink-soft); white-space: nowrap; }
 .bm-key-item b { color: var(--accent-clay); font-family: var(--display); font-weight: 600; margin-right: 3px; }
 
+/* the overlay grouping (book.json "overlay", e.g. Matthew's discourses):
+   tinted ticks, brackets under the units each spans, its own key row */
+.bm-tick.in-disc {
+  background: color-mix(in srgb, var(--accent-bronze) 14%, var(--panel));
+  border-color: color-mix(in srgb, var(--accent-bronze) 45%, var(--rule));
+}
+.bm-tick.in-disc[aria-current="page"] { background: var(--accent-bronze); color: var(--panel); }
+.bm-brackets { display: grid; margin-top: 5px; min-height: 26px; }
+.bm-disc { grid-row: 1; display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.bm-disc-bar {
+  display: block; width: 100%; height: 6px;
+  border: 1px solid var(--accent-bronze); border-top: none; border-radius: 0 0 4px 4px;
+}
+.bm-disc-label {
+  margin-top: 3px; font-family: var(--display); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .08em; color: var(--accent-bronze); white-space: nowrap;
+}
+.bm-key-row.disc .bm-key-item b { color: var(--accent-bronze); }
+
 .unit-chip {
   display: block; padding: 8px 12px; border: 1px solid var(--rule);
   border-radius: 7px; background: var(--panel); font-size: 14.5px; line-height: 1.3;
@@ -181,6 +200,15 @@ a.bm-tick:hover {
 .unit-chip.unbuilt { opacity: .5; cursor: default; }
 .unit-chip.unbuilt:hover { border-color: var(--rule); border-bottom-style: dotted; }
 .unit-chip.unbuilt .n { color: var(--ink-soft); }
+.unit-chip.in-disc {
+  background: color-mix(in srgb, var(--accent-bronze) 8%, var(--panel));
+  box-shadow: inset 3px 0 0 var(--accent-bronze); padding-left: 15px;
+}
+.unit-chip.in-disc:hover { border-color: var(--accent-bronze); }
+.unit-chip .disc-mark {
+  float: right; margin-left: 8px; font-family: var(--display); font-size: 11px;
+  font-weight: 600; letter-spacing: .06em; color: var(--accent-bronze);
+}
 
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 40px 26px 120px; }
 
@@ -345,6 +373,31 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
 .unit .verse-note .gloss { display: block; margin: 0; padding: 0; border: none; }
 .unit .verse-note .gloss + .gloss { margin-top: 8px; }
 
+/* a verse-aside component with its own chip (component.json "toggle"):
+   a round chip on the verse, and the panel (.aside-box) it opens. The
+   component's style.css colours its own chip and panel. */
+.unit .spot-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; margin-left: 4px; padding: 0;
+  vertical-align: baseline; text-indent: 0; font: inherit; font-size: 12px; line-height: 1;
+  color: var(--accent-bronze); background: transparent;
+  border: 1px solid var(--accent-bronze); border-radius: 50%;
+  cursor: pointer; transition: color .15s, border-color .15s, background .15s;
+}
+.unit .spot-toggle:hover { color: var(--panel); background: color-mix(in srgb, var(--accent-bronze) 55%, transparent); }
+.unit .spot-toggle.is-open { color: var(--panel); background: var(--accent-bronze); border-color: var(--accent-bronze); }
+.unit .spotlight {
+  text-indent: 0; margin: 6px 0 18px; padding: 12px 16px 14px;
+  background: color-mix(in srgb, var(--panel) 78%, var(--bg));
+  border: 1px solid var(--rule-soft); border-left: 3px solid var(--accent-bronze); border-radius: 4px;
+  font-size: 15px; line-height: 1.55; page-break-inside: avoid; break-inside: avoid;
+}
+.unit .spot-head {
+  display: block; font-family: var(--display); font-size: 11.5px; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
+}
+.unit .spot-div { height: 1px; background: var(--rule-soft); margin: 12px -16px; }
+
 /* ---- root hover tip + click popover ---- */
 
 .unit [data-root] { cursor: pointer; --rc-shown: var(--rc); }
@@ -479,6 +532,9 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
   .unit .v .n { width: 22px; }
   .unit .note-toggle { padding: 0 6px; }
   .unit .verse-note { padding-left: 11px; }
+  .unit .spot-toggle { width: 26px; height: 26px; font-size: 13px; }
+  .unit .spotlight { padding: 11px 13px 12px; }
+  .unit .spot-div { margin-left: -13px; margin-right: -13px; }
   .unit-pager { flex-direction: column; padding-bottom: 60px; }
   .unit-pager a { max-width: 100%; }
 }
@@ -490,8 +546,8 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
 
 @media print {
   .topbar-wrap, .nav-backdrop, .unit-pager, .unit-fab,
-  .note-toggle, .spot-controls { display: none !important; }
-  .verse-note { break-inside: avoid; }
+  .note-toggle, .spot-toggle, .spot-controls { display: none !important; }
+  .verse-note, .aside-box { break-inside: avoid; }
 }
 
 /* ======================================================= reader features
@@ -505,6 +561,8 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
 /* reading modes: body.mode-notes (default) / -open / -plain / -interlinear */
 body.mode-plain .unit .note-toggle,
 body.mode-plain .unit .verse-note,
+body.mode-plain .unit .spot-toggle,
+body.mode-plain .unit .aside-box,
 body.mode-plain .unit .spot-controls,
 body.mode-plain .unit sup.en,
 body.mode-plain .unit .notes { display: none !important; }

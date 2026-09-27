@@ -50,6 +50,7 @@ def build():
         "versification": b.cfg.get("versification", "kjv"),
         "core": __version__,
         "hub": b.cfg.get("hub"),
+        "overlay": b.cfg.get("overlay"),
         "unit_count": units.get("unit_count", len(rows)),
         "units_built": sum(1 for u in rows if u.get("built")),
         "files": files,

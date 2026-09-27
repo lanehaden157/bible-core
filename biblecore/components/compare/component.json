@@ -1,0 +1,9 @@
+{
+  "name": "compare",
+  "summary": "a rendering spotlight after a verse: the original, this translation, other versions and a note, in labelled rows",
+  "classes": ["compare", "row", "src", "txt"],
+  "role": "verse-aside",
+  "selector": ".compare",
+  "toggle": {"sym": "✦", "label": "spotlight", "box": "spotlight", "head": "✦ Rendering"},
+  "since": "0.1.0"
+}

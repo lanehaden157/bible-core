@@ -1,0 +1,15 @@
+/* .compare -- a rendering spotlight: labelled rows after a verse. Raw (no JS)
+   it is a dashed box; app/spotlight.js moves it into a .spotlight panel
+   behind the verse's ✦ chip (component.json "toggle"). */
+.unit .compare { display: block; text-indent: 0; margin: 6px 0 14px 0; border: 1px dashed var(--rule); border-radius: 6px; background: var(--panel); padding: 12px 16px; font-size: 15px; page-break-inside: avoid; break-inside: avoid; }
+.unit .compare .row { display: grid; grid-template-columns: 112px 1fr; gap: 4px 14px; align-items: baseline; margin: 0; padding: 5px 0; border-top: 1px solid var(--rule); }
+.unit .compare .row:first-child { border-top: none; padding-top: 0; }
+.unit .compare .src { font-variant: small-caps; letter-spacing: .05em; color: var(--ink-soft); font-style: normal; font-size: 13.5px; }
+.unit .compare .txt { line-height: 1.5; }
+.unit .spotlight .compare { margin: 0; padding: 0; border: none; background: none; border-radius: 0; }
+.unit .spotlight .compare .row { grid-template-columns: 116px 1fr; gap: 3px 14px; padding: 4px 0; border-top: 1px solid var(--rule-soft); }
+.unit .spotlight .compare .row:first-child { border-top: none; padding-top: 0; }
+.unit .spotlight .compare .src { font-size: 13px; }
+@media (max-width: 720px) {
+  .unit .compare .row, .unit .spotlight .compare .row { grid-template-columns: 1fr; gap: 1px; }
+}

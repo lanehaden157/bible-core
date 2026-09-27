@@ -2,7 +2,7 @@
 
 Each optional component is one folder here. Its pieces ship together:
 
-    <name>/component.json   {name, summary, classes, role, selector, since}
+    <name>/component.json   {name, summary, classes, role, selector, since, toggle?}
     <name>/style.css        its CSS (uses theme.css tokens only)
     <name>/__init__.py      check(html, meta) -> [problems]
     <name>/snippet.md       its style-reference text (markup, rules, why)
@@ -22,7 +22,11 @@ whose contract is at or past the component's `since` (contract.py).
 
 `role` tells the app shell what to do with the component:
   verse-aside   a following sibling of a verse, collapsed into the verse note
-                with the glosses (spotlight.js)
+                with the glosses (spotlight.js). With `toggle` it gets its own
+                chip instead: {sym, label, box?, head?, each?, cls?}. `box`
+                wraps the verse's asides of this kind in one panel (with
+                `head` as its title); `each` gives every aside its own chip
+                and leaves it unwrapped (it carries its own header)
   inline-block  a section.block that stays where the text puts it instead of
                 being hoisted with the structure blocks (main.js)
   verse         markup inside or around verse blocks; nothing to do
@@ -33,7 +37,7 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROLES = ("verse-aside", "inline-block", "verse")
-_KEYS = {"name", "summary", "classes", "role", "selector", "since"}
+_KEYS = {"name", "summary", "classes", "role", "selector", "since", "toggle"}
 
 
 class Component:
@@ -109,7 +113,9 @@ def app_manifest(comps):
     return {"_note": "Enabled components for the app shell (biblecore/components). "
                      "Generated; don't edit.",
             "components": [{"name": c.name, "role": c.spec["role"],
-                            "selector": c.spec["selector"]} for c in comps]}
+                            "selector": c.spec["selector"],
+                            **({"toggle": c.spec["toggle"]} if "toggle" in c.spec else {})}
+                           for c in comps]}
 
 
 def reference(comps, book_name):

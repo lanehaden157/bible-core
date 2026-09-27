@@ -41,7 +41,7 @@ def _quiet(fn, *a):
 def test_registry_shape():
     reg = components.registry()
     fails = []
-    if set(reg) != {"echo", "list", "poem", "itin", "textform"}:
+    if set(reg) != {"echo", "list", "poem", "itin", "textform", "compare", "synoptic"}:
         fails.append(f"registry has {sorted(reg)}")
     for c in reg.values():
         for f in ("style.css", "snippet.md", "__init__.py"):
@@ -51,6 +51,13 @@ def test_registry_shape():
             if f".{cls}" not in c.read("style.css"):
                 fails.append(f"{c.name}: class {cls} has no rule in its style.css")
         contract.parse(c.spec["since"])
+        t = c.spec.get("toggle")
+        if t is not None and (c.spec["role"] != "verse-aside" or not t.get("sym") or not t.get("label")):
+            fails.append(f"{c.name}: a toggle needs role verse-aside, a sym and a label")
+    # the app manifest carries the toggle through to spotlight.js
+    m = components.app_manifest([reg["compare"], reg["echo"]])["components"]
+    if m[0].get("toggle", {}).get("sym") != "✦" or "toggle" in m[1]:
+        fails.append(f"app manifest toggles wrong: {m}")
     return fails
 
 

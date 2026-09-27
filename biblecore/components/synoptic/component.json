@@ -1,0 +1,9 @@
+{
+  "name": "synoptic",
+  "summary": "a parallel passage after a verse (a synoptic parallel), with its own header, rows and a closing take",
+  "classes": ["synoptic", "row", "src", "txt", "take"],
+  "role": "verse-aside",
+  "selector": "aside.synoptic",
+  "toggle": {"sym": "✧", "label": "synoptic parallel", "each": true, "cls": "syn-toggle"},
+  "since": "0.1.0"
+}

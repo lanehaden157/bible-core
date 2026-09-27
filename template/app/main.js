@@ -15,8 +15,8 @@
    together, whenever threads.js/spotlight.js/search.js changes -- a stale
    cached module is invisible in the DOM and easy to mistake for a real bug. */
 
-import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=8";
-import { enhanceSpotlights, openAll } from "./spotlight.js?v=6";
+import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=9";
+import { enhanceSpotlights, openAll } from "./spotlight.js?v=7";
 import { renderSearch } from "./search.js?v=6";
 import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
          parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js?v=6";
@@ -46,6 +46,8 @@ let comps = [];       // [{name, role, selector}] from data/components.json
 let bookInfo = {};    // data/manifest.json: {book, osis, abbrev, ...}
 let groups = [];      // the primary grouping kind's entries, in order
 let groupKind = null; // e.g. "movement"
+let overlays = [];    // the overlay grouping's entries (book.json "overlay")
+let overlayKind = null; // e.g. "discourse": marks, brackets, a placement line
 
 const storagePrefix = () => (manifest?.book || "study").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const CENTER_TEXT_KEY = () => `${storagePrefix()}:centerText`;
@@ -78,6 +80,8 @@ async function init() {
   }
   groupKind = manifest.groupings?.[0]?.kind || null;
   groups = groupKind ? manifest.groupings.filter((g) => g.kind === groupKind) : [];
+  overlayKind = bookInfo.overlay || null;
+  overlays = overlayKind ? manifest.groupings.filter((g) => g.kind === overlayKind) : [];
   applySettings();
   buildUnitNav();
   wireNavToggle();
@@ -187,20 +191,30 @@ function wireNavToggle() {
 /* ----------------------------------------------------------------- unit nav */
 
 function chip(u) {
+  const d = overlayOf(u.n);
   const a = document.createElement("a");
-  a.className = "unit-chip" + (u.built ? "" : " unbuilt");
+  a.className = "unit-chip" + (u.built ? "" : " unbuilt") + (d ? " in-disc" : "");
   a.dataset.slug = u.slug;
   if (u.built) a.href = `#/${u.slug}`;
+  if (d) a.title = `${groupLabel(d)} — ${groupName(d)}`;
   a.innerHTML =
+    (d ? `<span class="disc-mark" aria-hidden="true">◆&nbsp;${roman(d.n)}</span>` : "") +
     `<span class="n">${u.n}</span>${escapeHtml(u.title)}` +
     `<span class="passage">${escapeHtml(u.passage)}${u.built ? "" : " · not yet built"}</span>`;
   return a;
 }
 
+/* "Movement II": the kind and number. A grouping's display name is its
+   `label` when it has one (units.json keeps `name` as the short id), else
+   its `name`. */
 function groupLabel(g) {
-  const kind = g.label || (g.kind ? g.kind[0].toUpperCase() + g.kind.slice(1) : "");
+  const kind = g.kind ? g.kind[0].toUpperCase() + g.kind.slice(1) : "";
   return `${kind} ${roman(g.n)}`.trim();
 }
+function groupName(g) { return g.label || g.name || ""; }
+function kindPlural(k) { return k ? k[0].toUpperCase() + k.slice(1) + "s" : ""; }
+
+function overlayOf(n) { return overlays.find((d) => d.units.includes(n)) || null; }
 
 /* Units bucketed by the primary grouping; one unnamed bucket when the book
    has no groupings. */
@@ -241,7 +255,7 @@ function buildBookMap() {
     const lab = document.createElement("div");
     lab.className = "bm-mv-label";
     lab.innerHTML = m.kind ? `<i></i><b>${roman(m.n)}</b><i></i>` : "<i></i><i></i>";
-    lab.title = m.kind ? `${groupLabel(m)} — ${m.name}` : "";
+    lab.title = m.kind ? `${groupLabel(m)} — ${groupName(m)}` : "";
     grp.appendChild(lab);
 
     const ticks = document.createElement("div");
@@ -249,7 +263,7 @@ function buildBookMap() {
     ticks.style.gridTemplateColumns = cols;
     for (const u of us) {
       const t = document.createElement(u.built ? "a" : "span");
-      t.className = "bm-tick" + (u.built ? "" : " unbuilt");
+      t.className = "bm-tick" + (u.built ? "" : " unbuilt") + (overlayOf(u.n) ? " in-disc" : "");
       t.dataset.slug = u.slug;
       t.textContent = u.n;
       t.title = `Unit ${u.n} · ${u.title} · ${u.passage}${u.built ? "" : " (not yet built)"}`;
@@ -257,6 +271,26 @@ function buildBookMap() {
       ticks.appendChild(t);
     }
     grp.appendChild(ticks);
+
+    // the overlay's groups as brackets under the units they span
+    if (overlays.length) {
+      const brs = document.createElement("div");
+      brs.className = "bm-brackets";
+      brs.style.gridTemplateColumns = cols;
+      const first = us[0].n;
+      for (const d of overlays) {
+        const inHere = d.units.filter((n) => us.some((u) => u.n === n));
+        if (!inHere.length) continue;
+        const el = document.createElement("div");
+        el.className = "bm-disc";
+        el.style.gridColumn = `${Math.min(...inHere) - first + 1} / ${Math.max(...inHere) - first + 2}`;
+        el.innerHTML = `<span class="bm-disc-bar"></span>` +
+          `<span class="bm-disc-label">◆&nbsp;${roman(d.n)}</span>`;
+        el.title = `${groupLabel(d)} — ${groupName(d)} (Units ${d.units.join(", ")})`;
+        brs.appendChild(el);
+      }
+      grp.appendChild(brs);
+    }
     row.appendChild(grp);
   }
 
@@ -266,12 +300,17 @@ function buildBookMap() {
   if (groups.length) {
     const key = document.createElement("div");
     key.className = "bm-key";
-    const heading = (groups[0].label || groupKind[0].toUpperCase() + groupKind.slice(1)) + "s";
     key.innerHTML =
-      `<div class="bm-key-row"><span class="bm-key-h">${escapeHtml(heading)}</span><span class="bm-key-items">` +
+      `<div class="bm-key-row"><span class="bm-key-h">${escapeHtml(kindPlural(groupKind))}</span><span class="bm-key-items">` +
         groups.map((m) =>
-          `<span class="bm-key-item"><b>${roman(m.n)}</b> ${escapeHtml(m.name)}</span>`).join("") +
-      `</span></div>`;
+          `<span class="bm-key-item"><b>${roman(m.n)}</b> ${escapeHtml(groupName(m))}</span>`).join("") +
+      `</span></div>` +
+      (overlays.length
+        ? `<div class="bm-key-row disc"><span class="bm-key-h">${escapeHtml(kindPlural(overlayKind))}</span><span class="bm-key-items">` +
+          overlays.map((d) =>
+            `<span class="bm-key-item"><b>◆&nbsp;${roman(d.n)}</b> ${escapeHtml(groupName(d))}</span>`).join("") +
+          `</span></div>`
+        : "");
     wrap.appendChild(key);
   }
   return wrap;
@@ -286,7 +325,7 @@ function buildUnitNav() {
     if (m.kind) {
       const label = document.createElement("div");
       label.className = "movement-label";
-      label.textContent = `${groupLabel(m)} · ${m.name}`;
+      label.textContent = `${groupLabel(m)} · ${groupName(m)}`;
       frag.appendChild(label);
     }
 
@@ -329,10 +368,11 @@ function route() {
     document.title = `Whole study — ${siteTitle()}`;
     renderPrint(content, manifest.units, bookRef(), (wrap, u) => {
       hoistStructureBlocks(wrap);
+      normalizeSectionHeadings(wrap);
       indexVerses(wrap, u);
       injectPalette(u, resolveUnit(u), `unit-palette-${u.n}`);
       rebuildLegend(wrap, resolveUnit(u));
-      enhanceSpotlights(wrap, selectorsFor("verse-aside"));
+      enhanceSpotlights(wrap, comps.filter((c) => c.role === "verse-aside"));
       openAll(wrap, true);
     });
     return;
@@ -386,11 +426,12 @@ async function loadUnit(unit, anchor) {
   content.innerHTML = html;
   renderPlacement(content, unit);
   hoistStructureBlocks(content);
+  normalizeSectionHeadings(content);
   indexVerses(content, unit);
   const resolved = resolveUnit(unit);
   injectPalette(unit, resolved);
   rebuildLegend(content, resolved);
-  enhanceSpotlights(content, selectorsFor("verse-aside"));
+  enhanceSpotlights(content, comps.filter((c) => c.role === "verse-aside"));
   const mode = readMode();
   if (mode === "open") openAll(content, true);
   if (mode === "interlinear") mountInterlinear(content);
@@ -431,6 +472,32 @@ function hoistStructureBlocks(root) {
   }
 }
 
+/* One section-heading form site-wide: <h3 class="pericope">Title <span>· range</span></h3>
+   (Matthew's unit 8 shape). Older Matthew fragments used div.sectionhead / div.panelhead /
+   h3.panel / h3.movement / h2.secthead — normalise them all here, and wrap a
+   trailing verse range in the <span> if the author didn't. Catches any future
+   drift too. */
+function normalizeSectionHeadings(root) {
+  const article = root.querySelector("article.unit") || root;
+  const LEGACY =
+    "h2.secthead, h2.sectionhead, h3.panel, h3.movement, .sectionhead, .panelhead";
+  for (const h of [...article.querySelectorAll(LEGACY)]) {
+    if (h.matches("h3.pericope")) continue;
+    const h3 = document.createElement("h3");
+    h3.className = "pericope";
+    h3.innerHTML = h.innerHTML;
+    h.replaceWith(h3);
+  }
+  const SEP = "(?:\\s|&nbsp;|\\u00a0)*";
+  const RANGE = "((?:\\d+:\\d+)(?:\\s*[\\u2013-]\\s*(?:\\d+:)?\\d+)?)";
+  const tail = new RegExp(SEP + "[·\\u2013\\u2014-]" + SEP + RANGE + "\\s*$");
+  for (const h of article.querySelectorAll("h3.pericope")) {
+    if (h.querySelector("span")) continue; // already Title <span>· range</span>
+    let s = h.innerHTML.replace(/^\s*(?:Panel|Movement|Part)\s+[\w']+\s*[·|]\s*/i, "");
+    h.innerHTML = s.replace(tail, " <span>· $1</span>");
+  }
+}
+
 /* the book switcher: every book site links back to the canon hub */
 function addHubLink(hub) {
   const actions = document.querySelector(".topbar-actions");
@@ -451,10 +518,16 @@ function renderPlacement(root, unit) {
   const mast = root.querySelector("header.mast");
   if (!mast) return;
   const mv = groups.find((m) => m.n === unit[groupKind]);
-  if (!mv) return;
+  const d = overlayOf(unit.n);
+  let txt = mv ? `${groupLabel(mv)} · ${groupName(mv)}` : "";
+  if (d) {
+    const pos = d.units.length > 1 ? ` (${d.units.indexOf(unit.n) + 1} of ${d.units.length})` : "";
+    txt += `${txt ? " — " : ""}◆ ${groupLabel(d)}: ${groupName(d)}${pos}`;
+  }
+  if (!txt) return;
   const el = document.createElement("div");
   el.className = "unit-place";
-  el.textContent = `${groupLabel(mv)} · ${mv.name}`;
+  el.textContent = txt;
   mast.appendChild(el);
 }
 

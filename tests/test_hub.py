@@ -26,7 +26,7 @@ def test_hub_data():
         fails.append("Joshua missing from the started books")
     else:
         j = started["joshua"]
-        if j["link"] != "v" or not j["groups"] or j["units_built"] < 4:
+        if j["link"] != "cv" or not j["groups"] or j["units_built"] < 4:
             fails.append(f"joshua entry: link={j['link']} groups={len(j['groups'])} built={j['units_built']}")
     lem = out["concordance.json"]["lemmas"]
     natan = lem.get("heb:5414", {}).get("books", {})

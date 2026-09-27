@@ -4,7 +4,8 @@
 core.css/theme.css split, with poem, itin and textform alongside echo and list.
 0.5.0 added the reading data layer (`emit`) and the reader features (§8).
 0.6.0 added the canon hub (§8) and linked each book site back to it.
-0.8.0 adds division themes (§8). 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
+0.8.0 adds division themes (§8). 0.9.0 puts Joshua and Matthew on the template
+app shell, with an overlay grouping and chip-toggled asides for Matthew (§8). 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
 Matthew's data read-only, and the Hebrew -> LXX -> NT bridge (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
@@ -502,6 +503,23 @@ files. (The comparison with Joshua's own audit script went when Joshua
 moved onto the core.)
 
 ---
+
+**All three books on the template shell (0.9.0).** Joshua (0.8.5) and
+Matthew (0.9.0) moved off their forked app shells onto the template's, so a
+shell change now reaches every book. Two things came across from Matthew:
+- **Overlay grouping.** book.json `"overlay"` names a secondary grouping kind
+  (Matthew: `"discourse"`). The shell draws it over the primary one: a
+  ◆ mark on unit chips, brackets under the book map, a key row, and a line in
+  each unit's placement ("◆ Discourse I: Sermon on the Mount (1 of 3)").
+- **Toggle components.** A verse-aside component may declare `"toggle"` in its
+  component.json. Instead of joining the shared * note, it gets its own chip:
+  `compare` (✦, several on one verse share a "Rendering" panel) and
+  `synoptic` (✧, one chip per parallel).
+
+A book's one-off fragment styling stays in its own `theme.css` (Matthew's
+rings, triads, exodus tables, prayer block and Greek title). A grouping's
+display name is `label`, falling back to `name`. Greek has no lexicon yet, so
+Matthew's interlinear shows transliteration and morphology without glosses.
 
 ## 9. Open questions
 

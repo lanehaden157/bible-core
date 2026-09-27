@@ -1,54 +1,100 @@
-/* Per-verse asides, collapsed by default behind one toggle per verse:
-   .gloss (a light note) plus every enabled component whose role is
-   "verse-aside" (aside.echo, aside.textform, ...), passed in by main.js from
-   data/components.json. Runs on the freshly loaded fragment; the fragments
-   themselves are untouched. */
+/* Per-verse asides, collapsed by default. A verse's following siblings are
+   gathered until the next verse or structural block:
+   - .gloss and every enabled "verse-aside" component without a `toggle`
+     (aside.echo, aside.textform, ...) share one light note (*) per verse;
+   - a component with a `toggle` (components.json, from its component.json)
+     gets its own chip: `box` wraps the verse's asides of that kind in one
+     panel headed `head` (compare -> a ✦ "Rendering" spotlight), `each` gives
+     every aside its own chip and leaves it where it is (aside.synoptic, ✧).
+   main.js passes the components in from data/components.json. Runs on the
+   freshly loaded fragment; the fragments themselves are untouched. */
 
 const BASE_SEL = ".gloss";
 const STOP_SEL =
-  "p.v, div.v, h3, section, header, .verses, table";
+  "p.v, div.v, h3, section, header, .verses, .sectionhead, .panelhead, .movement, .ring, .structure, table";
 
-export function enhanceSpotlights(root, extraSel = "") {
-  const ASIDE_SEL = extraSel ? `${BASE_SEL}, ${extraSel}` : BASE_SEL;
+export function enhanceSpotlights(root, comps = []) {
+  if (typeof comps === "string") comps = comps ? [{ selector: comps }] : [];
+  const noteSel = [BASE_SEL, ...comps.filter((c) => !c.toggle).map((c) => c.selector)].join(", ");
+  const own = comps.filter((c) => c.toggle);
   let count = 0;
 
   for (const verse of root.querySelectorAll("p.v, div.v")) {
-    const asides = [];
+    const notes = [];
+    const mine = own.map(() => []);
     let n = verse.nextElementSibling;
     while (n && !n.matches(STOP_SEL)) {
       const next = n.nextElementSibling;
-      if (n.matches(ASIDE_SEL)) asides.push(n);
-      else if (asides.length) break;
+      const i = own.findIndex((c) => n.matches(c.selector));
+      if (i >= 0) mine[i].push(n);
+      else if (n.matches(noteSel)) notes.push(n);
+      else if (notes.length || mine.some((m) => m.length)) break;
       n = next;
     }
-    if (!asides.length) continue;
 
-    mount(verse, verse, asides);
-    count += asides.length;
+    let after = verse;
+    if (notes.length) after = mountNote(verse, after, notes);
+    own.forEach((c, i) => {
+      if (!mine[i].length) return;
+      if (c.toggle.each) mine[i].forEach((el) => mountEach(verse, el, c.toggle));
+      else after = mountBox(verse, after, mine[i], c.toggle);
+    });
+    count += notes.length + mine.reduce((t, m) => t + m.length, 0);
   }
 
   if (count) addAllControl(root);
   return count;
 }
 
-function mount(verse, insertAfter, items) {
+function chipFor(verse, box, cls, sym, label, n) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = cls;
+  btn.setAttribute("aria-expanded", "false");
+  btn.setAttribute("aria-label", `Show ${label} for this verse${n > 1 ? ` (${n})` : ""}`);
+  btn.textContent = sym;
+  btn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(box, btn, box.hidden); });
+  verse.append(" ", btn);
+  box._btn = btn;
+}
+
+function mountNote(verse, insertAfter, items) {
   const box = document.createElement("div");
   box.className = "verse-note";
   box.hidden = true;
   items.forEach((el) => box.append(el));
   insertAfter.after(box);
-
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "note-toggle";
-  btn.setAttribute("aria-expanded", "false");
-  btn.setAttribute("aria-label",
-    `Show notes for this verse${items.length > 1 ? ` (${items.length})` : ""}`);
-  btn.textContent = "*";
-  btn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(box, btn, box.hidden); });
-  verse.append(" ", btn);
-  box._btn = btn;
+  chipFor(verse, box, "note-toggle", "*", "notes", items.length);
   return box;
+}
+
+function mountBox(verse, insertAfter, items, t) {
+  const box = document.createElement("aside");
+  box.className = `${t.box || "spotlight"} aside-box`;
+  box.hidden = true;
+  if (t.head) {
+    const h = document.createElement("div");
+    h.className = "spot-head";
+    h.textContent = t.head;
+    box.append(h);
+  }
+  items.forEach((el, i) => {
+    if (i) {
+      const d = document.createElement("div");
+      d.className = "spot-div";
+      box.append(d);
+    }
+    box.append(el);
+  });
+  insertAfter.after(box);
+  chipFor(verse, box, `spot-toggle ${t.cls || ""}`.trim(), t.sym, t.label, items.length);
+  return box;
+}
+
+function mountEach(verse, el, t) {
+  el.classList.add("aside-box");
+  el.hidden = true;
+  chipFor(verse, el, `spot-toggle ${t.cls || ""}`.trim(), t.sym, t.label, 1);
 }
 
 function setOpen(box, btn, open) {
@@ -69,7 +115,7 @@ export function openAll(root, open = true) {
 }
 
 function boxes(root) {
-  return [...root.querySelectorAll(".verse-note")];
+  return [...root.querySelectorAll(".verse-note, .aside-box")];
 }
 
 function addAllControl(root) {
@@ -112,13 +158,13 @@ function addAllControl(root) {
 /* print / PDF: open everything so nothing is lost on paper */
 if (typeof window !== "undefined") {
   window.addEventListener("beforeprint", () => {
-    document.querySelectorAll(".verse-note").forEach((b) => {
+    document.querySelectorAll(".verse-note, .aside-box").forEach((b) => {
       b._wasHidden = b.hidden;
       b.hidden = false;
     });
   });
   window.addEventListener("afterprint", () => {
-    document.querySelectorAll(".verse-note").forEach((b) => {
+    document.querySelectorAll(".verse-note, .aside-box").forEach((b) => {
       if (b._wasHidden) b.hidden = true;
     });
   });

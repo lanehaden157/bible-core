@@ -19,6 +19,9 @@ Every file may carry a top-level `_note` string for humans. Readers ignore it.
  "files": {"units.json": {"schema": 1}, "...": {}}}
 ```
 
+Optional: `"hub"` (the canon hub's URL) and `"overlay"` (book.json's secondary
+grouping kind, e.g. `"discourse"`, drawn over the primary one by the app).
+
 ## units.json · schema 1 (the porter and `units-from-map` write it)
 
 ```json

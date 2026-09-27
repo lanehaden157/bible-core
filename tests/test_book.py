@@ -30,6 +30,15 @@ def test_unknown_nested_keys_fail():
     return [f"missing error: {w}" for w in want if not any(w in e for e in errs)]
 
 
+def test_overlay_must_be_a_secondary_grouping():
+    ok = bookmod.validate_config(dict(MIN, groupings=["movement", "discourse"], overlay="discourse"))
+    bad = bookmod.validate_config(dict(MIN, groupings=["movement"], overlay="movement"))
+    fails = [f"valid overlay rejected: {ok}"] if ok else []
+    if not any("'overlay'" in e for e in bad):
+        fails.append(f"overlay on the primary grouping accepted: {bad}")
+    return fails
+
+
 def test_default_paths_derive_from_the_book():
     b = bookmod.Book(MIN, "/tmp/numbers")
     got = {k: os.path.relpath(b.path(k), b.root).replace(os.sep, "/")

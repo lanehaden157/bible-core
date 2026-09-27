@@ -21,6 +21,10 @@ ALLOWED_KEYS = {
     # overrides for the book's entry in biblecore/web/themes.json
     # ({division?, primary?, secondary?, emblem?}); see theme.py
     "theme",
+    # a secondary grouping kind (one of "groupings") the app draws over the
+    # primary one: marks on unit chips, brackets on the book map, a line in
+    # the placement (Matthew's discourses)
+    "overlay",
 }
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
 # the corpus numbering is converted through the corpus's own map) or
@@ -99,6 +103,8 @@ def validate_config(cfg):
         errs.append(f"sync: unknown key '{k}'")
     if "versification" in cfg and cfg["versification"] not in VERSIFICATIONS:
         errs.append(f"'versification' must be one of {list(VERSIFICATIONS)}")
+    if "overlay" in cfg and cfg["overlay"] not in (cfg.get("groupings") or [])[1:]:
+        errs.append("'overlay' must name one of the groupings after the first")
     if "palette" in cfg and not isinstance(cfg["palette"], (str, list)):
         errs.append("'palette' must be a path or a list of hex colours")
     return errs
