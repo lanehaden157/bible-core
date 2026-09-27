@@ -281,8 +281,12 @@ def build_css(b):
         f"  background: url(\"{mini_l}\") left center / contain no-repeat; opacity: .75;\n}}\n"
         ".unit .legend-group + .legend-group::before { margin: 0 auto 12px; background-position: center; }\n"
         "body.text-center .unit h3.pericope::after { margin-left: auto; margin-right: auto; background-position: center; }\n"
-        f':root[data-theme="dark"] :is({heads}) {{ background-image: url("{mini_d}"); }}\n'
-        f'@media (prefers-color-scheme: dark) {{ :root[data-theme="auto"] :is({heads}) {{ background-image: url("{mini_d}"); }} }}\n\n')
+        # pseudo-elements can't sit inside :is(), so each selector is spelled out
+        + ", ".join(f':root[data-theme="dark"] {h}' for h in heads.split(", "))
+        + f' {{ background-image: url("{mini_d}"); }}\n'
+        + "@media (prefers-color-scheme: dark) { "
+        + ", ".join(f':root[data-theme="auto"] {h}' for h in heads.split(", "))
+        + f' {{ background-image: url("{mini_d}"); }} }}\n\n')
     out.append(
         "/* tracked-word colours stay their own palette; in dark mode, lifted toward white */\n"
         ':root[data-theme="dark"] .unit [data-root] { --rc-shown: color-mix(in oklab, var(--rc) 58%, #fff); }\n'
