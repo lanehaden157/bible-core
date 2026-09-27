@@ -19,8 +19,9 @@ division.css carries, in this order:
   - the banner masthead: book colour band, emblem in a circle (CSS mask
     over an inlined SVG, so nothing extra to publish);
   - the division's ornament in place of the straight rules inside a unit:
-    full width above the notes, and a short centre cut (mini_ornament) under
-    each section heading and between the colour key's groups (Lane,
+    full width above the notes, and cut in three (mini_ornament) under
+    each section heading and between the colour key's groups, where the
+    motif keeps its size and the rules stretch to the heading's width (Lane,
     2026-09-26: "ornaments used more ... instead of those straight lines");
   - tracked-word colours lifted toward white in dark mode (threads.js sets
     --rc; see core.css).
@@ -117,10 +118,33 @@ def emblem_svg(name):
     return open(p, encoding="utf-8").read().strip() if name and os.path.exists(p) else None
 
 
+ORN_FAR = -1800   # the drawn rule runs this far left, so a stretched cut never runs out
+MOTIF = (250, 350)  # the centre cut: the motif and a little rule either side
+
+
+def _wave(x0, step, dx, ys, until, taper):
+    """A smooth wave from x0 in `step`-wide segments (y 9, controls
+    alternating between ys), stopping at `until`, then the taper segment."""
+    d = f"M{x0} 9C{x0 + step - dx} {ys[0]} {x0 + dx} {ys[1]} {x0 + step} 9"
+    x, i = x0 + step, 1
+    while x < until:
+        d += f"S{x + dx} {ys[i % 2 == 0]} {x + step} 9"
+        x, i = x + step, i + 1
+    return d + taper
+
+
 def mini_ornament(svg):
-    """The centre of a full ornament (its motif and a little of the rule on
-    each side): the same drawing, cropped by its viewBox."""
-    return svg.replace('viewBox="0 0 600 18"', 'viewBox="200 0 200 18"')
+    """The heading ornament, as three cuts of the same drawing: a long left
+    rule (anchored at its right end), the centre motif, a long right rule
+    (anchored at its left end). Laid side by side as CSS background layers,
+    the rules stretch to any width while the motif keeps its size."""
+    far = 300 - ORN_FAR
+    a, b = MOTIF
+    return (svg.replace('viewBox="0 0 600 18" preserveAspectRatio="xMidYMid meet"',
+                        f'viewBox="{ORN_FAR} 0 {a - ORN_FAR} 18" preserveAspectRatio="xMaxYMid slice"'),
+            svg.replace('viewBox="0 0 600 18"', f'viewBox="{a} 0 {b - a} 18"'),
+            svg.replace('viewBox="0 0 600 18" preserveAspectRatio="xMidYMid meet"',
+                        f'viewBox="{b} 0 {600 + far - b} 18" preserveAspectRatio="xMinYMid slice"'))
 
 
 def _data_uri(svg):
@@ -128,36 +152,43 @@ def _data_uri(svg):
     return "data:image/svg+xml," + urllib.parse.quote(svg, safe="=:/,.()-")
 
 
-def ornament_svg(div_id, sig, ink):
-    """A thin section rule in the division's own idiom, 600x18."""
+def ornament_svg(div_id, sig, ink, full=True):
+    """A thin section rule in the division's own idiom, 600x18. Each division
+    draws its left half (running out to ORN_FAR) and a centre motif; the right
+    half is the left mirrored about x=300, so the rule is always symmetric.
+    full=False is the drawing the heading cuts are taken from."""
     a, b, c = sig
     w = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 18" preserveAspectRatio="xMidYMid meet" fill="none" stroke-linecap="round"'
+    F = ORN_FAR
+    ends = ""
     if div_id == "torah":
-        wave = "C25 3 50 15 75 9S125 3 150 9 200 15 225 9 262 4 280 9"
-        body = (f'<path d="M0 9{wave}" stroke="{a}" stroke-width="1"/>'
-                f'<path d="M0 9C25 15 50 3 75 9S125 15 150 9 200 3 225 9 262 14 280 9" stroke="{c}" stroke-width="1"/>'
-                f'<path d="M320 9C345 3 370 15 395 9S445 3 470 9 520 15 545 9 582 4 600 9" stroke="{a}" stroke-width="1"/>'
-                f'<path d="M320 9C345 15 370 3 395 9S445 15 470 9 520 3 545 9 582 14 600 9" stroke="{c}" stroke-width="1"/>'
-                f'<path d="M300 2L307 9L300 16L293 9Z" stroke="{b}" stroke-width="1"/>')
+        half = (f'<path d="{_wave(F, 75, 25, (3, 15), 225, "S262 4 280 9")}" stroke="{a}" stroke-width="1"/>'
+                f'<path d="{_wave(F, 75, 25, (15, 3), 225, "S262 14 280 9")}" stroke="{c}" stroke-width="1"/>')
+        motif = f'<path d="M300 2L307 9L300 16L293 9Z" stroke="{b}" stroke-width="1"/>'
     elif div_id == "former":
-        joints = "".join(f"M{x} 3V9" for x in list(range(20, 280, 40)) + list(range(340, 600, 40)))
-        joints += "".join(f"M{x} 9V15" for x in list(range(40, 280, 40)) + list(range(360, 600, 40)))
-        body = (f'<path d="M0 3H280M0 9H280M0 15H280M320 3H600M320 9H600M320 15H600{joints}" stroke="{b}" stroke-width=".8"/>'
-                f'<path d="M290 2H310L306.5 16H293.5Z" stroke="{a}" stroke-width="1"/>')
+        joints = "".join(f"M{x} 3V9" for x in range(F + 20, 280, 40))
+        joints += "".join(f"M{x} 9V15" for x in range(F + 40, 280, 40))
+        half = f'<path d="M{F} 3H280M{F} 9H280M{F} 15H280{joints}" stroke="{b}" stroke-width=".8"/>'
+        motif = f'<path d="M290 2H310L306.5 16H293.5Z" stroke="{a}" stroke-width="1"/>'
     elif div_id == "latter":
-        body = (f'<path d="M0 11H252M348 11H600" stroke="{b}" stroke-width="1"/>'
-                f'<g fill="{a}"><circle cx="262" cy="10.5" r="1.2"/><circle cx="272" cy="8" r=".9"/><circle cx="338" cy="10.5" r="1.2"/><circle cx="328" cy="8" r=".9"/></g>'
-                f'<path d="M300 16C293.5 13 296.5 7 300 1.5C303.5 7 306.5 13 300 16Z" stroke="{a}" stroke-width="1"/>')
+        half = (f'<path d="M{F} 11H252" stroke="{b}" stroke-width="1"/>'
+                f'<g fill="{a}"><circle cx="262" cy="10.5" r="1.2"/><circle cx="272" cy="8" r=".9"/></g>')
+        motif = f'<path d="M300 16C293.5 13 296.5 7 300 1.5C303.5 7 306.5 13 300 16Z" stroke="{a}" stroke-width="1"/>'
     elif div_id == "writings":
-        body = (f'<path d="M0 9C40 3 60 15 100 9S160 3 200 9 250 14 278 9M322 9C350 4 380 15 420 9S480 3 520 9 570 15 600 9" stroke="{a}" stroke-width="1"/>'
-                f'<g stroke="{b}" stroke-width="1"><path d="M60 7C63 2.5 68 2.5 70 4C67 7 63 8 60 7Z"/><path d="M160 11C163 15.5 168 15.5 170 14C167 11 163 10 160 11Z"/><path d="M430 7C433 2.5 438 2.5 440 4C437 7 433 8 430 7Z"/><path d="M530 11C533 15.5 538 15.5 540 14C537 11 533 10 530 11Z"/></g>'
-                f'<path d="M292 16C289 10 290.5 3.5 295 3M308 16C311 10 309.5 3.5 305 3M293.5 16H306.5M296.5 5V15M300 4.5V15.5M303.5 5V15" stroke="{c}" stroke-width="1"/>')
+        leaves = "".join(f'<path d="M{x} 7C{x + 3} 2.5 {x + 8} 2.5 {x + 10} 4C{x + 7} 7 {x + 3} 8 {x} 7Z"/>'
+                         f'<path d="M{x + 100} 11C{x + 103} 15.5 {x + 108} 15.5 {x + 110} 14C{x + 107} 11 {x + 103} 10 {x + 100} 11Z"/>'
+                         for x in range(F + 60, 200, 200))
+        half = (f'<path d="{_wave(F, 100, 60, (3, 15), 200, "S250 14 278 9")}" stroke="{a}" stroke-width="1"/>'
+                f'<g stroke="{b}" stroke-width="1">{leaves}</g>')
+        motif = f'<path d="M292 16C289 10 290.5 3.5 295 3M308 16C311 10 309.5 3.5 305 3M293.5 16H306.5M296.5 5V15M300 4.5V15.5M303.5 5V15" stroke="{c}" stroke-width="1"/>'
     else:  # nt: scroll ends, three dots at the centre
-        body = (f'<path d="M14 9H286M314 9H586" stroke="{ink}" stroke-width=".9"/>'
-                f'<path d="M14 9C8.5 9 5 5.5 7 2.5C9 .5 13 1.5 13 5C13 7.4 10 7.4 10 5.6" stroke="{ink}" stroke-width=".9"/>'
-                f'<path d="M586 9C591.5 9 595 12.5 593 15.5C591 17.5 587 16.5 587 13C587 10.6 590 10.6 590 12.4" stroke="{ink}" stroke-width=".9"/>'
-                f'<g fill="{a}"><circle cx="292" cy="9" r="1.4"/><circle cx="300" cy="9" r="1.8"/><circle cx="308" cy="9" r="1.4"/></g>')
-    return f"<svg {w}>{body}</svg>"
+        half = f'<path d="M{14 if full else F} 9H286" stroke="{ink}" stroke-width=".9"/>'
+        motif = f'<g fill="{a}"><circle cx="292" cy="9" r="1.4"/><circle cx="300" cy="9" r="1.8"/><circle cx="308" cy="9" r="1.4"/></g>'
+        # the scroll's two ends turn opposite ways, as a scroll's do; only the
+        # full ornament has them (the heading cuts run on instead)
+        ends = (f'<path d="M14 9C8.5 9 5 5.5 7 2.5C9 .5 13 1.5 13 5C13 7.4 10 7.4 10 5.6" stroke="{ink}" stroke-width=".9"/>'
+                f'<path d="M586 9C591.5 9 595 12.5 593 15.5C591 17.5 587 16.5 587 13C587 10.6 590 10.6 590 12.4" stroke="{ink}" stroke-width=".9"/>') if full else ""
+    return f'<svg {w}>{half}<g transform="matrix(-1 0 0 1 600 0)">{half}</g>{motif}{ends}</svg>'
 
 
 # ------------------------------------------------------------------ tokens
@@ -226,6 +257,9 @@ def build_css(b):
     orn_light = ornament_svg(div["id"], div["signature"], div["ink"])
     orn_dark = ornament_svg(div["id"], [readable(c, dark["--bg"], div["paper"]) for c in div["signature"]],
                             dark["--ink-soft"])
+    dark_sig = [readable(c, dark["--bg"], div["paper"]) for c in div["signature"]]
+    cuts_l = mini_ornament(ornament_svg(div["id"], div["signature"], div["ink"], full=False))
+    cuts_d = mini_ornament(ornament_svg(div["id"], dark_sig, dark["--ink-soft"], full=False))
     out = [
         f"@import url('https://fonts.googleapis.com/css2?{'&'.join(fonts)}&display=swap');\n",
         f"/* division.css -- GENERATED by `python -m biblecore build` from bible-core {__version__}\n"
@@ -270,23 +304,29 @@ def build_css(b):
         f"  background: url(\"{_data_uri(orn_light)}\") center / contain no-repeat; opacity: .8;\n}}\n"
         f':root[data-theme="dark"] .unit .notes::before {{ background-image: url("{_data_uri(orn_dark)}"); }}\n'
         f'@media (prefers-color-scheme: dark) {{ :root[data-theme="auto"] .unit .notes::before {{ background-image: url("{_data_uri(orn_dark)}"); }} }}\n\n')
-    mini_l, mini_d = _data_uri(mini_ornament(orn_light)), _data_uri(mini_ornament(orn_dark))
+    # the motif cut is 100 units wide; at the 12px height (2/3 scale) that is
+    # 66.7px, and the two rule cuts fill the rest, overlapping it by a hair
+    def layers(cuts):
+        l, m, r = (_data_uri(x) for x in cuts)
+        return (f'url("{l}") left center / calc(50% - 33px) 12px no-repeat, '
+                f'url("{m}") center / 67px 12px no-repeat, '
+                f'url("{r}") right center / calc(50% - 33px) 12px no-repeat')
     heads = ".unit h3.pericope::after, .unit .legend-group + .legend-group::before"
     out.append(
-        "/* the short ornament in place of the heading underline and the key's group divider */\n"
-        ".unit h3.pericope { border-bottom: none; padding-bottom: 0; }\n"
+        "/* the heading ornament, in place of the heading underline and the key's group divider:\n"
+        "   the motif stays its size, the rule either side stretches to the heading's width */\n"
+        ".unit h3.pericope { border-bottom: none; padding-bottom: 0; width: fit-content; max-width: 100%; }\n"
         ".unit .legend-group + .legend-group { border-top: none; padding-top: 0; }\n"
         f"{heads} {{\n"
-        "  content: \"\"; display: block; height: 12px; width: 170px; margin: 5px 0 0;\n"
-        f"  background: url(\"{mini_l}\") left center / contain no-repeat; opacity: .75;\n}}\n"
-        ".unit .legend-group + .legend-group::before { margin: 0 auto 12px; background-position: center; }\n"
-        "body.text-center .unit h3.pericope::after { margin-left: auto; margin-right: auto; background-position: center; }\n"
+        "  content: \"\"; display: block; height: 12px; min-width: 110px; margin: 5px 0 0;\n"
+        f"  background: {layers(cuts_l)}; opacity: .75;\n}}\n"
+        ".unit .legend-group + .legend-group::before { margin: 0 0 12px; }\n"
         # pseudo-elements can't sit inside :is(), so each selector is spelled out
         + ", ".join(f':root[data-theme="dark"] {h}' for h in heads.split(", "))
-        + f' {{ background-image: url("{mini_d}"); }}\n'
+        + f" {{ background: {layers(cuts_d)}; }}\n"
         + "@media (prefers-color-scheme: dark) { "
         + ", ".join(f':root[data-theme="auto"] {h}' for h in heads.split(", "))
-        + f' {{ background-image: url("{mini_d}"); }} }}\n\n')
+        + f" {{ background: {layers(cuts_d)}; }} }}\n\n")
     out.append(
         "/* tracked-word colours stay their own palette; in dark mode, lifted toward white */\n"
         ':root[data-theme="dark"] .unit [data-root] { --rc-shown: color-mix(in oklab, var(--rc) 58%, #fff); }\n'

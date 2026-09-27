@@ -133,9 +133,11 @@ export function rebuildLegend(contentEl, resolved) {
       `${m.gloss ? " — " + esc(m.gloss) : ""}${st}${n}</li>`;
   };
 
+  // each group is a <details>, closed by default: the key opens on demand
   const group = (label, items) => items.length
-    ? `<div class="legend-group"><h3>${label}</h3>` +
-      `<ul>${items.map(row).join("")}</ul></div>`
+    ? `<details class="legend-group"><summary><h3>${label}` +
+      ` <span class="lg-n">${items.length}</span></h3></summary>` +
+      `<ul>${items.map(row).join("")}</ul></details>`
     : "";
 
   ul.outerHTML =
@@ -144,6 +146,10 @@ export function rebuildLegend(contentEl, resolved) {
 
   legend.querySelector(".cap")?.remove();
 }
+
+// a printed page has no way to open the key, so print it expanded
+window.addEventListener("beforeprint", () =>
+  document.querySelectorAll("details.legend-group").forEach((d) => { d.open = true; }));
 
 /* ---------------------------------------------- root hover tip + click popover */
 

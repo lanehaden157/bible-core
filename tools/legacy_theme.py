@@ -22,6 +22,7 @@ after a core theme change. Idempotent. What it touches in the book:
 Units, data, and tracked-word colours are never touched.
 """
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -100,8 +101,10 @@ def plan(root):
         idx = idx.replace("<head>\n", "<head>\n" + HEAD_SCRIPT + "\n", 1)
     idx = re.sub(r'<link href="https://fonts\.googleapis\.com/css2[^"]*" rel="stylesheet">\n', "", idx)
     idx = re.sub(r'<link rel="stylesheet" href="css/division\.css[^"]*">\n', "", idx)
+    # the version is the css's own hash, so a re-run after a theme change busts caches
+    ver = hashlib.sha1(files["css/division.css"].encode("utf-8")).hexdigest()[:8]
     idx = re.sub(r'(<link rel="stylesheet" href="css/styles\.css[^"]*">\n)',
-                 r'\1<link rel="stylesheet" href="css/division.css?v=1">\n', idx, count=1)
+                 r'\1<link rel="stylesheet" href="css/division.css?v=' + ver + r'">\n', idx, count=1)
     if 'name="appearance"' not in idx:
         idx = idx.replace('  <div id="settings-panel" class="settings-panel" role="menu" aria-label="display settings" hidden>\n',
                           '  <div id="settings-panel" class="settings-panel" role="menu" aria-label="display settings" hidden>\n' + APPEARANCE, 1)

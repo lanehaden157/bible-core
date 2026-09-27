@@ -15,7 +15,7 @@
    together, whenever threads.js/spotlight.js/search.js changes -- a stale
    cached module is invisible in the DOM and easy to mistake for a real bug. */
 
-import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=7";
+import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=8";
 import { enhanceSpotlights, openAll } from "./spotlight.js?v=6";
 import { renderSearch } from "./search.js?v=6";
 import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
