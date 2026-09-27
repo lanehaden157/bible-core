@@ -357,16 +357,26 @@ SYNOPTIC_EXCLUDE_GREEK = {"Mark", "Luke"}
 def load_greek_corpus(lxx_path=None):
     """-> (nt, lxx, lxx_book_order). nt: corpus/morphgnt.py's
     load_nt_corpus() (paths.morphgnt, usually all 27 NT books). lxx:
-    corpus/lxx.py's load_lxx() (paths.lxx), keyed by transliterated lemma
-    the same way, so the two corpora -- which don't share a numbering
-    scheme -- match."""
+    corpus/lxx.py's load_lxx() (paths.lxx), keyed by the same lemma ids,
+    so the two corpora -- which don't share a numbering scheme -- match.
+    An LXX lemma spelled exactly as an NT lemma takes that lemma's id, so
+    a homograph keeps its digit ('τις' is tis2 in both, never 'τίς', tis);
+    any other LXX lemma gets lang/greek.lemma_key()."""
+    import unicodedata
+
     from biblecore.corpus import lxx as lxx_mod
     from biblecore.corpus import morphgnt
     from biblecore.lang import greek
 
     b = current_book()
     nt = morphgnt.load_nt_corpus(b)
-    lxx_all = lxx_mod.load_lxx(lxx_path or b.path("lxx"), lambda w: greek.transliterate(w).lower())
+    nt_ids = {unicodedata.normalize("NFC", lemma): key
+              for lemma, key in morphgnt.lemma_ids(b).items()}
+
+    def key_of(lemma):
+        return nt_ids.get(unicodedata.normalize("NFC", lemma)) or greek.lemma_key(lemma)
+
+    lxx_all = lxx_mod.load_lxx(lxx_path or b.path("lxx"), key_of)
     order = lxx_all.pop(lxx_mod.BOOKS_KEY)
     return nt, lxx_all, order
 

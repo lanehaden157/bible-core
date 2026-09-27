@@ -119,3 +119,18 @@ def test_leads_file_is_transliterated_only():
     assert "- **Biblos geneseōs** (biblos + genesis) — Matt 1:1\n  - Gen 2:4\n" in md, md
     assert "- **zēlōtēs** (zēlōtēs) — Matt 1:3; 4 verses across the LXX + NT\n" in md, md
     assert not GREEK.search(md), "native Greek script in the leads file"
+
+
+def test_leads_keep_homographs_apart_in_the_lxx():
+    # 'τις' (someone, NT id tis2) is at Gen 1:1; 'τίς' (who?, id tis) isn't
+    # in this LXX at all. The LXX is keyed by the same ids as the NT, so
+    # each lead gets only its own lexeme's hits.
+    nt, lxx, _order = leads.load_greek_corpus()
+    freq = leads.verse_freq_greek(nt, lxx)
+    uw = leads.passage_words_greek(nt, "Matthew 1:1–3")
+    rare = {r["key"]: r for r in leads.rare_leads_greek(nt, lxx, freq, uw)}
+    assert rare["tis2"]["lxx"] == [("Gen", 1, 1)], rare.get("tis2")
+    assert "tis" not in rare, rare.get("tis")  # no hits outside Matthew
+    assert freq["tis"] == 1 and freq["tis2"] == 2, (freq["tis"], freq["tis2"])
+    phrases = [tuple(w[0] for w in p["words"]) for p in leads.phrase_leads_greek(lxx, freq, uw)]
+    assert ("tis", "legō") not in phrases, phrases  # 'who says' is not 'someone says'
