@@ -1,4 +1,6 @@
-"""Opt a pre-core book site (Joshua, Matthew) into its division theme.
+"""Opt a pre-core book site into its division theme. Retired: Joshua (0.8.5)
+and Matthew (0.9.0) now run the template shell, so no book uses it. Kept for
+a future site with its own shell.
 
     python tools/legacy_theme.py ../Joshua          # write / refresh the theme
     python tools/legacy_theme.py ../Joshua --check  # say what would change
@@ -34,8 +36,7 @@ sys.path.insert(0, CORE)
 from biblecore import book as bookmod  # noqa: E402
 from biblecore import theme  # noqa: E402
 
-BOOKS = {  # folder name -> (osis, display name); Joshua left 0.8.5 (template shell)
-    "Matthew": ("Matt", "Matthew"),
+BOOKS = {  # folder name -> (osis, display name); Joshua and Matthew have left
 }
 
 COMMON = """

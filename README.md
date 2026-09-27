@@ -1,9 +1,10 @@
 # bible-core
 
-The shared architecture for the books in the Bible study platform. Numbers
-and Joshua run on it (Joshua since 2026-09-26, on the template's app shell
-since 0.8.5);
-Matthew is a reference implementation and doesn't use it.
+The shared architecture for the books in the Bible study platform. Numbers,
+Joshua and Matthew all run the template's app shell (Joshua since 0.8.5,
+Matthew since 0.9.0). Numbers and Joshua use the whole pipeline; Matthew still
+ports units with its own `pipeline/` and uses core for the shell, the corpus
+and the reader data.
 
 - `ARCHITECTURE.md` — the shared shape, where books differ, how the core
   changes, and how to start a book (§8).
