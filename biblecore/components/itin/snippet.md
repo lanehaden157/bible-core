@@ -12,6 +12,6 @@
 - It goes inside a `section.block`, and it stays in line with the text.
 - Its direct children are only `span.stop` and `span.arr` ("→"), alternating, starting and ending with a stop.
 - A stop may carry a `data-root` span (a place name you're tracking) and a `<sup>` with its verse (`C:V`).
-- `data-verses` goes on the `div.itin` when the chips replace the verses (a formulaic station list). When the prose verses are also written out, leave it off and the chips are a summary.
+- `data-verses` goes on the `div.itin` when the chips replace the verses (a formulaic station list). When the prose verses are also written out, leave it off and the chips are a summary. Tracked-thread spans inside a `data-verses` block need no `data-w` (summary tags, colour only).
 
 **What counts as verified:** the stops and their order come from the verses. A route the text doesn't give (a scholar's reconstruction) belongs in a note, not in the chips.

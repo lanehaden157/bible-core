@@ -544,6 +544,20 @@ def test_tracked_span_with_data_w_passes():
     _check("tracked-thread span with data-w should pass", not errs, errs)
 
 
+def test_tracked_span_in_declared_table_needs_no_data_w():
+    html = _fragment(_meta(), body_extra=
+                      '<section class="block"><table class="list" data-verses="1:2">'
+                      '<tr><th>a</th></tr><tr><td><table><tr><td>x</td></tr></table>'
+                      '<span class="r" data-root="strong">strong</span></td></tr>'
+                      '</table></section>\n'
+                      '<p class="v"><span class="n">3</span> '
+                      '<span class="r" data-root="strong">strong</span></p>\n')
+    errs = um.check_tracked_spans_have_data_w(html, threads_json=_THREADS_JSON)
+    _check("a tracked span inside a data-verses table is a summary tag (no data-w); "
+           "the one after the table still needs one",
+           len(errs) == 1, errs)
+
+
 def test_local_span_without_data_w_is_fine():
     html = _fragment(_meta(), body_extra=
                       '<p class="v"><span class="n">2</span> '

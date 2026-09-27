@@ -5,7 +5,7 @@ core.css/theme.css split, with poem, itin and textform alongside echo and list.
 0.5.0 added the reading data layer (`emit`) and the reader features (§8).
 0.6.0 added the canon hub (§8) and linked each book site back to it.
 0.8.0 adds division themes (§8). 0.9.0 puts Joshua and Matthew on the template
-app shell, with an overlay grouping and chip-toggled asides for Matthew (§8). 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
+app shell, with an overlay grouping and chip-toggled asides for Matthew (§8). 0.9.1 lets tracked spans inside a `data-verses` component go without `data-w` (colour-only summary tags; Numbers unit 3). 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
 Matthew's data read-only, and the Hebrew -> LXX -> NT bridge (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
 in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
 versification E1). 0.3.0 adds contract versions and migrations, the data
@@ -50,7 +50,7 @@ be fixed everywhere, run from a book's root as `python -m biblecore <command>`:
 - `book.py` — reads `book.json`; every module asks it for paths and settings;
 - `meta.py` — the meta block (parse, validate, generate, inject) and the
   fragment checks (endnote pairing, no Hebrew *or* Greek script, `data-root`
-  resolves, tracked spans carry `data-w`, pericope ranges, echo anchors and
+  resolves, tracked spans carry `data-w` outside `data-verses` components, pericope ranges, echo anchors and
   nesting, no inline style, component whitelist read from the book's CSS);
 - `audit.py` — thread coverage as set arithmetic over word ids; `data_w.py`
   fills `data-w` by alignment; `roots.py` validates the id sets;

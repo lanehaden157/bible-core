@@ -67,7 +67,7 @@ suffixed id (`2416e`) claims exactly one.
 <span class="r" data-root="devote" data-w="068w5">devoted</span>
 ```
 
-Local roots don't need `data-w`. **You never hand-chase word ids**: the porter
+Local roots don't need `data-w`, and neither do tracked spans inside a `data-verses` component (a condensed table cell is a colour-only summary tag). **You never hand-chase word ids**: the porter
 fills them by per-verse alignment and reports the few it can't decide.
 
 **Never hand-type Hebrew; pull by word id. (learned:** NFC normalisation alone

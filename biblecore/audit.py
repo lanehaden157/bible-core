@@ -37,7 +37,7 @@ import sys
 
 from biblecore import corpus, lang
 from biblecore.book import book
-from biblecore.meta import declared_ranges
+from biblecore.meta import declared_extents, declared_ranges, in_extents
 from biblecore.roots import bare_id, is_id_segment, lemma_key, load_roots, split_ids
 
 
@@ -336,6 +336,9 @@ def coverage_for_fragment(slug, html, passage, threads_json=None, roots_json=Non
     words = load_words()
     wbi = words_by_id(words)
     spans = parse_tagged_spans(html)
+    span_pos = [m.start() for m in SPAN_ATTRS.finditer(html)
+                if DATA_ROOT.search(m.group(1))]
+    extents = declared_extents(html)
 
     gaps, wrong, strays, warnings = [], [], [], []
     covered = []
@@ -356,11 +359,12 @@ def coverage_for_fragment(slug, html, passage, threads_json=None, roots_json=Non
                           if in_range(cv, lo, hi)}
 
         tagged_ids = set()
-        for r, w in spans:
+        for (r, w), pos in zip(spans, span_pos):
             if r != root_slug:
                 continue
             if w is None:
-                missing_data_w += 1
+                if not in_extents(pos, extents):
+                    missing_data_w += 1  # summary tags in a data-verses component are exempt
                 continue
             tagged_ids.add(w)
 

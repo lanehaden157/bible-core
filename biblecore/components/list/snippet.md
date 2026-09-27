@@ -13,7 +13,7 @@
 - The last column is the number, and it's right-aligned.
 - A total the text itself gives goes in `<tfoot>`.
 - It stays in line with the text; it isn't hoisted to the top with the structure blocks.
-- Cells may carry `data-root` spans.
+- Cells may carry `data-root` spans, tracked threads included. Inside a `data-verses` table these are summary tags: they colour the cell but stand for words in several verses, so they need no `data-w`, and the audit counts the declared verses as covered.
 - `data-verses` names exactly the verses the table replaces, when it condenses a repeated formula. Say so in the pericope's gloss.
 
 **What counts as verified:** every number and name comes from the verses. The table condenses the text; it doesn't add to it.

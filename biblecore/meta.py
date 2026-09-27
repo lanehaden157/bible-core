@@ -507,7 +507,10 @@ def check_tracked_spans_have_data_w(html, threads_json=None):
     """Every span tagging a TRACKED thread (data-root matching a
     threads.json thread's root) must carry data-w (checklist 7, style
     reference §2). Local roots (declared only in this fragment's own
-    roots[]) don't need one."""
+    roots[]) don't need one, and neither does a span inside a data-verses
+    component: a condensed table cell summarizes words from several
+    verses, so it is a colour-only summary tag (a data-w there, if given,
+    is still audited)."""
     if threads_json is None:
         try:
             threads_json = _load("threads.json")
@@ -515,12 +518,15 @@ def check_tracked_spans_have_data_w(html, threads_json=None):
             threads_json = {"threads": []}
     tracked = {t["root"] for t in threads_json.get("threads", [])}
 
+    extents = declared_extents(html)
     errs = []
     for m in SPAN_R_RE.finditer(html):
         attrs = m.group(1)
         rm = DATA_ROOT_RE.search(attrs)
         if not rm or rm.group(1) not in tracked:
             continue
+        if in_extents(m.start(), extents):
+            continue  # summary tag inside a data-verses component
         if not DATA_W_ATTR_RE.search(attrs):
             errs.append(f"span tags tracked thread '{rm.group(1)}' with no "
                         f"data-w attribute (checklist 7)")
@@ -672,6 +678,32 @@ def declared_ranges(html):
         if r:
             out.append(r)
     return out
+
+
+_TAG_OPEN_RE = re.compile(r'<([a-zA-Z][a-zA-Z0-9]*)\b[^>]*\bdata-verses="[^"]*"[^>]*>')
+
+
+def declared_extents(html):
+    """[(start, end)] character spans of every element carrying data-verses,
+    from its opening tag through its matching close tag (same-name nesting
+    counted). Tracked-thread spans inside one are summary tags: colour
+    only, no data-w required (see check_tracked_spans_have_data_w)."""
+    out = []
+    for m in _TAG_OPEN_RE.finditer(html):
+        name = m.group(1).lower()
+        tok = re.compile(rf'<(/?){name}\b[^>]*>', re.I)
+        depth, end = 1, len(html)
+        for t in tok.finditer(html, m.end()):
+            depth += -1 if t.group(1) else 1
+            if depth == 0:
+                end = t.end()
+                break
+        out.append((m.start(), end))
+    return out
+
+
+def in_extents(pos, extents):
+    return any(a <= pos < b for a, b in extents)
 
 
 TABLE_LIST_RE = re.compile(r'<table\s+class="list"[^>]*>(.*?)</table>', re.S)
