@@ -142,7 +142,7 @@ function home() {
       <a class="card" href="#/book/${b.slug}" style="${b.primary ? `border-left:5px solid ${b.primary}` : ""}">
         <b>${esc(b.name)}</b>
         <span>${b.units_built} of ${b.unit_count} units built · ${b.threads.length} tracked threads</span>
-        <span class="bar"><i style="width:${Math.round(100 * b.units_built / (b.unit_count || 1))}%"></i></span>
+        <span class="bar"><i style="width:${Math.round(100 * b.units_built / (b.unit_count || 1))}%${b.primary ? `;background:${b.primary}` : ""}"></i></span>
       </a>`).join("")}</div>
     ${divisions.map(grid).join("")}
     <section><h2>Arcs</h2><div class="cards">${(canon.arcs || []).map((a) => `
