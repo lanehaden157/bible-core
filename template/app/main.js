@@ -517,7 +517,7 @@ function addHubLink(hub) {
 const SOURCES = {
   hebrew: "Hebrew text and morphology: <a href=\"https://github.com/openscriptures/morphhb\">Open Scriptures Hebrew Bible</a> (CC BY 4.0). "
     + "Lexicon glosses: <a href=\"https://github.com/openscriptures/HebrewLexicon\">Open Scriptures HebrewLexicon</a> (Strong's), shown as word identifiers, not translations.",
-  greek: "Greek text and morphology: <a href=\"https://github.com/morphgnt/sblgnt\">MorphGNT: SBLGNT Edition</a> (Tauber, ed., CC BY 4.0). "
+  greek: "Greek text and morphology: <a href=\"https://github.com/morphgnt/sblgnt\">MorphGNT: SBLGNT Edition</a> (Tauber, ed.; parsing and lemmas CC BY-SA 3.0; SBLGNT text © 2010 <a href=\"https://sblgnt.com/license/\">Society of Biblical Literature and Logos Bible Software</a>). "
     + "Lexicon glosses: <a href=\"https://github.com/morphgnt/morphological-lexicon\">MorphGNT morphological lexicon</a> (CC BY-SA 3.0).",
 };
 
