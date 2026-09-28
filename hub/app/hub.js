@@ -9,7 +9,7 @@
      #/intertext        the quotation/allusion/echo graph as a matrix + list
      #/paths, #/path/<id>  curated reading paths
      #/bridge           the Hebrew -> LXX -> NT lexical bridge
-     #/search           references, lemmas across books, tracked threads
+     #/search[/<q>]     references, lemmas across books, tracked threads
    No native script anywhere; lexicon glosses are identifiers. */
 
 // always revalidate, like the book sites: the data changes whenever the hub
@@ -207,7 +207,7 @@ function threadView(id) {
         ${m.ref ? refLink(m.ref) : ""}
         ${bt ? `<span class="swatch" style="background:${bt.color || "transparent"}"></span><i>${esc(bt.translit)}</i> — ${esc(bt.gloss)} <span class="n">${bt.count}× tagged</span>`
              : m.thread ? `<span class="muted">thread ${esc(m.thread)}</span>` : `<span class="muted">not a tracked thread there yet</span>`}
-        ${m.lemma ? `<span class="tag">${esc(m.lemma)}</span>` : ""}</li>`;
+        ${m.lemma ? lemmaLabel(m.lemma) : ""}</li>`;
     }).join("")}</ul>
     ${bridgeTable((canon.bridge || []).filter((r) => r.thread === t.id), "In the Greek")}`;
 }
@@ -224,6 +224,15 @@ function bridgeTable(rows, title) {
       <td><i>${r.nt.map(esc).join(", ")}</i> ${refLink(r.nt_ref)}</td></tr>
       ${r.note ? `<tr class="note"><td colspan="3">${esc(r.note)}${r.thread ? ` · <a href="#/thread/${r.thread}">${esc(threadLabel(r.thread))}</a>` : ""}</td></tr>` : ""}`).join("")}
     </tbody></table></div></section>`;
+}
+
+/* a member's lemma id as a reader sees it elsewhere on the hub:
+   heb:5157 -> "Strong's 5157" (searchable as =5157), grc:x -> the Greek lemma */
+function lemmaLabel(id) {
+  const [lang, key] = id.split(":");
+  if (lang === "heb") return `<a class="n" href="#/search/${encodeURIComponent("=" + key)}">Strong's ${esc(key)}</a>`;
+  if (lang === "grc") return `<span class="n">Greek <i>${esc(key)}</i></span>`;
+  return `<span class="n">${esc(id)}</span>`;
 }
 
 const threadLabel = (id) => (canon.threads || []).find((t) => t.id === id)?.label || id;
@@ -305,7 +314,7 @@ function pathView(id) {
     <ol class="steps">${p.steps.map((s) => `<li><b>${refLink(s.ref)}</b><span>${esc(s.note || "")}</span></li>`).join("")}</ol>`;
 }
 
-async function search() {
+async function search(initial) {
   document.title = "Search — study hub";
   content.innerHTML = `<h1 class="page-h">Search the canon</h1>
     <p class="lede">A reference (<i>Josh 1:6</i>), a transliterated word (<i>naḥalah</i>, diacritics optional),
@@ -313,7 +322,7 @@ async function search() {
     <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="reference, word, gloss or =number…">
     <div id="out"></div>`;
   const input = document.getElementById("q"), out = document.getElementById("out");
-  input.value = sessionStorage.getItem("hub.q") || "";
+  input.value = initial || sessionStorage.getItem("hub.q") || "";
   const c = await loadConc();
   const run = () => {
     const q = input.value.trim();
