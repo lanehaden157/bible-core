@@ -49,3 +49,15 @@ def test_missing_feature_file_exits_with_a_pointer():
         assert "verse.tf" in str(exc) and "corpus/README.md" in str(exc), exc
     else:
         raise AssertionError("expected SystemExit for a missing feature file")
+
+
+def test_a_word_with_no_lemma_keeps_the_rest_aligned():
+    # Text-Fabric leaves out a node with no value and gives the next one an
+    # explicit number: node 2 has no lemma, so node 3's line is '3<TAB>c'
+    greek_book.write_lxx(_tmp, [("Gen", 1, 1, "a"), ("Gen", 1, 2, "-"),
+                                ("Gen", 1, 3, "c"), ("Exod", 2, 1, "d")])
+    with open(os.path.join(_tmp, "lex_utf8.tf"), "w", encoding="utf-8") as fh:
+        fh.write("@node\n@valueType=str\n\na\n3\tc\nd\n")
+    out = lxx.load_lxx(_tmp, lambda w: w)
+    assert out["Gen"] == [(1, 1, "a"), (1, 3, "c")], out
+    assert out["Exod"] == [(2, 1, "d")], out
