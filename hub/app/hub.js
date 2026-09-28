@@ -13,8 +13,11 @@
    No native script anywhere; lexicon glosses are identifiers. */
 
 // always revalidate, like the book sites: the data changes whenever the hub
-// is rebuilt and pushed, and a stale cached copy is invisible
-const DATA = (f) => { const u = new URL(`../data/${f}`, import.meta.url); u.searchParams.set("v", Date.now()); return u; };
+// is rebuilt and pushed, and a stale cached copy is invisible. "no-cache"
+// asks the server every time but takes a 304 when nothing changed, so the
+// concordance (~350 KB) isn't re-downloaded on every visit to Search.
+const DATA = (f) => new URL(`../data/${f}`, import.meta.url);
+const getJSON = (f) => fetch(DATA(f), { cache: "no-cache" }).then((r) => r.json());
 const content = document.getElementById("content");
 let books = [], divisions = [], byOsis = new Map(), bySlug = new Map(), canon = {}, conc = null;
 
@@ -23,8 +26,8 @@ init();
 async function init() {
   try {
     const [b, c] = await Promise.all([
-      fetch(DATA("books.json")).then((r) => r.json()),
-      fetch(DATA("canon.json")).then((r) => r.json()),
+      getJSON("books.json"),
+      getJSON("canon.json"),
     ]);
     books = b.books;
     divisions = b.divisions || [];
@@ -46,7 +49,7 @@ async function init() {
   route();
 }
 
-const loadConc = async () => conc || (conc = await fetch(DATA("concordance.json")).then((r) => r.json()));
+const loadConc = async () => conc || (conc = await getJSON("concordance.json"));
 
 /* ---------------------------------------------------------------- router */
 
