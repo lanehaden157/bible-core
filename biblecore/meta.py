@@ -844,14 +844,16 @@ def validate_fragment(html, css_path=None, meta=None, threads_json=None):
     warnings_for_fragment()'s non-fatal warnings -- run all three when
     checking a real fragment."""
     from biblecore import contract
+    from biblecore.book import book
     unit_contract = contract.of(meta if meta is not None else parse(html))
+    skip = set(book().check("skip_fragment_checks"))
     errs = []
     for since, name, fn in FRAGMENT_CHECKS:
-        if not contract.at_least(unit_contract, since):
+        if name in skip or not contract.at_least(unit_contract, since):
             continue
         if name == "components":
             from biblecore import components
-            errs += components.check(html, meta, unit_contract)
+            errs += components.check(html, meta, unit_contract, skip)
         else:
             errs += fn(html, meta, threads_json, css_path)
     return errs

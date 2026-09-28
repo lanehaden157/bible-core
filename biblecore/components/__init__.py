@@ -88,11 +88,14 @@ def enabled(b=None):
     return [reg[n] for n in b.components]
 
 
-def check(html, meta, unit_contract):
-    """Every enabled component's check, gated by its `since`."""
+def check(html, meta, unit_contract, skip=()):
+    """Every enabled component's check, gated by its `since`. `skip` holds
+    the book's skip_fragment_checks; "component:<name>" drops one."""
     from biblecore import contract
     errs = []
     for c in enabled():
+        if f"component:{c.name}" in skip:
+            continue
         if contract.at_least(unit_contract, c.spec["since"]):
             errs += c.check(html, meta)
     return errs

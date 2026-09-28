@@ -1,6 +1,6 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.9.5, 2026-09-28. Built and tested (see §8). Expect it to
+**Status:** core 0.9.6, 2026-09-28. Built and tested (see §8). Expect it to
 change. The remaining plan is in `../core-plan-remaining.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
@@ -27,7 +27,8 @@ change. The remaining plan is in `../core-plan-remaining.md`.
 - 0.9.3: MorphGNT's movable-letter parens stripped from Greek lemma ids;
   `tools/stems_to_roots.py`.
 - 0.9.4: phrase threads take `alt` (the same title in another word order).
-- 0.9.5: audit pass (8 fixes: `--help` no longer runs commands, LXX homograph ids, `seq` backtracking, and others), tests that run without the sibling repos, hub polish (dark mode, AA contrast, themed book pages, sources page), and the Greek source credit corrected to CC BY-SA 3.0.
+- 0.9.5: audit pass (8 fixes: `--help` no longer runs commands, LXX homograph ids, `seq` backtracking, and others), tests that run without the sibling repos, and the Greek source credit corrected to CC BY-SA 3.0. (The hub polish that shipped in this release was reverted the same day, `8e80045`.)
+- 0.9.6: `book.json` `checks.skip_fragment_checks`, a list of hard fragment checks a book switches off (`meta.FRAGMENT_CHECKS` names, or `component:<name>`); Matthew uses it. The hub now rebuilds itself from a GitHub Action in the hub repo (§8).
 
 ## What this is
 
@@ -44,7 +45,8 @@ the 2026-09-22 "not migrating" call): vendored package, `book.json`, core
 build and sync, and since 0.8.5 the template's app shell with its own
 `theme.css`. Its units came through byte-identical apart from the contract
 stamp. Matthew runs the template shell, the corpus and the reader data on
-core (0.9.0, 0.9.2) but still ports units with its own `pipeline/` (§8).
+core (0.9.0, 0.9.2) but ports and builds units with its own `pipeline/`, by
+decision (2026-09-28: the move onto core's pipeline was dropped, §8).
 
 Where a rule gives a reason, the reason matters more than the rule. Items
 marked **(learned)** each cost a real mistake. Read the lesson before relaxing
@@ -266,7 +268,7 @@ that used to be scattered through Joshua's code.
   "groupings": ["movement"],
   "components": ["echo"],
   "meta_keys": [],
-  "checks": {"opens_note_required": true},
+  "checks": {"opens_note_required": true, "skip_fragment_checks": []},
   "palette": "data/palette.json",
   "sync": {"files": ["numbers_study_style_reference.md", "..."],
            "globs": ["canon-leads/canon-leads-unit-*.md"]},
@@ -542,7 +544,14 @@ A book's one-off fragment styling stays in its own `theme.css` (Matthew's
 rings, triads, exodus tables, prayer block and Greek title). A grouping's
 display name is `label`, falling back to `name`.
 
-**Matthew fully on bible-core (0.9.2, `matthew-core-plan.md` phases A/B/D4).**
+**Matthew and core: where it stopped (decided 2026-09-28).** Lane dropped
+the plan to move Matthew's pipeline onto core (the old phases D-G). Matthew
+keeps its own `pipeline/`; core's site, Greek data and canon work stay.
+Its units predate several fragment checks, so its `book.json` skips them
+(`checks.skip_fragment_checks`: native script, inline style / `--c-*`,
+`data-verses`, the synoptic component) and `biblecore test` passes there.
+The rest of this section describes what 0.9.2 gave Matthew.
+
 Matthew's site runs on core since 0.9.0; 0.9.2 gives it a working Greek
 interlinear and moves two more of its pipeline scripts' jobs into core:
 
@@ -580,10 +589,8 @@ interlinear and moves two more of its pipeline scripts' jobs into core:
   `manifest.language` -- required by OSHB's and MorphGNT's licences
   (CC BY 4.0 / CC BY-SA 3.0), which none of the book sites carried before.
 
-Left in Matthew's own `pipeline/`: porting units, `data-w` alignment
-(722 spans, no `roots.json` yet -- **plan B**, still open), colours (checked
-against the theme's accents once Matthew's colours are revisited -- **plan
-E**), and everything else `matthew-core-plan.md` scopes for a future session.
+Left in Matthew's own `pipeline/`, on purpose: porting units, colours,
+retrofit, leads, the digest and the sync.
 
 ## 9. Open questions
 

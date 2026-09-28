@@ -33,7 +33,11 @@ VERSIFICATIONS = ("kjv", "source")
 REQUIRED_KEYS = {"book", "osis", "slug", "language", "corpus"}
 
 CORPUS_KEYS = {"kind", "pin", "word_ids"}
-CHECK_DEFAULTS = {"opens_note_required": True}
+# `skip_fragment_checks` names hard fragment checks to switch off for a book
+# (meta.FRAGMENT_CHECKS names, or "component:<name>" for one component's
+# check). It exists for a book whose built units predate a check; a new
+# book leaves it empty.
+CHECK_DEFAULTS = {"opens_note_required": True, "skip_fragment_checks": []}
 SYNC_KEYS = {"files", "globs"}
 
 # Every path a module reads or writes, relative to the book root. A book
@@ -99,6 +103,16 @@ def validate_config(cfg):
             errs.append(f"'{k}' must be a list of strings")
     for k in sorted(set(cfg.get("checks") or {}) - set(CHECK_DEFAULTS)):
         errs.append(f"checks: unknown check '{k}' (known: {sorted(CHECK_DEFAULTS)})")
+    skip = (cfg.get("checks") or {}).get("skip_fragment_checks", [])
+    if not (isinstance(skip, list) and all(isinstance(x, str) for x in skip)):
+        errs.append("checks.skip_fragment_checks must be a list of strings")
+    else:
+        from biblecore import components, meta
+        known = {n for _, n, _ in meta.FRAGMENT_CHECKS if n != "components"}
+        known |= {f"component:{n}" for n in components.registry()}
+        for k in sorted(set(skip) - known):
+            errs.append(f"checks.skip_fragment_checks: unknown check '{k}' "
+                        f"(known: {sorted(known)})")
     for k in sorted(set(cfg.get("paths") or {}) - set(PATH_DEFAULTS)):
         errs.append(f"paths: unknown path '{k}' (known: {sorted(PATH_DEFAULTS)})")
     for k in sorted(set(cfg.get("sync") or {}) - SYNC_KEYS):
@@ -173,7 +187,8 @@ class Book:
         return list(self.cfg.get("meta_keys", []))
 
     def check(self, name):
-        return (self.cfg.get("checks") or {}).get(name, CHECK_DEFAULTS[name])
+        v = (self.cfg.get("checks") or {}).get(name, CHECK_DEFAULTS[name])
+        return list(v) if isinstance(v, list) else v
 
     @property
     def storage_key(self):

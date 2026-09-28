@@ -114,5 +114,30 @@ def test_opens_note_requirement_is_a_setting():
     return fails
 
 
+def test_skip_fragment_checks_is_a_setting():
+    html = '<p class="v" style="color:red"><span class="n">1</span>x</p>'
+    prev = bookmod._current
+    try:
+        bookmod.use(bookmod.Book(MIN, "/tmp/numbers"))
+        strict = meta.validate_fragment(html, meta={})
+        bookmod.use(bookmod.Book(dict(MIN, checks={"skip_fragment_checks": ["inline-style"]}),
+                                 "/tmp/numbers"))
+        loose = meta.validate_fragment(html, meta={})
+    finally:
+        bookmod.use(prev)
+    fails = []
+    if not any("inline style" in e for e in strict):
+        fails.append(f"default should flag an inline style: {strict}")
+    if any("inline style" in e for e in loose):
+        fails.append(f"skip_fragment_checks should drop it: {loose}")
+    bad = bookmod.validate_config(dict(MIN, checks={"skip_fragment_checks": ["nope"]}))
+    if not any("unknown check 'nope'" in e for e in bad):
+        fails.append(f"an unknown skip name should be an error: {bad}")
+    ok = bookmod.validate_config(dict(MIN, checks={"skip_fragment_checks": ["inline-style", "component:echo"]}))
+    if ok:
+        fails.append(f"known names should validate: {ok}")
+    return fails
+
+
 def test_joshua_fixture_is_a_valid_book():
     return bookmod.validate_config(json.load(open(support.FIXTURE, encoding="utf-8")))
