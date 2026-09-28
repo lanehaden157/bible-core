@@ -158,12 +158,23 @@ span.ref { border: none; }
 .matrix thead th { height: 72px; vertical-align: bottom; padding: 0 2px; }
 .matrix thead th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); }
 .matrix td.corner { border: none; background: none; }
+.matrix td { padding: 0; }
+.matrix .cell { display: block; width: 100%; height: 100%; min-height: 26px; padding: 0; border: none; background: none;
+  font: inherit; color: inherit; cursor: pointer; }
+.matrix .cell:hover { box-shadow: inset 0 0 0 1px var(--ink-soft); }
+.matrix .cell:focus-visible { outline: 2px solid var(--accent-bronze); outline-offset: -2px; }
+.matrix .cell[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent-clay); font-weight: 600; }
 .matrix td { width: 26px; height: 26px; text-align: center; border: 1px solid var(--rule-soft); background: color-mix(in srgb, var(--accent-jordan) calc(var(--a, 0) * 100%), transparent); color: var(--ink); }
 .bridge { border-collapse: collapse; width: 100%; font-size: 15.5px; }
 .bridge th { font-family: var(--display); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; text-align: left; padding: 0 12px 6px 0; border-bottom: 1px solid var(--rule); }
 .bridge td { padding: 8px 12px 4px 0; vertical-align: top; }
 .bridge tr.note td { padding-top: 0; padding-bottom: 10px; color: var(--ink-soft); font-size: 14px; border-bottom: 1px solid var(--rule-soft); }
 .filters { display: flex; gap: 16px; flex-wrap: wrap; margin: 6px 0 10px; font-size: 15px; }
+.clear { font: inherit; font-size: 15px; padding: 5px 12px; border: 1px solid var(--rule); border-radius: 6px;
+  background: none; color: var(--ink); cursor: pointer; align-self: flex-end; }
+.clear:hover { border-color: var(--ink-soft); }
+.clear:focus-visible { outline: 2px solid var(--accent-bronze); outline-offset: 2px; }
+#edges-sum { margin: 0 0 4px; }
 select, #q { font: inherit; font-size: 16px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); color: var(--ink); }
 #q { width: 100%; font-size: 17px; padding: 10px 14px; margin-bottom: 18px; }
 #q:focus { outline: 2px solid var(--accent-bronze); outline-offset: 1px; }

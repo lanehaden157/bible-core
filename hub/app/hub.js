@@ -264,39 +264,66 @@ function intertext() {
   document.title = "Intertext — study hub";
   const edges = canon.intertext || [];
   const order = new Map(books.map((b, i) => [b.osis, i]));
-  const src = [...new Set(edges.map((e) => parseRef(e.from)?.book.osis).filter(Boolean))].sort((a, b) => order.get(a) - order.get(b));
-  const tgtBook = (e) => parseRef(e.to)?.book;
-  const tgt = [...new Set(edges.map((e) => tgtBook(e)?.osis).filter(Boolean))].sort((a, b) => order.get(a) - order.get(b));
-  const count = (s, t) => edges.filter((e) => parseRef(e.from)?.book.osis === s && tgtBook(e)?.osis === t).length;
+  const srcOf = (e) => parseRef(e.from)?.book.osis, tgtOf = (e) => parseRef(e.to)?.book.osis;
+  const byCanon = (a, b) => order.get(a) - order.get(b);
+  const src = [...new Set(edges.map(srcOf).filter(Boolean))].sort(byCanon);
+  const tgt = [...new Set(edges.map(tgtOf).filter(Boolean))].sort(byCanon);
+  const count = (s, t) => edges.filter((e) => srcOf(e) === s && tgtOf(e) === t).length;
   const max = Math.max(1, ...src.flatMap((s) => tgt.map((t) => count(s, t))));
   const kinds = [...new Set(edges.map((e) => e.kind))];
+  const name = (o) => byOsis.get(o)?.name || o;
+  const opts = (xs) => xs.map((x) => `<option value="${esc(x)}">${esc(name(x))}</option>`).join("");
   content.innerHTML = `<h1 class="page-h">Intertext</h1>
     <p class="lede">${edges.length} links from the studies to the rest of the canon: quotations and allusions
       entered by hand, and echoes harvested from each unit's echo asides. Rows are the studied book,
-      columns the book it points to.</p>
+      columns the book it points to. Choose a count to list those links.</p>
     <div class="matrix-wrap" tabindex="0" role="region" aria-label="Links by book, scrolls sideways"><table class="matrix">
-      <caption class="sr">Number of links from each studied book (rows) to each book it points to (columns)</caption>
-      <thead><tr><td class="corner"></td>${tgt.map((t) => `<th scope="col" abbr="${esc(byOsis.get(t)?.name || t)}"><span>${esc(t)}</span></th>`).join("")}</tr></thead>
-      <tbody>${src.map((s) => `<tr><th scope="row">${esc(byOsis.get(s)?.name || s)}</th>${tgt.map((t) => {
+      <caption class="sr">Number of links from each studied book (rows) to each book it points to (columns); each count lists its links below</caption>
+      <thead><tr><td class="corner"></td>${tgt.map((t) => `<th scope="col" abbr="${esc(name(t))}"><span>${esc(t)}</span></th>`).join("")}</tr></thead>
+      <tbody>${src.map((s) => `<tr><th scope="row">${esc(name(s))}</th>${tgt.map((t) => {
         const n = count(s, t);
         // shade tops out at 0.55, where the count still reads at 4.5:1 or
         // better in both themes (darker, neither ink nor white text does)
-        return `<td${n ? ` style="--a:${(0.12 + 0.43 * n / max).toFixed(2)}" title="${n} link(s) ${s} → ${t}"` : ""}>${n || ""}</td>`;
+        return n ? `<td style="--a:${(0.12 + 0.43 * n / max).toFixed(2)}"><button type="button" class="cell"
+          data-s="${esc(s)}" data-t="${esc(t)}" aria-pressed="false"
+          aria-label="${esc(name(s))} to ${esc(name(t))}: ${n} link${n > 1 ? "s" : ""}" title="${n} link${n > 1 ? "s" : ""} ${esc(s)} → ${esc(t)}">${n}</button></td>` : "<td></td>";
       }).join("")}</tr>`).join("")}</tbody></table></div>
     <div class="filters">
-      <label>From <select id="f-src"><option value="">any book</option>${src.map((s) => `<option>${s}</option>`).join("")}</select></label>
-      <label>Kind <select id="f-kind"><option value="">any</option>${kinds.map((k) => `<option>${k}</option>`).join("")}</select></label>
+      <label>From <select id="f-src"><option value="">any book</option>${opts(src)}</select></label>
+      <label>To <select id="f-tgt"><option value="">any book</option>${opts(tgt)}</select></label>
+      <label>Kind <select id="f-kind"><option value="">any</option>${kinds.map((k) => `<option>${esc(k)}</option>`).join("")}</select></label>
+      <button type="button" id="f-clear" class="clear" hidden>Clear</button>
     </div>
+    <p id="edges-sum" class="muted" aria-live="polite"></p>
     <ul id="edges" class="edges"></ul>`;
+  const $ = (id) => document.getElementById(id);
   const draw = () => {
-    const s = document.getElementById("f-src").value, k = document.getElementById("f-kind").value;
-    const xs = edges.filter((e) => (!s || parseRef(e.from)?.book.osis === s) && (!k || e.kind === k));
-    document.getElementById("edges").innerHTML = xs.slice(0, 400).map((e) =>
+    const s = $("f-src").value, t = $("f-tgt").value, k = $("f-kind").value;
+    const xs = edges.filter((e) => (!s || srcOf(e) === s) && (!t || tgtOf(e) === t) && (!k || e.kind === k));
+    for (const b of content.querySelectorAll(".cell")) {
+      b.setAttribute("aria-pressed", String(!!s && !!t && b.dataset.s === s && b.dataset.t === t));
+    }
+    $("f-clear").hidden = !(s || t || k);
+    $("edges-sum").textContent = s || t || k
+      ? `${xs.length} link${xs.length === 1 ? "" : "s"}${s ? ` from ${name(s)}` : ""}${t ? ` to ${name(t)}` : ""}${k ? `, ${k}` : ""}`
+      : `All ${xs.length} links`;
+    $("edges").innerHTML = xs.slice(0, 400).map((e) =>
       `<li>${refLink(e.from)} <span class="arrow">→</span> ${refLink(e.to)} <span class="tag">${esc(e.kind)}</span>
         ${e.note ? `<span class="muted">${esc(e.note)}</span>` : ""}</li>`).join("") +
       (xs.length > 400 ? `<li class="muted">${xs.length - 400} more; filter to narrow.</li>` : "");
   };
-  content.querySelectorAll("select").forEach((s) => s.addEventListener("change", draw));
+  content.querySelectorAll("select").forEach((x) => x.addEventListener("change", draw));
+  content.querySelectorAll(".cell").forEach((b) => b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") === "true";
+    $("f-src").value = on ? "" : b.dataset.s;
+    $("f-tgt").value = on ? "" : b.dataset.t;
+    draw();
+    if (!on) $("edges-sum").scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }));
+  $("f-clear").addEventListener("click", () => {
+    for (const id of ["f-src", "f-tgt", "f-kind"]) $(id).value = "";
+    draw();
+  });
   draw();
 }
 
