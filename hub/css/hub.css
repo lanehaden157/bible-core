@@ -19,12 +19,38 @@
   --display: "Cinzel", Georgia, serif;
   --serif: "Frank Ruhl Libre", Georgia, "Times New Roman", serif;
   --maxw: 1040px;
+  color-scheme: light;
+}
+
+/* Dark: the book sites' own derivation (biblecore/theme.py _palette) from
+   this paper and ink, accents lifted to 4.5:1 on the panels. Follows the
+   shared Appearance choice (localStorage "bible:theme", set on any book
+   site: same origin) and the system setting when that is "auto". */
+:root[data-theme="dark"] {
+  --bg: #221d11; --panel: #302b1d; --panel-2: #3c3628;
+  --ink: #ece4cc; --ink-soft: #9d957f;
+  --rule: #5a5343; --rule-soft: #423c2d;
+  --accent-clay: #c78461; --accent-bronze: #ad9558; --accent-jordan: #839993;
+  --glow-1: #2c271a; --glow-2: #362313;
+  --topbar-bg: rgba(34, 29, 17, 0.94);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    --bg: #221d11; --panel: #302b1d; --panel-2: #3c3628;
+    --ink: #ece4cc; --ink-soft: #9d957f;
+    --rule: #5a5343; --rule-soft: #423c2d;
+    --accent-clay: #c78461; --accent-bronze: #ad9558; --accent-jordan: #839993;
+    --glow-1: #2c271a; --glow-2: #362313;
+    --topbar-bg: rgba(34, 29, 17, 0.94);
+    color-scheme: dark;
+  }
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; background: var(--bg); }
 body {
-  margin: 0;
+  margin: 0; min-height: 100vh;
   background:
     radial-gradient(circle at 16% -5%, var(--glow-1) 0%, transparent 55%),
     radial-gradient(circle at 106% 104%, var(--glow-2) 0%, transparent 52%),
