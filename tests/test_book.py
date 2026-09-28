@@ -133,7 +133,8 @@ def test_skip_fragment_checks_is_a_setting():
     bad = bookmod.validate_config(dict(MIN, checks={"skip_fragment_checks": ["nope"]}))
     if not any("unknown check 'nope'" in e for e in bad):
         fails.append(f"an unknown skip name should be an error: {bad}")
-    ok = bookmod.validate_config(dict(MIN, checks={"skip_fragment_checks": ["inline-style", "component:echo"]}))
+    ok = bookmod.validate_config(dict(MIN, checks={"skip_fragment_checks": ["inline-style", "component:echo"],
+                                                   "test_idempotent": False}))
     if ok:
         fails.append(f"known names should validate: {ok}")
     return fails

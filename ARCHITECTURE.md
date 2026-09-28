@@ -1,6 +1,6 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.9.6, 2026-09-28. Built and tested (see §8). Expect it to
+**Status:** core 0.9.7, 2026-09-28. Built and tested (see §8). Expect it to
 change. The remaining plan is in `../core-plan-remaining.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
@@ -28,7 +28,7 @@ change. The remaining plan is in `../core-plan-remaining.md`.
   `tools/stems_to_roots.py`.
 - 0.9.4: phrase threads take `alt` (the same title in another word order).
 - 0.9.5: audit pass (8 fixes: `--help` no longer runs commands, LXX homograph ids, `seq` backtracking, and others), tests that run without the sibling repos, and the Greek source credit corrected to CC BY-SA 3.0. (The hub polish that shipped in this release was reverted the same day, `8e80045`.)
-- 0.9.6: `book.json` `checks.skip_fragment_checks`, a list of hard fragment checks a book switches off (`meta.FRAGMENT_CHECKS` names, or `component:<name>`); Matthew uses it. The hub now rebuilds itself from a GitHub Action in the hub repo (§8).
+- 0.9.6/0.9.7: `book.json` `checks.skip_fragment_checks`, a list of hard fragment checks a book switches off (`meta.FRAGMENT_CHECKS` names, or `component:<name>`), and `checks.test_idempotent: false` to drop `biblecore test`'s build-idempotence check; Matthew uses both. The hub now rebuilds itself from a GitHub Action in the hub repo (§8).
 
 ## What this is
 
@@ -268,7 +268,7 @@ that used to be scattered through Joshua's code.
   "groupings": ["movement"],
   "components": ["echo"],
   "meta_keys": [],
-  "checks": {"opens_note_required": true, "skip_fragment_checks": []},
+  "checks": {"opens_note_required": true, "skip_fragment_checks": [], "test_idempotent": true},
   "palette": "data/palette.json",
   "sync": {"files": ["numbers_study_style_reference.md", "..."],
            "globs": ["canon-leads/canon-leads-unit-*.md"]},
@@ -549,7 +549,9 @@ the plan to move Matthew's pipeline onto core (the old phases D-G). Matthew
 keeps its own `pipeline/`; core's site, Greek data and canon work stay.
 Its units predate several fragment checks, so its `book.json` skips them
 (`checks.skip_fragment_checks`: native script, inline style / `--c-*`,
-`data-verses`, the synoptic component) and `biblecore test` passes there.
+`data-verses`, the synoptic component) and drops the build-idempotence
+check (`checks.test_idempotent: false`; its pipeline builds units, not
+core's), so `biblecore test` passes there.
 The rest of this section describes what 0.9.2 gave Matthew.
 
 Matthew's site runs on core since 0.9.0; 0.9.2 gives it a working Greek

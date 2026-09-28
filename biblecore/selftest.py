@@ -194,7 +194,7 @@ def main(argv=None):
     args = list(argv or [])
     failed = 0
     for name, fn in CHECKS:
-        if name == "idempotent" and "--quick" in args:
+        if name == "idempotent" and ("--quick" in args or not book().check("test_idempotent")):
             continue
         try:
             errs, notes = fn()

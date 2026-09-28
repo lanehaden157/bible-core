@@ -37,7 +37,10 @@ CORPUS_KEYS = {"kind", "pin", "word_ids"}
 # (meta.FRAGMENT_CHECKS names, or "component:<name>" for one component's
 # check). It exists for a book whose built units predate a check; a new
 # book leaves it empty.
-CHECK_DEFAULTS = {"opens_note_required": True, "skip_fragment_checks": []}
+# `test_idempotent: false` drops `biblecore test`'s build-idempotence check
+# for a book whose units are built by its own pipeline (Matthew).
+CHECK_DEFAULTS = {"opens_note_required": True, "skip_fragment_checks": [],
+                  "test_idempotent": True}
 SYNC_KEYS = {"files", "globs"}
 
 # Every path a module reads or writes, relative to the book root. A book
