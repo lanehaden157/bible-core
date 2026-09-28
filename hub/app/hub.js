@@ -9,16 +9,12 @@
      #/intertext        the quotation/allusion/echo graph as a matrix + list
      #/paths, #/path/<id>  curated reading paths
      #/bridge           the Hebrew -> LXX -> NT lexical bridge
-     #/search[/<q>]     references, lemmas across books, tracked threads
-     #/sources          every source the hub reproduces, with its licence
+     #/search           references, lemmas across books, tracked threads
    No native script anywhere; lexicon glosses are identifiers. */
 
 // always revalidate, like the book sites: the data changes whenever the hub
-// is rebuilt and pushed, and a stale cached copy is invisible. "no-cache"
-// asks the server every time but takes a 304 when nothing changed, so the
-// concordance (~350 KB) isn't re-downloaded on every visit to Search.
-const DATA = (f) => new URL(`../data/${f}`, import.meta.url);
-const getJSON = (f) => fetch(DATA(f), { cache: "no-cache" }).then((r) => r.json());
+// is rebuilt and pushed, and a stale cached copy is invisible
+const DATA = (f) => { const u = new URL(`../data/${f}`, import.meta.url); u.searchParams.set("v", Date.now()); return u; };
 const content = document.getElementById("content");
 let books = [], divisions = [], byOsis = new Map(), bySlug = new Map(), canon = {}, conc = null;
 
@@ -27,8 +23,8 @@ init();
 async function init() {
   try {
     const [b, c] = await Promise.all([
-      getJSON("books.json"),
-      getJSON("canon.json"),
+      fetch(DATA("books.json")).then((r) => r.json()),
+      fetch(DATA("canon.json")).then((r) => r.json()),
     ]);
     books = b.books;
     divisions = b.divisions || [];
@@ -41,16 +37,11 @@ async function init() {
     byOsis.set(b.osis, b);
     if (b.slug) bySlug.set(b.slug, b);
   }
-  window.addEventListener("hashchange", () => {
-    route();
-    // keyboard and screen-reader users land on the new view, not on the
-    // link they left (search focuses its own box)
-    if (!content.querySelector("#q")) content.focus({ preventScroll: true });
-  });
+  window.addEventListener("hashchange", route);
   route();
 }
 
-const loadConc = async () => conc || (conc = await getJSON("concordance.json"));
+const loadConc = async () => conc || (conc = await fetch(DATA("concordance.json")).then((r) => r.json()));
 
 /* ---------------------------------------------------------------- router */
 
@@ -65,10 +56,9 @@ function route() {
   }
   const views = {
     "": home, book: bookView, arcs, thread: threadView, scene: sceneView,
-    intertext, paths, path: pathView, search, bridge, sources,
+    intertext, paths, path: pathView, search, bridge,
   };
   window.scrollTo(0, 0);
-  delete document.documentElement.dataset.book; // bookView sets it: that book's theme (css/books.css)
   (views[page || ""] || notFound)(arg);
 }
 
@@ -89,9 +79,7 @@ function parseRef(ref) {
   return book ? { book, c: +m[2], v: m[3] ? +m[3] : 1, text: ref } : null;
 }
 
-// a half-verse letter ('26:1b–65', '25:1–26:1a') is read as the whole verse,
-// as the book sites and biblecore/audit.py parse_range() do
-const RANGE_RE = /(\d+):(\d+)[a-z]?\s*[–-]\s*(?:(\d+):)?(\d+)/;
+const RANGE_RE = /(\d+):(\d+)\s*[–-]\s*(?:(\d+):)?(\d+)/;
 function unitFor(book, c, v) {
   return (book.units || []).find((u) => {
     const m = RANGE_RE.exec(u.passage);
@@ -126,14 +114,14 @@ function home() {
   const stripe = (b) => b.primary
     ? `<span class="stripe"><i style="background:${b.primary}"></i><i style="background:${b.secondary}"></i></span>` : "";
   const tile = (b) => {
-    if (!b.site) return `<span class="tile${b.primary ? " themed" : ""}" title="${esc(b.name)}">${stripe(b)}${code(b.osis)}</span>`;
+    if (!b.site) return `<span class="tile${b.primary ? " themed" : ""}" title="${esc(b.name)}">${stripe(b)}${esc(b.osis)}</span>`;
     const pct = b.unit_count ? Math.round(100 * b.units_built / b.unit_count) : 0;
     return `<a class="tile started" href="#/book/${b.slug}" title="${esc(b.name)}: ${b.units_built} of ${b.unit_count} units"
       style="border-color:${b.primary || "var(--accent-bronze)"}">${stripe(b)}
-      ${code(b.osis)}<span class="bar"><i style="width:${pct}%;background:${b.primary || "var(--accent-clay)"}"></i></span></a>`;
+      ${esc(b.osis)}<span class="bar"><i style="width:${pct}%;background:${b.primary || "var(--accent-clay)"}"></i></span></a>`;
   };
   const grid = (d) => `<section class="canon-div"><h2><span class="sig">${d.signature.map((c) =>
-      `<i style="background:${c}"></i>`).join("")}</span><span>${esc(d.label)}${d.provisional ? ` <span class="muted">(theme provisional)</span>` : ""}</span></h2>
+      `<i style="background:${c}"></i>`).join("")}</span>${esc(d.label)}${d.provisional ? ` <span class="muted">(theme provisional)</span>` : ""}</h2>
     <div class="tiles">${books.filter((b) => b.division === d.id).map(tile).join("")}</div></section>`;
   content.innerHTML = `
     <h1 class="page-h">The canon, one book at a time</h1>
@@ -144,7 +132,7 @@ function home() {
       <a class="card" href="#/book/${b.slug}" style="${b.primary ? `border-left:5px solid ${b.primary}` : ""}">
         <b>${esc(b.name)}</b>
         <span>${b.units_built} of ${b.unit_count} units built · ${b.threads.length} tracked threads</span>
-        <span class="bar"><i style="width:${Math.round(100 * b.units_built / (b.unit_count || 1))}%${b.primary ? `;background:${b.primary}` : ""}"></i></span>
+        <span class="bar"><i style="width:${Math.round(100 * b.units_built / (b.unit_count || 1))}%"></i></span>
       </a>`).join("")}</div>
     ${divisions.map(grid).join("")}
     <section><h2>Arcs</h2><div class="cards">${(canon.arcs || []).map((a) => `
@@ -156,15 +144,12 @@ function bookView(slug) {
   const b = bySlug.get(slug);
   if (!b) return notFound();
   document.title = `${b.name} — study hub`;
-  document.documentElement.dataset.book = b.slug;
   const byN = new Map(b.units.map((u) => [u.n, u]));
   const groups = b.groups.length ? b.groups : [{ n: 0, label: "", units: b.units.map((u) => u.n) }];
   content.innerHTML = `
-    <header class="book-mast">
-      <p class="crumb"><a href="#/">Books</a> › ${esc(b.name)}</p>
-      <h1 class="page-h">${esc(b.name)}</h1>
-      <p class="lede">${b.units_built} of ${b.unit_count} units built. <a href="${b.site}">Open the study →</a></p>
-    </header>
+    <p class="crumb"><a href="#/">Books</a> › ${esc(b.name)}</p>
+    <h1 class="page-h">${esc(b.name)}</h1>
+    <p class="lede">${b.units_built} of ${b.unit_count} units built. <a href="${b.site}">Open the study →</a></p>
     ${groups.map((g) => `<section class="group"><h2>${g.label ? esc(g.label) : "Units"}</h2><div class="units">${
       g.units.map((n) => byN.get(n)).filter(Boolean).map((u) => u.built
         ? `<a class="unit built" href="${b.site}#/${u.slug}" title="${esc(u.passage)}"><b>${u.n}</b> ${esc(u.title)}</a>`
@@ -212,7 +197,7 @@ function threadView(id) {
         ${m.ref ? refLink(m.ref) : ""}
         ${bt ? `<span class="swatch" style="background:${bt.color || "transparent"}"></span><i>${esc(bt.translit)}</i> — ${esc(bt.gloss)} <span class="n">${bt.count}× tagged</span>`
              : m.thread ? `<span class="muted">thread ${esc(m.thread)}</span>` : `<span class="muted">not a tracked thread there yet</span>`}
-        ${m.lemma ? lemmaLabel(m.lemma) : ""}</li>`;
+        ${m.lemma ? `<span class="tag">${esc(m.lemma)}</span>` : ""}</li>`;
     }).join("")}</ul>
     ${bridgeTable((canon.bridge || []).filter((r) => r.thread === t.id), "In the Greek")}`;
 }
@@ -229,15 +214,6 @@ function bridgeTable(rows, title) {
       <td><i>${r.nt.map(esc).join(", ")}</i> ${refLink(r.nt_ref)}</td></tr>
       ${r.note ? `<tr class="note"><td colspan="3">${esc(r.note)}${r.thread ? ` · <a href="#/thread/${r.thread}">${esc(threadLabel(r.thread))}</a>` : ""}</td></tr>` : ""}`).join("")}
     </tbody></table></div></section>`;
-}
-
-/* a member's lemma id as a reader sees it elsewhere on the hub:
-   heb:5157 -> "Strong's 5157" (searchable as =5157), grc:x -> the Greek lemma */
-function lemmaLabel(id) {
-  const [lang, key] = id.split(":");
-  if (lang === "heb") return `<a class="n" href="#/search/${encodeURIComponent("=" + key)}">Strong's ${esc(key)}</a>`;
-  if (lang === "grc") return `<span class="n">Greek <i>${esc(key)}</i></span>`;
-  return `<span class="n">${esc(id)}</span>`;
 }
 
 const threadLabel = (id) => (canon.threads || []).find((t) => t.id === id)?.label || id;
@@ -264,67 +240,36 @@ function sceneView(id) {
 function intertext() {
   document.title = "Intertext — study hub";
   const edges = canon.intertext || [];
+  const src = [...new Set(edges.map((e) => parseRef(e.from)?.book.osis).filter(Boolean))];
+  const tgtBook = (e) => parseRef(e.to)?.book;
   const order = new Map(books.map((b, i) => [b.osis, i]));
-  const srcOf = (e) => parseRef(e.from)?.book.osis, tgtOf = (e) => parseRef(e.to)?.book.osis;
-  const byCanon = (a, b) => order.get(a) - order.get(b);
-  const src = [...new Set(edges.map(srcOf).filter(Boolean))].sort(byCanon);
-  const tgt = [...new Set(edges.map(tgtOf).filter(Boolean))].sort(byCanon);
-  const count = (s, t) => edges.filter((e) => srcOf(e) === s && tgtOf(e) === t).length;
+  const tgt = [...new Set(edges.map((e) => tgtBook(e)?.osis).filter(Boolean))].sort((a, b) => order.get(a) - order.get(b));
+  const count = (s, t) => edges.filter((e) => parseRef(e.from)?.book.osis === s && tgtBook(e)?.osis === t).length;
   const max = Math.max(1, ...src.flatMap((s) => tgt.map((t) => count(s, t))));
   const kinds = [...new Set(edges.map((e) => e.kind))];
-  const name = (o) => byOsis.get(o)?.name || o;
-  const opts = (xs) => xs.map((x) => `<option value="${esc(x)}">${esc(name(x))}</option>`).join("");
   content.innerHTML = `<h1 class="page-h">Intertext</h1>
     <p class="lede">${edges.length} links from the studies to the rest of the canon: quotations and allusions
       entered by hand, and echoes harvested from each unit's echo asides. Rows are the studied book,
-      columns the book it points to. Choose a count to list those links.</p>
-    <div class="matrix-wrap" tabindex="0" role="region" aria-label="Links by book, scrolls sideways"><table class="matrix">
-      <caption class="sr">Number of links from each studied book (rows) to each book it points to (columns); each count lists its links below</caption>
-      <thead><tr><td class="corner"></td>${tgt.map((t) => `<th scope="col" abbr="${esc(name(t))}"><span>${esc(t)}</span></th>`).join("")}</tr></thead>
-      <tbody>${src.map((s) => `<tr><th scope="row">${esc(name(s))}</th>${tgt.map((t) => {
+      columns the book it points to.</p>
+    <div class="matrix-wrap"><table class="matrix"><thead><tr><th></th>${tgt.map((t) => `<th><span>${esc(t)}</span></th>`).join("")}</tr></thead>
+      <tbody>${src.map((s) => `<tr><th>${esc(byOsis.get(s)?.name || s)}</th>${tgt.map((t) => {
         const n = count(s, t);
-        // shade tops out at 0.55, where the count still reads at 4.5:1 or
-        // better in both themes (darker, neither ink nor white text does)
-        return n ? `<td style="--a:${(0.12 + 0.43 * n / max).toFixed(2)}"><button type="button" class="cell"
-          data-s="${esc(s)}" data-t="${esc(t)}" aria-pressed="false"
-          aria-label="${esc(name(s))} to ${esc(name(t))}: ${n} link${n > 1 ? "s" : ""}" title="${n} link${n > 1 ? "s" : ""} ${esc(s)} → ${esc(t)}">${n}</button></td>` : "<td></td>";
+        return `<td${n ? ` style="--a:${(0.15 + 0.85 * n / max).toFixed(2)}" title="${n} link(s) ${s} → ${t}"` : ""}>${n || ""}</td>`;
       }).join("")}</tr>`).join("")}</tbody></table></div>
     <div class="filters">
-      <label>From <select id="f-src"><option value="">any book</option>${opts(src)}</select></label>
-      <label>To <select id="f-tgt"><option value="">any book</option>${opts(tgt)}</select></label>
-      <label>Kind <select id="f-kind"><option value="">any</option>${kinds.map((k) => `<option>${esc(k)}</option>`).join("")}</select></label>
-      <button type="button" id="f-clear" class="clear" hidden>Clear</button>
+      <label>From <select id="f-src"><option value="">any book</option>${src.map((s) => `<option>${s}</option>`).join("")}</select></label>
+      <label>Kind <select id="f-kind"><option value="">any</option>${kinds.map((k) => `<option>${k}</option>`).join("")}</select></label>
     </div>
-    <p id="edges-sum" class="muted" aria-live="polite"></p>
     <ul id="edges" class="edges"></ul>`;
-  const $ = (id) => document.getElementById(id);
   const draw = () => {
-    const s = $("f-src").value, t = $("f-tgt").value, k = $("f-kind").value;
-    const xs = edges.filter((e) => (!s || srcOf(e) === s) && (!t || tgtOf(e) === t) && (!k || e.kind === k));
-    for (const b of content.querySelectorAll(".cell")) {
-      b.setAttribute("aria-pressed", String(!!s && !!t && b.dataset.s === s && b.dataset.t === t));
-    }
-    $("f-clear").hidden = !(s || t || k);
-    $("edges-sum").textContent = s || t || k
-      ? `${xs.length} link${xs.length === 1 ? "" : "s"}${s ? ` from ${name(s)}` : ""}${t ? ` to ${name(t)}` : ""}${k ? `, ${k}` : ""}`
-      : `All ${xs.length} links`;
-    $("edges").innerHTML = xs.slice(0, 400).map((e) =>
+    const s = document.getElementById("f-src").value, k = document.getElementById("f-kind").value;
+    const xs = edges.filter((e) => (!s || parseRef(e.from)?.book.osis === s) && (!k || e.kind === k));
+    document.getElementById("edges").innerHTML = xs.slice(0, 400).map((e) =>
       `<li>${refLink(e.from)} <span class="arrow">→</span> ${refLink(e.to)} <span class="tag">${esc(e.kind)}</span>
         ${e.note ? `<span class="muted">${esc(e.note)}</span>` : ""}</li>`).join("") +
       (xs.length > 400 ? `<li class="muted">${xs.length - 400} more; filter to narrow.</li>` : "");
   };
-  content.querySelectorAll("select").forEach((x) => x.addEventListener("change", draw));
-  content.querySelectorAll(".cell").forEach((b) => b.addEventListener("click", () => {
-    const on = b.getAttribute("aria-pressed") === "true";
-    $("f-src").value = on ? "" : b.dataset.s;
-    $("f-tgt").value = on ? "" : b.dataset.t;
-    draw();
-    if (!on) $("edges-sum").scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }));
-  $("f-clear").addEventListener("click", () => {
-    for (const id of ["f-src", "f-tgt", "f-kind"]) $(id).value = "";
-    draw();
-  });
+  content.querySelectorAll("select").forEach((s) => s.addEventListener("change", draw));
   draw();
 }
 
@@ -346,7 +291,7 @@ function pathView(id) {
     <ol class="steps">${p.steps.map((s) => `<li><b>${refLink(s.ref)}</b><span>${esc(s.note || "")}</span></li>`).join("")}</ol>`;
 }
 
-async function search(initial) {
+async function search() {
   document.title = "Search — study hub";
   content.innerHTML = `<h1 class="page-h">Search the canon</h1>
     <p class="lede">A reference (<i>Josh 1:6</i>), a transliterated word (<i>naḥalah</i>, diacritics optional),
@@ -354,7 +299,7 @@ async function search(initial) {
     <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="reference, word, gloss or =number…">
     <div id="out"></div>`;
   const input = document.getElementById("q"), out = document.getElementById("out");
-  input.value = initial || sessionStorage.getItem("hub.q") || "";
+  input.value = sessionStorage.getItem("hub.q") || "";
   const c = await loadConc();
   const run = () => {
     const q = input.value.trim();
@@ -411,57 +356,10 @@ function threadHits(q) {
       ${canonFor(b.slug, t.id).map((c) => `<a class="tag" href="#/thread/${c.id}">canon: ${esc(c.label)}</a>`).join(" ")}</li>`).join("")}</ul></section>`;
 }
 
-/* Every source whose data the hub shows, credited as each asks (morphhb's
-   own attribution wording; MorphGNT's citation). Keep in step with the
-   footer in index.html and hub/README.md. */
-const SOURCE_LIST = [
-  ["Hebrew text, lemmas and morphology",
-    `<a href="https://github.com/openscriptures/morphhb">Open Scriptures Hebrew Bible</a> (morphhb). Original work of the Open
-     Scriptures Hebrew Bible available at https://github.com/openscriptures/morphhb. Lemma and morphology data
-     <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>; the text of the Westminster Leningrad Codex is in the public domain.`,
-    "The concordance on Search, every Hebrew reference, and the Hebrew side of the bridge."],
-  ["Hebrew lexicon glosses",
-    `<a href="https://github.com/openscriptures/HebrewLexicon">Open Scriptures HebrewLexicon</a>, Open Scriptures Hebrew Bible Project,
-     <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>; the text of Strong's Hebrew dictionary is in the public domain.`,
-    "Strong's short definitions, shown as word identifiers, never as translations."],
-  ["Greek New Testament",
-    `Tauber, J. K., ed. <a href="https://github.com/morphgnt/sblgnt"><i>MorphGNT: SBLGNT Edition</i></a>
-     (<a href="https://doi.org/10.5281/zenodo.376200">doi:10.5281/zenodo.376200</a>): parsing and lemmatization
-     <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>. Built on the
-     <a href="https://sblgnt.com/">SBL Greek New Testament</a>, © 2010 Society of Biblical Literature and Logos Bible Software,
-     under the <a href="https://sblgnt.com/license/">SBLGNT license</a>.`,
-    "New Testament lemmas and references (the bridge, Matthew's threads). No Greek text is reproduced; lemmas are transliterated."],
-  ["Septuagint",
-    `<a href="https://github.com/eliranwong/LXX-Rahlfs-1935">LXX-Rahlfs-1935</a>, © 2017 Eliran Wong,
-     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, based on the
-     <a href="http://ccat.sas.upenn.edu/gopher/text/religion/biblical/lxxmorph/">CCAT LXX morphology</a> (University of Pennsylvania)
-     of Rahlfs' 1935 edition; read through the <a href="https://github.com/CenterBLC/LXX">Center of Biblical Languages and
-     Technology's Text-Fabric edition</a> (CenterBLC/LXX).`,
-    "Greek Old Testament lemmas and references in the bridge, transliterated."],
-  ["Translations, notes and the canon",
-    "The studies' own: each book's translation and notes, and the arcs, canon threads, type-scenes, intertext, reading paths and bridge rows.",
-    ""],
-  ["Typefaces",
-    `Cinzel (Natanael Gama), EB Garamond (Georg Duffner and Octavio Pardo), Crimson Pro (Jacques Le Bailly),
-     Source Serif 4 (Frank Grießhammer, Adobe) and Uncial Antiqua (Astigmatic), served by
-     <a href="https://fonts.google.com/">Google Fonts</a> under the <a href="https://openfontlicense.org/">SIL Open Font License 1.1</a>.`,
-    ""],
-];
-
-function sources() {
-  document.title = "Sources — study hub";
-  content.innerHTML = `<h1 class="page-h">Sources and licences</h1>
-    <p class="lede">What the hub shows, where each part comes from, and the terms it is shared under.
-      Each book site credits the sources its own pages use.</p>
-    <dl class="sources">${SOURCE_LIST.map(([what, cred, use]) => `<dt>${esc(what)}</dt><dd>${cred}</dd>${use ? `<dd class="cite">${esc(use)}</dd>` : ""}`).join("")}</dl>`;
-}
-
 /* --------------------------------------------------------------- helpers */
 
 const total = (e) => Object.values(e.books).reduce((s, x) => s + x.n, 0);
 const arcLabel = (id) => (canon.arcs || []).find((a) => a.id === id)?.label || id || "";
 const cap = (s) => (s || "").charAt(0).toUpperCase() + (s || "").slice(1);
 function fold(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
-/* Cinzel's 1 is an I ("ISam", "ICor"): digits in a book code take the text face */
-function code(s) { return `<span class="code">${esc(s).replace(/\d+/g, (d) => `<span class="num">${d}</span>`)}</span>`; }
 function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
