@@ -56,6 +56,10 @@ COMMANDS = {
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }
+# commands whose main() parses its arguments with argparse (its own --help);
+# every other one gets its module docstring for -h/--help and doesn't run
+ARGPARSED = {"port", "data-w", "leads", "migrate", "units-from-map"}
+HELP = ("-h", "--help")
 
 
 def _corpus(argv):
@@ -87,15 +91,21 @@ def main(argv=None):
         print(__doc__)
         return 0
     cmd, rest = argv[0], argv[1:]
-    if cmd == "corpus":
-        return _corpus(rest)
-    if cmd == "book":
-        return _show_book(rest)
+    wants_help = any(a in HELP for a in rest)
+    if cmd in ("corpus", "book"):
+        if wants_help:
+            print(__doc__)
+            return 0
+        return _corpus(rest) if cmd == "corpus" else _show_book(rest)
     if cmd not in COMMANDS:
         print(f"unknown command {cmd!r}\n{__doc__}")
         return 2
     mod, fn = COMMANDS[cmd]
-    return getattr(importlib.import_module(mod), fn)(rest) or 0
+    module = importlib.import_module(mod)
+    if wants_help and cmd not in ARGPARSED:
+        print((module.__doc__ or __doc__).strip())
+        return 0
+    return getattr(module, fn)(rest) or 0
 
 
 if __name__ == "__main__":
