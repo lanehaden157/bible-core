@@ -25,9 +25,12 @@ and the reader data.
 - `hub/` + `tools/hub_build.py` — the canon hub site (ARCHITECTURE.md §8),
   built into the sibling `../hub` repo.
 - `corpus/` — shared corpus files a new book gets a copy of (the Strong's
-  lexicon).
-- `tests/` — `python tests/run.py`. Runs against the sibling `../Joshua`
-  checkout, read-only.
+  lexicon; for a Greek book, the MorphGNT lexicon).
+- `tests/` — `python tests/run.py`. Reads the sibling `../Joshua` (the
+  reference book), `../Numbers` and `../Matthew` checkouts, read-only, and
+  fails if it writes to them. Clone each next to this repo, then
+  `npm install` in Joshua and Numbers (morphhb) and
+  `python pipeline/fetch_corpus.py` in Matthew (ARCHITECTURE.md §8).
 
 Plan and status: `../g6-plan.md`. Session notes live one level up, in the
 `Bible/` session files.
