@@ -121,7 +121,7 @@ function home() {
       ${code(b.osis)}<span class="bar"><i style="width:${pct}%;background:${b.primary || "var(--accent-clay)"}"></i></span></a>`;
   };
   const grid = (d) => `<section class="canon-div"><h2><span class="sig">${d.signature.map((c) =>
-      `<i style="background:${c}"></i>`).join("")}</span>${esc(d.label)}${d.provisional ? ` <span class="muted">(theme provisional)</span>` : ""}</h2>
+      `<i style="background:${c}"></i>`).join("")}</span><span>${esc(d.label)}${d.provisional ? ` <span class="muted">(theme provisional)</span>` : ""}</span></h2>
     <div class="tiles">${books.filter((b) => b.division === d.id).map(tile).join("")}</div></section>`;
   content.innerHTML = `
     <h1 class="page-h">The canon, one book at a time</h1>

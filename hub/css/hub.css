@@ -99,7 +99,7 @@ h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 18p
 .tile .stripe { display: flex; width: 80%; height: 4px; margin: 0 0 3px; border-radius: 2px; overflow: hidden; }
 .tile .stripe i { display: block; flex: 1; }
 .canon-div h2 { display: flex; align-items: center; gap: 8px; }
-.canon-div .sig { display: inline-flex; gap: 2px; }
+.canon-div .sig { display: inline-flex; gap: 2px; flex: none; }
 .canon-div .sig i { display: block; width: 10px; height: 10px; border-radius: 2px; }
 
 .group .units { display: flex; flex-wrap: wrap; gap: 6px; }
