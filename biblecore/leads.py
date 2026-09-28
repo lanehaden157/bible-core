@@ -25,7 +25,7 @@ shared with the *other* four.
 
 Source: morphhb's whole Hebrew Bible (book.json paths.wlc). Lemma identity
 is the bare Strong's number. Everything printed is transliterated; no
-native script reaches the output. Hebrew books only.
+native script reaches the output.
 
 A Greek book (plan D4) gets the same two kinds of lead from a different
 pair of corpora instead: the LXX (the Old Testament in Greek,
@@ -450,7 +450,7 @@ def rare_leads_greek(nt, lxx, freq, unit_words, rare=RARE_DEFAULT):
 
 def phrase_leads_greek(lxx, freq, unit_words):
     """Adjacent lemma pairs in the passage that also stand adjacent in an
-    LXX verse. Both words under PHRASE_WORD_MAX total occurrences; the pair
+    LXX verse. Both words in at most PHRASE_WORD_MAX verses; the pair
     in at most PHRASE_TOTAL_MAX LXX verses. Overlapping pairs in one verse
     merge into a single phrase lead."""
     lxx_pairs = collections.defaultdict(list)

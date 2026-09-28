@@ -23,7 +23,9 @@ thread-stems.json or split the thread's ids by hand, and re-run.
     python tools/stems_to_roots.py <book-root> <thread-stems.json> [<threads.json>]
 
 Prints a JSON object {"roots": {slug: {"ids": [...], "note": "TODO"}}} for
-the clean threads to stdout, and a report of MIXED/CLASH cases to stderr.
+every thread whose stems matched something (MIXED ones included, to split
+by hand) to stdout, and a report of MIXED/CLASH/EMPTY/MALFORMED cases to
+stderr.
 Nothing is written -- paste the reviewed result into data/roots.json by hand.
 """
 import json

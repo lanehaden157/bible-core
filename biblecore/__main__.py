@@ -1,10 +1,11 @@
 """python -m biblecore <command> [args]   (run from the book's root)
+python -m biblecore <command> --help     (that command's usage)
 
 Commands:
   build                 re-derive everything downstream of the fragments
   assets                css + component list for the enabled components
   port N [--dry|--src X|--force]   port a research artifact
-  audit [...]           tracked-thread coverage (--ids ROOT, --unit unit-06, --stub)
+  audit [...]           tracked-thread coverage (--ids ROOT, --unit unit-06, --stub, --check)
   data-w N [--dry]      fill data-w on a built unit by alignment
   retrofit              apply the retrofit specs
   refresh               regenerate built fragments' meta blocks
@@ -14,7 +15,8 @@ Commands:
   roots                 validate data/roots.json
   digest                -> threads-digest.md
   colour ROOT [...]     colours for threads about to be promoted
-  leads [N|--all]       canon leads (Hebrew books)
+  leads [N|--all] [--rare N]
+                        canon leads (Hebrew Bible; LXX + NT for a Greek book)
   canon                 echo edges + meta rows -> data/canon.json
   emit                  -> data/words/, lemmas.json, text.json (interlinear, search)
   manifest              -> data/manifest.json (index to the data files)
@@ -24,7 +26,8 @@ Commands:
   corpus                build the word table and reading text from the corpus
   units-from-map [MAP] [--kinds outer,inner] [--dry]
                         unit rows + groupings from the literary unit map
-  sync-check [--mark-synced [FILE ...]]
+  sync-check [--mark-synced [FILE ...] | --mark-pasted]
+                        which chat-side files need syncing or re-pasting
   sync                  mirror chat-side files, commit, push
   book                  show the resolved book.json settings
 """
