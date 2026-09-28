@@ -79,7 +79,9 @@ function parseRef(ref) {
   return book ? { book, c: +m[2], v: m[3] ? +m[3] : 1, text: ref } : null;
 }
 
-const RANGE_RE = /(\d+):(\d+)\s*[–-]\s*(?:(\d+):)?(\d+)/;
+// a half-verse letter ('26:1b–65', '25:1–26:1a') is read as the whole verse,
+// as the book sites and biblecore/audit.py parse_range() do
+const RANGE_RE = /(\d+):(\d+)[a-z]?\s*[–-]\s*(?:(\d+):)?(\d+)/;
 function unitFor(book, c, v) {
   return (book.units || []).find((u) => {
     const m = RANGE_RE.exec(u.passage);
