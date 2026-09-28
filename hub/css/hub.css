@@ -22,7 +22,13 @@
   /* the Torah's text face (web/themes.json), the family the book sites
      use; Frank Ruhl Libre was the pre-0.8 template's and no site loads it */
   --serif: "EB Garamond", Georgia, "Times New Roman", serif;
+  --title: var(--display);
+  /* the hub's own chrome (top bar, footer) keeps these on a themed book page */
+  --hub-display: "Cinzel", Georgia, serif;
+  --hub-serif: "EB Garamond", Georgia, "Times New Roman", serif;
   --maxw: 1040px;
+  /* a book page's banner; css/books.css (generated) sets them per book */
+  --book-primary: #b1481f; --book-secondary: #8c6d1f; --mast-fg: #fff; --emblem-fg: #e9dfc3;
   color-scheme: light;
 }
 
@@ -70,10 +76,11 @@ a:focus-visible, summary:focus-visible, select:focus-visible, [tabindex="0"]:foc
 }
 #content:focus { outline: none; }
 
+.topbar, .foot { font-family: var(--hub-serif); }
 .topbar { position: sticky; top: 0; z-index: 10; background: var(--topbar-bg); backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); }
 .topbar .inner { max-width: var(--maxw); margin: 0 auto; padding: 10px 24px; display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
-.brand { font-family: var(--display); font-size: 19px; font-weight: 600; letter-spacing: .04em; border: none; }
-.brand span { color: var(--ink-soft); font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 15px; letter-spacing: normal; }
+.brand { font-family: var(--hub-display); font-size: 19px; font-weight: 600; letter-spacing: .04em; border: none; }
+.brand span { color: var(--ink-soft); font-family: var(--hub-serif); font-style: italic; font-weight: 400; font-size: 15px; letter-spacing: normal; }
 .topnav { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
 .topnav a { font-size: 14.5px; color: var(--ink-soft); border: 1px solid transparent; border-radius: 6px; padding: 4px 10px; }
 .topnav a:hover { border-color: var(--rule); color: var(--ink); }
@@ -109,6 +116,21 @@ h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 18p
 .canon-div h2 { display: flex; align-items: center; gap: 8px; }
 .canon-div .sig { display: inline-flex; gap: 2px; flex: none; }
 .canon-div .sig i { display: block; width: 10px; height: 10px; border-radius: 2px; }
+
+/* a book page opens with its site's banner: the book's colour, its emblem
+   in a circle (css/books.css gives each themed book its colours, faces and
+   --emblem; the same masthead the book site draws over each unit) */
+.book-mast { position: relative; background: var(--book-primary); color: var(--mast-fg);
+  border-radius: 8px; border-bottom: 4px solid var(--book-secondary); padding: 18px 24px 16px; margin: 0 0 22px; }
+.book-mast .crumb, .book-mast .page-h, .book-mast .lede, .book-mast a { color: var(--mast-fg); }
+.book-mast .page-h { font-family: var(--title); }
+.book-mast .lede { margin: 0; }
+.book-mast a:focus-visible { outline-color: var(--mast-fg); }
+.book-mast::before, .book-mast::after { position: absolute; top: 50%; transform: translateY(-50%); }
+.book-mast::before { right: 22px; width: 62px; height: 62px; border-radius: 50%; background: var(--book-secondary); }
+.book-mast::after { right: 35px; width: 36px; height: 36px; background: var(--emblem-fg);
+  -webkit-mask: var(--emblem) center / contain no-repeat; mask: var(--emblem) center / contain no-repeat; }
+:root[data-book] .book-mast { padding-right: 104px; }
 
 .group .units { display: flex; flex-wrap: wrap; gap: 6px; }
 .unit { font-size: 15.5px; padding: 4px 9px; border: 1px dashed var(--rule); border-radius: 6px; color: var(--ink-soft); }
@@ -163,5 +185,9 @@ select, #q { font: inherit; font-size: 16px; padding: 6px 10px; border: 1px soli
   .topbar .inner { padding: 9px 16px; gap: 6px; }
   .topnav { margin-left: 0; width: 100%; }
   .page-h { font-size: 27px; }
+  .book-mast { padding: 14px 16px 14px; }
+  :root[data-book] .book-mast { padding-right: 78px; }
+  .book-mast::before { right: 14px; width: 50px; height: 50px; }
+  .book-mast::after { right: 24px; width: 30px; height: 30px; }
   .tiles { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); }
 }

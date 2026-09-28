@@ -67,6 +67,7 @@ function route() {
     intertext, paths, path: pathView, search, bridge,
   };
   window.scrollTo(0, 0);
+  delete document.documentElement.dataset.book; // bookView sets it: that book's theme (css/books.css)
   (views[page || ""] || notFound)(arg);
 }
 
@@ -154,12 +155,15 @@ function bookView(slug) {
   const b = bySlug.get(slug);
   if (!b) return notFound();
   document.title = `${b.name} — study hub`;
+  document.documentElement.dataset.book = b.slug;
   const byN = new Map(b.units.map((u) => [u.n, u]));
   const groups = b.groups.length ? b.groups : [{ n: 0, label: "", units: b.units.map((u) => u.n) }];
   content.innerHTML = `
-    <p class="crumb"><a href="#/">Books</a> › ${esc(b.name)}</p>
-    <h1 class="page-h">${esc(b.name)}</h1>
-    <p class="lede">${b.units_built} of ${b.unit_count} units built. <a href="${b.site}">Open the study →</a></p>
+    <header class="book-mast">
+      <p class="crumb"><a href="#/">Books</a> › ${esc(b.name)}</p>
+      <h1 class="page-h">${esc(b.name)}</h1>
+      <p class="lede">${b.units_built} of ${b.unit_count} units built. <a href="${b.site}">Open the study →</a></p>
+    </header>
     ${groups.map((g) => `<section class="group"><h2>${g.label ? esc(g.label) : "Units"}</h2><div class="units">${
       g.units.map((n) => byN.get(n)).filter(Boolean).map((u) => u.built
         ? `<a class="unit built" href="${b.site}#/${u.slug}" title="${esc(u.passage)}"><b>${u.n}</b> ${esc(u.title)}</a>`
