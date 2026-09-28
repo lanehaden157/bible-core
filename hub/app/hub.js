@@ -114,11 +114,11 @@ function home() {
   const stripe = (b) => b.primary
     ? `<span class="stripe"><i style="background:${b.primary}"></i><i style="background:${b.secondary}"></i></span>` : "";
   const tile = (b) => {
-    if (!b.site) return `<span class="tile${b.primary ? " themed" : ""}" title="${esc(b.name)}">${stripe(b)}${esc(b.osis)}</span>`;
+    if (!b.site) return `<span class="tile${b.primary ? " themed" : ""}" title="${esc(b.name)}">${stripe(b)}${code(b.osis)}</span>`;
     const pct = b.unit_count ? Math.round(100 * b.units_built / b.unit_count) : 0;
     return `<a class="tile started" href="#/book/${b.slug}" title="${esc(b.name)}: ${b.units_built} of ${b.unit_count} units"
       style="border-color:${b.primary || "var(--accent-bronze)"}">${stripe(b)}
-      ${esc(b.osis)}<span class="bar"><i style="width:${pct}%;background:${b.primary || "var(--accent-clay)"}"></i></span></a>`;
+      ${code(b.osis)}<span class="bar"><i style="width:${pct}%;background:${b.primary || "var(--accent-clay)"}"></i></span></a>`;
   };
   const grid = (d) => `<section class="canon-div"><h2><span class="sig">${d.signature.map((c) =>
       `<i style="background:${c}"></i>`).join("")}</span>${esc(d.label)}${d.provisional ? ` <span class="muted">(theme provisional)</span>` : ""}</h2>
@@ -364,4 +364,6 @@ const total = (e) => Object.values(e.books).reduce((s, x) => s + x.n, 0);
 const arcLabel = (id) => (canon.arcs || []).find((a) => a.id === id)?.label || id || "";
 const cap = (s) => (s || "").charAt(0).toUpperCase() + (s || "").slice(1);
 function fold(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+/* Cinzel's 1 is an I ("ISam", "ICor"): digits in a book code take the text face */
+function code(s) { return `<span class="code">${esc(s).replace(/\d+/g, (d) => `<span class="num">${d}</span>`)}</span>`; }
 function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }

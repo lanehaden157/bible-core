@@ -94,6 +94,7 @@ h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 18p
 .tile { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 38px; padding: 4px; font-family: var(--display); font-size: 12.5px; color: var(--ink-soft); border: 1px dashed var(--rule-soft); border-radius: 5px; }
 .tile.started { opacity: 1; color: var(--ink); background: var(--panel); border: 1px solid var(--accent-bronze); font-weight: 600; }
 .tile.started .bar { width: 80%; }
+.tile .num { font-family: var(--serif); font-size: 1.05em; }
 .tile .stripe { opacity: .7; }
 .tile .stripe { display: flex; width: 80%; height: 4px; margin: 0 0 3px; border-radius: 2px; overflow: hidden; }
 .tile .stripe i { display: block; flex: 1; }
@@ -103,7 +104,7 @@ h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 18p
 
 .group .units { display: flex; flex-wrap: wrap; gap: 6px; }
 .unit { font-size: 14.5px; padding: 4px 9px; border: 1px dashed var(--rule); border-radius: 6px; color: var(--ink-soft); }
-.unit b { font-family: var(--display); color: var(--ink-soft); margin-right: 3px; }
+.unit b { font-family: var(--serif); font-weight: 600; color: var(--ink-soft); margin-right: 3px; } /* Cinzel's 1 reads as I */
 .unit.built { border: 1px solid var(--rule); background: var(--panel); color: var(--ink); }
 .unit.built b { color: var(--accent-clay); }
 
