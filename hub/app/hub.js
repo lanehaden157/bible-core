@@ -242,9 +242,9 @@ function sceneView(id) {
 function intertext() {
   document.title = "Intertext — study hub";
   const edges = canon.intertext || [];
-  const src = [...new Set(edges.map((e) => parseRef(e.from)?.book.osis).filter(Boolean))];
-  const tgtBook = (e) => parseRef(e.to)?.book;
   const order = new Map(books.map((b, i) => [b.osis, i]));
+  const src = [...new Set(edges.map((e) => parseRef(e.from)?.book.osis).filter(Boolean))].sort((a, b) => order.get(a) - order.get(b));
+  const tgtBook = (e) => parseRef(e.to)?.book;
   const tgt = [...new Set(edges.map((e) => tgtBook(e)?.osis).filter(Boolean))].sort((a, b) => order.get(a) - order.get(b));
   const count = (s, t) => edges.filter((e) => parseRef(e.from)?.book.osis === s && tgtBook(e)?.osis === t).length;
   const max = Math.max(1, ...src.flatMap((s) => tgt.map((t) => count(s, t))));
@@ -253,8 +253,10 @@ function intertext() {
     <p class="lede">${edges.length} links from the studies to the rest of the canon: quotations and allusions
       entered by hand, and echoes harvested from each unit's echo asides. Rows are the studied book,
       columns the book it points to.</p>
-    <div class="matrix-wrap"><table class="matrix"><thead><tr><th></th>${tgt.map((t) => `<th><span>${esc(t)}</span></th>`).join("")}</tr></thead>
-      <tbody>${src.map((s) => `<tr><th>${esc(byOsis.get(s)?.name || s)}</th>${tgt.map((t) => {
+    <div class="matrix-wrap" tabindex="0" role="region" aria-label="Links by book, scrolls sideways"><table class="matrix">
+      <caption class="sr">Number of links from each studied book (rows) to each book it points to (columns)</caption>
+      <thead><tr><td class="corner"></td>${tgt.map((t) => `<th scope="col" abbr="${esc(byOsis.get(t)?.name || t)}"><span>${esc(t)}</span></th>`).join("")}</tr></thead>
+      <tbody>${src.map((s) => `<tr><th scope="row">${esc(byOsis.get(s)?.name || s)}</th>${tgt.map((t) => {
         const n = count(s, t);
         // shade tops out at 0.55, where the count still reads at 4.5:1 or
         // better in both themes (darker, neither ink nor white text does)
