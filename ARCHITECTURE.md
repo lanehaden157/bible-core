@@ -1,21 +1,32 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.5.0, 2026-09-24. 0.4.0 added the component registry and the
-core.css/theme.css split, with poem, itin and textform alongside echo and list.
-0.5.0 added the reading data layer (`emit`) and the reader features (§8).
-0.6.0 added the canon hub (§8) and linked each book site back to it.
-0.8.0 adds division themes (§8). 0.9.0 puts Joshua and Matthew on the template
-app shell, with an overlay grouping and chip-toggled asides for Matthew (§8). 0.9.1 lets tracked spans inside a `data-verses` component go without `data-w` (colour-only summary tags; Numbers unit 3). 0.9.2 gives Matthew a working Greek
-interlinear (a vendored MorphGNT lexicon, `lang/greek_lexicon.py`), phrase
-threads (`roots.json` `seq`, plan D2), the LXX corpus adapter and Matthew's
-canon leads ported into `leads.py` (plan D4), and a site-wide source-credit
-footer (main.js `SOURCES`) -- see "Matthew fully on bible-core" below. 0.7.0 added Greek: a second language adapter and corpus adapter, proven on
-Matthew's data read-only, and the Hebrew -> LXX -> NT bridge (§8). Numbers unit 1 shaped 0.2.0 (`data-verses`,
-in-place promotion, `new_book.py` + `units-from-map`, `table.list`,
-versification E1). 0.3.0 adds contract versions and migrations, the data
-manifest, the book-side `test`, the synced core workflow and canon
-decisions, and Aramaic word language. Built and tested (see §8). Expect it to
+**Status:** core 0.9.4, 2026-09-27. Built and tested (see §8). Expect it to
 change. The remaining plan is in `../core-plan-remaining.md`.
+
+- 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
+  `new_book.py` + `units-from-map`, `table.list`, versification E1).
+- 0.3.0: contract versions and migrations, the data manifest, the book-side
+  `test`, the synced core workflow and canon decisions, and Aramaic word
+  language.
+- 0.4.0: the component registry and the core.css/theme.css split, with poem,
+  itin and textform alongside echo and list.
+- 0.5.0: the reading data layer (`emit`) and the reader features (§8).
+- 0.6.0: the canon hub (§8), with each book site linked back to it.
+- 0.7.0: Greek, a second language adapter and corpus adapter, proven on
+  Matthew's data read-only, and the Hebrew -> LXX -> NT bridge (§8).
+- 0.8.0: division themes (§8).
+- 0.9.0: Joshua and Matthew on the template app shell, with an overlay
+  grouping and chip-toggled asides for Matthew (§8).
+- 0.9.1: tracked spans inside a `data-verses` component may go without
+  `data-w` (colour-only summary tags; Numbers unit 3).
+- 0.9.2: a working Greek interlinear for Matthew (a vendored MorphGNT
+  lexicon, `lang/greek_lexicon.py`), phrase threads (`roots.json` `seq`,
+  plan D2), the LXX corpus adapter and Matthew's canon leads ported into
+  `leads.py` (plan D4), and a site-wide source-credit footer (main.js
+  `SOURCES`). See "Matthew fully on bible-core" below.
+- 0.9.3: MorphGNT's movable-letter parens stripped from Greek lemma ids;
+  `tools/stems_to_roots.py`.
+- 0.9.4: phrase threads take `alt` (the same title in another word order).
 
 ## What this is
 
@@ -29,10 +40,10 @@ book's own style reference.
 Joshua and Matthew are the **reference implementations**. Everything here was
 learned there. **Joshua runs on this core since 2026-09-26** (Lane reversed
 the 2026-09-22 "not migrating" call): vendored package, `book.json`, core
-build and sync, with its own app shell and theme kept (`css/styles.css` as a
-single-file `paths.css`, so no `core.css`/`components.css`). Its units came
-through byte-identical apart from the contract stamp. Matthew keeps its own
-code and copies a core fix across only when it clearly helps.
+build and sync, and since 0.8.5 the template's app shell with its own
+`theme.css`. Its units came through byte-identical apart from the contract
+stamp. Matthew runs the template shell, the corpus and the reader data on
+core (0.9.0, 0.9.2) but still ports units with its own `pipeline/` (§8).
 
 Where a rule gives a reason, the reason matters more than the rule. Items
 marked **(learned)** each cost a real mistake. Read the lesson before relaxing
@@ -227,7 +238,7 @@ ask Lane" policy.
 | axis | Joshua | Matthew | default for a new book |
 |---|---|---|---|
 | language / transliteration | Hebrew, `hebrew.py`, no vowel length | Greek, `greek.py`, ē/ō | from the language adapter. **Schemes are frozen per language, never harmonised (H10).** |
-| corpus | OSHB, word ids | SBLGNT, no word ids | a corpus with word ids whenever one exists |
+| corpus | OSHB, word ids | MorphGNT (SBLGNT), word ids (0.7.0) | a corpus with word ids whenever one exists |
 | groupings | 4 movements | 3 movements + 5 discourses | `groupings: [{kind, n, label, span, units}]`, where the book picks the kinds (D11) |
 | optional components | echo | ring, table, itinerary, compare, synoptic | from the registry (`biblecore/components/`), enabled in `book.json`; template enables echo + list |
 | `opens.note` | required | optional | required |
@@ -452,7 +463,8 @@ Matthew's MorphGNT and SBLGNT files read-only (`tests/test_corpus_morphgnt.py`):
 - `emit` writes a Greek interlinear with no native script.
 
 A Greek book sets `"language": "greek"`, `"corpus": {"kind": "morphgnt", …}`,
-`"versification": "source"` and `paths.morphgnt`. The template's chat-side
+`"versification": "source"` and `paths.morphgnt` (plus `paths.greek_lexicon`
+and `paths.lxx` since 0.9.2). The template's chat-side
 text and style reference are still Hebrew-shaped, so adapt them when the
 first NT book starts (G12).
 
@@ -483,11 +495,10 @@ The `assets` step turns the book's entry into `css/division.css`
   the colours themselves never change).
 
 A division may name a `title` face, used on the masthead title only (the
-NT's uncials). `tools/legacy_theme.py ../Joshua` (or `../Matthew`) opts a
-pre-core site in (Lane, 2026-09-26). It writes its `division.css`, plus
-aliases for the site's own token names and hard-coded colours, adds the
-index.html theme script, stylesheet link and Appearance setting, and makes a
-one-line `threads.js` change. Re-run it after any theme change. A book overrides any part in `book.json` `"theme"`. A book with no entry gets
+NT's uncials). `tools/legacy_theme.py` opted a pre-core site with its own
+app shell into its theme (Lane, 2026-09-26). It is retired now that Joshua
+(0.8.5) and Matthew (0.9.0) run the template shell, and kept for a future
+site with its own shell. A book overrides any part in `book.json` `"theme"`. A book with no entry gets
 no division.css, and its theme.css fallback tokens (`:where(:root)`) apply.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
@@ -497,8 +508,14 @@ reference's worked example, and that re-running the build changes no file.
 Audit gaps are reported but don't fail it.
 
 **Testing the core:** `python tests/run.py [filter]` (no pytest needed). The
-suite runs against Joshua's real data, read-only (scratch copies where a test
-writes). Its strongest check:
+suite reads the sibling book checkouts, read-only: Joshua's real data above
+all (scratch copies where a test writes), plus Numbers' word table and
+Matthew's MorphGNT, LXX and pipeline for parity checks. `run.py` fails the
+run if any file in them changes. Set up with `git clone` of each next to
+bible-core, `npm install` in `../Joshua` and `../Numbers` (morphhb), and
+`python pipeline/fetch_corpus.py` in `../Matthew`. The Greek path also has
+its own small scratch book (`tests/greek_book.py`), so it is tested without
+Matthew. Its strongest check:
 Joshua rebuilt from the template, porting its four source artifacts through
 the CLI, reproduces Joshua's committed units byte for byte with a clean
 thread audit (`tests/test_template.py`). It also checks the corpus builder

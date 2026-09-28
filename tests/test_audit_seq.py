@@ -65,6 +65,17 @@ def test_bare_id_matches_any_letter_variant():
     return []
 
 
+def test_a_later_middle_word_is_tried_when_the_nearest_fails():
+    # 111 222 222 999 333, gap 2: the first 222 leaves 333 three words
+    # away, the second 222 leaves it two -- a real occurrence
+    words = [row("w1", "111", 1, 1), row("w2", "222", 1, 1), row("w3", "222", 1, 1),
+             row("w4", "999", 1, 1), row("w5", "333", 1, 1)]
+    hits = source_hits_for_seq(words, ["111", "222", "333"], max_gap=2)
+    if hits != {"w5": (1, 1)}:
+        return [f"expected a hit at w5 through the second 222, got {hits}"]
+    return []
+
+
 def test_source_hits_for_entry_dispatches_on_seq():
     words = [row("w1", "111", 1, 1), row("w2", "222", 1, 1)]
     seq_entry = {"seq": ["111", "222"], "note": "x"}

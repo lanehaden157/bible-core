@@ -10,38 +10,57 @@ node, in `paths.lxx`):
     book.tf       the LXX's own book abbreviation
     chapter.tf    chapter number
     verse.tf      verse number
-Each feature file's data lines run 1:1 with word-slot nodes (1..N); a line
+Each feature file's data lines follow the word-slot nodes (1..N); a line
 is either a bare value (the next node) or "start[-end]<TAB>value" (a run of
-nodes sharing one value, expanded here). Higher node types (book/chapter/
-verse nodes themselves) follow after node N in the same file and are never
-read -- verified against fetch_corpus.py's pinned commit.
+nodes sharing one value, expanded here). A node with no value has no line:
+the next line names its node explicitly, and the nodes skipped read as "".
+Higher node types (book/chapter/verse nodes themselves) follow after node N
+in the same file and are never read -- verified against fetch_corpus.py's
+pinned commit. N is the last node lex_utf8.tf gives a value.
 """
 import os
 import sys
 
 
-def _tf_values(path, limit):
+def _tf_lines(path):
+    """The data lines of a feature file (after the header's blank line)."""
     lines = open(path, encoding="utf-8").read().split("\n")
-    i = 0
-    while lines[i] != "":
-        i += 1
-    i += 1  # skip the blank line ending the header
+    i = lines.index("") + 1
+    if lines[-1] == "":
+        lines.pop()
+    return lines[i:]
+
+
+def _tf_nodes(lines):
+    """(first_node, last_node, value) per data line."""
     node = 1
-    while node <= limit and i < len(lines):
-        line = lines[i]
-        i += 1
+    for line in lines:
         if "\t" in line:
             rng, value = line.split("\t", 1)
             if "-" in rng:
                 start, end = (int(x) for x in rng.split("-"))
             else:
                 start = end = int(rng)
-            for _ in range(start, min(end, limit) + 1):
-                yield value
-            node = end + 1
         else:
-            yield line
-            node += 1
+            start = end = node
+            value = line
+        yield start, end, value
+        node = end + 1
+
+
+def _tf_values(lines, limit):
+    """The value of every node 1..limit, "" for a node the file skips."""
+    node = 1
+    for start, end, value in _tf_nodes(lines):
+        if node > limit:
+            return
+        for _ in range(node, min(start, limit + 1)):
+            yield ""
+        for _ in range(max(start, node), min(end, limit) + 1):
+            yield value
+        node = end + 1
+    for _ in range(node, limit + 1):
+        yield ""
 
 
 BOOKS_KEY = "__order__"
@@ -59,20 +78,12 @@ def load_lxx(path, key_fn):
         if not os.path.exists(os.path.join(path, name)):
             sys.exit(f"LXX Text-Fabric data not found ({name}) at {path} -- "
                      f"see corpus/README.md")
-    lex_path = os.path.join(path, "lex_utf8.tf")
-    with open(lex_path, encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    i = 0
-    while lines[i] != "":
-        i += 1
-    n_words = len(lines) - (i + 1)
-    if lines and lines[-1] == "":
-        n_words -= 1
+    lex = _tf_lines(os.path.join(path, "lex_utf8.tf"))
+    n_words = max((end for _s, end, _v in _tf_nodes(lex)), default=0)
 
-    lemmas = list(_tf_values(lex_path, n_words))
-    books = list(_tf_values(os.path.join(path, "book.tf"), n_words))
-    chapters = list(_tf_values(os.path.join(path, "chapter.tf"), n_words))
-    verses = list(_tf_values(os.path.join(path, "verse.tf"), n_words))
+    lemmas = list(_tf_values(lex, n_words))
+    books, chapters, verses = (list(_tf_values(_tf_lines(os.path.join(path, f)), n_words))
+                               for f in ("book.tf", "chapter.tf", "verse.tf"))
 
     out = {}
     order = []

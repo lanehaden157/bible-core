@@ -1,10 +1,11 @@
 """python -m biblecore <command> [args]   (run from the book's root)
+python -m biblecore <command> --help     (that command's usage)
 
 Commands:
   build                 re-derive everything downstream of the fragments
   assets                css + component list for the enabled components
   port N [--dry|--src X|--force]   port a research artifact
-  audit [...]           tracked-thread coverage (--ids ROOT, --unit unit-06, --stub)
+  audit [...]           tracked-thread coverage (--ids ROOT, --unit unit-06, --stub, --check)
   data-w N [--dry]      fill data-w on a built unit by alignment
   retrofit              apply the retrofit specs
   refresh               regenerate built fragments' meta blocks
@@ -14,7 +15,8 @@ Commands:
   roots                 validate data/roots.json
   digest                -> threads-digest.md
   colour ROOT [...]     colours for threads about to be promoted
-  leads [N|--all]       canon leads (Hebrew books)
+  leads [N|--all] [--rare N]
+                        canon leads (Hebrew Bible; LXX + NT for a Greek book)
   canon                 echo edges + meta rows -> data/canon.json
   emit                  -> data/words/, lemmas.json, text.json (interlinear, search)
   manifest              -> data/manifest.json (index to the data files)
@@ -24,7 +26,8 @@ Commands:
   corpus                build the word table and reading text from the corpus
   units-from-map [MAP] [--kinds outer,inner] [--dry]
                         unit rows + groupings from the literary unit map
-  sync-check [--mark-synced [FILE ...]]
+  sync-check [--mark-synced [FILE ...] | --mark-pasted]
+                        which chat-side files need syncing or re-pasting
   sync                  mirror chat-side files, commit, push
   book                  show the resolved book.json settings
 """
@@ -56,6 +59,10 @@ COMMANDS = {
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }
+# commands whose main() parses its arguments with argparse (its own --help);
+# every other one gets its module docstring for -h/--help and doesn't run
+ARGPARSED = {"port", "data-w", "leads", "migrate", "units-from-map"}
+HELP = ("-h", "--help")
 
 
 def _corpus(argv):
@@ -87,15 +94,21 @@ def main(argv=None):
         print(__doc__)
         return 0
     cmd, rest = argv[0], argv[1:]
-    if cmd == "corpus":
-        return _corpus(rest)
-    if cmd == "book":
-        return _show_book(rest)
+    wants_help = any(a in HELP for a in rest)
+    if cmd in ("corpus", "book"):
+        if wants_help:
+            print(__doc__)
+            return 0
+        return _corpus(rest) if cmd == "corpus" else _show_book(rest)
     if cmd not in COMMANDS:
         print(f"unknown command {cmd!r}\n{__doc__}")
         return 2
     mod, fn = COMMANDS[cmd]
-    return getattr(importlib.import_module(mod), fn)(rest) or 0
+    module = importlib.import_module(mod)
+    if wants_help and cmd not in ARGPARSED:
+        print((module.__doc__ or __doc__).strip())
+        return 0
+    return getattr(module, fn)(rest) or 0
 
 
 if __name__ == "__main__":

@@ -23,7 +23,9 @@ thread-stems.json or split the thread's ids by hand, and re-run.
     python tools/stems_to_roots.py <book-root> <thread-stems.json> [<threads.json>]
 
 Prints a JSON object {"roots": {slug: {"ids": [...], "note": "TODO"}}} for
-the clean threads to stdout, and a report of MIXED/CLASH cases to stderr.
+every thread whose stems matched something (MIXED ones included, to split
+by hand) to stdout, and a report of MIXED/CLASH/EMPTY/MALFORMED cases to
+stderr.
 Nothing is written -- paste the reviewed result into data/roots.json by hand.
 """
 import json
@@ -132,19 +134,31 @@ def main():
             "note": "TODO",
         }
 
-    # id-clash check across proposed roots (roots.py's own ownership rule)
-    owner = {}
+    # id-clash check across proposed roots (roots.py's own ownership rule:
+    # a bare id claims every lexeme under it, a digit id only its own, so
+    # ara2 and ara3 may sit in different roots but ara collides with both)
+    bare_owner, exact_owner = {}, {}
     clashes = []
     for slug, entry in roots_out.items():
         for id_str in entry["ids"]:
             try:
-                bare = greek.bare_id(id_str)
+                key, bare = greek.lemma_key_of_id(id_str), greek.bare_id(id_str)
             except ValueError:
-                bare = id_str
-            if bare in owner and owner[bare] != slug:
-                clashes.append((id_str, owner[bare], slug))
+                continue  # reported as MALFORMED
+            precise = greek.is_precise(key)
+            if bare_owner.get(bare) not in (None, slug):
+                other = bare_owner[bare]
+            elif precise:
+                other = exact_owner.get(key) if exact_owner.get(key) != slug else None
             else:
-                owner[bare] = slug
+                other = next((o for k, o in exact_owner.items()
+                              if greek.bare_id(k) == bare and o != slug), None)
+            if other is not None:
+                clashes.append((id_str, other, slug))
+            elif precise:
+                exact_owner[key] = slug
+            else:
+                bare_owner[bare] = slug
 
     print(json.dumps({"roots": roots_out}, indent=2, ensure_ascii=False))
 

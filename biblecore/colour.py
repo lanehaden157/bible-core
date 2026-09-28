@@ -1,5 +1,8 @@
 """Colour: perceptual distance and palette assignment (ARCHITECTURE.md §2).
 
+    python -m biblecore colour ROOT [ROOT ...]   # colours for threads about
+                                                 # to be promoted
+
 Every colour on the site is assigned here, never picked by eye. Local roots
 get a per-unit colour (assign_hues); newly promoted tracked threads get a
 book-wide one (assign_tracked_colors). Both draw from the book's palette

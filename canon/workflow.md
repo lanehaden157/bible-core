@@ -33,9 +33,10 @@ hand. The style reference holds every artifact rule.
 3. **Intertext pass.** Its own turn, after Lane confirms pass 2. Start from
    `canon-leads-unit-NN.md` in the synced folder: a generated list of where the
    unit's rare words and shared two-word phrases occur elsewhere in the canon.
-   It's a word search, not a judgment. It's blind to common words, themes,
-   type-scenes and the New Testament, so the pass starts there but doesn't
-   end there.
+   It's a word search, not a judgment. It's blind to common words, themes and
+   type-scenes, and for a Hebrew book to the New Testament (a Greek book's
+   sheet reads the LXX and the rest of the NT, but not its Synoptic
+   parallels), so the pass starts there but doesn't end there.
 
    The deliverable is a ledger, as a table. It has one row per link considered,
    with the verse, the target text, the kind of link (shared word, shared phrase,

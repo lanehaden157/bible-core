@@ -167,28 +167,33 @@ def source_hits_for_seq(words, seq, max_gap=4):
             if not ((bares & bare0) or (keys & exact0)):
                 pos += 1
                 continue
-            last = idxs[pos]
-            matched = True
-            for bare_i, exact_i in specs[1:]:
-                found = None
-                for j in idxs:
-                    if j <= last:
-                        continue
-                    if j > last + max_gap:
-                        break  # idxs is ascending -- nothing closer follows
-                    b, k = _lemma_id_forms(words[j]["lemma"])
-                    if (b & bare_i) or (k & exact_i):
-                        found = j
-                        break
-                if found is None:
-                    matched = False
-                    break
-                last = found
-            if matched:
+            last = _seq_rest(words, idxs, specs, 1, idxs[pos], max_gap)
+            if last is not None:
                 row = words[last]
                 hits[row["word_id"]] = (row["ch"], row["v"])
             pos += 1
     return hits
+
+
+def _seq_rest(words, idxs, specs, n, last, max_gap):
+    """Index of the word matching the final spec, with specs[n:] matched in
+    order after word `last`, each within max_gap of the one before; None if
+    they can't be. The nearest candidate is tried first, then later ones:
+    '111 222 222 x 333' with gap 2 needs the second 222."""
+    if n == len(specs):
+        return last
+    bare_n, exact_n = specs[n]
+    for j in idxs:
+        if j <= last:
+            continue
+        if j > last + max_gap:
+            break  # idxs is ascending -- nothing closer follows
+        b, k = _lemma_id_forms(words[j]["lemma"])
+        if (b & bare_n) or (k & exact_n):
+            end = _seq_rest(words, idxs, specs, n + 1, j, max_gap)
+            if end is not None:
+                return end
+    return None
 
 
 def source_hits_for_entry(words, entry):

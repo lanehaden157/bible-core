@@ -1,6 +1,7 @@
 """units_map: unit rows + groupings from the literary unit map's Overview
 table (the layout Numbers' map uses), and tools/new_book.py's lexicon pin."""
 import os
+import shutil
 import sys
 
 import support
@@ -90,3 +91,19 @@ def test_no_rows_is_reported():
 
 def test_lexicon_pin_matches_shipped_file():
     assert new_book.sha1(new_book.LEXICON) == new_book.LEXICON_SHA1
+
+
+def test_lexicon_pin_ignores_line_endings():
+    # a Windows checkout (core.autocrlf) has the lexicon with CRLF, a Linux
+    # or macOS one with LF; new_book's check must pass on both
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="biblecore-")
+    try:
+        data = open(new_book.LEXICON, "rb").read().replace(b"\r\n", b"\n")
+        for name, body in (("lf.xml", data), ("crlf.xml", data.replace(b"\n", b"\r\n"))):
+            p = os.path.join(tmp, name)
+            with open(p, "wb") as fh:
+                fh.write(body)
+            assert new_book.sha1(p) == new_book.LEXICON_SHA1, name
+    finally:
+        shutil.rmtree(tmp)
