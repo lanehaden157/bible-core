@@ -14,13 +14,17 @@ import os
 import sys
 import traceback
 
+# Parity tests import Matthew's own pipeline modules; importing writes
+# __pycache__/ beside them unless bytecode writing is off.
+sys.dont_write_bytecode = True
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.dirname(HERE))
 
 SIBLINGS = [os.path.normpath(os.path.join(HERE, "..", "..", b))
             for b in ("Joshua", "Numbers", "Matthew")]
-SKIP_DIRS = {".git", "node_modules", "__pycache__"}
+SKIP_DIRS = {".git", "node_modules"}
 
 
 def snapshot(roots=SIBLINGS):
