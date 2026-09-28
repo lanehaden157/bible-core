@@ -189,6 +189,10 @@ select, #q { font: inherit; font-size: 16px; padding: 6px 10px; border: 1px soli
 .refs { font-size: 15.5px; line-height: 1.9; word-spacing: 3px; margin: 6px 0 0; }
 
 .foot { max-width: var(--maxw); margin: 0 auto; padding: 0 24px 40px; font-size: 14px; color: var(--ink-soft); font-style: italic; text-align: center; }
+.foot p { margin: 0 auto 6px; max-width: 62em; }
+.sources dt { font-family: var(--display); font-weight: 600; font-size: 16px; margin: 20px 0 2px; }
+.sources dd { margin: 0 0 4px; max-width: 44em; }
+.sources .cite { font-size: 15.5px; color: var(--ink-soft); }
 
 @media (max-width: 720px) {
   body { font-size: 18px; }

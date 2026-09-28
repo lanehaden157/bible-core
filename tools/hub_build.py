@@ -22,6 +22,8 @@ Writes into the hub folder:
   data/canon.json      arcs, canon threads, type-scenes, intertext, paths
   data/concordance.json  Hebrew lemmas across books (F7) and every
                        book's tracked threads with counts
+Each data file that carries third-party data names its sources and
+licences in a `_sources` string (the page credits them at #/sources).
 
 Deterministic. Commit and push the hub repo afterwards.
 """
@@ -147,6 +149,12 @@ def build():
                              provisional=bool(v.get("provisional")))
                  for k, v in th["divisions"].items()]
     canon = OrderedDict(
+        _sources=("Arcs, threads, type-scenes, intertext, paths and bridge rows: the studies' own. "
+                  "Bridge NT lemmas: MorphGNT: SBLGNT Edition (Tauber, ed., https://github.com/morphgnt/sblgnt), "
+                  "CC BY-SA 3.0, of the SBL Greek New Testament (c) 2010 Society of Biblical Literature and "
+                  "Logos Bible Software. Bridge LXX lemmas: LXX-Rahlfs-1935 (c) 2017 Eliran Wong "
+                  "(https://github.com/eliranwong/LXX-Rahlfs-1935), CC BY-NC-SA 4.0, from the CCAT LXX "
+                  "morphology, via CenterBLC/LXX. Hebrew ids: see concordance.json."),
         arcs=canon_file("arcs").get("arcs", []),
         threads=canon_file("threads").get("threads", []),
         typescenes=canon_file("typescenes").get("typescenes", []),
@@ -157,6 +165,11 @@ def build():
     conc = OrderedDict(
         _note="Hebrew lemmas across the books with word tables, keyed heb:<Strong's+letter>; "
               "glosses are Strong's short definitions (identifiers, not renderings).",
+        _sources=("Original work of the Open Scriptures Hebrew Bible available at "
+                  "https://github.com/openscriptures/morphhb (lemmas and morphology CC BY 4.0; WLC text "
+                  "public domain). Glosses: Open Scriptures HebrewLexicon "
+                  "(https://github.com/openscriptures/HebrewLexicon), Open Scriptures Hebrew Bible Project, "
+                  "CC BY 4.0; Strong's text public domain."),
         lemmas=concordance([entries[b["osis"]] | {"repo": b["repo"]} for b in started]),
     )
     return {"books.json": {"books": books, "divisions": divisions}, "canon.json": canon,

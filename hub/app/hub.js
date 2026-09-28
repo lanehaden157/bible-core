@@ -10,6 +10,7 @@
      #/paths, #/path/<id>  curated reading paths
      #/bridge           the Hebrew -> LXX -> NT lexical bridge
      #/search[/<q>]     references, lemmas across books, tracked threads
+     #/sources          every source the hub reproduces, with its licence
    No native script anywhere; lexicon glosses are identifiers. */
 
 // always revalidate, like the book sites: the data changes whenever the hub
@@ -64,7 +65,7 @@ function route() {
   }
   const views = {
     "": home, book: bookView, arcs, thread: threadView, scene: sceneView,
-    intertext, paths, path: pathView, search, bridge,
+    intertext, paths, path: pathView, search, bridge, sources,
   };
   window.scrollTo(0, 0);
   delete document.documentElement.dataset.book; // bookView sets it: that book's theme (css/books.css)
@@ -408,6 +409,51 @@ function threadHits(q) {
     <li><span class="swatch" style="background:${t.color || "transparent"}"></span><i>${esc(t.translit)}</i> — ${esc(t.gloss)}
       <span class="n">${t.count}×</span> <a href="#/book/${b.slug}">${esc(b.name)}</a>
       ${canonFor(b.slug, t.id).map((c) => `<a class="tag" href="#/thread/${c.id}">canon: ${esc(c.label)}</a>`).join(" ")}</li>`).join("")}</ul></section>`;
+}
+
+/* Every source whose data the hub shows, credited as each asks (morphhb's
+   own attribution wording; MorphGNT's citation). Keep in step with the
+   footer in index.html and hub/README.md. */
+const SOURCE_LIST = [
+  ["Hebrew text, lemmas and morphology",
+    `<a href="https://github.com/openscriptures/morphhb">Open Scriptures Hebrew Bible</a> (morphhb). Original work of the Open
+     Scriptures Hebrew Bible available at https://github.com/openscriptures/morphhb. Lemma and morphology data
+     <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>; the text of the Westminster Leningrad Codex is in the public domain.`,
+    "The concordance on Search, every Hebrew reference, and the Hebrew side of the bridge."],
+  ["Hebrew lexicon glosses",
+    `<a href="https://github.com/openscriptures/HebrewLexicon">Open Scriptures HebrewLexicon</a>, Open Scriptures Hebrew Bible Project,
+     <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>; the text of Strong's Hebrew dictionary is in the public domain.`,
+    "Strong's short definitions, shown as word identifiers, never as translations."],
+  ["Greek New Testament",
+    `Tauber, J. K., ed. <a href="https://github.com/morphgnt/sblgnt"><i>MorphGNT: SBLGNT Edition</i></a>
+     (<a href="https://doi.org/10.5281/zenodo.376200">doi:10.5281/zenodo.376200</a>): parsing and lemmatization
+     <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>. Built on the
+     <a href="https://sblgnt.com/">SBL Greek New Testament</a>, © 2010 Society of Biblical Literature and Logos Bible Software,
+     under the <a href="https://sblgnt.com/license/">SBLGNT license</a>.`,
+    "New Testament lemmas and references (the bridge, Matthew's threads). No Greek text is reproduced; lemmas are transliterated."],
+  ["Septuagint",
+    `<a href="https://github.com/eliranwong/LXX-Rahlfs-1935">LXX-Rahlfs-1935</a>, © 2017 Eliran Wong,
+     <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>, based on the
+     <a href="http://ccat.sas.upenn.edu/gopher/text/religion/biblical/lxxmorph/">CCAT LXX morphology</a> (University of Pennsylvania)
+     of Rahlfs' 1935 edition; read through the <a href="https://github.com/CenterBLC/LXX">Center of Biblical Languages and
+     Technology's Text-Fabric edition</a> (CenterBLC/LXX).`,
+    "Greek Old Testament lemmas and references in the bridge, transliterated."],
+  ["Translations, notes and the canon",
+    "The studies' own: each book's translation and notes, and the arcs, canon threads, type-scenes, intertext, reading paths and bridge rows.",
+    ""],
+  ["Typefaces",
+    `Cinzel (Natanael Gama), EB Garamond (Georg Duffner and Octavio Pardo), Crimson Pro (Jacques Le Bailly),
+     Source Serif 4 (Frank Grießhammer, Adobe) and Uncial Antiqua (Astigmatic), served by
+     <a href="https://fonts.google.com/">Google Fonts</a> under the <a href="https://openfontlicense.org/">SIL Open Font License 1.1</a>.`,
+    ""],
+];
+
+function sources() {
+  document.title = "Sources — study hub";
+  content.innerHTML = `<h1 class="page-h">Sources and licences</h1>
+    <p class="lede">What the hub shows, where each part comes from, and the terms it is shared under.
+      Each book site credits the sources its own pages use.</p>
+    <dl class="sources">${SOURCE_LIST.map(([what, cred, use]) => `<dt>${esc(what)}</dt><dd>${cred}</dd>${use ? `<dd class="cite">${esc(use)}</dd>` : ""}`).join("")}</dl>`;
 }
 
 /* --------------------------------------------------------------- helpers */
