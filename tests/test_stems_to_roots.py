@@ -76,3 +76,14 @@ def test_one_id_in_two_roots_is_a_clash():
     roots, err = _run({"mercy": {"stems": ["ελεος"]}, "pity": {"stems": ["^ελεο"]}})
     assert roots["mercy"]["ids"] == roots["pity"]["ids"] == ["eleos"], roots
     assert "CLASH: 1 id(s)" in err and "'eleos': 'mercy' and 'pity'" in err, err
+
+
+def test_two_lexemes_of_one_transliteration_may_sit_in_two_roots():
+    # ara2 (ἆρα, a question) and ara3 (ἀρά, a curse) are distinct precise
+    # ids; roots.validate() lets them sit in different roots, so this is
+    # no clash
+    roots, err = _run({"question": {"stems": ["^αρα"], "exclude": ["αρας"]},
+                       "curse": {"stems": ["αρας"]}})
+    assert roots == {"curse": {"ids": ["ara3"], "note": "TODO"},
+                     "question": {"ids": ["ara2"], "note": "TODO"}}, roots
+    assert "CLASH" not in err, err
