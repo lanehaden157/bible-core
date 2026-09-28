@@ -10,8 +10,10 @@
   --ink-soft: #6b5d40;
   --rule: #cab883;
   --rule-soft: #ddcda0;
-  --accent-clay: #b1481f;
-  --accent-bronze: #8c6d1f;
+  /* clay and bronze a step darker than the book sites' #b1481f/#8c6d1f:
+     here they colour small text (unit numbers, tags), which needs 4.5:1 */
+  --accent-clay: #9d431e;
+  --accent-bronze: #745c1d;
   --accent-jordan: #2f5f6b;
   --glow-1: #f7f0da;
   --glow-2: #ddc98f;
@@ -89,10 +91,10 @@ h3 { font-family: var(--display); font-size: 16px; font-weight: 600; margin: 18p
 .bar i { display: block; height: 100%; background: var(--accent-clay); }
 
 .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 5px; }
-.tile { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 38px; padding: 4px; font-family: var(--display); font-size: 12.5px; color: var(--ink-soft); border: 1px dashed var(--rule); border-radius: 5px; opacity: .6; }
+.tile { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 38px; padding: 4px; font-family: var(--display); font-size: 12.5px; color: var(--ink-soft); border: 1px dashed var(--rule-soft); border-radius: 5px; }
 .tile.started { opacity: 1; color: var(--ink); background: var(--panel); border: 1px solid var(--accent-bronze); font-weight: 600; }
 .tile.started .bar { width: 80%; }
-.tile.themed { opacity: .8; }
+.tile .stripe { opacity: .7; }
 .tile .stripe { display: flex; width: 80%; height: 4px; margin: 0 0 3px; border-radius: 2px; overflow: hidden; }
 .tile .stripe i { display: block; flex: 1; }
 .canon-div h2 { display: flex; align-items: center; gap: 8px; }

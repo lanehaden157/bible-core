@@ -254,7 +254,9 @@ function intertext() {
     <div class="matrix-wrap"><table class="matrix"><thead><tr><th></th>${tgt.map((t) => `<th><span>${esc(t)}</span></th>`).join("")}</tr></thead>
       <tbody>${src.map((s) => `<tr><th>${esc(byOsis.get(s)?.name || s)}</th>${tgt.map((t) => {
         const n = count(s, t);
-        return `<td${n ? ` style="--a:${(0.15 + 0.85 * n / max).toFixed(2)}" title="${n} link(s) ${s} → ${t}"` : ""}>${n || ""}</td>`;
+        // shade tops out at 0.55, where the count still reads at 4.5:1 or
+        // better in both themes (darker, neither ink nor white text does)
+        return `<td${n ? ` style="--a:${(0.12 + 0.43 * n / max).toFixed(2)}" title="${n} link(s) ${s} → ${t}"` : ""}>${n || ""}</td>`;
       }).join("")}</tr>`).join("")}</tbody></table></div>
     <div class="filters">
       <label>From <select id="f-src"><option value="">any book</option>${src.map((s) => `<option>${s}</option>`).join("")}</select></label>
