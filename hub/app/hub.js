@@ -37,7 +37,12 @@ async function init() {
     byOsis.set(b.osis, b);
     if (b.slug) bySlug.set(b.slug, b);
   }
-  window.addEventListener("hashchange", route);
+  window.addEventListener("hashchange", () => {
+    route();
+    // keyboard and screen-reader users land on the new view, not on the
+    // link they left (search focuses its own box)
+    if (!content.querySelector("#q")) content.focus({ preventScroll: true });
+  });
   route();
 }
 
