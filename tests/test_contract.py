@@ -89,6 +89,46 @@ def test_migrate_stamps_and_is_idempotent():
     return fails
 
 
+def test_migrate_pending_is_the_half_open_range():
+    steps = [("0.3.0", "a", None), ("0.5.0", "b", None), ("0.9.0", "c", None)]
+    old = migrate.MIGRATIONS
+    migrate.MIGRATIONS = steps
+    try:
+        got = [m[1] for m in migrate.pending("0.3.0", "0.9.0")]
+        assert got == ["b", "c"], got  # after the stamp, up to and including the target
+        assert [m[1] for m in migrate.pending("0.2.0", "0.4.0")] == ["a"]
+        assert migrate.pending("0.9.0", "0.9.4") == []
+    finally:
+        migrate.MIGRATIONS = old
+
+
+def test_migrate_dry_and_single_unit():
+    uj_path = os.path.join(_tmp, "data", "units.json")
+    before = support.read(uj_path), {n: _unit(n) for n in (1, 2)}
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        migrate.main(["--dry"])
+    fails = []
+    if (support.read(uj_path), {n: _unit(n) for n in (1, 2)}) != before:
+        fails.append("--dry wrote something")
+    if "would move" not in out.getvalue():
+        fails.append(f"--dry didn't say what it would do: {out.getvalue()[-200:]}")
+    _quiet(migrate.main, ["--unit", "2"])
+    rows = {u["n"]: u for u in um._load("units.json")["units"]}
+    if contract.of(rows[2]) != contract.current() or contract.of(rows[1]) != contract.UNSTAMPED:
+        fails.append(f"--unit 2 moved {[(n, contract.of(r)) for n, r in rows.items()]}")
+    return fails
+
+
+def test_migrate_refuses_a_target_newer_than_the_core():
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = migrate.main(["--to", "99.0.0"])
+    assert rc == 2 and "newer than this core" in out.getvalue(), (rc, out.getvalue())
+    with contextlib.redirect_stdout(io.StringIO()):
+        assert migrate.main(["--to", "1.2"]) == 2
+
+
 def test_manifest():
     _quiet(manifest.main, [])
     path = book().data("manifest.json")

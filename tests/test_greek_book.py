@@ -134,3 +134,25 @@ def test_leads_keep_homographs_apart_in_the_lxx():
     assert freq["tis"] == 1 and freq["tis2"] == 2, (freq["tis"], freq["tis2"])
     phrases = [tuple(w[0] for w in p["words"]) for p in leads.phrase_leads_greek(lxx, freq, uw)]
     assert ("tis", "legō") not in phrases, phrases  # 'who says' is not 'someone says'
+
+
+def test_a_phrase_thread_aligns_and_audits_clean():
+    # one span over the whole phrase gets the id of its last word, and the
+    # audit then finds the phrase covered
+    from biblecore import audit, data_w
+    morphgnt.build(book())
+    threads = {"threads": [{"id": "book-of-origins", "root": "book-of-origins"}]}
+    roots = {"roots": {"book-of-origins": {"seq": ["biblos", "genesis"], "note": "x"}}}
+    html = ('<p class="v"><span class="n">1</span> The <span class="r" '
+            'data-root="book-of-origins">book of the origin</span>.</p>\n'
+            '<p class="v"><span class="n">2</span> Who says?</p>\n'
+            '<p class="v"><span class="n">3</span> Someone zealous.</p>\n')
+    edits, report = data_w.plan(html, "Matthew 1:1–3", threads, roots)
+    assert report == [] and [e[2] for e in edits] == ["01010102"], (edits, report)
+    tagged = data_w.apply_edits(html, edits)
+    assert 'data-root="book-of-origins" data-w="01010102"' in tagged, tagged
+    cov = audit.coverage_for_fragment("unit-01", tagged, "Matthew 1:1–3", threads, roots)
+    assert not (cov["gaps"] or cov["wrong"] or cov["strays"] or cov["missing_data_w"]), cov
+    cov = audit.coverage_for_fragment("unit-01", html.replace(
+        'class="r" data-root="book-of-origins"', 'class="x"'), "Matthew 1:1–3", threads, roots)
+    assert [g["word_id"] for g in cov["gaps"]] == ["01010102"], cov["gaps"]
