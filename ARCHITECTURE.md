@@ -1,6 +1,6 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.9.4, 2026-09-27. Built and tested (see §8). Expect it to
+**Status:** core 0.9.5, 2026-09-28. Built and tested (see §8). Expect it to
 change. The remaining plan is in `../core-plan-remaining.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
@@ -27,6 +27,7 @@ change. The remaining plan is in `../core-plan-remaining.md`.
 - 0.9.3: MorphGNT's movable-letter parens stripped from Greek lemma ids;
   `tools/stems_to_roots.py`.
 - 0.9.4: phrase threads take `alt` (the same title in another word order).
+- 0.9.5: audit pass (8 fixes: `--help` no longer runs commands, LXX homograph ids, `seq` backtracking, and others), tests that run without the sibling repos, hub polish (dark mode, AA contrast, themed book pages, sources page), and the Greek source credit corrected to CC BY-SA 3.0.
 
 ## What this is
 
