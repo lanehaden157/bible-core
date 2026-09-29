@@ -150,8 +150,10 @@ Lane only when genuinely unsure.
 can make goes here **instead of** being asked in chat. `topic` is a few words;
 `note` is the question, answerable cold; `options` optional short answers.
 Render your best provisional choice so the draft keeps moving, and flag it.
-The porter prints every question at port time; the decision then goes in
-`translation-choices.md` or the thread/root entry.
+Claude Code then asks Lane each question in the AskUserQuestion popup
+(multiple choice, `options` become the choices, best provisional first), which
+Lane prefers to a chat list. The porter prints every question at port time; the
+decision then goes in `translation-choices.md` or the thread/root entry.
 
 ---
 

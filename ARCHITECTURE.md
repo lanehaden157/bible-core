@@ -1,7 +1,7 @@
 # Bible Study Platform — Shared Architecture
 
 **Status:** core 0.9.9, 2026-09-29. Built and tested (see §8). Expect it to
-change. The remaining plan is in `../core-plan-remaining.md`.
+change. Status and history are in `../session_index.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
   `new_book.py` + `units-from-map`, `table.list`, versification E1).
@@ -28,9 +28,9 @@ change. The remaining plan is in `../core-plan-remaining.md`.
   `tools/stems_to_roots.py`.
 - 0.9.4: phrase threads take `alt` (the same title in another word order).
 - 0.9.5: audit pass (8 fixes: `--help` no longer runs commands, LXX homograph ids, `seq` backtracking, and others), tests that run without the sibling repos, and the Greek source credit corrected to CC BY-SA 3.0. (The hub polish that shipped in this release was reverted the same day, `8e80045`.)
-- 0.9.9: performance, same output (checked byte for byte on Numbers and Joshua builds). `audit` builds a lemma-id index once per word table instead of scanning every word per root; `leads` indexes occurrences and pairs once per corpus instead of per rare lemma and per unit; `roots._override`, `known_lemma_ids`, `hebrew.transliterate_word` and `greek._word` are cached; `sync-check` hashes all files with one `git hash-object`; `core_diff` reads the pin with one `git cat-file --batch`. Numbers `build` 18.6s to ~4.5s, `core_diff` 6.4s to 0.55s, core tests 2m15s to ~1m.
+- 0.9.6/0.9.7: `book.json` `checks.skip_fragment_checks`, a list of hard fragment checks a book switches off (`meta.FRAGMENT_CHECKS` names, or `component:<name>`), and `checks.test_idempotent: false` to drop `biblecore test`'s build-idempotence check; Matthew used both. The hub now rebuilds itself from a GitHub Action in the hub repo (§8).
 - 0.9.8: `audit` caches `_lemma_id_forms` (`biblecore test` on a 14-unit book went from minutes to ~16s); `selftest.check_audit` no longer calls `len()` on the audit's int return.
-- 0.9.6/0.9.7: `book.json` `checks.skip_fragment_checks`, a list of hard fragment checks a book switches off (`meta.FRAGMENT_CHECKS` names, or `component:<name>`), and `checks.test_idempotent: false` to drop `biblecore test`'s build-idempotence check; Matthew uses both. The hub now rebuilds itself from a GitHub Action in the hub repo (§8).
+- 0.9.9: performance, same output (checked byte for byte on Numbers and Joshua builds). `audit` builds a lemma-id index once per word table instead of scanning every word per root; `leads` indexes occurrences and pairs once per corpus instead of per rare lemma and per unit; `roots._override`, `known_lemma_ids`, `hebrew.transliterate_word` and `greek._word` are cached; `sync-check` hashes all files with one `git hash-object`; `core_diff` reads the pin with one `git cat-file --batch`. Numbers `build` 18.6s to ~4.5s, `core_diff` 6.4s to 0.55s, core tests 2m15s to ~1m.
 
 ## What this is
 
@@ -46,9 +46,8 @@ learned there. **Joshua runs on this core since 2026-09-26** (Lane reversed
 the 2026-09-22 "not migrating" call): vendored package, `book.json`, core
 build and sync, and since 0.8.5 the template's app shell with its own
 `theme.css`. Its units came through byte-identical apart from the contract
-stamp. Matthew runs the template shell, the corpus and the reader data on
-core (0.9.0, 0.9.2) but ports and builds units with its own `pipeline/`, by
-decision (2026-09-28: the move onto core's pipeline was dropped, §8).
+stamp. Matthew is **standalone** (decided 2026-09-29): its own app shell and
+`pipeline/`, no core syncs (§8). Core's Greek work was proven against its data.
 
 Where a rule gives a reason, the reason matters more than the rule. Items
 marked **(learned)** each cost a real mistake. Read the lesson before relaxing
@@ -148,8 +147,9 @@ Joshua A1/A2: a regenerated meta block failed the project's own validator.**)**
 - **Tag every occurrence, following the lexeme rather than the English
   gloss.**
 - Tracked threads have fixed colours across the book, and local roots get a
-  per-unit colour. Both are **assigned by algorithm, never picked by eye**.
-  Each book supplies its own palette well.
+  per-unit colour. Both are **assigned by algorithm** (colours picked by eye
+  collided before; hand-pick one only if Lane asks). Each book supplies its
+  own palette well.
 - Notable one-off translation choices, and words with a canon history, get a
   local root (with an `echo` for the canon history).
 - `translit` shape is a **language** setting (C1). Hebrew uses one bare root
@@ -230,11 +230,9 @@ and warns on unknown arcs, missing book threads and new type-scene ids.
 
 `threads.json`, `roots.json` and each book's glossary are **policy**. The
 porter proposes and a human disposes. Nothing in the pipeline writes policy on
-its own. **Default promotion policy is Joshua's** (Lane, 2026-09-22): Claude
-decides whether a candidate becomes a tracked thread, biased toward
-book-wide, works mostly autonomously, and asks Lane when genuinely unsure.
-A book can change this in its own settings (C2). Matthew keeps its "always
-ask Lane" policy.
+its own. Who decides whether a candidate becomes a tracked thread is set in
+each book's style reference §3; the default is Joshua's (`canon/decisions.md`).
+Matthew keeps its own "Lane decides" policy.
 
 ---
 
@@ -365,38 +363,9 @@ audit, then check in a browser, then commit. The project-side sync is a
 mirror, so the instruction field **points at the synced files instead of
 restating them (H12)**.
 
----
-
-## 7. Numbers: what to expect first
-
-These are notes, not builds. Nothing here is built until a unit asks for it
-(H4).
-
-- **Genre mix.** Narrative, law (chs. 5–6, 15, 18–19, 28–30, 35), lists
-  (censuses 1 and 26, camp order 2, the Levite duties 3–4, the twelve
-  near-identical tribal offerings of ch. 7, the itinerary of 33, the borders of
-  34), and poetry (the priestly blessing 6:24–26, the ark songs 10:35–36, the
-  songs of ch. 21, the Balaam oracles 23–24). It is the first test of whether
-  the shape bends.
-- **Likely first new components:** a list/table component (E15) for the
-  censuses and ch. 7, and a poetry/line block (E2) by the Balaam unit.
-- **Unit map and groupings** come from the Numbers project side once its
-  resources are compiled (Lane, 2026-09-22). That is the same path Joshua's
-  map took. Claude Code doesn't draft one. The two candidate framings are the
-  census frame (chs. 1 and 26: old generation → new) and geography (Sinai →
-  wilderness → plains of Moab); the project side will pick.
-- **Versification.** Hebrew and English chapter/verse numbers diverge in
-  Numbers (around chs. 16–17 and 29–30 at least). A scratch build of
-  morphhb's Numbers gives **1,289 verses** (English Bibles: 1,288), 16,422
-  words, 94 petuḥot and 65 setumot, to be checked against printed BHS during
-  setup. The map should be
-  **derived from the corpus and an English versification source, not typed
-  from memory**, and built before unit 1.
-- **Canon leads** carry over directly. Numbers' echoes run back into Exodus
-  and Leviticus and forward into Deuteronomy, Joshua itself, the Psalms, and
-  the New Testament (1 Cor 10, John 3:14, Jude 11, Rev 2:14).
-- **Shared vocabulary with Joshua** (ʾaron, ḥerem, naḥalah, nefesh, qadash) is
-  already decided in `canon/conventions.md`. Start from those decisions.
+**Precedence.** The instruction field beats `core-workflow.md`; the style
+reference owns the artifact rules; a conflict between the field and the style
+reference goes to Lane rather than being resolved silently.
 
 ---
 
@@ -502,8 +471,8 @@ The `assets` step turns the book's entry into `css/division.css`
 A division may name a `title` face, used on the masthead title only (the
 NT's uncials). `tools/legacy_theme.py` opted a pre-core site with its own
 app shell into its theme (Lane, 2026-09-26). It is retired now that Joshua
-(0.8.5) and Matthew (0.9.0) run the template shell, and kept for a future
-site with its own shell. A book overrides any part in `book.json` `"theme"`. A book with no entry gets
+(0.8.5) runs the template shell, and kept for a future site with its own
+shell. A book overrides any part in `book.json` `"theme"`. A book with no entry gets
 no division.css, and its theme.css fallback tokens (`:where(:root)`) apply.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
@@ -530,9 +499,9 @@ moved onto the core.)
 
 ---
 
-**All three books on the template shell (0.9.0).** Joshua (0.8.5) and
-Matthew (0.9.0) moved off their forked app shells onto the template's, so a
-shell change now reaches every book. Two things came across from Matthew:
+**The template shell (0.8.5 / 0.9.0).** Joshua moved off its forked app shell
+onto the template's in 0.8.5, so a shell change now reaches every book on core.
+Two things came across from Matthew's time on it (0.9.0):
 - **Overlay grouping.** book.json `"overlay"` names a secondary grouping kind
   (Matthew: `"discourse"`). The shell draws it over the primary one: a
   ◆ mark on unit chips, brackets under the book map, a key row, and a line in
@@ -542,64 +511,25 @@ shell change now reaches every book. Two things came across from Matthew:
   `compare` (✦, several on one verse share a "Rendering" panel) and
   `synoptic` (✧, one chip per parallel).
 
-A book's one-off fragment styling stays in its own `theme.css` (Matthew's
-rings, triads, exodus tables, prayer block and Greek title). A grouping's
+A book's one-off fragment styling stays in its own `theme.css`. A grouping's
 display name is `label`, falling back to `name`.
 
-**Matthew and core: now standalone (decided 2026-09-29).** Lane reverted Matthew to its pre-core state (tag `pre-revert-2026-09-29` keeps the core-era work); the hub treats it as 'legacy'. Everything below about Matthew running on core is history, kept because core's Greek/LXX work came from it.
+**Matthew and core: standalone (decided 2026-09-29).** Lane reverted Matthew to
+its pre-core state (tag `pre-revert-2026-09-29` keeps the core-era work); the
+hub treats it as 'legacy' and it gets no core syncs. Core's Greek work came
+from Matthew's data and is where any future Greek book starts:
+`corpus/morphgnt.py`, the MorphGNT lexicon (`lang/greek_lexicon.py`, CC BY-SA
+3.0, `corpus/README.md`), phrase threads (`roots.json` `seq`/`alt`, matched in
+`audit.py`), the LXX adapter and Greek canon leads (`corpus/lxx.py`,
+`leads.py`), and the source-credit footer (`main.js` `SOURCES`). The mechanics
+are in those modules' docstrings and their tests. Matthew's own `pipeline/`
+keeps porting, colours, retrofit, leads, the digest and the sync.
 
-**Earlier: where it stopped (2026-09-28).** Lane dropped
-the plan to move Matthew's pipeline onto core (the old phases D-G). Matthew
-keeps its own `pipeline/`; core's site, Greek data and canon work stay.
-Its units predate several fragment checks, so its `book.json` skips them
-(`checks.skip_fragment_checks`: native script, inline style / `--c-*`,
-`data-verses`, the synoptic component) and drops the build-idempotence
-check (`checks.test_idempotent: false`; its pipeline builds units, not
-core's), so `biblecore test` passes there.
-The rest of this section describes what 0.9.2 gave Matthew.
+## 9. Parked
 
-Matthew's site runs on core since 0.9.0; 0.9.2 gives it a working Greek
-interlinear and moves two more of its pipeline scripts' jobs into core:
-
-- **Greek glosses (plan D1: MorphGNT).** `corpus/lexicon/lexemes.yaml`, the
-  MorphGNT morphological lexicon (CC BY-SA 3.0, `corpus/README.md`), vendored
-  per book like `HebrewStrong.xml` (book.json `paths.greek_lexicon`).
-  `lang/greek_lexicon.py` reads its `gloss` field; `corpus/morphgnt.py`'s
-  `lemma_forms()` maps a word's lemma id back to the Greek text to look it up
-  by; `emit.py`'s `lemmas()` wires it into `data/lemmas.json`. Checked
-  against every lemma in Matthew's own text: 100% coverage
-  (`tests/test_corpus_morphgnt.py`).
-- **Phrase threads (plan D2: "teach multi word").** A thread with no single
-  lemma ("son of man", "the Law and the Prophets") gives `roots.json` a
-  `"seq"` instead of `"ids"`: an ORDERED list of lemma ids, matched in order
-  within `"gap"` words of each other (default 4 -- room for an article or
-  conjunction between them, never crossing a verse). `audit.py`'s
-  `source_hits_for_seq()` does the matching; `source_hits_for_entry()`
-  dispatches on an entry's shape, so `data_w.py` and the rest of the audit
-  work unchanged. A `seq` root's lemmas are never checked against other
-  roots' id claims (they're a position constraint, not ownership).
-  A title that also occurs in another word order ("the prophets and the
-  law", Matt 11:13) adds `"alt": [[...]]` -- further ordered lists matched
-  the same way, hits merged (core 0.9.4).
-- **The LXX + Greek canon leads (plan D4).** `corpus/lxx.py` reads
-  CenterBLC's Text-Fabric build of the LXX (book.json `paths.lxx`);
-  `corpus/morphgnt.py`'s `load_nt_corpus()` reads the whole NT the same way
-  `paths.morphgnt` already vendors it. `leads.py` gained a parallel Greek
-  path (`rare_leads_greek`, `phrase_leads_greek`, ...), ported from Matthew's
-  own `pipeline/canon_leads.py` -- proven against it over a real unit,
-  structurally identical bar one deliberate improvement (core disambiguates
-  a Greek homograph Matthew's simpler script collapsed,
-  `tests/test_leads_greek.py`).
-- **Source credit (main.js `SOURCES`, `.site-foot`).** Every site now
-  credits its underlying text/morphology/lexicon in a footer, keyed by
-  `manifest.language` -- required by OSHB's and MorphGNT's licences
-  (CC BY 4.0 / CC BY-SA 3.0), which none of the book sites carried before.
-
-Left in Matthew's own `pipeline/`, on purpose: porting units, colours,
-retrofit, leads, the digest and the sync.
-
-## 9. Open questions
-
-- ~~Whether the stylesheet splits into shared structure plus theme tokens
-  (D10, D5).~~ Done in 0.4.0: `web/core.css` + per-book `theme.css` + the
-  registry.
+Lane parked these (2026-09-24/25); none is planned: F8 maps, F9 timelines, F10
+structures as data, F12 vocab app, F19 annotations, EPUB. E3-E10 genre
+profiles are built with the book that needs them (H4). Tag **1.0** after a few
+more Numbers units are built on the current shape (Lane's call). Housekeeping:
+the throwaway GitHub repo `lanehaden157/biblecore-newbook-test` still exists
+(deleting it needs the `delete_repo` scope).

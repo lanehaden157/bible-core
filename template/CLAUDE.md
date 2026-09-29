@@ -36,9 +36,23 @@ reports edits made there. Update the vendored copy with
 ## Policy files
 
 `data/threads.json` and `data/roots.json` are policy: the porter proposes, a
-human applies. Thread colours come from `python -m biblecore colour`, never
-picked by eye. Claude decides whether a candidate becomes a tracked thread,
-biased toward book-wide, and asks Lane only when genuinely unsure.
+human applies. Who decides whether a candidate becomes a tracked thread is set
+in the style reference §3. Thread colours come from `python -m biblecore colour`
+by default (colours picked by eye collided before); hand-pick one only if Lane
+asks.
+
+## Asking Lane
+
+Lane prefers questions (the porter's `questions[]`, wording calls, thread
+decisions) as AskUserQuestion multiple-choice popups, best provisional choice
+first and marked "(Recommended)", batched four per call, rather than a list in
+chat.
+
+## Concurrent sessions
+
+Other sessions may be editing `../bible-core` or sibling books at the same
+time. See "Concurrent sessions" in `../bible-core/CLAUDE.md`: check `git status`
+first and stage explicit paths.
 
 ## Corpus
 

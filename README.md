@@ -32,5 +32,5 @@ books.
   `npm install` in Joshua and Numbers (morphhb) and
   `python pipeline/fetch_corpus.py` in Matthew (ARCHITECTURE.md §8).
 
-Plan and status: `../g6-plan.md`. Session notes live one level up, in the
-`Bible/` session files.
+Status and history: `../session_index.md` and the other `Bible/` session files
+one level up.

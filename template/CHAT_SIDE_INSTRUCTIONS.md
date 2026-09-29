@@ -10,6 +10,6 @@ Keep medieval Jewish commentators and fine-grained grammar in proportion: one vo
 
 How we work
 
-`core-workflow.md` in the synced folder holds the shared loop: what's on hand, the four passes (pause after each), the seven standing moves, scope and working style. Read it at the start of every unit and follow it. `{{SLUG}}_study_style_reference.md` holds every artifact rule. Where this field and those files disagree, this field wins for {{BOOK}}.
+`core-workflow.md` in the synced folder holds the shared loop: what's on hand, the four passes (pause after each), the seven standing moves, scope and working style. Read it at the start of every unit and follow it. `{{SLUG}}_study_style_reference.md` holds every artifact rule. This field wins over `core-workflow.md` for {{BOOK}}. The style reference owns the artifact rules; if this field and the style reference conflict, flag it to Lane rather than picking one.
 
 ✎ Anything this book does differently from the core workflow goes here.

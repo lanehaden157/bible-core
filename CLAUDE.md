@@ -5,9 +5,8 @@ shared shape, where books are expected to differ, how the core changes, and
 how to start a book (§8).
 
 **State (2026-09-29):** core 0.9.9, tests 286/286. Numbers and Joshua are on
-core; Matthew is standalone (below). `../core-plan-remaining.md` and `../g6-plan.md`
-are history (all five phases built); the platform-level record is
-`../session_index.md`. The core is forward-looking, built for future books.
+core; Matthew is standalone (below). The platform-level record (status and
+history) is `../session_index.md`. The core is forward-looking, built for future books.
 Matthew is **standalone** (decided 2026-09-29): Lane reverted it to its
 pre-core state (old app shell, own `pipeline/`, no `book.json`, units 1-13; the
 core-era work is at its tag `pre-revert-2026-09-29`). It is a 'legacy' book in
@@ -61,7 +60,8 @@ checkouts read-only (README.md has the setup).
 3. Vendor into each book: `python tools/core_sync.py <book>`, set the book's
    `book.json` `core`, run its `build` (Matthew is not synced), `python -m biblecore test`, then commit explicit
    paths and push. Run `python -m biblecore sync` where chat-side files changed.
-   Never `git add -A` in a book repo (other sessions share them).
+   Stage explicit paths: `git add -A` in a book repo sweeps up other sessions'
+   edits.
 4. Book settings that gate checks (`checks` in `book.json`) are closed keys:
    a new one goes in `book.py` `CHECK_DEFAULTS` with a test.
 

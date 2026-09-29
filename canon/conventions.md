@@ -16,10 +16,10 @@ point for books that haven't made the choice yet.
 | convention | default | source |
 |---|---|---|
 | second-person plural | **y'all**, and possessive **y'all's**. Singular "you" is left unmarked. | Matthew 2026-09-12; Joshua 2026-09-16, possessives 2026-09-22 |
-| divine name | **Yahweh**. Never "LORD" or "the Lord". Transliterate as `YHWH` (Hebrew). Greek *kyrios* standing for the name is rendered Yahweh. | both |
-| sky | **sky / skies**, never "heaven(s)": *shamayim*, *ouranos*, *ouranios*. This applies in cosmological senses too, because a fixed rule beats a per-verse call re-argued in every book. | Matthew; Joshua 2026-09-19 (C12) |
+| divine name | **Yahweh**, always. Transliterate as `YHWH` (Hebrew). Greek *kyrios* standing for the name is rendered Yahweh. | both |
+| sky | **sky / skies**, always: *shamayim*, *ouranos*, *ouranios*. This applies in cosmological senses too, because one fixed rendering beats a per-verse call re-argued in every book. | Matthew; Joshua 2026-09-19 (C12) |
 | slave | **slave**, not "servant": *ʿeved*, *doulos*. "Slave of Yahweh" for Moses' title. | Matthew; Joshua 2026-09-19 (C10) |
-| life / being | **life** (singular) and **being(s)** (plural), never "soul": *nefesh*, *psychē*. There is one documented exception, **person**, where *nefesh* is a generic distributive singular in legal or battle formulae ("kills a person"). | Matthew; Joshua 2026-09-21 |
+| life / being | **life** (singular) and **being(s)** (plural): *nefesh*, *psychē*. There is one documented exception, **person**, where *nefesh* is a generic distributive singular in legal or battle formulae ("kills a person"). | Matthew; Joshua 2026-09-21 |
 | look | **look**, not "behold": *idou*, *hinneh* | Matthew 2026-09-12; Joshua units 2–4 already use "look" throughout |
 | amen | **amen**, transliterated, not "truly" | Matthew |
 
@@ -65,3 +65,6 @@ offered as defaults.
   deferred from Joshua G3 until it had a shared home).
 - 2026-09-22: ḥesed left untranslated as the Hebrew Bible default (Lane).
   Greek books keep their own choice for *eleos*.
+- 2026-09-29: the divine-name, sky and life/being rows reworded positively
+  ("always Yahweh", "always sky/skies"), dropping the "never" phrasings (Lane).
+  No rendering changed.

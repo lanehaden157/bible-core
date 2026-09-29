@@ -4,8 +4,9 @@ How files move between this repo and the {{BOOK}} Claude.ai research project.
 
 **Repo → project: synced, never uploaded by hand.** `book.json` → `sync` is
 the list. `python -m biblecore sync` mirrors those files flat into
-`project-side/synced/`, then commits and pushes, and the project's GitHub
-connector reads that folder. Each sync also writes
+`project-side/synced/`, then commits and pushes it, and the project's GitHub
+connector reads that folder. It pushes on its own, so run it when Lane has OK'd
+the push (normally together with the commit that caused the change). Each sync also writes
 `synced/synced-index.md`, the complete list with each file's role. That's
 the only list, so don't restate it elsewhere. `python -m biblecore sync-check`
 reports which files changed since they were last synced (the build runs it too).
