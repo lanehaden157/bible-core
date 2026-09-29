@@ -25,10 +25,24 @@ def _pinned_commit(book_root):
     return parts[1] if len(parts) > 1 and parts[1] != "unknown" else None
 
 
-def _pinned_text(commit, rel):
-    r = subprocess.run(["git", "show", f"{commit}:biblecore/{rel}"], cwd=CORE,
+def _pinned_texts(commit, rels):
+    """{rel: bytes at the pin, or None if absent}, from one `git cat-file
+    --batch` rather than a `git show` process per file."""
+    want = "".join(f"{commit}:biblecore/{rel}\n" for rel in rels).encode()
+    r = subprocess.run(["git", "cat-file", "--batch"], cwd=CORE, input=want,
                        capture_output=True)
-    return r.stdout if r.returncode == 0 else None
+    data, pos, out = r.stdout, 0, {}
+    for rel in rels:
+        end = data.index(b"\n", pos)
+        header = data[pos:end].split()
+        pos = end + 1
+        if header[-1] == b"missing":
+            out[rel] = None
+            continue
+        size = int(header[2])
+        out[rel] = data[pos:pos + size]
+        pos += size + 1
+    return out
 
 
 # vendored file types: code, plus the components' css/json/md and web/ assets
@@ -55,10 +69,12 @@ def local_edits(book_root):
             if f.endswith(EXTS):
                 have.add(os.path.relpath(os.path.join(d, f), dst).replace(os.sep, "/"))
     out = []
-    for rel in sorted(have & pinned):
+    shared = sorted(have & pinned)
+    texts = _pinned_texts(commit, shared)
+    for rel in shared:
         with open(os.path.join(dst, rel), "rb") as fh:
             mine = fh.read().replace(b"\r\n", b"\n")
-        theirs = (_pinned_text(commit, rel) or b"").replace(b"\r\n", b"\n")
+        theirs = (texts[rel] or b"").replace(b"\r\n", b"\n")
         if mine != theirs:
             out.append(f"modified {rel}")
     out += [f"added {rel}" for rel in sorted(have - pinned)]

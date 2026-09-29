@@ -134,12 +134,38 @@ def source_hits_for_root(words, ids):
     tagged words sharing one id -- counted as two occurrences here, by
     design, not folded into one)."""
     bare_set, exact_set = split_ids(ids)
+    by_bare, by_key = _word_index(words)
+    at = set()
+    for b in bare_set:
+        at.update(by_bare.get(b, ()))
+    for k in exact_set:
+        at.update(by_key.get(k, ()))
     hits = {}
-    for row in words:
-        bares, keys = _lemma_id_forms(row["lemma"])
-        if (bares & bare_set) or (keys & exact_set):
-            hits[row["word_id"]] = (row["ch"], row["v"])
+    for i in sorted(at):
+        row = words[i]
+        hits[row["word_id"]] = (row["ch"], row["v"])
     return hits
+
+
+_index_held = None
+
+
+def _word_index(words):
+    """({bare id: [word positions]}, {exact key: [word positions]}) for a
+    word table, built once per table: every root in a build asks the same
+    table, and scanning all of it per root made the audit words x roots."""
+    global _index_held
+    held = _index_held
+    if held is None or held[0] is not words or held[1] != len(words):
+        by_bare, by_key = {}, {}
+        for i, row in enumerate(words):
+            bares, keys = _lemma_id_forms(row["lemma"])
+            for b in bares:
+                by_bare.setdefault(b, []).append(i)
+            for k in keys:
+                by_key.setdefault(k, []).append(i)
+        held = _index_held = (words, len(words), by_bare, by_key)
+    return held[2], held[3]
 
 
 def source_hits_for_seq(words, seq, max_gap=4):

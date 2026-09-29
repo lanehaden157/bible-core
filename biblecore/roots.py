@@ -34,7 +34,7 @@ import json
 import os
 import re
 
-from biblecore.book import book
+from biblecore.book import book, on_reset
 
 _SLUG_RE = re.compile(r"^[a-z0-9-]+$")
 _ID_RE = re.compile(r"^(\d+)\s?([a-z]|\+)?$")
@@ -46,15 +46,28 @@ _ID_RE = re.compile(r"^(\d+)\s?([a-z]|\+)?$")
 # is_id_segment / is_precise to use its own scheme (Greek: transliterated
 # lemmas, lang/greek.py); anything it leaves out falls back to these.
 
+_overrides = {}
+
+
 def _override(name):
+    # asked per lemma segment (millions of times in an audit), so the
+    # answer is kept until the book changes
+    if name in _overrides:
+        return _overrides[name]
     try:
         lang = book().language
     except Exception:
         return None
     if lang == "hebrew":
-        return None
-    from biblecore.lang import adapter
-    return getattr(adapter(lang), name, None)
+        f = None
+    else:
+        from biblecore.lang import adapter
+        f = getattr(adapter(lang), name, None)
+    _overrides[name] = f
+    return f
+
+
+on_reset(_overrides.clear)
 
 
 def is_id_segment(seg: str) -> bool:
@@ -162,17 +175,32 @@ def known_lemma_ids(words_tsv: str = None) -> set:
     segments (one per surface morpheme); bound-prefix segments (c, b, d,
     k, l, m, ...) aren't ids and are skipped."""
     words_tsv = words_tsv or book().path("words")
+    st = os.stat(words_tsv)
+    stamp = (words_tsv, st.st_mtime_ns, st.st_size)
+    held = _known_held.get(stamp)
+    if held is not None:
+        return held
     known = set()
+    seen = set()   # a lemma field repeats across thousands of words
     with open(words_tsv, encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter="\t")
         for row in reader:
+            if row["lemma"] in seen:
+                continue
+            seen.add(row["lemma"])
             for seg in row["lemma"].split("/"):
                 seg = seg.strip()
                 if not is_id_segment(seg):
                     continue
                 known.add(bare_id(seg))
                 known.add(lemma_key(seg))
+    _known_held.clear()
+    _known_held[stamp] = known = frozenset(known)
     return known
+
+
+_known_held = {}   # the last table's ids, keyed by file and its mtime/size
+on_reset(_known_held.clear)
 
 
 def validate(data: dict, words_tsv: str = None, threads_data: dict = None) -> list:

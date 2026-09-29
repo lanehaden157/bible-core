@@ -75,9 +75,15 @@ def test_lxx_words_in_their_verses():
     finally:
         sys.path.remove(PIPE)
     fails = []
+    by_verse = {}   # (book, chapter, verse) -> lemma keys; one pass, not one per row
+    for name, rows in lxx.items():
+        if name == gc.LXX_BOOKS_KEY:   # the book-order list, not verses
+            continue
+        for r in rows:
+            by_verse.setdefault((name, r[0], r[1]), set()).add(r[2])
     for row in BRIDGE["rows"]:
         book, c, v = _ref(row["lxx_ref"])
-        got = {r[2] for r in lxx.get(LXX_NAMES.get(book, book), []) if r[0] == c and r[1] == v}
+        got = by_verse.get((LXX_NAMES.get(book, book), c, v), set())
         for k in row["lxx"]:
             if k not in got:
                 fails.append(f"{k} not in LXX {row['lxx_ref']}")

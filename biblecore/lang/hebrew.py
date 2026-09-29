@@ -101,6 +101,7 @@ phase-0.6-plan.md §A decisions:
 """
 
 import csv
+import functools
 import os
 import re
 import unicodedata
@@ -436,6 +437,7 @@ def _align_lemma_to_surface(surface_morphemes, lemma, morph):
     return [_bare_lemma_id(s) for s in per_morpheme]
 
 
+@functools.lru_cache(maxsize=None)
 def transliterate_word(surface: str, lemma: str, morph: str = None) -> str:
     """Transliterate one <w>'s surface form, applying OVERRIDES per
     morpheme via its lemma id. `lemma` and `morph` are the raw

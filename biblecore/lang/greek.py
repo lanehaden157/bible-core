@@ -23,6 +23,7 @@ Matthew's key too (greek_corpus.py), so its thread notes and canon leads
 line up. The corpus adapter (corpus/morphgnt.py) appends a digit only if
 two distinct lemmas ever land on the same key.
 """
+import functools
 import re
 import unicodedata
 
@@ -77,6 +78,7 @@ def _split_keep(text):
     return tok
 
 
+@functools.lru_cache(maxsize=None)
 def _word(word):
     rough = _has_rough_breathing(word)
     w = _stripaccents(word).lower()

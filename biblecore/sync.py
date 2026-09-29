@@ -75,15 +75,26 @@ def index_text(b=None):
             "| file | what it is |\n|---|---|\n" + "\n".join(rows) + "\n")
 
 
-def _git(*args, check=True):
+def _git(*args, check=True, input=None):
     return subprocess.run(["git", *args], cwd=book().root, capture_output=True,
-                          text=True, check=check)
+                          text=True, check=check, input=input)
 
 
 def hash_file(path):
     if not path.exists():
         return None
     return _git("hash-object", str(path)).stdout.strip()
+
+
+def hash_files(paths):
+    """{path: git blob hash, or None if missing}: one `git hash-object`
+    for the lot rather than a process per file. Same filters as hash_file."""
+    present = [p for p in paths if p.exists()]
+    out = {p: None for p in paths}
+    if present:
+        res = _git("hash-object", "--stdin-paths", input="\n".join(str(p) for p in present))
+        out.update(zip(present, res.stdout.split()))
+    return out
 
 
 def load_state():
@@ -102,8 +113,9 @@ def mark_synced(rels):
     root = Path(book().root)
     state = load_state()
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    hashes = hash_files([root / rel for rel in rels])
     for rel in rels:
-        h = hash_file(root / rel)
+        h = hashes[root / rel]
         if h is not None:
             state[rel] = {"hash": h, "synced_at": now}
     save_state(state)
@@ -137,11 +149,13 @@ def check_main(argv=None):
 
     if args and args[0] == "--mark-synced":
         now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-        for rel in args[1:] or tracked:
+        wanted = args[1:] or tracked
+        hashes = hash_files([root / rel for rel in wanted if rel in tracked])
+        for rel in wanted:
             if rel not in tracked:
                 print(f"  skip (not tracked): {rel}")
                 continue
-            h = hash_file(root / rel)
+            h = hashes[root / rel]
             if h is None:
                 print(f"  skip (missing on disk): {rel}")
                 continue
@@ -151,8 +165,10 @@ def check_main(argv=None):
         return 0
 
     stale, missing, ok = [], [], []
+    rel_chat = _chat_side_rel()
+    hashes = hash_files([root / rel for rel in tracked] + ([root / rel_chat] if rel_chat else []))
     for rel in tracked:
-        current = hash_file(root / rel)
+        current = hashes[root / rel]
         if current is None:
             missing.append(rel)
         elif state.get(rel, {}).get("hash") != current:
@@ -173,8 +189,8 @@ def check_main(argv=None):
         print(f"\n({len(ok)} file(s) already in sync)")
     if not tracked:
         print("book.json lists no sync files.")
-    rel = _chat_side_rel()
-    if rel and state.get(PASTED_KEY, {}).get("hash") != hash_file(root / rel):
+    rel = rel_chat
+    if rel and state.get(PASTED_KEY, {}).get("hash") != hashes[root / rel]:
         print(f"PASTE BY HAND: {rel} changed since it was last pasted into the "
               f"project's instruction field. Paste it, then run "
               f"`python -m biblecore sync-check --mark-pasted`.")

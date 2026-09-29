@@ -36,6 +36,7 @@ ported from Matthew's pipeline/canon_leads.py, its own tool before this.
 """
 import argparse
 import collections
+import functools
 import json
 import os
 import re
@@ -63,14 +64,35 @@ VERSE_RE = re.compile(r'<verse osisID="([^"]+)">(.*?)</verse>', re.S)
 WORD_RE = re.compile(r'<w [^>]*?lemma="([^"]+)"[^>]*?morph="([^"]+)"[^>]*>([^<]*)</w>')
 
 
-def bare_ids(lemma):
-    """'c/3722 b' -> ['3722']; '1007+' -> ['1007']; prefix segments dropped."""
+_NON_DIGIT = re.compile(r"[^0-9]")
+
+
+@functools.lru_cache(maxsize=None)
+def _bare_ids(lemma):
     out = []
     for seg in lemma.split("/"):
-        n = re.sub(r"[^0-9]", "", seg)
+        n = _NON_DIGIT.sub("", seg)
         if n:
             out.append(n)
-    return out
+    return tuple(out)
+
+
+def bare_ids(lemma):
+    """'c/3722 b' -> ['3722']; '1007+' -> ['1007']; prefix segments dropped."""
+    return list(_bare_ids(lemma))
+
+
+_derived = {}
+
+
+def _memo(name, corpus, build):
+    """`build(corpus)`, kept for the last corpus passed under `name`. A
+    lead run asks the same index of the same loaded corpus once per unit;
+    holding the corpus itself makes an identity match safe."""
+    held = _derived.get(name)
+    if held is None or held[0] is not corpus:
+        held = _derived[name] = (corpus, build(corpus))
+    return held[1]
 
 
 def load_bible(wlc=None):
@@ -144,6 +166,20 @@ def passage_verses(bible, passage):
             if lo <= tuple(int(x) for x in ref.split(".")[1:]) <= hi]
 
 
+def _occurrence_index(bible):
+    """{lemma id: [(book, ref, first word with that id in the verse)]} in
+    canonical order: one scan of the Bible instead of one per rare lemma."""
+    index = {}
+    for book in BOOKS:
+        for ref, words in bible[book]:
+            seen = set()
+            for w in words:
+                if w[0] not in seen:
+                    seen.add(w[0])
+                    index.setdefault(w[0], []).append((book, ref, w))
+    return index
+
+
 def rare_leads(bible, freq, unit_verses, rare=RARE_DEFAULT):
     """Rare lemmas in the passage, with every occurrence outside this book."""
     own = current_book().osis
@@ -154,22 +190,28 @@ def rare_leads(bible, freq, unit_verses, rare=RARE_DEFAULT):
                 seen.setdefault(w[0], {"word": w, "refs": []})
                 if ref not in seen[w[0]]["refs"]:
                     seen[w[0]]["refs"].append(ref)
+    index = _memo("occurrences", bible, _occurrence_index)
     leads = []
     for lid, info in seen.items():
-        hits = []
-        for book in BOOKS:
-            if book == own:
-                continue
-            for ref, words in bible[book]:
-                match = next((w for w in words if w[0] == lid), None)
-                if match:
-                    hits.append((ref, match))
+        hits = [(ref, match) for book, ref, match in index.get(lid, ()) if book != own]
         if hits:
             leads.append({"id": lid, "word": info["word"], "here": info["refs"],
                           "freq": freq[lid], "hits": hits})
     # Torah hits first, then fewest total occurrences -- the rarest link is the strongest signal
     leads.sort(key=lambda L: (not any(r.split(".")[0] in TORAH for r, _ in L["hits"]), L["freq"]))
     return leads
+
+
+def _torah_pairs(bible):
+    own = current_book().osis
+    pairs = collections.defaultdict(list)
+    for book in BOOKS[:5]:
+        if book == own:
+            continue
+        for ref, words in bible[book]:
+            for a, b in zip(words, words[1:]):
+                pairs[(a[0], b[0])].append((ref, a, b))
+    return pairs
 
 
 def phrase_leads(bible, freq, unit_verses):
@@ -179,13 +221,7 @@ def phrase_leads(bible, freq, unit_verses):
     merge into a single phrase ("Reubenite, Gadite, half-tribe of Manasseh"
     is one lead, not four), with the Torah verses of all its pairs."""
     own = current_book().osis
-    torah_pairs = collections.defaultdict(list)
-    for book in BOOKS[:5]:
-        if book == own:
-            continue
-        for ref, words in bible[book]:
-            for a, b in zip(words, words[1:]):
-                torah_pairs[(a[0], b[0])].append((ref, a, b))
+    torah_pairs = _memo(("torah_pairs", own), bible, _torah_pairs)
 
     def qualifies(a, b):
         key = (a[0], b[0])
@@ -413,6 +449,22 @@ def passage_words_greek(nt, passage):
     return [(f"{ch}:{v}", words) for (ch, v), words in by_verse.items()]
 
 
+def _lxx_occurrences(lxx):
+    at = {}
+    for book, verses in lxx.items():
+        for ch, v, k in verses:
+            at.setdefault(k, []).append((book, ch, v))
+    return at
+
+
+def _nt_occurrences(nt):
+    at = {}
+    for book, verses in nt.items():
+        for ch, v, k, surface in verses:
+            at.setdefault(k, []).append((book, ch, v, surface))
+    return at
+
+
 def rare_leads_greek(nt, lxx, freq, unit_words, rare=RARE_DEFAULT):
     """Rare lemmas in the passage, with every occurrence outside this book
     (Synoptic-excluded books skipped too, for a book that has that
@@ -426,20 +478,13 @@ def rare_leads_greek(nt, lxx, freq, unit_words, rare=RARE_DEFAULT):
                 if ref not in seen[key]["refs"]:
                     seen[key]["refs"].append(ref)
 
+    lxx_at = _memo("lxx_at", lxx, _lxx_occurrences)
+    nt_at = _memo("nt_at", nt, _nt_occurrences)
     leads = []
     for key, info in seen.items():
-        lxx_hits = []
-        for book in lxx:
-            for ch, v, k in lxx[book]:
-                if k == key:
-                    lxx_hits.append((book, ch, v))
-        nt_hits = []
-        for book, verses in nt.items():
-            if book == own or book in SYNOPTIC_EXCLUDE_GREEK:
-                continue
-            for ch, v, k, surface in verses:
-                if k == key:
-                    nt_hits.append((book, ch, v, surface))
+        lxx_hits = lxx_at.get(key, [])
+        nt_hits = [h for h in nt_at.get(key, ())
+                   if h[0] != own and h[0] not in SYNOPTIC_EXCLUDE_GREEK]
         if lxx_hits or nt_hits:
             leads.append({"key": key, "surface": info["surface"], "here": info["refs"],
                           "freq": freq[key], "lxx": lxx_hits, "nt": nt_hits})
@@ -448,19 +493,24 @@ def rare_leads_greek(nt, lxx, freq, unit_words, rare=RARE_DEFAULT):
     return leads
 
 
-def phrase_leads_greek(lxx, freq, unit_words):
-    """Adjacent lemma pairs in the passage that also stand adjacent in an
-    LXX verse. Both words in at most PHRASE_WORD_MAX verses; the pair
-    in at most PHRASE_TOTAL_MAX LXX verses. Overlapping pairs in one verse
-    merge into a single phrase lead."""
-    lxx_pairs = collections.defaultdict(list)
+def _lxx_pairs(lxx):
+    pairs = collections.defaultdict(list)
     for book, verses in lxx.items():
         by_verse = collections.OrderedDict()
         for ch, v, key in verses:
             by_verse.setdefault((ch, v), []).append(key)
         for (ch, v), keys in by_verse.items():
             for a, b in zip(keys, keys[1:]):
-                lxx_pairs[(a, b)].append((book, ch, v))
+                pairs[(a, b)].append((book, ch, v))
+    return pairs
+
+
+def phrase_leads_greek(lxx, freq, unit_words):
+    """Adjacent lemma pairs in the passage that also stand adjacent in an
+    LXX verse. Both words in at most PHRASE_WORD_MAX verses; the pair
+    in at most PHRASE_TOTAL_MAX LXX verses. Overlapping pairs in one verse
+    merge into a single phrase lead."""
+    lxx_pairs = _memo("lxx_pairs", lxx, _lxx_pairs)
 
     def qualifies(a, b):
         key = (a[0], b[0])
