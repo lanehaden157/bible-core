@@ -4,14 +4,16 @@ How this repo behaves. `README.md` maps the files; `ARCHITECTURE.md` is the
 shared shape, where books are expected to differ, how the core changes, and
 how to start a book (§8).
 
-**State (2026-09-28):** core 0.9.8, tests 286/286. Matthew is vendored at 0.9.8;
-Numbers and Joshua at 0.9.7. `../core-plan-remaining.md` and `../g6-plan.md`
+**State (2026-09-28):** core 0.9.8, tests 286/286. Numbers and Joshua are on
+core; Matthew is standalone (below). `../core-plan-remaining.md` and `../g6-plan.md`
 are history (all five phases built); the platform-level record is
 `../session_index.md`. The core is forward-looking, built for future books.
-Matthew keeps its own `pipeline/` by decision (2026-09-28): it uses core's
-shell, Greek data and canon work, and skips the fragment checks its old units
-can't meet (`book.json` `checks.skip_fragment_checks`, `checks.test_idempotent`).
-Don't plan a Matthew migration onto core's pipeline.
+Matthew is **standalone** (decided 2026-09-29): Lane reverted it to its
+pre-core state (old app shell, own `pipeline/`, no `book.json`, units 1-13; the
+core-era work is at its tag `pre-revert-2026-09-29`). It is a 'legacy' book in
+the hub (`vN` links) and gets no core syncs. Core stays for future books;
+don't plan a Matthew migration. Core's Greek work (MorphGNT, LXX) was proven
+against Matthew's data and still reads it read-only for parity tests.
 
 ## Concurrent sessions
 
@@ -57,8 +59,7 @@ checkouts read-only (README.md has the setup).
    to ARCHITECTURE.md's version list and its status line. Commit, tag
    `vX.Y.Z`, push both.
 3. Vendor into each book: `python tools/core_sync.py <book>`, set the book's
-   `book.json` `core`, run its `build` (Matthew: `assets` + `manifest`, and its
-   own `pipeline/build.py`), `python -m biblecore test`, then commit explicit
+   `book.json` `core`, run its `build` (Matthew is not synced), `python -m biblecore test`, then commit explicit
    paths and push. Run `python -m biblecore sync` where chat-side files changed.
    Never `git add -A` in a book repo (other sessions share them).
 4. Book settings that gate checks (`checks` in `book.json`) are closed keys:

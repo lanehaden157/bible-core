@@ -1,5 +1,5 @@
 {
-  "_note": "The canon in order, for the hub's canon map. A book with a study gets `site` (its Pages URL), `repo` (folder name next to bible-core, read by tools/hub_build.py) and `kind` ('core' for books on the template app, which take c:v verse links; 'legacy' for a site with its own shell, which takes vN links). Numbers, Joshua and Matthew are all 'core' since 2026-09-26. Protestant order and English names; osis ids as morphhb/SBLGNT use them.",
+  "_note": "The canon in order, for the hub's canon map. A book with a study gets `site` (its Pages URL), `repo` (folder name next to bible-core, read by tools/hub_build.py) and `kind` ('core' for books on the template app, which take c:v verse links; 'legacy' for a site with its own shell, which takes vN links). Numbers and Joshua are 'core' (since 2026-09-26); Matthew is 'legacy' again since 2026-09-29, when Lane reverted it to its own pre-core shell. Protestant order and English names; osis ids as morphhb/SBLGNT use them.",
   "books": [
     {"osis": "Gen", "name": "Genesis", "t": "ot"},
     {"osis": "Exod", "name": "Exodus", "t": "ot"},
@@ -40,7 +40,7 @@
     {"osis": "Hag", "name": "Haggai", "t": "ot"},
     {"osis": "Zech", "name": "Zechariah", "t": "ot"},
     {"osis": "Mal", "name": "Malachi", "t": "ot"},
-    {"osis": "Matt", "name": "Matthew", "t": "nt", "slug": "matthew", "site": "https://lanehaden157.github.io/Matthew/", "repo": "Matthew", "kind": "core"},
+    {"osis": "Matt", "name": "Matthew", "t": "nt", "slug": "matthew", "site": "https://lanehaden157.github.io/Matthew/", "repo": "Matthew", "kind": "legacy"},
     {"osis": "Mark", "name": "Mark", "t": "nt"},
     {"osis": "Luke", "name": "Luke", "t": "nt"},
     {"osis": "John", "name": "John", "t": "nt"},

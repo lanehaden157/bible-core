@@ -545,7 +545,9 @@ A book's one-off fragment styling stays in its own `theme.css` (Matthew's
 rings, triads, exodus tables, prayer block and Greek title). A grouping's
 display name is `label`, falling back to `name`.
 
-**Matthew and core: where it stopped (decided 2026-09-28).** Lane dropped
+**Matthew and core: now standalone (decided 2026-09-29).** Lane reverted Matthew to its pre-core state (tag `pre-revert-2026-09-29` keeps the core-era work); the hub treats it as 'legacy'. Everything below about Matthew running on core is history, kept because core's Greek/LXX work came from it.
+
+**Earlier: where it stopped (2026-09-28).** Lane dropped
 the plan to move Matthew's pipeline onto core (the old phases D-G). Matthew
 keeps its own `pipeline/`; core's site, Greek data and canon work stay.
 Its units predate several fragment checks, so its `book.json` skips them
