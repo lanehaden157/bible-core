@@ -1,6 +1,6 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.9.7, 2026-09-28. Built and tested (see §8). Expect it to
+**Status:** core 0.9.8, 2026-09-29. Built and tested (see §8). Expect it to
 change. The remaining plan is in `../core-plan-remaining.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
@@ -28,6 +28,7 @@ change. The remaining plan is in `../core-plan-remaining.md`.
   `tools/stems_to_roots.py`.
 - 0.9.4: phrase threads take `alt` (the same title in another word order).
 - 0.9.5: audit pass (8 fixes: `--help` no longer runs commands, LXX homograph ids, `seq` backtracking, and others), tests that run without the sibling repos, and the Greek source credit corrected to CC BY-SA 3.0. (The hub polish that shipped in this release was reverted the same day, `8e80045`.)
+- 0.9.8: `audit` caches `_lemma_id_forms` (`biblecore test` on a 14-unit book went from minutes to ~16s); `selftest.check_audit` no longer calls `len()` on the audit's int return.
 - 0.9.6/0.9.7: `book.json` `checks.skip_fragment_checks`, a list of hard fragment checks a book switches off (`meta.FRAGMENT_CHECKS` names, or `component:<name>`), and `checks.test_idempotent: false` to drop `biblecore test`'s build-idempotence check; Matthew uses both. The hub now rebuilds itself from a GitHub Action in the hub repo (§8).
 
 ## What this is

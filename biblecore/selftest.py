@@ -132,7 +132,7 @@ def check_audit():
     rc_out = io.StringIO()
     with contextlib.redirect_stdout(rc_out):
         problems = audit.audit()
-    n = len(problems) if problems else 0
+    n = problems if isinstance(problems, int) else len(problems or [])
     return [], [f"{n} coverage issue(s)" + (" (run `python -m biblecore audit`)" if n else "")]
 
 

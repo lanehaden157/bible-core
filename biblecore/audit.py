@@ -30,6 +30,7 @@ Informational: exits 0 even with gaps (most units don't exist yet, so most
 threads legitimately show gaps past whatever's built).
 """
 
+import functools
 import json
 import os
 import re
@@ -104,6 +105,7 @@ def words_by_id(words):
     return {row["word_id"]: row for row in words}
 
 
+@functools.lru_cache(maxsize=None)
 def _lemma_id_forms(lemma_field):
     """(bare_ids, exact_keys) for a row's '/'-separated lemma segments.
 

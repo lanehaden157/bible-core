@@ -4,8 +4,8 @@ How this repo behaves. `README.md` maps the files; `ARCHITECTURE.md` is the
 shared shape, where books are expected to differ, how the core changes, and
 how to start a book (§8).
 
-**State (2026-09-28):** core 0.9.7, tests 286/286. Numbers, Joshua and
-Matthew are all vendored at 0.9.7. `../core-plan-remaining.md` and `../g6-plan.md`
+**State (2026-09-28):** core 0.9.8, tests 286/286. Matthew is vendored at 0.9.8;
+Numbers and Joshua at 0.9.7. `../core-plan-remaining.md` and `../g6-plan.md`
 are history (all five phases built); the platform-level record is
 `../session_index.md`. The core is forward-looking, built for future books.
 Matthew keeps its own `pipeline/` by decision (2026-09-28): it uses core's
