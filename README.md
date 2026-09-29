@@ -23,7 +23,8 @@ and the reader data.
   to a book's copy.
 - `docs/data-shapes.md` — the published `data/*.json` shapes.
 - `hub/` + `tools/hub_build.py` — the canon hub site (ARCHITECTURE.md §8),
-  built into the sibling `../hub` repo.
+  built into the sibling `../hub` repo, which rebuilds itself daily from a
+  GitHub Action.
 - `corpus/` — shared corpus files a new book gets a copy of (the Strong's
   lexicon; for a Greek book, the MorphGNT lexicon).
 - `tests/` — `python tests/run.py`. Reads the sibling `../Joshua` (the

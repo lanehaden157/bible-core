@@ -1,9 +1,17 @@
 # bible-core
 
 How this repo behaves. `README.md` maps the files; `ARCHITECTURE.md` is the
-shared shape, where books are expected to differ, and how the core changes
-(§8 covers the release checklist). `../core-plan-remaining.md` is the open
-plan.
+shared shape, where books are expected to differ, how the core changes, and
+how to start a book (§8).
+
+**State (2026-09-28):** core 0.9.7, tests 286/286. Numbers, Joshua and
+Matthew are all vendored at 0.9.7. `../core-plan-remaining.md` and `../g6-plan.md`
+are history (all five phases built); the platform-level record is
+`../session_index.md`. The core is forward-looking, built for future books.
+Matthew keeps its own `pipeline/` by decision (2026-09-28): it uses core's
+shell, Greek data and canon work, and skips the fragment checks its old units
+can't meet (`book.json` `checks.skip_fragment_checks`, `checks.test_idempotent`).
+Don't plan a Matthew migration onto core's pipeline.
 
 ## Concurrent sessions
 
@@ -32,6 +40,35 @@ back to back. Good habits, not hard rules:
 
 ## Commands (run from this folder)
 
-    python tests/run.py                  # the whole suite (no pytest needed)
+    python tests/run.py [filter]         # the whole suite (no pytest needed)
     python tools/core_sync.py <book-dir>  # vendor into a book (refuses if dirty)
     python tools/core_diff.py <book-dir>  # book-local edits made to biblecore/
+    python tools/new_book.py ...         # start a book from template/ (§8)
+    python tools/canon_collect.py        # refresh canon/*.json from the books
+    python tools/hub_build.py ../hub     # rebuild the hub by hand (see below)
+
+The tests read the sibling `../Joshua`, `../Numbers` and `../Matthew`
+checkouts read-only (README.md has the setup).
+
+## Releasing a core change
+
+1. `python tests/run.py` green; `git status` clean apart from the change.
+2. Bump `biblecore/__init__.py` and `template/book.json`'s `core`, add a line
+   to ARCHITECTURE.md's version list and its status line. Commit, tag
+   `vX.Y.Z`, push both.
+3. Vendor into each book: `python tools/core_sync.py <book>`, set the book's
+   `book.json` `core`, run its `build` (Matthew: `assets` + `manifest`, and its
+   own `pipeline/build.py`), `python -m biblecore test`, then commit explicit
+   paths and push. Run `python -m biblecore sync` where chat-side files changed.
+   Never `git add -A` in a book repo (other sessions share them).
+4. Book settings that gate checks (`checks` in `book.json`) are closed keys:
+   a new one goes in `book.py` `CHECK_DEFAULTS` with a test.
+
+## The hub
+
+`hub/` here is the hub's page, app and CSS; `tools/hub_build.py` adds the data.
+The hub repo (`lanehaden157/bible`, Pages) rebuilds itself from pushed code:
+its `.github/workflows/rebuild.yml` runs daily and on "Run workflow", and
+commits only on change. So after a core or unit push, press the button (or
+wait a day); no manual rebuild needed. Don't edit the hub repo by hand. The
+local `hub_build.py` also reads unpushed work, so use it for previews only.
