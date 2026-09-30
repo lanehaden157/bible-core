@@ -27,7 +27,7 @@ import subprocess
 import sys
 
 CORE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-INIT = os.path.join("biblecore", "__init__.py")
+INIT = "biblecore/__init__.py"  # forward slashes: also a git pathspec
 ARCH = "ARCHITECTURE.md"
 _VER = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 _LIST_LINE = re.compile(r"^- \d+\.\d+\.\d+")
@@ -130,8 +130,9 @@ def main(argv=None):
 
     print(f"release {old} -> {a.version}: {a.note.strip()}")
     if a.dry_run:
-        print("dry run: would run the tests" if not a.skip_tests else "dry run: tests skipped",
-              f"bump {INIT}, add the {ARCH} line, commit, tag {tag}")
+        steps = ([] if a.skip_tests else ["run the tests"]) + [
+            f"set {INIT}", f"add the {ARCH} line", "commit", f"tag {tag}"]
+        print("dry run; would " + ", ".join(steps))
         return 0
 
     if a.skip_tests:
