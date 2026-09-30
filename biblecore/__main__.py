@@ -103,7 +103,7 @@ def _template_line(b):
     import subprocess
     base = b.cfg.get("template")
     if not base:
-        return "no base recorded -> ../bible-core/tools/core_diff.py <book> --template --set-base <commit>"
+        return "no base recorded -> ../bible-core/tools/core_diff.py . --template --set-base <commit>"
     core = os.path.join(os.path.dirname(os.path.abspath(b.root)), "bible-core")
     try:
         r = subprocess.run(["git", "rev-list", "--count", f"{base}..HEAD", "--", "template"],
@@ -116,7 +116,7 @@ def _template_line(b):
     if not n:
         return f"base {base} (template unchanged since)"
     return (f"base {base} ({n} template commit{'s' if n != 1 else ''} since -> "
-            f"../bible-core/tools/core_diff.py <book> --template)")
+            f"../bible-core/tools/core_diff.py . --template)")
 
 
 def status_lines(b):

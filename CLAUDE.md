@@ -48,7 +48,7 @@ back to back. Good habits, not hard rules:
     python tools/core_sync.py <book-dir>  # vendor into one book (refuses if dirty)
     python tools/core_diff.py <book-dir>  # book-local edits made to biblecore/
     python tools/core_diff.py <book-dir> --template  # template changes the book hasn't taken
-    python tools/new_book.py ...         # start a book from template/ (§8); fills its canon/books.json row
+    python tools/new_book.py ...         # start a book from template/ (§8, docs/new-book.md); fills its canon/books.json row
     python tools/canon_collect.py        # refresh canon/*.json from the books
     python tools/hub_build.py ../hub     # rebuild the hub by hand (see below)
 

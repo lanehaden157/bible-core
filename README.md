@@ -26,6 +26,7 @@ books.
 - `tools/release.py` — cut a release: tests, version, the ARCHITECTURE line,
   commit and tag (ARCHITECTURE.md §5).
 - `docs/data-shapes.md` — the published `data/*.json` shapes.
+- `docs/new-book.md` — the checklist for starting a book, who does what.
 - `hub/` + `tools/hub_build.py` — the canon hub site (ARCHITECTURE.md §8),
   built into the sibling `../hub` repo, which rebuilds itself daily from a
   GitHub Action.

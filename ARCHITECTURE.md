@@ -413,7 +413,9 @@ reference goes to Lane rather than being resolved silently.
 ## 8. Using it
 
 **Starting a book** comes in two stages, because the unit map arrives from the
-project side after bootstrap (the order Numbers went in):
+project side after bootstrap (the order Numbers went in). `docs/new-book.md`
+is the full checklist around them (who does what, the claude.ai project, the
+unit loop):
 
 1. `python tools/new_book.py ../<Book> --book <Book> --osis <OSIS> [--github]`
    copies the template with its placeholders filled, vendors the core, copies
