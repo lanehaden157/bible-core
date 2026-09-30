@@ -41,7 +41,12 @@ CORPUS_KEYS = {"kind", "pin", "word_ids"}
 # for a book whose units are built by its own pipeline (Matthew).
 CHECK_DEFAULTS = {"opens_note_required": True, "skip_fragment_checks": [],
                   "test_idempotent": True}
-SYNC_KEYS = {"files", "globs"}
+# "sync" lists only what a book adds to or drops from core's default synced
+# files (biblecore.sync.DEFAULT_SYNC): `extra` takes paths or glob patterns,
+# `skip` takes paths or patterns matched against the resolved paths.
+SYNC_KEYS = {"extra", "skip"}
+# the pre-0.10.0 full lists; named in the error so a book knows what to do
+OLD_SYNC_KEYS = {"files", "globs"}
 
 # Every path a module reads or writes, relative to the book root. A book
 # overrides any of these under "paths" in book.json (Joshua's layout differs
@@ -118,8 +123,17 @@ def validate_config(cfg):
                         f"(known: {sorted(known)})")
     for k in sorted(set(cfg.get("paths") or {}) - set(PATH_DEFAULTS)):
         errs.append(f"paths: unknown path '{k}' (known: {sorted(PATH_DEFAULTS)})")
-    for k in sorted(set(cfg.get("sync") or {}) - SYNC_KEYS):
-        errs.append(f"sync: unknown key '{k}'")
+    sync = cfg.get("sync") or {}
+    for k in sorted(set(sync) - SYNC_KEYS):
+        if k in OLD_SYNC_KEYS:
+            errs.append(f"sync: '{k}' was replaced in core 0.10.0 -- core supplies the "
+                        f"default synced files (biblecore.sync.DEFAULT_SYNC); list only "
+                        f"additions under sync.extra and exclusions under sync.skip")
+        else:
+            errs.append(f"sync: unknown key '{k}' (known: {sorted(SYNC_KEYS)})")
+    for k in SYNC_KEYS & set(sync):
+        if not (isinstance(sync[k], list) and all(isinstance(x, str) for x in sync[k])):
+            errs.append(f"sync.{k} must be a list of strings")
     if "versification" in cfg and cfg["versification"] not in VERSIFICATIONS:
         errs.append(f"'versification' must be one of {list(VERSIFICATIONS)}")
     if "overlay" in cfg and cfg["overlay"] not in (cfg.get("groupings") or [])[1:]:
@@ -228,14 +242,10 @@ class Book:
         return list(data["well"] if isinstance(data, dict) else data)
 
     def sync_files(self):
-        """Repo-relative files that round-trip into the Claude.ai project."""
-        import glob
-        sync = self.cfg.get("sync") or {}
-        files = list(sync.get("files", []))
-        for pattern in sync.get("globs", []):
-            files += sorted(os.path.relpath(p, self.root).replace(os.sep, "/")
-                            for p in glob.glob(os.path.join(self.root, pattern)))
-        return files
+        """Repo-relative files that round-trip into the Claude.ai project:
+        core's defaults plus sync.extra, minus sync.skip (biblecore.sync)."""
+        from biblecore import sync
+        return sync.resolve(self)
 
 
 _current = None

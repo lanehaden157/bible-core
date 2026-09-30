@@ -61,35 +61,40 @@ def test_vendor_diff_and_refusal_round_trip():
         shutil.rmtree(d)
 
 
-def test_every_template_sync_file_has_a_role():
-    """synced-index.md is the one list of synced files; each file the template
-    syncs needs a role there (biblecore/sync.py ROLES), or the index says
-    'book file' and the chat side learns nothing. Also: every template sync
-    file exists in a fresh book, apart from those the build generates."""
+def test_new_book_registers_the_hub_row():
+    """new_book.py fills the book's canon/books.json row (structural audit
+    P1), touching only that line; the hub workflow clones from `site`."""
     import json
-    import tempfile
-    from template_book import make_book
-    from biblecore import book as bookmod
-    from biblecore import sync
-    d = tempfile.mkdtemp(prefix="bc-roles-")
+    import new_book
+    d = tempfile.mkdtemp(prefix="bc-books-")
     try:
-        make_book(d, "Leviticus", "Lev", "leviticus")
-        b = bookmod.Book.from_file(os.path.join(d, "book.json"))
-        cfg = json.load(open(os.path.join(d, "book.json"), encoding="utf-8"))
+        path = os.path.join(d, "books.json")
+        shutil.copyfile(new_book.BOOKS_JSON, path)
+        before = open(path, encoding="utf-8").read().split("\n")
         fails = []
-        names = list(cfg["sync"]["files"]) + [
-            "canon-leads/canon-leads-unit-01.md", "leviticus-versification.md"]
-        for rel in names:
-            if not sync.role_for(os.path.basename(rel), b):
-                fails.append(f"{rel}: no role in sync.ROLES")
-        generated = {"threads-digest.md", "Leviticus-words.tsv", "components-reference.md"}
-        for rel in cfg["sync"]["files"]:
-            if rel not in generated and not os.path.exists(os.path.join(d, rel)):
-                fails.append(f"{rel}: missing from a fresh book")
-        text = sync.index_text(b)
-        if "resources.md" not in text or "core-workflow.md" not in text:
-            fails.append("index misses resources.md or core-workflow.md")
+        owner = new_book.pages_owner(path)
+        if owner != "lanehaden157":
+            fails.append(f"pages_owner: {owner}")
+        row = new_book.register_book("Lev", "leviticus", "Leviticus", "LaneHaden157", path)
+        want = {"osis": "Lev", "name": "Leviticus", "t": "ot", "slug": "leviticus",
+                "site": "https://lanehaden157.github.io/leviticus/",
+                "repo": "Leviticus", "kind": "core"}
+        if row != want:
+            fails.append(f"row: {row}")
+        raw = open(path, "rb").read()
+        if b"\r\n" in raw:
+            fails.append("CRLF written")
+        after = raw.decode("utf-8").split("\n")
+        changed = [i for i, (x, y) in enumerate(zip(before, after)) if x != y]
+        if len(after) != len(before) or len(changed) != 1 or '"Lev"' not in after[changed[0]]:
+            fails.append(f"expected only Leviticus's line to change: {changed}")
+        if json.loads(raw)["books"][2] != want:
+            fails.append("the file doesn't parse to the new row")
+        try:
+            new_book.register_book("Nope", "x", "X", "o", path)
+            fails.append("an unknown osis was accepted")
+        except RuntimeError:
+            pass
         return fails
     finally:
-        shutil.rmtree(d, ignore_errors=True)
-        support.joshua_book()
+        shutil.rmtree(d)

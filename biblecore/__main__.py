@@ -29,7 +29,8 @@ Commands:
   sync-check [--mark-synced [FILE ...] | --mark-pasted]
                         which chat-side files need syncing or re-pasting
   sync                  mirror chat-side files, commit, push
-  book                  show the resolved book.json settings
+  book                  the book's state (core pin, units, threads, sync, pasted
+                        field) and its resolved paths
 """
 import importlib
 import json
@@ -74,12 +75,84 @@ def _corpus(argv):
     return 0
 
 
-def _show_book(argv):
+def _ranges(ns):
+    """[1, 2, 3, 5] -> '1-3, 5'."""
+    out, start = [], None
+    for i, n in enumerate(ns):
+        if start is None:
+            start = n
+        if i + 1 == len(ns) or ns[i + 1] != n + 1:
+            out.append(str(start) if start == n else f"{start}-{n}")
+            start = None
+    return ", ".join(out)
+
+
+def _load(path):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, ValueError):
+        return None
+
+
+def status_lines(b):
+    """The book's state, read from its data (structural audit D1): the
+    CLAUDE.md files point here instead of keeping hand-written state lines."""
+    import os
+    from collections import Counter
     from biblecore import __version__
+    lines = []
+    pinned = b.cfg.get("core", "?")
+    vf = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CORE_VERSION")
+    vendored = open(vf, encoding="utf-8").read().split() if os.path.exists(vf) else []
+    stamp = f" ({vendored[1][:7]})" if len(vendored) > 1 else ""
+    flag = "" if pinned == __version__ else "  <- MISMATCH: vendor with core_sync.py, then set book.json core"
+    lines.append(f"core      book.json pins {pinned}; vendored {__version__}{stamp}{flag}")
+
+    uj = _load(b.data("units.json"))
+    if uj:
+        built = sorted(u["n"] for u in uj.get("units", []) if u.get("built"))
+        planned = uj.get("unit_count") or len(uj.get("units", []))
+        lines.append(f"units     {len(built)} built of {planned} planned"
+                     + (f" ({_ranges(built)})" if built else ""))
+    else:
+        lines.append("units     no data/units.json yet")
+    th = _load(b.data("threads.json"))
+    threads = (th or {}).get("threads", [])
+    by = Counter(t.get("status", "?") for t in threads)
+    lines.append(f"threads   {len(threads)} tracked"
+                 + (f" ({', '.join(f'{n} {s}' for s, n in sorted(by.items()))})" if threads else ""))
+
+    try:
+        from biblecore import sync
+        st = sync.status(b)
+    except Exception as exc:  # no git, not a repo yet
+        lines.append(f"sync      unavailable ({type(exc).__name__}: {exc})")
+        return lines
+    todo = [f"{len(st['stale'])} need syncing" if st["stale"] else "",
+            f"{len(st['missing'])} missing" if st["missing"] else "",
+            f"{len(st['orphans'])} no longer synced" if st["orphans"] else ""]
+    todo = [t for t in todo if t]
+    lines.append(f"sync      {len(st['tracked'])} files, "
+                 + (", ".join(todo) + " -> python -m biblecore sync-check" if todo
+                    else "all in sync"))
+    paste = {"pasted": f"pasted{' ' + st['pasted_at'][:10] if st['pasted_at'] else ''}; "
+                       f"no changes since",
+             "changed": "changed since the last paste -> PASTE BY HAND, then "
+                        "sync-check --mark-pasted",
+             "never": "no paste recorded -> paste it, then sync-check --mark-pasted",
+             None: "no instruction-field file"}[st["paste"]]
+    lines.append(f"field     {st['chat_side'] or '-'}: {paste}")
+    return lines
+
+
+def _show_book(argv):
     from biblecore.book import book
     b = book()
     print(f"{b.name} ({b.osis}) at {b.root}")
-    print(f"core {__version__}; book.json pins {b.cfg.get('core', '?')}")
+    for line in status_lines(b):
+        print(line)
+    print("paths")
     for k in ("words", "reading", "units", "data", "css", "source", "out",
               "retrofit", "retro", "wlc"):
         print(f"  {k:10} {b.path(k)}")

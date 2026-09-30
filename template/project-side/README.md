@@ -2,17 +2,20 @@
 
 How files move between this repo and the {{BOOK}} Claude.ai research project.
 
-**Repo → project: synced, never uploaded by hand.** `book.json` → `sync` is
-the list. `python -m biblecore sync` mirrors those files flat into
-`project-side/synced/`, then commits and pushes it, and the project's GitHub
-connector reads that folder. It pushes on its own, so run it when Lane has OK'd
+**Repo → project: synced, never uploaded by hand.** Core supplies the
+default list (`biblecore/sync.py` `DEFAULT_SYNC`); `book.json` → `sync` holds
+only this book's additions (`extra`) and exclusions (`skip`).
+`python -m biblecore sync` mirrors the resolved files flat into
+`project-side/synced/`, removes any mirror file that has left the list, then
+commits and pushes it, and the project's GitHub connector reads that folder. It pushes on its own, so run it when Lane has OK'd
 the push (normally together with the commit that caused the change). Each sync also writes
 `synced/synced-index.md`, the complete list with each file's role. That's
 the only list, so don't restate it elsewhere. `python -m biblecore sync-check`
 reports which files changed since they were last synced (the build runs it too).
 
-To sync a new file, add it to `book.json` → `sync`. If it's a core file,
-also give it a role in `biblecore/sync.py` `ROLES`.
+To sync another file, add it to `book.json` → `sync.extra` (a path or a glob
+pattern); to stop syncing a default, add it to `sync.skip`. A file every book
+should sync belongs in core's `DEFAULT_SYNC`, with a role in `ROLES`.
 
 **Not synced:**
 

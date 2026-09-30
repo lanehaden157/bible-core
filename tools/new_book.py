@@ -18,6 +18,9 @@ Written from Numbers' setup log (H14). In order:
   6. git init + first commit
   7. --github only: create the GitHub repo (public, since Pages needs it on
      a free plan), push, enable Pages from main, and run the first sync
+  8. add the book's row to canon/books.json here in bible-core (site, repo
+     folder, kind core), so the hub picks it up; the hub's rebuild workflow
+     clones every book with a row. Commit it in bible-core.
 
 Stage two runs once the project side delivers the literary unit map:
 `python -m biblecore units-from-map` in the new book loads its unit rows
@@ -41,6 +44,7 @@ LEXICON = os.path.join(CORE, "corpus", "lexicon", "HebrewStrong.xml")
 # (Windows) has CRLF on disk, one without has LF, and both must pass
 LEXICON_SHA1 = "15861be1f825151a59513fae0117574ff46b7e56"
 TEXT_EXT = (".md", ".json", ".html", ".js", ".css", ".gitignore")
+BOOKS_JSON = os.path.join(CORE, "canon", "books.json")
 
 sys.path.insert(0, CORE)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -100,6 +104,42 @@ def set_core_version(dest):
     with open(p, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(cfg, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
+
+
+def pages_owner(path=BOOKS_JSON):
+    """The GitHub owner of the started books' Pages sites (all one owner)."""
+    with open(path, encoding="utf-8") as fh:
+        rows = json.load(fh)["books"]
+    for r in rows:
+        if r.get("site", "").startswith("https://") and ".github.io/" in r["site"]:
+            return r["site"][len("https://"):].split(".github.io/")[0]
+    return None
+
+
+def register_book(osis, slug, repo, owner, path=BOOKS_JSON):
+    """Fill the book's row in canon/books.json: slug, site (its Pages URL,
+    which also names the GitHub repo the hub workflow clones), repo (the
+    folder name next to bible-core) and kind "core". The file keeps one row
+    per line; only this book's line changes. Returns the new row."""
+    with open(path, encoding="utf-8") as fh:
+        lines = fh.read().split("\n")
+    key = f'"osis": "{osis}"'
+    hits = [i for i, ln in enumerate(lines) if key in ln]
+    if len(hits) != 1:
+        raise RuntimeError(f"expected one canon/books.json row for {osis}, found {len(hits)}")
+    i = hits[0]
+    body = lines[i].strip()
+    comma = body.endswith(",")
+    row = json.loads(body.rstrip(","))
+    row.update(slug=slug, site=f"https://{owner.lower()}.github.io/{slug}/",
+               repo=repo, kind="core")
+    indent = lines[i][:len(lines[i]) - len(lines[i].lstrip())]
+    lines[i] = indent + json.dumps(row, ensure_ascii=False) + ("," if comma else "")
+    text = "\n".join(lines)
+    json.loads(text)  # still valid
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(text)
+    return row
 
 
 def run(cmd, cwd, check=True):
@@ -205,6 +245,17 @@ def main(argv=None):
             print(f"    site: https://{owner.lower()}.github.io/{slug}/")
             step = "sync"
             run([sys.executable, "-m", "biblecore", "sync"], dest)
+        else:
+            owner = pages_owner()
+            if not owner:
+                raise RuntimeError("no GitHub owner found in canon/books.json; "
+                                   "add the book's row by hand")
+
+        step = "hub row"
+        print("[8] canon/books.json row (the hub)")
+        row = register_book(a.osis, slug, os.path.basename(dest), owner)
+        print(f"    {row['name']}: {row['site']} (repo folder {row['repo']}); "
+              f"commit canon/books.json in bible-core")
     except RuntimeError as exc:
         print(f"\nstopped at '{step}': {exc}\nthe folder is left as it is; "
               f"finish that step by hand and carry on from the list in this "

@@ -36,7 +36,7 @@ import os
 import re
 import sys
 
-from biblecore.book import book
+from biblecore.book import Book, book
 
 ROW_RE = re.compile(r"^\|\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*$")
 HEAD_RE = re.compile(r"^\|\s*\|\s*(\*\*|\*)(.+?)\1\s*\|\s*\|\s*$")
@@ -216,7 +216,9 @@ def _kinds(arg):
 
 def _update_book_json(root, kinds, map_rel):
     """Fill book.json groupings (innermost first) if empty, and add the map
-    to the synced files. Returns lines describing what changed."""
+    to sync.extra unless core's defaults already sync it (they do for
+    `<slug>-literary-unit-map.md`). Returns lines describing what changed."""
+    from biblecore import sync
     path = os.path.join(root, "book.json")
     with open(path, encoding="utf-8") as fh:
         cfg = json.load(fh)
@@ -224,10 +226,9 @@ def _update_book_json(root, kinds, map_rel):
     if kinds and not cfg.get("groupings"):
         cfg["groupings"] = list(reversed(kinds))
         out.append(f"book.json: groupings = {cfg['groupings']}")
-    files = cfg.setdefault("sync", {}).setdefault("files", [])
-    if map_rel not in files:
-        files.append(map_rel)
-        out.append(f"book.json: sync.files += {map_rel}")
+    if map_rel not in sync.resolve(Book(cfg, root)):
+        cfg.setdefault("sync", {}).setdefault("extra", []).append(map_rel)
+        out.append(f"book.json: sync.extra += {map_rel}")
     if out:
         with open(path, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(cfg, fh, indent=2, ensure_ascii=False)

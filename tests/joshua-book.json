@@ -18,24 +18,14 @@
   "checks": {
     "opens_note_required": true
   },
-  "palette": "../bible-core/tests/joshua_well.json",
   "sync": {
-    "files": [
-      "joshua_study_style_reference.md",
-      "translation-choices.md",
-      "threads-digest.md",
-      "data/roots.json",
-      "Joshua-words.tsv",
+    "extra": [
       "Joshua-reading.txt",
       "Joshua-english.txt",
-      "joshua-literary-unit-map.md",
-      "candidate-boundaries.md",
-      "resources.md"
+      "candidate-boundaries.md"
     ],
-    "globs": [
-      "canon-leads/canon-leads-unit-*.md"
-    ]
+    "skip": []
   },
   "storage_key": "joshua",
-  "core": "0.1.0"
+  "hub": "https://lanehaden157.github.io/bible/"
 }

@@ -8,24 +8,22 @@ Built on **bible-core** (vendored in `biblecore/`, version in
 differ are in `bible-core/ARCHITECTURE.md`; shared wording defaults in
 `bible-core/canon/conventions.md`.
 
-**State:** new book, no units built.
+**State:** `python -m biblecore book` prints where the book stands (units
+built and planned, tracked threads, core pin vs vendored copy, sync and paste
+status), read from its data. It isn't written here, so it can't go stale.
 
 ## Commands (run from this folder)
 
+    python -m biblecore book             # where the book stands (see State above)
+    python -m biblecore port 5 [--dry]   # port source-artifacts/{{SLUG}}_05_translation.html (--force re-ports)
     python -m biblecore build            # everything downstream of units/*.html
-    python -m biblecore port 5 [--dry]   # port source-artifacts/{{SLUG}}_05_translation.html
-    python -m biblecore port 5 --force   # re-port a built unit (source must be current)
     python -m biblecore audit            # tracked-thread coverage (--ids ROOT to preview an id set)
-    python -m biblecore colour ROOT      # colour for a thread about to be promoted
-    python -m biblecore data-w 5         # after promoting: fill the new thread's spans in place
-    python -m biblecore leads            # canon-leads for built units + the next one
-    python -m biblecore units-from-map --kinds part,movement   # unit rows + groupings from the unit map
-    python -m biblecore corpus           # rebuild the word table from morphhb (npm ci first)
-    python -m biblecore sync             # push chat-side files to the synced mirror
-    python -m biblecore sync-check --mark-pasted   # after pasting CHAT_SIDE_INSTRUCTIONS.md into the project
     python -m biblecore test [--quick]   # check the book: pin, units, contracts, build idempotence
-    python -m biblecore migrate [--dry]  # after re-vendoring: move built units to the new contract
-    python -m biblecore book             # show resolved settings
+    python -m biblecore sync             # mirror chat-side files, commit and push (after Lane's OK)
+
+`python -m biblecore` lists the rest: `colour` and `data-w` for promoting a
+thread, `leads`, `units-from-map`, `corpus`, `migrate` after re-vendoring,
+`sync-check --mark-pasted` after pasting the instruction field.
 
 `book.json` holds everything book-specific (closed keys: an unknown key is an
 error). Change behaviour for this book by adding a book-local module that

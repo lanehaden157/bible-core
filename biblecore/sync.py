@@ -6,8 +6,11 @@
     python -m biblecore sync                        # mirror into project-side/synced/,
                                                     # commit and push if anything changed
 
-The file list is book.json "sync" (files + globs). The mirror is flat and
-deliberately duplicated so a GitHub-connector "sync" source sees plain files.
+The file list is core's defaults (DEFAULT_SYNC below) plus book.json
+"sync.extra", minus "sync.skip". The mirror is flat and deliberately
+duplicated so a GitHub-connector "sync" source sees plain files. `sync` also
+removes mirror files that have left the list, so a skipped or renamed file
+doesn't linger in the project; `sync-check` reports them first.
 
 Every sync also writes `synced-index.md` into the mirror: the complete list
 of synced files, each with its role (ROLES below), generated from book.json.
@@ -21,7 +24,9 @@ that file has changed since the last `--mark-pasted`.
 Seeded from Joshua's check_project_sync.py + sync_to_github.py.
 """
 import fnmatch
+import glob
 import json
+import os
 import shutil
 import subprocess
 from datetime import datetime, timezone
@@ -51,6 +56,84 @@ ROLES = [
     ("canon-leads-unit-*.md", "the intertext pass's starting list for one unit (generated)"),
 ]
 
+
+# The files every book syncs, in index order (structural audit P4). Keys in
+# <angle brackets> resolve through Book.path(), so a book's `paths`
+# overrides carry over; {slug}/{book} are filled from book.json. Required
+# ones are reported MISSING when absent (the template or the build makes
+# them); the others sync once they exist. A book adds to this with
+# book.json sync.extra and drops from it with sync.skip; a file every new
+# book should sync belongs here, with a role in ROLES.
+DEFAULT_SYNC = [
+    ("<style_reference>", True),
+    ("resources.md", True),
+    ("translation-choices.md", True),
+    ("canon-conventions.md", True),
+    ("canon-decisions.md", True),
+    ("core-workflow.md", True),
+    ("<components_ref>", True),
+    ("<digest>", True),
+    ("<data>/roots.json", True),
+    ("<words>", True),
+    ("{slug}-literary-unit-map.md", False),
+    ("<canon_leads>/canon-leads-unit-*.md", False),
+    ("<verse_map>", False),
+]
+GLOB_CHARS = set("*?[")
+
+
+def _rel(b, path):
+    return os.path.relpath(path, b.root).replace(os.sep, "/")
+
+
+def _fill(b, entry):
+    """A DEFAULT_SYNC entry as a path relative to the book root."""
+    head, sep, tail = entry.partition(">")
+    if entry.startswith("<") and sep:
+        base = _rel(b, b.path(head[1:]))
+        entry = base + tail
+    return entry.format(slug=b.slug, book=b.name)
+
+
+def _expand(b, pattern):
+    """Repo-relative paths matching one pattern, sorted."""
+    return sorted(_rel(b, p) for p in glob.glob(os.path.join(b.root, pattern)))
+
+
+def resolve(b=None):
+    """The book's synced files, repo-relative: the defaults (required ones
+    always; the rest when they exist), then sync.extra (a plain path is
+    required, a pattern takes what matches), minus anything sync.skip
+    matches. No duplicates; order is the index order."""
+    b = b or book()
+    sync = b.cfg.get("sync") or {}
+    out = []
+    entries = [(_fill(b, e), req) for e, req in DEFAULT_SYNC]
+    entries += [(e, True) for e in sync.get("extra", [])]
+    for entry, required in entries:
+        if GLOB_CHARS & set(entry):
+            out += _expand(b, entry)
+        elif required or os.path.exists(os.path.join(b.root, entry)):
+            out.append(entry)
+    skip = sync.get("skip", [])
+    seen, files = set(), []
+    for rel in out:
+        if rel in seen or any(fnmatch.fnmatch(rel, pat) for pat in skip):
+            continue
+        seen.add(rel)
+        files.append(rel)
+    return files
+
+
+def orphans(b=None):
+    """Files in the mirror that are no longer synced (the next `sync`
+    removes them)."""
+    b = b or book()
+    synced = Path(b.path("synced"))
+    if not synced.is_dir():
+        return []
+    keep = {Path(rel).name for rel in resolve(b)} | {INDEX_NAME}
+    return sorted(p.name for p in synced.iterdir() if p.is_file() and p.name not in keep)
 
 def role_for(name, b=None):
     b = b or book()
@@ -133,7 +216,7 @@ def _chat_side_rel():
 def check_main(argv=None):
     args = list(argv or [])
     root = Path(book().root)
-    tracked = book().sync_files()
+    tracked = resolve()
     state = load_state()
 
     if args and args[0] == "--mark-pasted":
@@ -164,17 +247,8 @@ def check_main(argv=None):
         save_state(state)
         return 0
 
-    stale, missing, ok = [], [], []
-    rel_chat = _chat_side_rel()
-    hashes = hash_files([root / rel for rel in tracked] + ([root / rel_chat] if rel_chat else []))
-    for rel in tracked:
-        current = hashes[root / rel]
-        if current is None:
-            missing.append(rel)
-        elif state.get(rel, {}).get("hash") != current:
-            stale.append(rel)
-        else:
-            ok.append(rel)
+    st = status()
+    stale, missing, ok, orphaned = st["stale"], st["missing"], st["ok"], st["orphans"]
     if stale:
         print("NEEDS RE-SYNCING (run `python -m biblecore sync`):")
         for rel in stale:
@@ -183,18 +257,51 @@ def check_main(argv=None):
         print("MISSING on disk (referenced but not found):")
         for rel in missing:
             print(f"  - {rel}")
+    if orphaned:
+        print("NO LONGER SYNCED (the next `python -m biblecore sync` removes them "
+              "from the mirror):")
+        for name in orphaned:
+            print(f"  - {name}")
     if ok and not stale:
         print("Everything tracked is in sync.")
     elif ok:
         print(f"\n({len(ok)} file(s) already in sync)")
     if not tracked:
-        print("book.json lists no sync files.")
-    rel = rel_chat
-    if rel and state.get(PASTED_KEY, {}).get("hash") != hashes[root / rel]:
-        print(f"PASTE BY HAND: {rel} changed since it was last pasted into the "
+        print("No files to sync.")
+    if st["paste"] in ("changed", "never"):
+        print(f"PASTE BY HAND: {st['chat_side']} changed since it was last pasted into the "
               f"project's instruction field. Paste it, then run "
               f"`python -m biblecore sync-check --mark-pasted`.")
-    return 1 if stale else 0
+    return 1 if stale or orphaned else 0
+
+
+def status(b=None):
+    """Where the mirror and the instruction field stand, without printing:
+    {tracked, stale, missing, ok, orphans, chat_side, paste, pasted_at}.
+    `paste` is "pasted", "changed" (edited since the last --mark-pasted),
+    "never" (no paste recorded) or None (the book has no field file)."""
+    b = b or book()
+    root = Path(b.root)
+    tracked = resolve(b)
+    state = load_state()
+    rel_chat = _chat_side_rel()
+    hashes = hash_files([root / rel for rel in tracked] + ([root / rel_chat] if rel_chat else []))
+    pasted = state.get(PASTED_KEY)
+    out = {"tracked": tracked, "stale": [], "missing": [], "ok": [],
+           "orphans": orphans(b), "chat_side": rel_chat, "paste": None,
+           "pasted_at": (pasted or {}).get("pasted_at")}
+    for rel in tracked:
+        current = hashes[root / rel]
+        if current is None:
+            out["missing"].append(rel)
+        elif state.get(rel, {}).get("hash") != current:
+            out["stale"].append(rel)
+        else:
+            out["ok"].append(rel)
+    if rel_chat:
+        out["paste"] = ("never" if not pasted else
+                        "pasted" if pasted.get("hash") == hashes[root / rel_chat] else "changed")
+    return out
 
 
 def push_main(argv=None):
@@ -210,6 +317,9 @@ def push_main(argv=None):
         shutil.copyfile(src, synced / Path(rel).name)
     for rel in missing:
         print(f"MISSING on disk (skipped): {rel}")
+    for name in orphans():
+        (synced / name).unlink()
+        print(f"removed from the mirror (no longer synced): {name}")
     (synced / INDEX_NAME).write_text(index_text(), encoding="utf-8", newline="\n")
 
     status = _git("status", "--porcelain", "--", str(synced))

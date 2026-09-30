@@ -65,3 +65,25 @@ def test_argparse_commands_print_usage_and_exit_0():
             if exc.code != 0 or "usage:" not in out.getvalue():
                 fails.append(f"{cmd} --help: exit {exc.code}, printed {out.getvalue()[:80]!r}")
     return fails
+
+
+def test_book_prints_state_from_data():
+    """`python -m biblecore book` is where a book's state lives (structural
+    audit D1); CLAUDE.md files point at it instead of keeping counts."""
+    import json
+    b = support.joshua_book()
+    uj = json.load(open(b.data("units.json"), encoding="utf-8"))
+    built = sum(1 for u in uj["units"] if u.get("built"))
+    threads = len(json.load(open(b.data("threads.json"), encoding="utf-8"))["threads"])
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        rc = cli.main(["book"])
+    text = out.getvalue()
+    want = [f"{built} built of {uj['unit_count']} planned", f"{threads} tracked",
+            "book.json pins", "sync      ", "field     "]
+    fails = [f"missing {w!r} in:\n{text}" for w in want if w not in text]
+    if rc:
+        fails.append(f"rc {rc}")
+    if cli._ranges([1, 2, 3, 5, 7, 8]) != "1-3, 5, 7-8":
+        fails.append(f"_ranges: {cli._ranges([1, 2, 3, 5, 7, 8])}")
+    return fails
