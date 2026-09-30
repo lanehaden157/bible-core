@@ -14,8 +14,9 @@ acceptance checks a book can run on itself:
   contracts    every built unit carries a contract stamp no newer than core
   example      the style reference's worked example (section 8) validates, if it has one
   audit        tracked-thread coverage (reported, not a failure)
-  idempotent   re-running the build's hard steps changes no file; anything
-               it would change is reported and put back
+  idempotent   re-running the build's hard steps changes no file (data,
+               units, digest, css/, app/, index.html); anything it would
+               change is reported and put back
 
 Exit 1 if any check fails.
 """
@@ -141,6 +142,12 @@ def _snapshot():
     paths = glob.glob(os.path.join(b.path("data"), "*.json"))
     paths += glob.glob(os.path.join(b.path("units"), "unit-*.html"))
     paths += [b.path("digest")]
+    # the generated stylesheets and app shell (0.11.0): a hand edit or a shell
+    # left behind by a vendor shows up here; theme.css is the book's and the
+    # build never writes it, so including it is harmless
+    paths += glob.glob(os.path.join(b.path("css"), "*.css"))
+    paths += glob.glob(os.path.join(b.root, "app", "*.js"))
+    paths += [os.path.join(b.root, "index.html")]
     snap = {}
     for p in paths:
         if os.path.exists(p):

@@ -31,6 +31,16 @@ wraps a core function, not by editing `biblecore/`; `python ../bible-core/tools/
 reports edits made there. Update the vendored copy with
 `python ../bible-core/tools/core_sync.py .`.
 
+## Site
+
+The build's `assets` step writes the app shell (`index.html`, `app/*.js`) and
+`css/core.css`, `components.css`, `division.css` from bible-core, with the
+book name filled in and a content hash on every link. Each one says
+"generated, don't edit", and `python -m biblecore test` reports a hand edit.
+This book's look is `css/theme.css` plus the `book.json` settings (groupings,
+components, theme). A change to the shell itself goes into bible-core's
+`biblecore/web/` and reaches the book with the next vendor and build.
+
 ## Policy files
 
 `data/threads.json` and `data/roots.json` are policy: the porter proposes, a

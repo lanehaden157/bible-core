@@ -23,12 +23,14 @@ def teardown():
 def test_numbers_passes_biblecore_test():
     """Every book-side check but the core pin (Numbers pins the release it
     last took, which trails this checkout between releases). For the same
-    reason the copy's manifest, which records the core version, is
-    refreshed first."""
+    reason the copy's manifest, which records the core version, and its
+    generated shell and stylesheets (whose content and ?v= hashes follow
+    this checkout's biblecore/web/) are refreshed first."""
     if not support.have_numbers():
         return []
-    from biblecore import manifest
+    from biblecore import assets, manifest
     with contextlib.redirect_stdout(io.StringIO()):
+        assets.main([])
         manifest.main([])
     fails = []
     for name, fn in selftest.CHECKS:

@@ -14,7 +14,8 @@ Written from Numbers' setup log (H14). In order:
      it was copied over by hand)
   4. npm install (morphhb, the pin in package.json), then
      `python -m biblecore corpus`
-  5. `python -m biblecore build` on the empty book
+  5. `python -m biblecore build` on the empty book (its `assets` step writes
+     the app shell: index.html, app/*.js)
   6. git init + first commit
   7. --github only: create the GitHub repo (public, since Pages needs it on
      a free plan), push, enable Pages from main, and run the first sync

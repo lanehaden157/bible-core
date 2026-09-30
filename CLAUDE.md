@@ -65,7 +65,10 @@ A test that needs sibling data gets it from `support.copy_of()` or
    `vX.Y.Z`, push both.
 3. Vendor into each book: `python tools/core_sync.py <book>`, set the book's
    `book.json` `core`, run its `build` (Matthew is not synced), `python -m biblecore test`, then commit explicit
-   paths and push. Run `python -m biblecore sync` where chat-side files changed.
+   paths and push. The build rewrites the app shell (`index.html`, `app/*.js`)
+   and the generated css from `biblecore/web/`, with fresh `?v=` content
+   hashes, so there is nothing to copy or bump by hand. Include those files in
+   the commit; their diff should be only what changed in `biblecore/web/`. Run `python -m biblecore sync` where chat-side files changed.
    Stage explicit paths: `git add -A` in a book repo sweeps up other sessions'
    edits.
 4. Book settings that gate checks (`checks` in `book.json`) are closed keys:

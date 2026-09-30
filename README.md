@@ -1,7 +1,7 @@
 # bible-core
 
 The shared architecture for the books in the Bible study platform. Numbers and
-Joshua run the template's app shell and pipeline. Matthew is standalone since
+Joshua run the core's app shell and pipeline. Matthew is standalone since
 2026-09-29 (reverted to its own shell and `pipeline/`); core is for future
 books.
 
@@ -15,7 +15,9 @@ books.
   edges, type-scenes (ARCHITECTURE.md §2). `python tools/canon_collect.py`
   refreshes them from the books.
 - `biblecore/` — the shared package, vendored into each book and run from the
-  book's root as `python -m biblecore <command>`.
+  book's root as `python -m biblecore <command>`. `biblecore/web/` holds the
+  site's shared parts (core.css, themes, and the app shell: `index.html`,
+  `app/*.js`), which the build writes into each book.
 - `template/` — the starter a new book copies once and then owns.
 - `tools/new_book.py` — start a new book (§8). `tools/core_sync.py`,
   `tools/core_diff.py` — vendor the package into a book; report local edits

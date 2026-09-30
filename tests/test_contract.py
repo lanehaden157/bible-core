@@ -169,6 +169,16 @@ def test_selftest_checks():
         fails.append(f"a stale occurrences.json wasn't reported: {errs}")
     if support.read(p) != edited:
         fails.append("check_idempotent didn't restore the file it rebuilt")
+    open(p, "w", encoding="utf-8", newline="\n").write(edited.replace("{ ", "{", 1))
+    # so is a hand edit to the generated app shell (0.11.0)
+    p = os.path.join(book().root, "app", "main.js")
+    edited = support.read(p).replace("const ", "const  ", 1)
+    open(p, "w", encoding="utf-8", newline="\n").write(edited)
+    errs, _ = selftest.check_idempotent()
+    if not errs or "main.js" not in errs[0]:
+        fails.append(f"a hand-edited app/main.js wasn't reported: {errs}")
+    if support.read(p) != edited:
+        fails.append("check_idempotent didn't restore the shell file")
     return fails
 
 

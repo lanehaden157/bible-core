@@ -1,6 +1,6 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.10.0, 2026-09-29. Built and tested (see §8). Expect it to
+**Status:** core 0.11.0, 2026-09-29. Built and tested (see §8). Expect it to
 change. Status and history are in `../session_index.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
@@ -33,6 +33,7 @@ change. Status and history are in `../session_index.md`.
 - 0.9.9: performance, same output (checked byte for byte on Numbers and Joshua builds). `audit` builds a lemma-id index once per word table instead of scanning every word per root; `leads` indexes occurrences and pairs once per corpus instead of per rare lemma and per unit; `roots._override`, `known_lemma_ids`, `hebrew.transliterate_word` and `greek._word` are cached; `sync-check` hashes all files with one `git hash-object`; `core_diff` reads the pin with one `git cat-file --batch`. Numbers `build` 18.6s to ~4.5s, `core_diff` 6.4s to 0.55s, core tests 2m15s to ~1m.
 - 0.9.10: line endings. Every file core writes is LF on every OS (`newline` on each writer), to match the `.gitattributes` (`* text=auto eol=lf`) now in core, the template and each book; before this a Windows build wrote CRLF, which shows as modified under `eol=lf`. `test_template` checks that a build writes no CRLF, and that a new book gets the template's `.gitattributes`.
 - 0.10.0: less hand upkeep (structural audit step 2). Core supplies the default synced files (`sync.DEFAULT_SYNC`); `book.json` `sync` lists only `extra` and `skip` (§4), and `sync` prunes mirror files that leave the list. `python -m biblecore book` prints the book's state (units, threads, core pin, sync, pasted field), so CLAUDE.md files no longer keep state lines. `tools/new_book.py` fills the book's `canon/books.json` row and the hub workflow clones every book listed there (§8). Tests work on temp copies of the sibling books, and `tests/support.py` refuses any write into them; Numbers is a test fixture; the Joshua fixture matches Joshua's `book.json`.
+- 0.11.0: the app shell is core-owned (structural audit F1/F2). `index.html` and `app/*.js` moved from `template/` into `biblecore/web/`, and the `assets` step writes them into each book with the book name filled in, marked "generated, don't edit". Every same-origin link and import carries `?v=<content hash>` computed by the build, replacing the hand-bumped `?v=N`. `biblecore test`'s idempotence check now covers `css/`, `app/` and `index.html` too. Numbers and Joshua moved in the same release; their shells changed only in the `?v` values and the comments.
 
 ## What this is
 
@@ -62,6 +63,7 @@ one of them.
 | layer | lives in | who owns it | changes how |
 |---|---|---|---|
 | **Shared package** (`biblecore/`) | this repo, vendored into each book as `<book>/biblecore/` at a pinned version | shared | Fix it here and re-vendor (`tools/core_sync.py`). A book adopts a new version when it chooses. |
+| **Generated into the book** (`css/core.css`, `css/components.css`, `css/division.css`, `index.html`, `app/*.js`, `data/components.json`) | the book repo, written by the build's `assets` step from `biblecore/web/` and the components | shared (the package's output) | Change the source in `biblecore/web/` and rebuild. The build overwrites edits made in the book, and `biblecore test` reports them. |
 | **Starter template** (`template/`) | copied once into a new book | the book, from the moment it's copied | Freely, in the book. Improvements worth sharing come back to the template by hand. |
 | **Book-only** | the book repo | the book | Freely. |
 
@@ -83,6 +85,10 @@ be fixed everywhere, run from a book's root as `python -m biblecore <command>`:
   writes `css/core.css` (shared structure, `web/core.css`),
   `css/components.css`, `data/components.json` (roles for the app shell)
   and `components-reference.md` (synced). Echo, list, poem, itin, textform so far;
+- `web/` — the site's shared parts: `core.css`, the division themes, and
+  since 0.11.0 the **app shell** (`index.html`, `app/*.js`, with generic
+  groupings). `assets` writes the shell into the book with the book name
+  filled in and a content hash on every link and import (§8);
 - `port.py` and `build.py` — the default porter and build. They're mechanism
   too, but a book that needs a different sequence writes its own script that
   calls the same steps, rather than editing these;
@@ -90,16 +96,18 @@ be fixed everywhere, run from a book's root as `python -m biblecore <command>`:
   `validate_units.py`, `digest.py`, `leads.py` (canon leads), `sync.py`;
 - language adapters (`lang/hebrew.py`) and corpus adapters (`corpus/oshb.py`).
 
-**Starter template: taste, and anything likely to vary by genre.** The app
-shell (JS, `index.html`) with generic groupings, `css/theme.css` (colour and
-font tokens plus book-only rules, starting as Joshua's look; the structure
-is the shared, generated `core.css`, D10), empty `data/` seeds and a starter palette,
+**Starter template: taste, and anything likely to vary by genre.**
+`css/theme.css` (colour and font tokens plus book-only rules, starting as
+Joshua's look; the structure is the shared, generated `core.css`, D10), empty
+`data/` seeds and a starter palette,
 the style-reference and chat-side skeletons (✎ marks what the book decides),
 `translation-choices.md` starting from `canon-conventions.md`, `CLAUDE.md`,
 and the session-context files.
 
 **Book-only:** `book.json`, `data/`, `units/`, `source-artifacts/`, the unit
-map, the glossary, the theme, and any scripts only that book needs.
+map, the glossary, the theme, and any scripts only that book needs. A book
+changes its site through `theme.css` and `book.json` settings (groupings,
+overlay, components, theme), not by editing the generated shell.
 
 **Seed from Joshua.** Joshua's pipeline is the hardened, tested one.
 Matthew's `unit_meta.py`, `audit_thread_coverage.py` and `port_artifact.py`
@@ -388,7 +396,8 @@ project side after bootstrap (the order Numbers went in):
 1. `python tools/new_book.py ../<Book> --book <Book> --osis <OSIS> [--github]`
    copies the template with its placeholders filled, vendors the core, copies
    the Strong's lexicon (`corpus/lexicon/`, sha1-checked), runs `npm install` +
-   `python -m biblecore corpus` + `build`, and makes the first commit.
+   `python -m biblecore corpus` + `build` (whose `assets` step writes the app
+   shell), and makes the first commit.
    `--github` also creates the public repo, enables Pages and runs the first
    sync; without it the script prints those commands. Check the corpus counts
    against a printed edition.
@@ -400,7 +409,7 @@ project side after bootstrap (the order Numbers went in):
 
 **Reader features (0.5.0).** The build's `emit` step writes the reading
 data layer (`data/words/<ch>.json`, `lemmas.json`, `text.json`;
-`docs/data-shapes.md`), and the template's `app/reader.js` uses it:
+`docs/data-shapes.md`), and the shell's `app/reader.js` uses it:
 - reading modes: notes, every note open, translation only, interlinear;
 - the interlinear itself, with transliteration, Strong's senses (labelled as
   an identifier, not the translation) and morphology in plain words
@@ -485,14 +494,16 @@ The `assets` step turns the book's entry into `css/division.css`
 A division may name a `title` face, used on the masthead title only (the
 NT's uncials). `tools/legacy_theme.py` opted a pre-core site with its own
 app shell into its theme (Lane, 2026-09-26). It is retired now that Joshua
-(0.8.5) runs the template shell, and kept for a future site with its own
+(0.8.5) runs the shared shell, and kept for a future site with its own
 shell. A book overrides any part in `book.json` `"theme"`. A book with no entry gets
 no division.css, and its theme.css fallback tokens (`:where(:root)`) apply.
 
 **Checking a book:** `python -m biblecore test` in the book (`--quick` skips
 the build rerun). It checks that the core pin agrees, the corpus loads, the
 data parses, every built unit validates, the contract stamps, the style
-reference's worked example, and that re-running the build changes no file.
+reference's worked example, and that re-running the build changes no file
+(data, units, digest, and since 0.11.0 the generated `css/`, `app/` and
+`index.html`, so a hand edit to the shell is reported).
 Audit gaps are reported but don't fail it.
 
 **Testing the core:** `python tests/run.py [filter]` (no pytest needed). The
@@ -511,15 +522,40 @@ its own small scratch book (`tests/greek_book.py`), so it is tested without
 Matthew. Its strongest check:
 Joshua rebuilt from the template, porting its four source artifacts through
 the CLI, reproduces Joshua's committed units byte for byte with a clean
-thread audit (`tests/test_template.py`). It also checks the corpus builder
+thread audit, and its build writes the same app shell as Joshua's
+(`tests/test_template.py`). It also checks the corpus builder
 against Joshua's word table and generate/scan against Joshua's committed
 files. (The comparison with Joshua's own audit script went when Joshua
 moved onto the core.)
 
 ---
 
-**The template shell (0.8.5 / 0.9.0).** Joshua moved off its forked app shell
-onto the template's in 0.8.5, so a shell change now reaches every book on core.
+**The app shell (0.8.5 / 0.9.0 / 0.11.0).** Joshua moved off its forked app
+shell onto the template's in 0.8.5. Since 0.11.0 the shell is core-owned
+(structural audit F1/F2): `biblecore/web/index.html` and
+`biblecore/web/app/*.js`, written into each book by `assets` (`assets.shell()`):
+- **Filled from `book.json`:** the title, description and brand come from
+  the book name (Lane, 2026-09-29: no separate key for custom wording).
+- **Marked generated:** each file starts with a "generated, don't edit"
+  comment. A rebuild overwrites a hand edit, and `biblecore test` reports it.
+- **Content-hashed cache-busting:** the sources import plain `"./x.js"`. The
+  build stamps every same-origin import, and every `css/` and `app/` link in
+  `index.html`, with `?v=<first 10 hex of sha256>`. A module's hash covers
+  its text after its own imports are stamped, so a change reaches every
+  importer and index.html. Stylesheet hashes cover the css as the build
+  leaves it, so editing `theme.css` changes only its own link. The import
+  graph has to stay acyclic; `assets` stops with a message if it isn't.
+- **A book with a single-file `paths.css`** (the old Joshua layout, kept in
+  the tests) gets no shell and keeps its own.
+- **Where a book hook would go (not built).** Neither book needs one yet
+  (Lane, 2026-09-29). The planned shape is an optional, book-owned
+  `app/book.js`. `assets` would link it after `main.js` in `index.html` with
+  its own hash, only when the file exists, and never write it. `main.js`
+  would expose the few calls it needs (routes, per-unit enhancers). Build it
+  when a book first needs something `theme.css` and `book.json` can't
+  express. `assets` never deletes files it didn't write, so a book's own
+  file in `app/` is safe.
+
 Two things came across from Matthew's time on it (0.9.0):
 - **Overlay grouping.** book.json `"overlay"` names a secondary grouping kind
   (Matthew: `"discourse"`). The shell draws it over the primary one: a

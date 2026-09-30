@@ -3,8 +3,9 @@
 1. An empty book made from the template builds clean.
 2. Joshua re-made from the template -- its four source artifacts ported one
    by one with `python -m biblecore port N`, then `build` -- reproduces
-   Joshua's committed units byte for byte, with a clean thread audit. This
-   is the proof that a new book gets the same pipeline Joshua has.
+   Joshua's committed units byte for byte, with a clean thread audit, and
+   the build writes Joshua's app shell (index.html, app/*.js) byte for byte.
+   This is the proof that a new book gets the same pipeline Joshua has.
 
 Slow (it ports four units and scans the Hebrew Bible for canon leads).
 """
@@ -56,6 +57,27 @@ def _crlf_written(root, since):
     return bad
 
 
+def _same_shell(ours, joshua):
+    """The build's app shell in `ours` against the one this checkout
+    generates for Joshua (index.html, app/*.js; 0.11.0). Joshua's committed
+    shell trails this checkout between releases, like its core pin, so it
+    is regenerated in memory rather than read from disk."""
+    from biblecore import assets
+    from biblecore import book as bookmod
+    cfg = json.load(open(os.path.join(joshua, "book.json"), encoding="utf-8"))
+    want = assets.generated(bookmod.Book(cfg, joshua))
+    fails = []
+    for rel, text in want.items():
+        if not rel.startswith(("app/", "index.html")):
+            continue
+        p = os.path.join(ours, rel)
+        if not os.path.exists(p):
+            fails.append(f"build wrote no {rel}")
+        elif open(p, "rb").read() != text.encode("utf-8"):
+            fails.append(f"{rel} differs from Joshua's shell")
+    return fails
+
+
 def test_template_has_no_unfilled_placeholders_after_instantiation():
     d = tempfile.mkdtemp(prefix="bc-tpl-")
     try:
@@ -104,7 +126,10 @@ def test_empty_book_builds():
         r = _cli(d, "build")
         if r.returncode or "build ok" not in r.stdout:
             return [f"empty build failed: {r.stdout[-800:]}{r.stderr[-800:]}"]
-        return _crlf_written(d, since)
+        # the template ships no shell; the first build writes it (0.11.0)
+        shell = [x for x in ("index.html", "app/main.js")
+                 if not os.path.exists(os.path.join(d, x))]
+        return [f"first build wrote no {x}" for x in shell] + _crlf_written(d, since)
     finally:
         shutil.rmtree(d)
 
@@ -120,6 +145,8 @@ def test_joshua_from_template_reproduces_joshua():
                             os.path.join(d, "source-artifacts", f))
         shutil.copyfile(os.path.join(J, "retrofit", "retrofit-tags.json"),
                         os.path.join(d, "retrofit", "retrofit-tags.json"))
+        # Joshua's own look: index.html carries theme.css's hash
+        shutil.copyfile(os.path.join(J, "css", "theme.css"), os.path.join(d, "css", "theme.css"))
         for f in ("threads.json", "roots.json"):
             shutil.copyfile(os.path.join(J, "data", f), os.path.join(d, "data", f))
         uj = json.load(open(os.path.join(J, "data", "units.json"), encoding="utf-8"))
@@ -131,6 +158,8 @@ def test_joshua_from_template_reproduces_joshua():
                   open(os.path.join(d, "data", "units.json"), "w", encoding="utf-8", newline="\n"),
                   indent=2, ensure_ascii=False)
         _set_paths(d, groupings=["movement"],
+                   components=json.load(open(os.path.join(J, "book.json"),
+                                             encoding="utf-8"))["components"],
                    palette=os.path.join(support.HERE, "joshua_well.json"),
                    paths={"wlc": WLC, "lexicon": support.LEXICON})
 
@@ -156,6 +185,7 @@ def test_joshua_from_template_reproduces_joshua():
                             support.read(os.path.join(J, "units", f"unit-{n:02d}.html")))
             if ours != theirs:
                 fails.append(f"unit {n} differs from Joshua's committed fragment")
+        fails += _same_shell(d, J)
         return fails + _crlf_written(d, since)
     finally:
         shutil.rmtree(d)

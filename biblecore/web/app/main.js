@@ -1,7 +1,6 @@
-/* Study site — tab router + footnote interactions (bible-core starter
-   template; the book owns this file once copied and may change it freely).
-   Plain ES module, no build step. Paths are relative so it works from a
-   GitHub Pages subpath.
+/* Study site — tab router + footnote interactions (bible-core app shell,
+   written into each book by `python -m biblecore assets`). Plain ES module,
+   no bundler. Paths are relative so it works from a GitHub Pages subpath.
 
    Groupings: data/units.json carries `groupings: [{kind, n, name, label?,
    span, units}]` and each unit row carries an integer per kind (e.g.
@@ -10,16 +9,17 @@
    capitalised) is what a reader sees ("Movement II · …"). A book with no
    groupings gets one flat list.
 
-   The `?v=N` on every same-origin module import is manual cache-busting for
-   GitHub Pages. Bump every `?v=N` here AND in search.js's threads.js import,
-   together, whenever threads.js/spotlight.js/search.js changes -- a stale
-   cached module is invisible in the DOM and easy to mistake for a real bug. */
+   Cache-busting: the build stamps every same-origin import below (and the
+   stylesheet and script links in index.html) with `?v=<content hash>`, so a
+   changed module gets a new URL on GitHub Pages. Write plain "./x.js" here;
+   a stale cached module is invisible in the DOM and easy to mistake for a
+   real bug, which is why nothing is bumped by hand. */
 
-import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js?v=9";
-import { enhanceSpotlights, openAll } from "./spotlight.js?v=7";
-import { renderSearch } from "./search.js?v=7";
+import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js";
+import { enhanceSpotlights, openAll } from "./spotlight.js";
+import { renderSearch } from "./search.js";
 import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
-         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js?v=7";
+         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js";
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
