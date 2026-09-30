@@ -14,7 +14,7 @@ import os
 import support
 from biblecore.lang import greek
 
-MATTHEW = os.path.normpath(os.path.join(support.CORE, "..", "Matthew"))
+MATTHEW = support.MATTHEW_SRC  # read-only inputs (corpora, its own pipeline)
 MORPHGNT = os.path.join(MATTHEW, "pipeline", "corpus", "morphgnt", "61-Mt-morphgnt.txt")
 
 CASES = {

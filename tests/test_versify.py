@@ -6,7 +6,7 @@ import os
 import support
 from biblecore import audit, book as bookmod, versify
 
-WLC = os.path.join(support.JOSHUA, "node_modules", "morphhb", "wlc")
+WLC = support.WLC
 
 
 def test_numbers_map_matches_the_hand_built_one():

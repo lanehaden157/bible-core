@@ -12,7 +12,7 @@ import support
 from biblecore import book as bookmod
 from biblecore import leads
 
-MATTHEW = os.path.normpath(os.path.join(support.CORE, "..", "Matthew"))
+MATTHEW = support.MATTHEW_SRC  # read-only inputs (corpora, its own pipeline)
 LXX_DIR = os.path.join(MATTHEW, "pipeline", "corpus", "lxx")
 MGNT_DIR = os.path.join(MATTHEW, "pipeline", "corpus", "morphgnt")
 UNIT_N = 13
@@ -41,7 +41,7 @@ def setup():
            "corpus": {"kind": "morphgnt", "pin": "morphgnt/sblgnt", "word_ids": True},
            "versification": "source", "groupings": [], "components": [],
            "paths": {"morphgnt": MGNT_DIR, "lxx": LXX_DIR}}
-    bookmod.use(bookmod.Book(cfg, MATTHEW))
+    bookmod.use(bookmod.Book(cfg, support.copy_of("Matthew")))
 
 
 def teardown():
@@ -53,7 +53,7 @@ def test_parity_with_matthews_own_canon_leads():
         return ["Matthew's LXX/MorphGNT corpus not found next to bible-core"]
     if not os.path.exists(os.path.join(MATTHEW, "pipeline", "canon_leads.py")):
         return []  # retired in Matthew's phase E; the parity was proven then
-    row = next(u for u in json.load(open(os.path.join(MATTHEW, "data", "units.json"),
+    row = next(u for u in json.load(open(os.path.join(support.copy_of("Matthew"), "data", "units.json"),
                                          encoding="utf-8"))["units"] if u["n"] == UNIT_N)
     passage = row["passage"]
 

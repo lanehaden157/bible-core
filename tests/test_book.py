@@ -142,3 +142,17 @@ def test_skip_fragment_checks_is_a_setting():
 
 def test_joshua_fixture_is_a_valid_book():
     return bookmod.validate_config(json.load(open(support.FIXTURE, encoding="utf-8")))
+
+
+def test_joshua_fixture_matches_joshua():
+    """tests/joshua-book.json is Joshua's real book.json less its core pin
+    (structural audit B4: it had drifted to core 0.1.0 and an old sync
+    list). When Joshua's settings change, copy them over."""
+    real = os.path.join(support.JOSHUA_SRC, "book.json")
+    if not os.path.exists(real):
+        return []
+    theirs = json.load(open(real, encoding="utf-8"))
+    theirs.pop("core", None)
+    ours = json.load(open(support.FIXTURE, encoding="utf-8"))
+    return [f"fixture {k!r} differs from ../Joshua/book.json"
+            for k in sorted(set(ours) | set(theirs)) if ours.get(k) != theirs.get(k)]

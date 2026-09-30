@@ -271,8 +271,7 @@ that used to be scattered through Joshua's code.
   "meta_keys": [],
   "checks": {"opens_note_required": true, "skip_fragment_checks": [], "test_idempotent": true},
   "palette": "data/palette.json",
-  "sync": {"files": ["numbers_study_style_reference.md", "..."],
-           "globs": ["canon-leads/canon-leads-unit-*.md"]},
+  "sync": {"extra": [], "skip": []},
   "storage_key": "numbers",
   "paths": {},
   "core": "0.2.0"
@@ -293,8 +292,18 @@ that used to be scattered through Joshua's code.
   differences to `<slug>-versification.md`. `source` keeps the corpus
   numbering (Joshua's sheets were written that way). The generated word
   table, reading text and boundaries stay in source numbering.
-- `paths` — override any default location (Joshua's layout is expressed
-  this way in `tests/joshua-book.json`).
+- `sync` — which files round-trip into the Claude.ai project. Core supplies
+  the default set (`biblecore/sync.py` `DEFAULT_SYNC`: the style reference,
+  resources, translation choices, the vendored canon and workflow files, the
+  generated reference, digest, roots and word table, and, once they exist,
+  the unit map, canon leads and versification list). A book lists only what
+  it adds (`extra`, paths or glob patterns) and drops (`skip`, matched
+  against the resolved paths). Joshua adds its reading text, English text
+  and boundary list; Numbers adds nothing. `sync` prunes mirror files that
+  leave the list. Before 0.10.0 each book listed every file (`files` +
+  `globs`), and a new core file had to be added to every book by hand.
+- `paths` — override any default location (none of the current books needs
+  one; the tests use it to read big inputs in place).
 
 Unknown keys are an error, and every key is read by code (H5). New keys are
 easy to add in `book.py`; keys nothing reads don't stay.
@@ -415,8 +424,11 @@ the canon registries, including `canon/paths.json` (reading paths, F21). Pages:
 
 Book sites whose `book.json` has `"hub"` get an "All books" link (F13), and a
 thread popover row, "In the canon: …" (F15), read from the hub's
-`data/canon.json`. Starting a new book: add its site/repo/kind to
-`canon/books.json`, then rebuild the hub.
+`data/canon.json`. Starting a new book: `tools/new_book.py` fills its
+`canon/books.json` row (site, repo folder, kind `core`); commit that in
+bible-core. The hub repo's rebuild workflow clones every book with a `site`
+and a `repo` from `canon/books.json` (the GitHub repo named by the Pages URL,
+into the folder `repo` names), so no workflow edit is needed.
 
 **Greek (0.7.0, G7/E12).** `lang/greek.py` is Matthew's transliteration
 scheme, frozen (H10). `tests/test_greek.py` defines it: 25 hand-worked
@@ -483,10 +495,15 @@ reference's worked example, and that re-running the build changes no file.
 Audit gaps are reported but don't fail it.
 
 **Testing the core:** `python tests/run.py [filter]` (no pytest needed). The
-suite reads the sibling book checkouts, read-only: Joshua's real data above
-all (scratch copies where a test writes), plus Numbers' word table and
-Matthew's MorphGNT, LXX and pipeline for parity checks. `run.py` fails the
-run if any file in them changes. Set up with `git clone` of each next to
+suite reads the sibling book checkouts: Joshua's real data above all, Numbers
+(`biblecore test` on a copy, as the template-shaped fixture), and Matthew's
+MorphGNT, LXX and pipeline for parity checks. `tests/support.py` gives each
+test a temporary copy of the book it needs (`copy_of()`; big read-only
+inputs such as morphhb and the lexicons are read in place), and importing it
+installs a guard that refuses any write into the siblings for the rest of
+the process, so a harness that calls test functions directly is covered too
+(structural audit B1). `run.py` still fails the run if a file there
+changes, which also covers child processes. Set up with `git clone` of each next to
 bible-core, `npm install` in `../Joshua` and `../Numbers` (morphhb), and
 `python pipeline/fetch_corpus.py` in `../Matthew`. The Greek path also has
 its own small scratch book (`tests/greek_book.py`), so it is tested without

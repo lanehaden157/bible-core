@@ -4,8 +4,11 @@ How this repo behaves. `README.md` maps the files; `ARCHITECTURE.md` is the
 shared shape, where books are expected to differ, how the core changes, and
 how to start a book (§8).
 
-**State (2026-09-29):** core 0.9.10, tests 287/287. Numbers and Joshua are on
-core; Matthew is standalone (below). The platform-level record (status and
+**State:** the version is `biblecore/__init__.py`; `python tests/run.py`
+prints the test count; each book's state (units, threads, core pin, sync,
+pasted field) is `python -m biblecore book` in that book. None of it is
+written here, so it can't go stale. Numbers and Joshua are on core; Matthew
+is standalone (below). The platform-level record (status and
 history) is `../session_index.md`. The core is forward-looking, built for future books.
 Matthew is **standalone** (decided 2026-09-29): Lane reverted it to its
 pre-core state (old app shell, own `pipeline/`, no `book.json`, units 1-13; the
@@ -35,21 +38,24 @@ back to back. Good habits, not hard rules:
 - A book's `core_sync.py` refuses to run against a dirty bible-core commit —
   don't route around that by committing someone else's half-finished edit
   just to unblock a vendor.
-- After a vendor lands in a book, that book's `CLAUDE.md` should record
-  which core commit/version it pulled, so a later session can tell whether
-  it's behind.
+- After a vendor, `python -m biblecore book` in that book shows its pin and
+  the vendored commit, so a later session can tell whether it's behind
+  without anything recorded by hand.
 
 ## Commands (run from this folder)
 
     python tests/run.py [filter]         # the whole suite (no pytest needed)
     python tools/core_sync.py <book-dir>  # vendor into a book (refuses if dirty)
     python tools/core_diff.py <book-dir>  # book-local edits made to biblecore/
-    python tools/new_book.py ...         # start a book from template/ (§8)
+    python tools/new_book.py ...         # start a book from template/ (§8); fills its canon/books.json row
     python tools/canon_collect.py        # refresh canon/*.json from the books
     python tools/hub_build.py ../hub     # rebuild the hub by hand (see below)
 
 The tests read the sibling `../Joshua`, `../Numbers` and `../Matthew`
-checkouts read-only (README.md has the setup).
+checkouts through temporary copies, and `tests/support.py` refuses any write
+into them, even from a harness that skips `run.py` (README.md has the setup).
+A test that needs sibling data gets it from `support.copy_of()` or
+`support.joshua_book()` / `numbers_book()`.
 
 ## Releasing a core change
 
@@ -63,7 +69,13 @@ checkouts read-only (README.md has the setup).
    Stage explicit paths: `git add -A` in a book repo sweeps up other sessions'
    edits.
 4. Book settings that gate checks (`checks` in `book.json`) are closed keys:
-   a new one goes in `book.py` `CHECK_DEFAULTS` with a test.
+   a new one goes in `book.py` `CHECK_DEFAULTS` with a test. A file every
+   book should sync goes in `sync.py` `DEFAULT_SYNC` (with a role in
+   `ROLES`), not in each book's `book.json`.
+5. Every file writer opens with `newline="\n"` (since 0.9.10), so a Windows
+   run writes LF like the `.gitattributes` expects. `test_template` catches a
+   build step that writes CRLF, but not a tool's own writes (`new_book.py`,
+   `sync.py`), so check new writers by eye.
 
 ## The hub
 
@@ -71,5 +83,7 @@ checkouts read-only (README.md has the setup).
 The hub repo (`lanehaden157/bible`, Pages) rebuilds itself from pushed code:
 its `.github/workflows/rebuild.yml` runs daily and on "Run workflow", and
 commits only on change. So after a core or unit push, press the button (or
-wait a day); no manual rebuild needed. Don't edit the hub repo by hand. The
+wait a day); no manual rebuild needed. The workflow clones every book with a
+row in `canon/books.json` (site + repo), and `tools/new_book.py` adds that
+row, so a new book needs no workflow edit. Don't edit the hub repo by hand. The
 local `hub_build.py` also reads unpushed work, so use it for previews only.

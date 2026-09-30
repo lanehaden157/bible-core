@@ -27,8 +27,9 @@ books.
 - `corpus/` — shared corpus files a new book gets a copy of (the Strong's
   lexicon; for a Greek book, the MorphGNT lexicon).
 - `tests/` — `python tests/run.py`. Reads the sibling `../Joshua` (the
-  reference book), `../Numbers` and `../Matthew` checkouts, read-only, and
-  fails if it writes to them. Clone each next to this repo, then
+  reference book), `../Numbers` and `../Matthew` checkouts through temporary
+  copies (`tests/support.py`), which also refuses any write into them, and
+  fails if one changed anyway. Clone each next to this repo, then
   `npm install` in Joshua and Numbers (morphhb) and
   `python pipeline/fetch_corpus.py` in Matthew (ARCHITECTURE.md §8).
 

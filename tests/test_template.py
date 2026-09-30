@@ -21,7 +21,7 @@ import support
 from template_book import make_book
 
 J = support.JOSHUA
-WLC = os.path.join(J, "node_modules", "morphhb", "wlc")
+WLC = support.WLC
 
 
 def _cli(root, *args):
@@ -132,8 +132,7 @@ def test_joshua_from_template_reproduces_joshua():
                   indent=2, ensure_ascii=False)
         _set_paths(d, groupings=["movement"],
                    palette=os.path.join(support.HERE, "joshua_well.json"),
-                   paths={"wlc": WLC, "lexicon": os.path.join(
-                       J, "corpus", "lexicon", "HebrewStrong.xml")})
+                   paths={"wlc": WLC, "lexicon": support.LEXICON})
 
         fails = []
         since = time.time()
