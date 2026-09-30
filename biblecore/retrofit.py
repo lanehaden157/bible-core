@@ -245,7 +245,7 @@ def main(argv=None):
             html, msg = FNS[op](html, it)
             logs.append(msg)
         if html != before:
-            with open(path, "w", encoding="utf-8") as fh:
+            with open(path, "w", encoding="utf-8", newline="\n") as fh:
                 fh.write(html)
 
     for m in logs:

@@ -318,7 +318,7 @@ def _build_hebrew(n, rare=RARE_DEFAULT, bible=None, freq=None, glosses=None, out
                 phrase_leads(bible, freq, uv), glosses, rare)
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, f"canon-leads-unit-{n:02d}.md")
-    with open(path, "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(md)
     return path
 
@@ -600,6 +600,6 @@ def _build_greek(n, rare=RARE_DEFAULT, nt=None, lxx=None, freq=None, out_dir=Non
                       phrase_leads_greek(lxx, freq, uw), rare)
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, f"canon-leads-unit-{n:02d}.md")
-    with open(path, "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(md)
     return path

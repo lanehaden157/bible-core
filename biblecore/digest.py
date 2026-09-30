@@ -63,7 +63,7 @@ def main(argv=None):
             "adds the first thread.)*",
             "",
         ]
-        with open(out, "w", encoding="utf-8") as fh:
+        with open(out, "w", encoding="utf-8", newline="\n") as fh:
             fh.write("\n".join(lines))
         print(f"wrote {out} — 0 threads (empty threads.json, round trip OK)")
         return 0
@@ -99,7 +99,7 @@ def main(argv=None):
                          f"{unit}): {e.get('why', '').strip()}")
 
     lines.append("")
-    with open(out, "w", encoding="utf-8") as fh:
+    with open(out, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines))
     print(f"wrote {out} — {len(threads)} threads, {len(declined)} declined")
     return 0

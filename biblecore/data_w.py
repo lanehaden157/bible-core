@@ -173,7 +173,7 @@ def main(argv=None):
         print("(--dry: nothing written)")
         return 0
 
-    with open(path, "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(apply_edits(html, edits))
     print(f"wrote {os.path.relpath(path, book().root)}")
     return 0

@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 import support
 from template_book import make_book
@@ -36,6 +37,23 @@ def _set_paths(root, **paths):
     bj.update({k: v for k, v in paths.items() if k != "paths"})
     bj["paths"] = paths.get("paths", {})
     json.dump(bj, open(p, "w", encoding="utf-8"), indent=2)
+
+
+def _crlf_written(root, since):
+    """Text files under root written at or after `since` that contain CRLF.
+    Every writer opens with newline="\\n": with .gitattributes eol=lf, a CRLF
+    file on Windows shows as modified in git status (structural audit B2)."""
+    bad = []
+    for base, dirs, files in os.walk(root):
+        dirs[:] = [x for x in dirs if x not in ("biblecore", "node_modules", "__pycache__")]
+        for f in files:
+            p = os.path.join(base, f)
+            if os.path.getmtime(p) < since or not f.endswith(
+                    (".md", ".json", ".html", ".js", ".css", ".tsv", ".txt")):
+                continue
+            if b"\r\n" in open(p, "rb").read():
+                bad.append(f"CRLF written: {os.path.relpath(p, root)}")
+    return bad
 
 
 def test_template_has_no_unfilled_placeholders_after_instantiation():
@@ -79,12 +97,14 @@ def test_empty_book_builds():
     try:
         make_book(d, "Numbers", "Num", "numbers")
         _set_paths(d, paths={"wlc": WLC})
+        since = time.time()
         r = _cli(d, "corpus")
         if r.returncode:
             return [f"corpus failed: {r.stdout[-500:]}{r.stderr[-800:]}"]
         r = _cli(d, "build")
         if r.returncode or "build ok" not in r.stdout:
             return [f"empty build failed: {r.stdout[-800:]}{r.stderr[-800:]}"]
+        return _crlf_written(d, since)
     finally:
         shutil.rmtree(d)
 
@@ -108,7 +128,7 @@ def test_joshua_from_template_reproduces_joshua():
         json.dump({"book": "Joshua", "unit_count": uj["unit_count"],
                    "groupings": uj["groupings"],
                    "units": units},
-                  open(os.path.join(d, "data", "units.json"), "w", encoding="utf-8"),
+                  open(os.path.join(d, "data", "units.json"), "w", encoding="utf-8", newline="\n"),
                   indent=2, ensure_ascii=False)
         _set_paths(d, groupings=["movement"],
                    palette=os.path.join(support.HERE, "joshua_well.json"),
@@ -116,6 +136,7 @@ def test_joshua_from_template_reproduces_joshua():
                        J, "corpus", "lexicon", "HebrewStrong.xml")})
 
         fails = []
+        since = time.time()
         for n in (1, 2, 3, 4):
             r = _cli(d, "port", str(n))
             if r.returncode:
@@ -136,6 +157,6 @@ def test_joshua_from_template_reproduces_joshua():
                             support.read(os.path.join(J, "units", f"unit-{n:02d}.html")))
             if ours != theirs:
                 fails.append(f"unit {n} differs from Joshua's committed fragment")
-        return fails
+        return fails + _crlf_written(d, since)
     finally:
         shutil.rmtree(d)

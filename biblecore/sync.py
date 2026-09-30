@@ -105,7 +105,7 @@ def load_state():
 def save_state(state):
     p = Path(book().path("sync_state"))
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    p.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
 
 
 def mark_synced(rels):

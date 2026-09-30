@@ -72,11 +72,11 @@ def main(argv=None):
         row["contract"] = target
         moved += 1
         if not a.dry and new != html:
-            with open(path, "w", encoding="utf-8") as fh:
+            with open(path, "w", encoding="utf-8", newline="\n") as fh:
                 fh.write(new)
 
     if moved and not a.dry:
-        with open(book().data("units.json"), "w", encoding="utf-8") as fh:
+        with open(book().data("units.json"), "w", encoding="utf-8", newline="\n") as fh:
             json.dump(uj, fh, indent=2, ensure_ascii=False)
             fh.write("\n")
         from biblecore import refresh

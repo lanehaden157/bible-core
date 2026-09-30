@@ -97,7 +97,7 @@ def scan_all():
 def main(argv=None):
     data = scan_all()
     out = book().data("occurrences.json")
-    with open(out, "w", encoding="utf-8") as fh:
+    with open(out, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(data, fh, indent=2, ensure_ascii=False)
     tot = sum(r["count"] for u in data.values() for r in u.values())
     hits = sum(len(r["hits"]) for u in data.values() for r in u.values())

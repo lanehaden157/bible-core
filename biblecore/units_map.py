@@ -266,7 +266,7 @@ def main(argv=None):
         print("(--dry: nothing written)")
         return 0
 
-    with open(b.data("units.json"), "w", encoding="utf-8") as fh:
+    with open(b.data("units.json"), "w", encoding="utf-8", newline="\n") as fh:
         json.dump(new, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
     print(f"wrote {os.path.relpath(b.data('units.json'), b.root)}")

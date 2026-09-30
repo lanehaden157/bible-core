@@ -4,7 +4,7 @@ How this repo behaves. `README.md` maps the files; `ARCHITECTURE.md` is the
 shared shape, where books are expected to differ, how the core changes, and
 how to start a book (§8).
 
-**State (2026-09-29):** core 0.9.9, tests 286/286. Numbers and Joshua are on
+**State (2026-09-29):** core 0.9.10, tests 287/287. Numbers and Joshua are on
 core; Matthew is standalone (below). The platform-level record (status and
 history) is `../session_index.md`. The core is forward-looking, built for future books.
 Matthew is **standalone** (decided 2026-09-29): Lane reverted it to its

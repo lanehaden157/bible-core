@@ -136,7 +136,7 @@ def merge_units_json(meta, dry, fragment_html=None):
             row[g] = meta[g]
 
     if not dry:
-        with open(book().data("units.json"), "w", encoding="utf-8") as fh:
+        with open(book().data("units.json"), "w", encoding="utf-8", newline="\n") as fh:
             json.dump(uj, fh, indent=2, ensure_ascii=False)
             fh.write("\n")
     return local_roots
@@ -234,7 +234,7 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True):
     out = book().path("out")
     os.makedirs(out, exist_ok=True)
     path = os.path.join(out, f"thread-delta-{n:02d}.md")
-    with open(path, "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines) + "\n")
     return path
 
@@ -397,7 +397,7 @@ def merge_retro(meta, dry):
         written += 1
     if (written or skips) and not dry:
         os.makedirs(os.path.dirname(retro_spec), exist_ok=True)
-        with open(retro_spec, "w", encoding="utf-8") as fh:
+        with open(retro_spec, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(rt, fh, indent=2, ensure_ascii=False)
             fh.write("\n")
     return written, skips
@@ -525,7 +525,7 @@ def port_one(n, dry, src=None, force=False):
                  f"Just promoted a thread? No re-port needed: "
                  f"python -m biblecore data-w {n}, then build.")
     os.makedirs(os.path.dirname(dest), exist_ok=True)
-    with open(dest, "w", encoding="utf-8") as fh:
+    with open(dest, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(fragment)
     print(f"wrote {dest}")
     print(f"local hues: { {k: v['color'] for k, v in local_roots.items()} }")

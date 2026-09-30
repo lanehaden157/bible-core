@@ -25,7 +25,7 @@ def main(argv=None):
             html = fh.read()
         new = um.inject(html, um.generate(n, uj, tj))
         if new != html:
-            with open(path, "w", encoding="utf-8") as fh:
+            with open(path, "w", encoding="utf-8", newline="\n") as fh:
                 fh.write(new)
             changed += 1
             print(f"refreshed unit-{n:02d} meta")
