@@ -551,6 +551,20 @@ against Joshua's word table and generate/scan against Joshua's committed
 files. (The comparison with Joshua's own audit script went when Joshua
 moved onto the core.)
 
+**Continuous integration (structural audit B3).** Both halves also run on
+GitHub Actions, on every push and pull request:
+- bible-core's `.github/workflows/tests.yml` checks out this repo (full
+  history, for the template-drift tests) with Joshua, Numbers and Matthew
+  beside it from their pushed `main`, installs morphhb and Matthew's corpus
+  (cached), checks that data is in place (the sibling tests would otherwise
+  skip quietly), and runs `python tests/run.py`.
+- Each book runs `python -m biblecore test` (with `npm ci`, since without
+  morphhb's verse map a Hebrew book's English numbering quietly falls back to
+  the Hebrew) from `.github/workflows/tests.yml`. The template ships it
+  unchanged (`test_template` checks), so a new book has CI from its first
+  push. Commits touching only `project-side/` or session files skip it.
+A failed run emails the pusher (GitHub's default notification).
+
 ---
 
 **The app shell (0.8.5 / 0.9.0 / 0.11.0).** Joshua moved off its forked app

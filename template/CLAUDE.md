@@ -25,6 +25,10 @@ status), read from its data. It isn't written here, so it can't go stale.
 thread, `leads`, `units-from-map`, `corpus`, `migrate` after re-vendoring,
 `sync-check --mark-pasted` after pasting the instruction field.
 
+GitHub Actions runs `python -m biblecore test` on every push
+(`.github/workflows/tests.yml`, shipped unchanged by bible-core's template;
+commits touching only `project-side/` or session files skip it).
+
 `book.json` holds everything book-specific (closed keys: an unknown key is an
 error). Change behaviour for this book by adding a book-local module that
 wraps a core function, not by editing `biblecore/`; `python ../bible-core/tools/core_diff.py`

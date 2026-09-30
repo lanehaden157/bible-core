@@ -1,0 +1,98 @@
+name: Tests
+
+# The core's full suite (tests/run.py) against the pushed books, checked out
+# beside bible-core the way they sit locally (Joshua, Numbers, Matthew; public
+# repos, their main branches). Structural audit B3.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # full history: the drift tests read the template at old commits
+      # (591dba6) and the round-trip tests resolve CORE_VERSION commits
+      - uses: actions/checkout@v4
+        with:
+          path: bible-core
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: lanehaden157/joshua
+          path: Joshua
+      - uses: actions/checkout@v4
+        with:
+          repository: lanehaden157/numbers
+          path: Numbers
+      - uses: actions/checkout@v4
+        with:
+          repository: lanehaden157/Matthew
+          path: Matthew
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # morphhb (the OSHB corpus), pinned by each book's package-lock.json
+      - name: Cache Joshua node_modules
+        id: joshua-npm
+        uses: actions/cache@v4
+        with:
+          path: Joshua/node_modules
+          key: npm-joshua-${{ hashFiles('Joshua/package-lock.json') }}
+      - name: npm ci (Joshua)
+        if: steps.joshua-npm.outputs.cache-hit != 'true'
+        working-directory: Joshua
+        run: npm ci --no-fund --no-audit
+      - name: Cache Numbers node_modules
+        id: numbers-npm
+        uses: actions/cache@v4
+        with:
+          path: Numbers/node_modules
+          key: npm-numbers-${{ hashFiles('Numbers/package-lock.json') }}
+      - name: npm ci (Numbers)
+        if: steps.numbers-npm.outputs.cache-hit != 'true'
+        working-directory: Numbers
+        run: npm ci --no-fund --no-audit
+
+      # MorphGNT + LXX, pinned by commit in fetch_corpus.py
+      - name: Cache Matthew corpus
+        id: matthew-corpus
+        uses: actions/cache@v4
+        with:
+          path: Matthew/pipeline/corpus
+          key: corpus-matthew-${{ hashFiles('Matthew/pipeline/fetch_corpus.py') }}
+      - name: Fetch Matthew corpus
+        if: steps.matthew-corpus.outputs.cache-hit != 'true'
+        working-directory: Matthew
+        run: python pipeline/fetch_corpus.py
+
+      # tests that need a sibling's data skip quietly when it's missing, so
+      # a failed install must fail here rather than pass the suite hollow
+      - name: Check the sibling data is in place
+        run: |
+          for p in Joshua/node_modules/morphhb/wlc/VerseMap.xml \
+                   Numbers/node_modules/morphhb/wlc/VerseMap.xml \
+                   Joshua/Joshua-words.tsv Numbers/book.json \
+                   Matthew/pipeline/corpus/morphgnt Matthew/pipeline/corpus/lxx; do
+            test -e "$p" || { echo "missing: $p"; exit 1; }
+          done
+
+      - name: Run the suite
+        working-directory: bible-core
+        run: python tests/run.py

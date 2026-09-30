@@ -37,6 +37,10 @@ books.
   fails if one changed anyway. Clone each next to this repo, then
   `npm install` in Joshua and Numbers (morphhb) and
   `python pipeline/fetch_corpus.py` in Matthew (ARCHITECTURE.md §8).
+- `.github/workflows/tests.yml` — the same suite on GitHub Actions, on every
+  push and PR, with the siblings cloned beside it. The book-side workflow is
+  `template/.github/workflows/tests.yml` (`biblecore test`), identical in
+  every book.
 
 Status and history: `../session_index.md` and the other `Bible/` session files
 one level up.

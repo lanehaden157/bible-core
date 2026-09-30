@@ -78,6 +78,11 @@ def _same_shell(ours, joshua):
     return fails
 
 
+# the template's own placeholders ({{BOOK}}, {{SLUG}}, ...), not a GitHub
+# Actions expression like ${{ github.ref }}
+PLACEHOLDER_RE = re.compile(r"\{\{[A-Z_]+\}\}")
+
+
 def test_template_has_no_unfilled_placeholders_after_instantiation():
     d = tempfile.mkdtemp(prefix="bc-tpl-")
     try:
@@ -88,9 +93,33 @@ def test_template_has_no_unfilled_placeholders_after_instantiation():
                 continue
             for f in files:
                 path = os.path.join(base, f)
-                if "{{" in f or "{{" in open(path, encoding="utf-8", errors="ignore").read():
+                if PLACEHOLDER_RE.search(f) or PLACEHOLDER_RE.search(
+                        open(path, encoding="utf-8", errors="ignore").read()):
                     left.append(os.path.relpath(path, d))
         return [f"placeholder left in {x}" for x in left]
+    finally:
+        shutil.rmtree(d)
+
+
+def test_new_book_gets_the_ci_workflow_unchanged():
+    # structural audit B3: every book runs the same workflow, so new_book
+    # copies it byte for byte and it holds none of the template's placeholders
+    rel = os.path.join(".github", "workflows", "tests.yml")
+    src = os.path.join(support.CORE, "template", rel)
+    if not os.path.exists(src):
+        return [f"template has no {rel}"]
+    fails = []
+    if PLACEHOLDER_RE.search(open(src, encoding="utf-8").read()):
+        fails.append(f"template {rel} holds a placeholder; it must be the same in every book")
+    d = tempfile.mkdtemp(prefix="bc-tpl-")
+    try:
+        make_book(d, "Numbers", "Num", "numbers")
+        got = os.path.join(d, rel)
+        if not os.path.exists(got):
+            fails.append(f"new book has no {rel}")
+        elif open(got, "rb").read() != open(src, "rb").read():
+            fails.append(f"new book's {rel} differs from the template's")
+        return fails
     finally:
         shutil.rmtree(d)
 

@@ -1,0 +1,59 @@
+name: Tests
+
+# `python -m biblecore test` on every push and pull request: the core pin,
+# the corpus, data, units, contracts, the audit, and that re-running the
+# build changes nothing (so a unit edited but not rebuilt and committed
+# fails here). Shipped by bible-core's template, identical in every book;
+# bible-core's own tests run in bible-core. Structural audit B3.
+on:
+  push:
+    # commits that touch only these can't change what the test checks
+    paths-ignore:
+      - "project-side/**"
+      - "session_index.md"
+      - "session_summary_*.md"
+      - "improvements_log.md"
+  pull_request:
+    paths-ignore:
+      - "project-side/**"
+      - "session_index.md"
+      - "session_summary_*.md"
+      - "improvements_log.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # morphhb (the OSHB corpus, pinned in package-lock.json). The test
+      # needs it: without its VerseMap.xml the book's English verse numbers
+      # quietly fall back to the Hebrew ones.
+      - name: Cache node_modules
+        id: npm
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: npm-${{ hashFiles('package-lock.json') }}
+      - name: npm ci
+        if: steps.npm.outputs.cache-hit != 'true'
+        run: npm ci --no-fund --no-audit
+      - name: Test the book
+        run: python -m biblecore test

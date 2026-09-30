@@ -58,6 +58,12 @@ into them, even from a harness that skips `run.py` (README.md has the setup).
 A test that needs sibling data gets it from `support.copy_of()` or
 `support.joshua_book()` / `numbers_book()`.
 
+GitHub Actions runs the suite on every push and PR (`.github/workflows/tests.yml`,
+against the books' pushed `main`), and each book runs `biblecore test` from
+the workflow the template ships (ARCHITECTURE §8). A red run there after a
+green local one usually means something unpushed: a book commit the core
+change relies on, or a generated file left uncommitted.
+
 ## Releasing a core change
 
 Two commands, after the change itself is committed:
