@@ -1,6 +1,6 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.9.10, 2026-09-29. Built and tested (see §8). Expect it to
+**Status:** core 0.10.0, 2026-09-29. Built and tested (see §8). Expect it to
 change. Status and history are in `../session_index.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
@@ -30,8 +30,9 @@ change. Status and history are in `../session_index.md`.
 - 0.9.5: audit pass (8 fixes: `--help` no longer runs commands, LXX homograph ids, `seq` backtracking, and others), tests that run without the sibling repos, and the Greek source credit corrected to CC BY-SA 3.0. (The hub polish that shipped in this release was reverted the same day, `8e80045`.)
 - 0.9.6/0.9.7: `book.json` `checks.skip_fragment_checks`, a list of hard fragment checks a book switches off (`meta.FRAGMENT_CHECKS` names, or `component:<name>`), and `checks.test_idempotent: false` to drop `biblecore test`'s build-idempotence check; Matthew used both. The hub now rebuilds itself from a GitHub Action in the hub repo (§8).
 - 0.9.8: `audit` caches `_lemma_id_forms` (`biblecore test` on a 14-unit book went from minutes to ~16s); `selftest.check_audit` no longer calls `len()` on the audit's int return.
-- 0.9.10: line endings. Every file core writes is LF on every OS (`newline` on each writer), to match the `.gitattributes` (`* text=auto eol=lf`) now in core, the template and each book; before this a Windows build wrote CRLF, which shows as modified under `eol=lf`. `test_template` checks that a build writes no CRLF, and that a new book gets the template's `.gitattributes`.
 - 0.9.9: performance, same output (checked byte for byte on Numbers and Joshua builds). `audit` builds a lemma-id index once per word table instead of scanning every word per root; `leads` indexes occurrences and pairs once per corpus instead of per rare lemma and per unit; `roots._override`, `known_lemma_ids`, `hebrew.transliterate_word` and `greek._word` are cached; `sync-check` hashes all files with one `git hash-object`; `core_diff` reads the pin with one `git cat-file --batch`. Numbers `build` 18.6s to ~4.5s, `core_diff` 6.4s to 0.55s, core tests 2m15s to ~1m.
+- 0.9.10: line endings. Every file core writes is LF on every OS (`newline` on each writer), to match the `.gitattributes` (`* text=auto eol=lf`) now in core, the template and each book; before this a Windows build wrote CRLF, which shows as modified under `eol=lf`. `test_template` checks that a build writes no CRLF, and that a new book gets the template's `.gitattributes`.
+- 0.10.0: less hand upkeep (structural audit step 2). Core supplies the default synced files (`sync.DEFAULT_SYNC`); `book.json` `sync` lists only `extra` and `skip` (§4), and `sync` prunes mirror files that leave the list. `python -m biblecore book` prints the book's state (units, threads, core pin, sync, pasted field), so CLAUDE.md files no longer keep state lines. `tools/new_book.py` fills the book's `canon/books.json` row and the hub workflow clones every book listed there (§8). Tests work on temp copies of the sibling books, and `tests/support.py` refuses any write into them; Numbers is a test fixture; the Joshua fixture matches Joshua's `book.json`.
 
 ## What this is
 
