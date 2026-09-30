@@ -22,5 +22,6 @@
     "skip": []
   },
   "hub": "https://lanehaden157.github.io/bible/",
-  "core": "0.11.0"
+  "core": "{{CORE}}",
+  "template": "{{TEMPLATE}}"
 }

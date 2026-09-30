@@ -5,7 +5,7 @@ unit-testable via its own __main__ block.
 Scheme (a summary -- tests/test_hebrew.py's expected values are the
 authoritative definition; if this docstring and that file disagree, the
 test file wins). Locked by joshua_study_style_reference.md §5 and the
-phase-0.6-plan.md §A decisions:
+Joshua's archive/phase-0.6-plan.md §A decisions:
 
 - Alphabet: ʾ b g d h w z ḥ ṭ y k l m n s ʿ p ts q r sh ś t.
   No vowel length. No spirantization -- bet/kaf/pe are ALWAYS b/k/p, never

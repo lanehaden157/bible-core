@@ -30,11 +30,9 @@ back to back. Good habits, not hard rules:
   session's work, don't commit over it — use `git worktree add` instead and
   merge back with a fast-forward when done, or ask the other session what
   it's mid-edit on.
-- Bump `__version__` / `CORE_VERSION` / `template/book.json`'s `core` key
-  only for a change you're committing in the same breath — don't leave a
-  version bumped with unrelated uncommitted work sitting on top of it.
-  Check `git log -3` right before bumping in case another session already
-  moved main.
+- Let `tools/release.py` do the version bump: it refuses a dirty tree, so
+  a version never sits on top of unrelated uncommitted work. Check
+  `git log -3` first in case another session already moved main.
 - A book's `core_sync.py` refuses to run against a dirty bible-core commit —
   don't route around that by committing someone else's half-finished edit
   just to unblock a vendor.
@@ -45,8 +43,11 @@ back to back. Good habits, not hard rules:
 ## Commands (run from this folder)
 
     python tests/run.py [filter]         # the whole suite (no pytest needed)
-    python tools/core_sync.py <book-dir>  # vendor into a book (refuses if dirty)
+    python tools/release.py X.Y.Z --note "..."  # cut a release (below)
+    python tools/core_sync.py --all       # take it to every core book (below)
+    python tools/core_sync.py <book-dir>  # vendor into one book (refuses if dirty)
     python tools/core_diff.py <book-dir>  # book-local edits made to biblecore/
+    python tools/core_diff.py <book-dir> --template  # template changes the book hasn't taken
     python tools/new_book.py ...         # start a book from template/ (§8); fills its canon/books.json row
     python tools/canon_collect.py        # refresh canon/*.json from the books
     python tools/hub_build.py ../hub     # rebuild the hub by hand (see below)
@@ -59,26 +60,39 @@ A test that needs sibling data gets it from `support.copy_of()` or
 
 ## Releasing a core change
 
-1. `python tests/run.py` green; `git status` clean apart from the change.
-2. Bump `biblecore/__init__.py` and `template/book.json`'s `core`, add a line
-   to ARCHITECTURE.md's version list and its status line. Commit, tag
-   `vX.Y.Z`, push both.
-3. Vendor into each book: `python tools/core_sync.py <book>`, set the book's
-   `book.json` `core`, run its `build` (Matthew is not synced), `python -m biblecore test`, then commit explicit
-   paths and push. The build rewrites the app shell (`index.html`, `app/*.js`)
-   and the generated css from `biblecore/web/`, with fresh `?v=` content
-   hashes, so there is nothing to copy or bump by hand. Include those files in
-   the commit; their diff should be only what changed in `biblecore/web/`. Run `python -m biblecore sync` where chat-side files changed.
-   Stage explicit paths: `git add -A` in a book repo sweeps up other sessions'
-   edits.
-4. Book settings that gate checks (`checks` in `book.json`) are closed keys:
-   a new one goes in `book.py` `CHECK_DEFAULTS` with a test. A file every
-   book should sync goes in `sync.py` `DEFAULT_SYNC` (with a role in
-   `ROLES`), not in each book's `book.json`.
-5. Every file writer opens with `newline="\n"` (since 0.9.10), so a Windows
-   run writes LF like the `.gitattributes` expects. `test_template` catches a
-   build step that writes CRLF, but not a tool's own writes (`new_book.py`,
-   `sync.py`), so check new writers by eye.
+Two commands, after the change itself is committed:
+
+1. `python tools/release.py X.Y.Z --note "what changed"`. It refuses a dirty
+   tree, runs `python tests/run.py` (`--skip-tests` if you just ran it), sets
+   `biblecore/__init__.py` (the one place the version is written), adds the
+   line to ARCHITECTURE.md's version list, commits and tags `vX.Y.Z`.
+   `--dry-run` checks without changing anything.
+2. `python tools/core_sync.py --all` (`--check` first to preview). For each
+   `kind: core` book in `canon/books.json` found next to this folder, it
+   vendors, sets `book.json` `core`, runs the book's `build` and `python -m
+   biblecore test`, then stages the changed files by name and commits. The
+   build rewrites the generated css and app shell from `biblecore/web/`, so
+   their diff is only what changed there. A book with a dirty tree is
+   skipped and named (usually another session mid-edit): rerun `--all` once
+   it's clean. A failed build or test leaves that book's changes uncommitted
+   to inspect.
+3. Neither command pushes. Both print the push commands; push core, its tag
+   and each book once Lane says so. Where the summary says chat-side files
+   changed, run `python -m biblecore sync` in that book after pushing (it
+   commits and pushes the mirror).
+
+When writing the change:
+
+- Book settings that gate checks (`checks` in `book.json`) are closed keys:
+  a new one goes in `book.py` `CHECK_DEFAULTS` with a test. A file every
+  book should sync goes in `sync.py` `DEFAULT_SYNC` (with a role in
+  `ROLES`), not in each book's `book.json`.
+- Every file writer opens with `newline="\n"` (since 0.9.10), so a Windows
+  run writes LF like the `.gitattributes` expects. `test_template` catches a
+  build step that writes CRLF, but not a tool's own writes (`new_book.py`,
+  `sync.py`), so check new writers by eye.
+- A template fix reaches existing books only through `core_diff.py <book>
+  --template`, which each book session runs when it chooses.
 
 ## The hub
 

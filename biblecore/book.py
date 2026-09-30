@@ -11,6 +11,7 @@ quietly collect settings nothing reads (ARCHITECTURE.md §4, review H5).
 """
 import json
 import os
+import re
 
 ALLOWED_KEYS = {
     "book", "osis", "abbrev", "slug", "language", "corpus", "groupings",
@@ -25,6 +26,10 @@ ALLOWED_KEYS = {
     # primary one: marks on unit chips, brackets on the book map, a line in
     # the placement (Matthew's discourses)
     "overlay",
+    # the bible-core commit whose template/ the book last took changes from
+    # (its template base; structural audit D3). Read by
+    # `tools/core_diff.py <book> --template`, moved by its `--set-base`.
+    "template",
 }
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
 # the corpus numbering is converted through the corpus's own map) or
@@ -138,6 +143,9 @@ def validate_config(cfg):
         errs.append(f"'versification' must be one of {list(VERSIFICATIONS)}")
     if "overlay" in cfg and cfg["overlay"] not in (cfg.get("groupings") or [])[1:]:
         errs.append("'overlay' must name one of the groupings after the first")
+    if "template" in cfg and not (isinstance(cfg["template"], str)
+                                  and re.fullmatch(r"[0-9a-f]{7,40}", cfg["template"])):
+        errs.append("'template' must be a bible-core commit hash (7-40 hex digits)")
     if "palette" in cfg and not isinstance(cfg["palette"], (str, list)):
         errs.append("'palette' must be a path or a list of hex colours")
     return errs

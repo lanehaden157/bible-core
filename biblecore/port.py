@@ -242,7 +242,8 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True):
 def _append_candidate_preview(lines, root, cand):
     """Preview what a candidate's proposed `ids` would pull in book-wide --
     the review step before Lane commits an id set to data/roots.json (the
-    id-based analogue of Matthew's stem preview, phase-0.6-plan.md §1)."""
+    id-based analogue of Matthew's stem preview, Joshua's
+    archive/phase-0.6-plan.md §1)."""
     ids = cand.get("ids")
     if not ids:
         lines.append(f"    - no ids proposed yet; once some are, run "

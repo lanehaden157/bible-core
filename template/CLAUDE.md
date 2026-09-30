@@ -29,7 +29,10 @@ thread, `leads`, `units-from-map`, `corpus`, `migrate` after re-vendoring,
 error). Change behaviour for this book by adding a book-local module that
 wraps a core function, not by editing `biblecore/`; `python ../bible-core/tools/core_diff.py`
 reports edits made there. Update the vendored copy with
-`python ../bible-core/tools/core_sync.py .`.
+`python ../bible-core/tools/core_sync.py .` (a core release does this for
+every book). `python ../bible-core/tools/core_diff.py . --template` shows the
+template changes this book hasn't taken (optional; `--set-base` after
+taking them).
 
 ## Site
 

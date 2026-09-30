@@ -153,6 +153,7 @@ def test_joshua_fixture_matches_joshua():
         return []
     theirs = json.load(open(real, encoding="utf-8"))
     theirs.pop("core", None)
+    theirs.pop("template", None)
     ours = json.load(open(support.FIXTURE, encoding="utf-8"))
     return [f"fixture {k!r} differs from ../Joshua/book.json"
             for k in sorted(set(ours) | set(theirs)) if ours.get(k) != theirs.get(k)]

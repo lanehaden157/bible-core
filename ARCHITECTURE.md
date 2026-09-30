@@ -1,7 +1,8 @@
 # Bible Study Platform — Shared Architecture
 
-**Status:** core 0.11.0, 2026-09-29. Built and tested (see §8). Expect it to
-change. Status and history are in `../session_index.md`.
+**Status:** built and tested (see §8). Expect it to change. The version is
+`biblecore/__init__.py` (the last line below); status and history are in
+`../session_index.md`.
 
 - 0.2.0: shaped by Numbers unit 1 (`data-verses`, in-place promotion,
   `new_book.py` + `units-from-map`, `table.list`, versification E1).
@@ -64,7 +65,7 @@ one of them.
 |---|---|---|---|
 | **Shared package** (`biblecore/`) | this repo, vendored into each book as `<book>/biblecore/` at a pinned version | shared | Fix it here and re-vendor (`tools/core_sync.py`). A book adopts a new version when it chooses. |
 | **Generated into the book** (`css/core.css`, `css/components.css`, `css/division.css`, `index.html`, `app/*.js`, `data/components.json`) | the book repo, written by the build's `assets` step from `biblecore/web/` and the components | shared (the package's output) | Change the source in `biblecore/web/` and rebuild. The build overwrites edits made in the book, and `biblecore test` reports them. |
-| **Starter template** (`template/`) | copied once into a new book | the book, from the moment it's copied | Freely, in the book. Improvements worth sharing come back to the template by hand. |
+| **Starter template** (`template/`) | copied once into a new book | the book, from the moment it's copied | Freely, in the book. Improvements worth sharing come back to the template by hand; `tools/core_diff.py <book> --template` shows a book the template changes it hasn't taken (§5). |
 | **Book-only** | the book repo | the book | Freely. |
 
 **Shared package: mechanism, not taste.** Code where a bug fixed once should
@@ -283,7 +284,8 @@ that used to be scattered through Joshua's code.
   "sync": {"extra": [], "skip": []},
   "storage_key": "numbers",
   "paths": {},
-  "core": "0.2.0"
+  "core": "0.2.0",
+  "template": "ecd5bf6"
 }
 ```
 
@@ -313,6 +315,10 @@ that used to be scattered through Joshua's code.
   `globs`), and a new core file had to be added to every book by hand.
 - `paths` — override any default location (none of the current books needs
   one; the tests use it to read big inputs in place).
+- `core`, `template` — written by the tools, not by hand: `core` is the
+  vendored version (`tools/core_sync.py` sets it), `template` the bible-core
+  commit whose `template/` the book last took (`new_book.py` fills it,
+  `core_diff.py --template --set-base` moves it; §5).
 
 Unknown keys are an error, and every key is read by code (H5). New keys are
 easy to add in `book.py`; keys nothing reads don't stay.
@@ -324,6 +330,21 @@ easy to add in `book.py`; keys nothing reads don't stay.
 - **Pinned versions.** Each book records `core` in `book.json` and a
   `CORE_VERSION` file, and upgrades when it chooses. A core change never
   reaches a book by surprise.
+- **Releasing is two commands** (structural audit F3/F4). Commit the change,
+  then `python tools/release.py X.Y.Z --note "..."`: it refuses a dirty tree,
+  runs the suite, sets `biblecore/__init__.py` (the only place the version is
+  written), adds the line to the version list above, commits and tags. Then
+  `python tools/core_sync.py --all` takes it to every `kind: core` book in
+  `canon/books.json`: vendor, set `book.json` `core`, build, `biblecore
+  test`, stage the changed files by name and commit. It skips a book whose
+  tree is dirty (another session's work) and says so. Neither pushes.
+- **Template drift is reported, not pushed** (D3). The template's files
+  become the book's own when copied, so a template fix doesn't reach an
+  existing book by itself. `python tools/core_diff.py <book> --template`
+  lists each template-seeded file the template changed since the book's
+  `template` base, with the diff and whether the book's copy is untouched
+  (`take`: replace it whole) or has its own edits (`review`). Taking any of it
+  stays optional; `--set-base` records what was taken.
 - **`0.x` while Numbers shapes it**, so breaking changes are fine. **`1.0`**
   once Numbers has a few units built and the shape has held.
 - **Override, don't edit.** To change shared behaviour for one book, wrap or
@@ -397,7 +418,8 @@ project side after bootstrap (the order Numbers went in):
    copies the template with its placeholders filled, vendors the core, copies
    the Strong's lexicon (`corpus/lexicon/`, sha1-checked), runs `npm install` +
    `python -m biblecore corpus` + `build` (whose `assets` step writes the app
-   shell), and makes the first commit.
+   shell), and makes the first commit. `book.json` gets `core` and the
+   template base (`template`, this checkout's commit) filled in.
    `--github` also creates the public repo, enables Pages and runs the first
    sync; without it the script prints those commands. Check the corpus counts
    against a printed edition.

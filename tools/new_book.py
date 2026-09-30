@@ -6,9 +6,11 @@
 Written from Numbers' setup log (H14). In order:
 
   1. copy template/ to the new folder, filling {{BOOK}} {{OSIS}} {{ABBREV}}
-     {{SLUG}} in file names and contents
-  2. vendor biblecore/ + canon files (core_sync.py); book.json "core"
-     set to this checkout's version
+     {{SLUG}} in file names and contents, and book.json's {{CORE}} (this
+     checkout's version) and {{TEMPLATE}} (its commit: the book's template
+     base, read by `core_diff.py --template`)
+  2. vendor biblecore/ + canon files (core_sync.py, which also sets
+     book.json "core")
   3. copy the Strong's lexicon from corpus/lexicon/ (sha1-checked); canon
      leads' glosses read it (learned: Numbers' glosses were all "?" until
      it was copied over by hand)
@@ -51,27 +53,54 @@ sys.path.insert(0, CORE)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
+def placeholders(name, osis, slug, abbrev=None, core=None, template=None):
+    """The template's placeholders and their values. {{CORE}} and
+    {{TEMPLATE}} (book.json's "core" and "template") default to this
+    checkout's version and commit: biblecore/__init__.py is the one place
+    the version is written (structural audit F4)."""
+    if core is None:
+        from biblecore import __version__ as core
+    if template is None:
+        template = template_commit()
+    return {"{{BOOK}}": name, "{{OSIS}}": osis, "{{ABBREV}}": abbrev or osis,
+            "{{SLUG}}": slug, "{{CORE}}": core, "{{TEMPLATE}}": template}
+
+
+def fill(s, subs):
+    for k, v in subs.items():
+        if v is not None:
+            s = s.replace(k, v)
+    return s
+
+
+def template_commit(rev="HEAD"):
+    """Short hash of a bible-core commit (a book's template base), or None
+    outside a git checkout."""
+    r = subprocess.run(["git", "rev-parse", "--short=7", rev], cwd=CORE,
+                       capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
 def instantiate(dest, name, osis, slug, abbrev=None):
     """Copy template/ to dest with the placeholders filled (names too)."""
-    subs = {"{{BOOK}}": name, "{{OSIS}}": osis, "{{ABBREV}}": abbrev or osis,
-            "{{SLUG}}": slug}
-
-    def fill(s):
-        for k, v in subs.items():
-            s = s.replace(k, v)
-        return s
+    subs = placeholders(name, osis, slug, abbrev)
 
     for d, _dirs, files in os.walk(TEMPLATE):
         _dirs[:] = [x for x in _dirs if x != "__pycache__"]
         rel_dir = os.path.relpath(d, TEMPLATE)
-        out_dir = os.path.join(dest, fill(rel_dir)) if rel_dir != "." else dest
+        out_dir = os.path.join(dest, fill(rel_dir, subs)) if rel_dir != "." else dest
         os.makedirs(out_dir, exist_ok=True)
         for f in files:
             src = os.path.join(d, f)
-            dst = os.path.join(out_dir, fill(f))
+            dst = os.path.join(out_dir, fill(f, subs))
             if f.endswith(TEXT_EXT) or f == ".gitignore":
                 with open(src, encoding="utf-8") as fh:
-                    text = fill(fh.read())
+                    text = fh.read()
+                if subs["{{TEMPLATE}}"] is None and "{{TEMPLATE}}" in text:
+                    # no git: leave the base unrecorded rather than write a bad one
+                    text = "".join(ln for ln in text.splitlines(True)
+                                   if "{{TEMPLATE}}" not in ln).replace('",\n}', '"\n}')
+                text = fill(text, subs)
                 with open(dst, "w", encoding="utf-8", newline="\n") as fh:
                     fh.write(text)
             else:
@@ -94,17 +123,6 @@ def copy_lexicon(dest):
     if got != LEXICON_SHA1:
         raise RuntimeError(f"lexicon sha1 {got} != expected {LEXICON_SHA1}")
     return out
-
-
-def set_core_version(dest):
-    from biblecore import __version__
-    p = os.path.join(dest, "book.json")
-    with open(p, encoding="utf-8") as fh:
-        cfg = json.load(fh)
-    cfg["core"] = __version__
-    with open(p, "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(cfg, fh, indent=2, ensure_ascii=False)
-        fh.write("\n")
 
 
 def pages_owner(path=BOOKS_JSON):
@@ -197,7 +215,6 @@ def main(argv=None):
         import core_sync
         if core_sync.main([dest] + (["--allow-dirty"] if a.allow_dirty else [])):
             raise RuntimeError("core_sync refused (see above)")
-        set_core_version(dest)
 
         step = "lexicon"
         print("[3] Strong's lexicon")

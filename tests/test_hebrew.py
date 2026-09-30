@@ -14,7 +14,7 @@ and were corrected after re-reading the dumped codepoints, which is the
 point of doing it this way: the mistake was caught by re-deriving, not by
 trusting the generator.
 
-Covers every row of phase-0.6-plan.md's measured-output table (06b5Q is
+Covers every row of Joshua's archive/phase-0.6-plan.md's measured-output table (06b5Q is
 covered by the closely analogous 06XR4/06K9n kol cases; melek itself
 doesn't recur as a bare form early enough in Joshua to pull a cleaner id,
 so the no-spirantization rule is instead exercised directly by 06XSi/
@@ -51,7 +51,7 @@ def _load_words():
 # (word_id, expected) -- surface/lemma/morph are looked up from
 # Joshua-words.tsv, not retyped here.
 WORD_CASES = [
-    # phase-0.6-plan.md's measured-output table, corrected:
+    # Joshua's archive/phase-0.6-plan.md's measured-output table, corrected:
     ("062oS", "ha-mmelakim"),   # dagesh-forte doubling (article gemination, already its own OSHB morpheme) + sheva-under-doubling vocal
     ("06K9n", "ka-mmishpaṭ"),   # same gemination pattern via an inseparable preposition, not just the article; sheva now silent under shin, shin -> sh
     ("06aPd", "yehoshuaʿ̲"),    # furtive patach on final ayin, shin -> sh

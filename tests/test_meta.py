@@ -1,5 +1,5 @@
 """Regression tests for unit_meta.py's validate()/validate_fragment(),
-reworked for phase-0.6-plan.md §F to match joshua_study_style_reference.md
+reworked for Joshua's archive/phase-0.6-plan.md §F to match joshua_study_style_reference.md
 (§3 the hard contract, §4 components, §7 the checklist) exactly. Proves
 each hardened check fires (and that a clean fragment passes all of them).
 No real unit fragments exist yet, so the fragment skeletons here are
@@ -772,7 +772,7 @@ def test_generate_round_trips_opens_and_payoffs_notes():
 def _extract_worked_example():
     """Pull the §8 worked example's fenced ```html block straight out of
     joshua_study_style_reference.md at test time -- not copied into this
-    file, so the two can never quietly drift apart (phase-0.6-plan.md §G:
+    file, so the two can never quietly drift apart (Joshua's archive/phase-0.6-plan.md §G:
     "this test is the contract between the style reference and the
     validator; if either drifts, it fails")."""
     with open(STYLE_REF_MD, encoding="utf-8") as f:

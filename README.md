@@ -20,8 +20,11 @@ books.
   `app/*.js`), which the build writes into each book.
 - `template/` — the starter a new book copies once and then owns.
 - `tools/new_book.py` — start a new book (§8). `tools/core_sync.py`,
-  `tools/core_diff.py` — vendor the package into a book; report local edits
-  to a book's copy.
+  `tools/core_diff.py` — vendor the package into a book (`--all`: every
+  core book, built, tested and committed); report local edits to a book's
+  copy (`--template`: the template changes a book hasn't taken).
+- `tools/release.py` — cut a release: tests, version, the ARCHITECTURE line,
+  commit and tag (ARCHITECTURE.md §5).
 - `docs/data-shapes.md` — the published `data/*.json` shapes.
 - `hub/` + `tools/hub_build.py` — the canon hub site (ARCHITECTURE.md §8),
   built into the sibling `../hub` repo, which rebuilds itself daily from a

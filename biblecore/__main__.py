@@ -95,6 +95,30 @@ def _load(path):
         return None
 
 
+def _template_line(b):
+    """The book's template base (book.json "template"), with how many
+    bible-core commits have touched template/ since, when a sibling
+    bible-core checkout is there to ask."""
+    import os
+    import subprocess
+    base = b.cfg.get("template")
+    if not base:
+        return "no base recorded -> ../bible-core/tools/core_diff.py <book> --template --set-base <commit>"
+    core = os.path.join(os.path.dirname(os.path.abspath(b.root)), "bible-core")
+    try:
+        r = subprocess.run(["git", "rev-list", "--count", f"{base}..HEAD", "--", "template"],
+                           cwd=core, capture_output=True, text=True)
+    except OSError:
+        r = None
+    if not r or r.returncode:
+        return f"base {base}"
+    n = int(r.stdout.strip() or 0)
+    if not n:
+        return f"base {base} (template unchanged since)"
+    return (f"base {base} ({n} template commit{'s' if n != 1 else ''} since -> "
+            f"../bible-core/tools/core_diff.py <book> --template)")
+
+
 def status_lines(b):
     """The book's state, read from its data (structural audit D1): the
     CLAUDE.md files point here instead of keeping hand-written state lines."""
@@ -108,6 +132,7 @@ def status_lines(b):
     stamp = f" ({vendored[1][:7]})" if len(vendored) > 1 else ""
     flag = "" if pinned == __version__ else "  <- MISMATCH: vendor with core_sync.py, then set book.json core"
     lines.append(f"core      book.json pins {pinned}; vendored {__version__}{stamp}{flag}")
+    lines.append("template  " + _template_line(b))
 
     uj = _load(b.data("units.json"))
     if uj:
