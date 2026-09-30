@@ -255,7 +255,8 @@ def template_main(book_root, args):
     for state in order:
         for st, rel, brel, old, new in rows:
             if st == state:
-                print(f"  {st:8} {brel}")
+                print(f"  {st:8} {brel}" + (_taken_hint(book_root, brel, old, new)
+                                             if st == "review" else ""))
     if not stat:
         for st, rel, brel, old, new in rows:
             if st in ("take", "review", "new"):
@@ -264,9 +265,24 @@ def template_main(book_root, args):
                                             "base", "now", lineterm="", n=2)
                 for ln in list(diff)[2:]:
                     print(ln)
+    rel_root = os.path.relpath(book_root).replace(os.sep, "/")
     print("\nAdopting is optional. After taking what you want, record it with\n"
-          f"  python tools/core_diff.py {os.path.relpath(book_root)} --template --set-base")
+          f"  python tools/core_diff.py {rel_root} --template --set-base")
     return 0
+
+
+def _taken_hint(book_root, brel, old, new):
+    """How many of the lines the template added already appear in the book's
+    file (whitespace and line wrapping ignored), a rough sign a change was
+    taken by hand."""
+    have = " ".join(open(os.path.join(book_root, brel), encoding="utf-8").read().split())
+    before = set((old or "").splitlines())
+    added = [ln for ln in dict.fromkeys((new or "").splitlines())
+             if ln.strip() and ln not in before]
+    if not added:
+        return "  (the template only removed lines)"
+    n = sum(" ".join(ln.split()) in have for ln in added)
+    return f"  ({n} of {len(added)} added lines already in the book)"
 
 
 def main(argv=None):

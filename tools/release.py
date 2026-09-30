@@ -25,6 +25,7 @@ import os
 import re
 import subprocess
 import sys
+import textwrap
 
 CORE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INIT = "biblecore/__init__.py"  # forward slashes: also a git pathspec
@@ -83,6 +84,18 @@ def add_version_line(version, note, root=CORE):
     lines.insert(end + 1, f"- {version}: {note.strip()}")
     with open(p, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines))
+
+
+def commit_message(version, note):
+    """"Core X.Y.Z: <the note's first sentence>", then the whole note as the
+    body when it runs longer."""
+    note = " ".join(note.split())
+    m = re.match(r"(.+?[.;])\s", note + " ")
+    first = m.group(1).rstrip(".;") if m else note
+    subject = f"Core {version}: {first}"
+    if first == note.rstrip("."):
+        return subject
+    return subject + "\n\n" + textwrap.fill(note, 72)
 
 
 def dirty(root=CORE):
@@ -158,7 +171,7 @@ def main(argv=None):
         print(f"{exc}; nothing committed")
         return 1
     r = git(["add", "--", INIT, ARCH])
-    msg = f"Core {a.version}: {a.note.strip()}"
+    msg = commit_message(a.version, a.note)
     cmd = ["commit", "-q", "-m", msg] + [x for t in a.trailer for x in ("--trailer", t)]
     r = r if r.returncode else git(cmd)
     if r.returncode:

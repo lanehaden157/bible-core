@@ -154,6 +154,12 @@ def test_release_bumps_and_adds_the_version_line():
             fails.append("a repeated version was accepted")
         except RuntimeError:
             pass
+        msg = release.commit_message("0.4.3", "short fix.")
+        if msg != "Core 0.4.3: short fix":
+            fails.append(f"one-sentence message: {msg!r}")
+        msg = release.commit_message("0.4.3", "tooling (F3). `x.py` does 0.4.3 things")
+        if not msg.startswith("Core 0.4.3: tooling (F3)\n\ntooling (F3). `x.py`"):
+            fails.append(f"long message: {msg!r}")
         if release.parse("0.10.0") <= release.parse("0.9.10"):
             fails.append("versions compare as strings")
         return fails
