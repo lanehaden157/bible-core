@@ -55,6 +55,25 @@ def test_template_has_no_unfilled_placeholders_after_instantiation():
         shutil.rmtree(d)
 
 
+def test_new_book_gets_the_template_gitattributes():
+    # line endings: every book checks out LF, so diffs against the template
+    # compare content (structural audit B2)
+    d = tempfile.mkdtemp(prefix="bc-tpl-")
+    try:
+        make_book(d, "Numbers", "Num", "numbers")
+        got = os.path.join(d, ".gitattributes")
+        if not os.path.exists(got):
+            return ["new book has no .gitattributes"]
+        src = os.path.join(support.CORE, "template", ".gitattributes")
+        if open(got, "rb").read() != open(src, "rb").read():
+            return [".gitattributes differs from the template's"]
+        if "* text=auto eol=lf" not in open(got, encoding="utf-8").read():
+            return [".gitattributes lacks '* text=auto eol=lf'"]
+        return []
+    finally:
+        shutil.rmtree(d)
+
+
 def test_empty_book_builds():
     d = tempfile.mkdtemp(prefix="bc-empty-")
     try:
