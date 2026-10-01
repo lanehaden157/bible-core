@@ -101,15 +101,21 @@ def check_units():
 def check_contracts():
     from biblecore import meta as um
     errs, notes = [], []
+    legacy = []
     for row in um._load("units.json")["units"]:
         if not row.get("built"):
             continue
         c = row.get("contract")
-        if c is None:
+        if contract.is_legacy(c):
+            legacy.append(row["n"])
+        elif c is None:
             notes.append(f"unit-{row['n']:02d} unstamped (counts as {contract.UNSTAMPED}; "
                          f"`python -m biblecore migrate` stamps it)")
         else:
             errs += [f"unit-{row['n']:02d}: {e}" for e in contract.check_stamp(c)]
+    if legacy:
+        notes.append(f"{len(legacy)} legacy unit(s) boxed as shipped, held to no fragment check "
+                     f"(unit {legacy[0]}" + (f"-{legacy[-1]}" if len(legacy) > 1 else "") + ")")
     return errs, notes
 
 

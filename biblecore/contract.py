@@ -7,12 +7,21 @@ unit that shipped before it. To hold an older unit to newer rules, run its
 migrations (`python -m biblecore migrate`), which move the stamp forward.
 
 Units ported before 0.3.0 carry no stamp and count as UNSTAMPED.
+
+A unit may instead be stamped `legacy`: it was built before the book moved
+onto core and is boxed as it shipped. It is held to no versioned fragment
+check (every check arrived at some version, and a legacy unit is older than
+all of them), and `migrate` leaves it alone. Only a book's older units get
+this stamp; it is set by hand in the unit's `units.json` row and meta block,
+never by the porter, so a new unit can't slip into it and a book-wide
+`skip_fragment_checks` isn't needed to excuse the old ones.
 """
 import re
 
 from biblecore import __version__
 
 UNSTAMPED = "0.2.0"
+LEGACY = "legacy"
 _VER_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
 
@@ -28,12 +37,18 @@ def is_version(v):
 
 
 def of(meta_or_row):
-    """The unit's contract version, or UNSTAMPED."""
+    """The unit's contract version, LEGACY, or UNSTAMPED."""
     v = (meta_or_row or {}).get("contract")
-    return v if is_version(v) else UNSTAMPED
+    return v if v == LEGACY or is_version(v) else UNSTAMPED
+
+
+def is_legacy(contract):
+    return contract == LEGACY
 
 
 def at_least(contract, since):
+    if is_legacy(contract):
+        return False
     return parse(contract) >= parse(since)
 
 
@@ -44,10 +59,10 @@ def current():
 def check_stamp(contract):
     """Problems with a stamp itself: malformed, or newer than this core
     (a unit ported by a newer core than the one validating it)."""
-    if contract is None:
+    if contract is None or is_legacy(contract):
         return []
     if not is_version(contract):
-        return [f"contract {contract!r} is not a core version 'X.Y.Z'"]
+        return [f"contract {contract!r} is not a core version 'X.Y.Z' (or 'legacy')"]
     if parse(contract) > parse(__version__):
         return [f"contract {contract} is newer than this core ({__version__}); "
                 f"re-vendor bible-core before validating this unit"]

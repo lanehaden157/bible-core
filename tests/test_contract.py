@@ -129,6 +129,52 @@ def test_migrate_refuses_a_target_newer_than_the_core():
         assert migrate.main(["--to", "1.2"]) == 2
 
 
+def test_legacy_stamp_is_valid_and_exempts_every_versioned_check():
+    fails = []
+    base = {"unit": 1, "passage": "x", "title": "x", "roots": [],
+            "threads": {"opens": [], "payoffs": [], "candidates": [], "retro": []}}
+    if um.validate(dict(base, contract="legacy")):
+        fails.append(f"legacy stamp rejected: {um.validate(dict(base, contract='legacy'))}")
+    if contract.of({"contract": "legacy"}) != contract.LEGACY:
+        fails.append("contract.of lost the legacy stamp")
+    if contract.at_least("legacy", "0.1.0"):
+        fails.append("a legacy unit counted as at least 0.1.0")
+    # an oldest-version check (native script, 0.1.0) is held off a legacy unit
+    # and still runs on a stamped one
+    html = ('<article class="unit" data-unit="1"><p>λόγος</p></article>')
+    meta = {"unit": 1}
+    if um.validate_fragment(html, meta=dict(meta, contract="legacy")):
+        fails.append("a legacy unit was held to a fragment check")
+    if not um.validate_fragment(html, meta=dict(meta, contract=contract.current())):
+        fails.append("the same fragment passed under the current contract")
+    return fails
+
+
+def test_migrate_leaves_a_legacy_unit_alone():
+    uj_path = os.path.join(_tmp, "data", "units.json")
+    uj = json.loads(support.read(uj_path))
+    for row in uj["units"]:
+        if row["n"] == 1:
+            row["contract"] = "legacy"
+    with open(uj_path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(uj, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+    before = _unit(1)
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        migrate.main(["--unit", "1"])
+    fails = []
+    if "legacy" not in out.getvalue() or "0 unit(s) moved" not in out.getvalue():
+        fails.append(f"migrate didn't skip the legacy unit: {out.getvalue()[-200:]}")
+    rows = {u["n"]: u for u in um._load("units.json")["units"]}
+    if rows[1].get("contract") != "legacy" or _unit(1) != before:
+        fails.append("migrate changed a legacy unit")
+    errs, notes = selftest.check_contracts()
+    if errs or not any("legacy" in n for n in notes):
+        fails.append(f"contracts check: {errs} {notes}")
+    return fails
+
+
 def test_manifest():
     _quiet(manifest.main, [])
     path = book().data("manifest.json")

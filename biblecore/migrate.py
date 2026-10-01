@@ -57,6 +57,9 @@ def main(argv=None):
         if not row.get("built") or (a.unit and row["n"] != a.unit):
             continue
         have = contract.of(row)
+        if contract.is_legacy(have):
+            print(f"unit-{row['n']:02d}: legacy, boxed as shipped; left alone")
+            continue
         steps = pending(have, target)
         if contract.parse(have) >= contract.parse(target):
             print(f"unit-{row['n']:02d}: at {have}, nothing to do")

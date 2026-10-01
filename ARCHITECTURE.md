@@ -369,6 +369,15 @@ easy to add in `book.py`; keys nothing reads don't stay.
   to it, add a migration to `biblecore/migrate.py` and run
   `python -m biblecore migrate`, which runs the migrations, moves the stamps and
   refreshes the meta blocks.
+- **The `legacy` stamp (0.14.0).** A book that joins core after shipping units
+  can box them: `"contract": "legacy"` in the unit's `units.json` row and
+  meta block means the unit is held to no versioned fragment check and
+  `migrate` leaves it alone. It is set by hand (the porter never writes it, so
+  a new unit can't land in it), and it replaces a book-wide
+  `skip_fragment_checks`, which would also excuse the book's new units. A
+  legacy unit's prose and structure stay as shipped; threads are book-wide, so
+  it can still take tag edits (`retrofit`, `data-w`), and `biblecore test`
+  reports how many units are boxed. Matthew's units 1-13 are the first.
 - **Data as an API (F17).** The build writes `data/manifest.json` (book,
   core, progress, schema version per file). Shapes are in
   `docs/data-shapes.md`. Bump a file's schema in `manifest.SCHEMAS` on any
