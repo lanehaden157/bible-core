@@ -298,9 +298,10 @@ glossary at unit 10 and paid with a retroactive audit.**)**
 
 <!-- lang: hebrew -->
 **Be tough on structures.** Chiasms and rings only when textually verifiable.
-Prefer the Masoretic paragraph breaks (`candidate-boundaries.md`) over
-patterns you noticed. **(learned:** eight over-reaching chiasms were cut from
-Matthew.**)**
+Weigh the Masoretic paragraph breaks (`candidate-boundaries.md`) and the
+patterns you notice together: neither outranks the other, and where they
+disagree, say so and argue for the boundary you choose. **(learned:** eight
+over-reaching chiasms were cut from Matthew.**)**
 <!-- /lang -->
 <!-- lang: greek -->
 **Be tough on structures.** Chiasms and rings only when textually verifiable.

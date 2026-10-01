@@ -15,7 +15,7 @@ Never assume a term is known from earlier. Reintroduce transliteration and gloss
 <!-- /lang -->
 
 <!-- lang: hebrew -->
-Lens: intertextuality first. Where earlier Scripture stands behind a line, where a line or word comes back later in the canon (the Prophets, the Writings, the New Testament), and what the echo does. Then narrative structure, keyword tracing, type-scenes, and the creation–covenant–exile–presence metanarrative. Prefer the book's own markers (formulae, Masoretic paragraph breaks) over imposed symmetry. ✎ Add this book's own lens notes and genre cautions here.
+Lens: intertextuality first. Where earlier Scripture stands behind a line, where a line or word comes back later in the canon (the Prophets, the Writings, the New Testament), and what the echo does. Then narrative structure, keyword tracing, type-scenes, and the creation–covenant–exile–presence metanarrative. Weigh the book's own markers (formulae, Masoretic paragraph breaks) alongside the patterns you notice, and don't impose a symmetry the text doesn't show. ✎ Add this book's own lens notes and genre cautions here.
 <!-- /lang -->
 <!-- lang: greek -->
 Lens: intertextuality first. Where Israel's Scriptures stand behind a line (quoted, alluded to or echoed, usually through the Septuagint, with the Hebrew behind it named where it matters), where a line or word comes back elsewhere in the New Testament, and what the echo does. Then narrative or argument structure, keyword tracing, type-scenes, and the creation–covenant–exile–presence metanarrative. Weigh the book's own markers (formulae, transitions, the author's signposts) alongside the patterns you notice, and don't impose a symmetry the text doesn't show. ✎ Add this book's own lens notes and genre cautions here.
