@@ -465,7 +465,12 @@ async function loadUnit(unit, anchor) {
     if (me !== loading) return;
   }
   if (anchor) {
-    const el = findVerse(content, anchor) || document.getElementById(anchor);
+    // a link from the standalone shell Matthew used before core (#/unit-05/v7):
+    // the unit's first verse numbered 7, as that shell found it
+    const oldLink = anchor.match(/^v(\d+)$/);
+    const el = oldLink
+      ? [...content.querySelectorAll(".v")].find((v) => v.querySelector(".n")?.textContent.trim() === oldLink[1])
+      : findVerse(content, anchor) || document.getElementById(anchor);
     if (el) requestAnimationFrame(() => jumpTo(el));
     else content.scrollIntoView({ block: "start" });
   } else {

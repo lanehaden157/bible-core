@@ -717,16 +717,18 @@ Two things came across from Matthew's time on it (0.9.0):
 A book's one-off fragment styling stays in its own `theme.css`. A grouping's
 display name is `label`, falling back to `name`.
 
-**Matthew and core: standalone (decided 2026-09-29).** Lane reverted Matthew to
-its pre-core state (tag `pre-revert-2026-09-29` keeps the core-era work); the
-hub treats it as 'legacy' and it gets no core syncs. Core's Greek work came
-from Matthew's data and is where any future Greek book starts:
-`corpus/morphgnt.py`, the MorphGNT lexicon (`lang/greek_lexicon.py`, CC BY-SA
-3.0, `corpus/README.md`), phrase threads (`roots.json` `seq`/`alt`, matched in
-`audit.py`), the LXX adapter and Greek canon leads (`corpus/lxx.py`,
-`leads.py`), and the source-credit footer (`main.js` `SOURCES`). The mechanics
-are in those modules' docstrings and their tests. Matthew's own `pipeline/`
-keeps porting, colours, retrofit, leads, the digest and the sync.
+**Matthew and core (2026-10-01).** Matthew is a core book with its first 13
+units boxed: they are stamped `contract: "legacy"` (§5), keep their prose and
+structure as built, and take only tag edits. Units from 14 on go through core's
+`port` loop like Numbers and Joshua. (Lane reverted Matthew to its own
+pre-core state on 2026-09-29, tag `pre-revert-2026-09-29` keeps that core-era
+work, and chose this boxed form the next day.) Core's Greek work came from
+Matthew's data: `corpus/morphgnt.py`, the MorphGNT lexicon
+(`lang/greek_lexicon.py`, CC BY-SA 3.0, `corpus/README.md`), phrase threads
+(`roots.json` `seq`/`alt`, matched in `audit.py`), the LXX adapter and Greek
+canon leads (`corpus/lxx.py`, `leads.py`), and the source-credit footer
+(`main.js` `SOURCES`). The mechanics are in those modules' docstrings and their
+tests. Matthew's colours come from its own 124-colour well at ΔE 7 (§2).
 
 ## 9. Parked
 
