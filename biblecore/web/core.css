@@ -581,12 +581,19 @@ body.mode-plain .unit .notes { display: none !important; }
 .unit .il-w { display: inline-flex; flex-direction: column; min-width: 3.2em; padding: 3px 6px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--panel); line-height: 1.25; border-bottom: 1px solid var(--rule-soft); }
 .unit .il-w:hover { border-color: var(--ink-soft); }
 .unit .il-w i { font-size: 15px; color: var(--ink); }
-.unit .il-w b { font-weight: 400; font-size: 12.5px; color: var(--accent-bronze); }
+/* --gloss: the book's secondary colour moved until it reads 4.5:1 on the
+   box's --panel (theme.py); a book with no division theme keeps bronze */
+.unit .il-w b { font-weight: 400; font-size: 12.5px; color: var(--gloss, var(--accent-bronze)); }
 .unit .il-w small { font-size: 10.5px; color: var(--ink-soft); max-width: 14em; }
 .unit .il-w b { max-width: 14em; }
 .unit .il-w.il-arc { border-style: dashed; }
 .unit .il-key { font-size: 13.5px; font-style: italic; color: var(--ink-soft); margin: 0 0 18px; }
+/* a verse with no block of its own (inside a data-verses table or a
+   block-formatted passage) gets a box labelled with its reference */
+.unit .il-gap { margin-top: 0; }
+.unit .il-ref { flex: 0 0 100%; font-family: var(--display); font-size: 13px; font-weight: 600; color: var(--accent-clay); }
 body.text-center .unit .il { justify-content: center; margin-left: 0; }
+body.text-center .unit .il-ref { text-align: center; }
 
 /* search: grouped result blocks */
 .sr-block { margin: 0 0 30px; }

@@ -4,11 +4,12 @@
 
    Data (all static, fetched once and cached):
      data/words/<ch>.json  per-word translit, lemma key, morphology in words
-     data/lemmas.json      lemma -> translit, Strong's short gloss, count, refs
+     data/lemmas.json      lemma -> translit, gloss (Strong's for Hebrew, the
+                           MorphGNT lexicon for Greek), count, refs
      data/text.json        the study's own English per built verse
 
-   Strong's glosses are a word identifier for the reader, never the study's
-   rendering, and the interlinear says so. No native script: the data
+   Glosses identify a word for the reader, never the study's rendering,
+   and the interlinear says so. No native script: the data
    layer carries none. */
 
 const DATA = (p) => new URL(`../data/${p}`, import.meta.url);
@@ -78,12 +79,35 @@ export function indexVerses(root, unit) {
   }
 }
 
+/* "6:24" -> that verse. A verse with no block of its own (inside a
+   data-verses table, or a block-formatted passage): its interlinear box if
+   mounted, else the block that declares it, else the closest verse before
+   it. "v24" (search's occurrence links) -> the first verse numbered 24. */
 export function findVerse(root, anchor) {
   const cv = /^(\d+):(\d+)$/.exec(anchor);
-  if (cv) return root.querySelector(`.v[data-ref="${cv[1]}:${cv[2]}"]`);
+  if (cv) {
+    const want = [+cv[1], +cv[2]];
+    const exact = root.querySelector(`.v[data-ref="${anchor}"], .il-gap[data-ref="${anchor}"]`);
+    if (exact) return exact;
+    const decl = declaredBlocks(root).find((d) => cmp(d.lo, want) <= 0 && cmp(want, d.hi) <= 0);
+    if (decl) return decl.el;
+    let best = null;
+    for (const el of root.querySelectorAll(".v[data-ref]")) {
+      if (cmp(el.dataset.ref.split(":").map(Number), want) <= 0) best = el;
+    }
+    return best;
+  }
   const vm = /^v(\d+)$/.exec(anchor);
   if (vm) return [...root.querySelectorAll(".v")].find((v) => v.dataset.ref?.endsWith(`:${vm[1]}`));
   return null;
+}
+
+/* elements that stand in for verses (data-verses="1:22–43", "6:9–7:2") */
+function declaredBlocks(root) {
+  return [...root.querySelectorAll("[data-verses]")].map((el) => {
+    const r = passageRange(el.dataset.verses);
+    return r && { el, lo: r[0], hi: r[1] };
+  }).filter(Boolean);
 }
 
 /* ---------------------------------------------------------- reading modes */
@@ -103,42 +127,129 @@ export function applyMode(mode) {
 
 /* Strong's senses, as the lexicon lists them (up to three). Never just the
    first: Strong's orders senses by root meaning, so the first misleads
-   (dabar comes out "arrange"). */
+   (dabar comes out "arrange"). A Greek lexicon gloss is shown as it is. */
 const senses = (g) => (g || "").split(";").map((x) => x.trim()).filter(Boolean).join("; ");
 
-export async function mountInterlinear(root) {
+/* What the gloss is, by the book's language (Matthew's pilot, note 7):
+   Strong's for Hebrew, the MorphGNT lexicon for Greek. */
+const GLOSS_KEY = {
+  hebrew: "a Strong's gloss (a word identifier, not this study's translation)",
+  greek: "a lexicon gloss (it identifies the word; it isn't this study's translation)",
+};
+const LANGUAGE = { hebrew: "Hebrew", greek: "Greek" };
+
+const HEADING_SEL = "h2, h3, .sectionhead, .spot-controls";
+
+/* Word boxes under every indexed verse of root (indexVerses first). opts:
+   {book: the book's name, language: "hebrew" | "greek", passage: the
+   unit's passage}. A verse with no block of its own gets a labelled box:
+   right after the element that declares it (data-verses), or, when nothing
+   does, just before the next verse (Lane, 2026-10-01). Resolves once the
+   boxes are in; an unmount or a newer mount meanwhile cancels this one
+   (Matthew's pilot, note 5), so a mode or unit switch mid-fetch never
+   leaves boxes behind or doubles them. */
+export async function mountInterlinear(root, opts = {}) {
   if (root.querySelector(".il")) return;
+  const gen = (root._ilGen = (root._ilGen || 0) + 1);
   const verses = [...root.querySelectorAll(".v[data-ref]")];
-  const chapters = [...new Set(verses.map((v) => +v.dataset.ref.split(":")[0]))];
+  if (!verses.length) return;
+  const refs = verses.map((el) => el.dataset.ref.split(":").map(Number));
+  const range = passageRange(opts.passage || unitPassage(root)) || [refs[0], refs[refs.length - 1]];
+  const chapters = [];
+  for (let c = range[0][0]; c <= range[1][0]; c++) chapters.push(c);
   const [lemmas, ...chs] = await Promise.all([loadLemmas(), ...chapters.map(loadChapter)]);
-  const byCh = new Map(chapters.map((c, i) => [c, chs[i]]));
-  for (const el of verses) {
-    const [c, v] = el.dataset.ref.split(":");
-    const words = byCh.get(+c)?.[v];
-    if (!words?.length) continue;
-    const box = document.createElement("div");
-    box.className = "il";
-    box.setAttribute("aria-label", `Interlinear, ${c}:${v}`);
-    box.innerHTML = words.map((w) => {
-      const lem = lemmas[w.l] || {};
-      const title = [lem.g && `Gloss: ${lem.g}`, w.m, lem.n && `${lem.n}× in the book`]
-        .filter(Boolean).join(" · ");
-      return `<a class="il-w${w.a ? " il-arc" : ""}" href="#/lemma/${encodeURIComponent(w.l)}" title="${esc(title)}">` +
-        `<i>${esc(w.t)}</i><b>${esc(senses(lem.g) || "—")}</b><small>${esc(w.m)}</small></a>`;
-    }).join("");
-    el.after(box);
+  if (root._ilGen !== gen || root.querySelector(".il")) return;
+  const byCh = new Map(chapters.map((c, i) => [c, chs[i] || {}]));
+  const o = { book: opts.book || "the book", language: opts.language || "hebrew" };
+
+  verses.forEach((el, i) => {
+    const ws = byCh.get(refs[i][0])?.[refs[i][1]];
+    if (ws?.length) el.after(box(ws, refs[i], lemmas, o, false));
+  });
+
+  // the passage's other verses: declared by a block, or not written out
+  const have = new Set(verses.map((el) => el.dataset.ref));
+  const declared = declaredBlocks(root);
+  const after = new Map();  // declaring element -> the last box put after it
+  for (const c of chapters) {
+    const vs = Object.keys(byCh.get(c)).map(Number).sort((a, b) => a - b);
+    for (const v of vs) {
+      const cv = [c, v];
+      if (have.has(`${c}:${v}`) || cmp(cv, range[0]) < 0 || cmp(range[1], cv) < 0) continue;
+      const b = box(byCh.get(c)[v], cv, lemmas, o, true);
+      const d = declared.find((x) => cmp(x.lo, cv) <= 0 && cmp(cv, x.hi) <= 0);
+      if (d) {
+        (after.get(d.el) || d.el).after(b);
+        after.set(d.el, b);
+        continue;
+      }
+      const next = verses[refs.findIndex((r) => cmp(r, cv) > 0)];
+      if (next) gapAnchor(next).before(b);
+      else (lastBox(verses[verses.length - 1]) || verses[verses.length - 1]).after(b);
+    }
   }
+
   if (!root.querySelector(".il-key")) {
     const key = document.createElement("p");
     key.className = "il-key";
-    key.textContent = "Interlinear: transliteration, a Strong's gloss (a word identifier, not " +
-      "this study's translation) and the grammar. Tap a word for every place its lemma occurs.";
-    (root.querySelector(".verses") || root.querySelector("article.unit") || root).prepend(key);
+    key.textContent = `Interlinear: the ${LANGUAGE[o.language] || "original"} transliterated, ` +
+      `${GLOSS_KEY[o.language] || GLOSS_KEY.hebrew} and the grammar. Tap a word to find every ` +
+      `place it occurs in ${o.book}.`;
+    keyAnchor(root)?.before(key);
   }
 }
 
 export function unmountInterlinear(root) {
+  root._ilGen = (root._ilGen || 0) + 1;
   root.querySelectorAll(".il, .il-key").forEach((e) => e.remove());
+}
+
+function box(ws, [c, v], lemmas, o, gap) {
+  const el = document.createElement("div");
+  el.className = gap ? "il il-gap" : "il";
+  el.setAttribute("aria-label", `Interlinear, ${c}:${v}`);
+  if (gap) el.dataset.ref = `${c}:${v}`;
+  const gloss = o.language === "hebrew" ? senses : (g) => g || "";
+  el.innerHTML = (gap ? `<span class="il-ref">${c}:${v}</span>` : "") + ws.map((w) => {
+    const lem = lemmas[w.l] || {};
+    const title = [lem.g && `Gloss: ${lem.g}`, w.m, lem.n && `${lem.n}× in ${o.book}`]
+      .filter(Boolean).join(" · ");
+    return `<a class="il-w${w.a ? " il-arc" : ""}" href="#/search/${encodeURIComponent(w.l)}" title="${esc(title)}">` +
+      `<i>${esc(w.t)}</i><b>${esc(gloss(lem.g) || "—")}</b><small>${esc(w.m)}</small></a>`;
+  }).join("");
+  return el;
+}
+
+function unitPassage(root) {
+  try { return JSON.parse(root.querySelector("#unit-meta")?.textContent || "{}").passage || ""; }
+  catch (e) { return ""; }
+}
+
+/* the last box right after a verse (its own, then any gap boxes) */
+function lastBox(verse) {
+  let at = null;
+  for (let n = verse.nextElementSibling; n?.classList.contains("il"); n = n.nextElementSibling) at = n;
+  return at;
+}
+
+/* before the next verse, but above any heading that opens it */
+function gapAnchor(verse) {
+  let at = verse;
+  while (at.previousElementSibling?.matches(HEADING_SEL)) at = at.previousElementSibling;
+  return at;
+}
+
+/* above the first verse (and the heading or notes bar over it). Core
+   fragments have no wrapper around their verses, so prepending to the unit
+   would put the key above the masthead (Matthew's pilot, note 6). */
+function keyAnchor(root) {
+  const article = root.querySelector("article.unit") || root;
+  const bar = article.querySelector(".spot-controls");
+  if (bar) return bar;
+  let at = article.querySelector(".v[data-ref]");
+  if (!at) return null;
+  while (at.parentElement && at.parentElement !== article) at = at.parentElement;
+  return gapAnchor(at);
 }
 
 /* ------------------------------------------------ continue where you left off */

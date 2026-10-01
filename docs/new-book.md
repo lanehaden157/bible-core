@@ -40,8 +40,8 @@
 18. **Claude**:
     - `port N`
     - the porter's questions go to you as popups
-    - promotions, `colour`, `data-w`
-    - `build`, `audit`, `test`
+    - promotions, `colour`, `data-w`; what `data-w` can't decide and the port's coverage gaps go in `retrofit/retrofit-tags.json` (the recipe is in the book's CLAUDE.md)
+    - `build`, `audit`, `test` (its `words` check re-reads the corpus and checks the interlinear data)
     - browser check
     - commit explicit paths (never hand-edit `index.html`, `app/` or the generated css; a shell change goes into bible-core)
     - after your OK: push and `sync`

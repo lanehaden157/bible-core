@@ -453,11 +453,30 @@ unit loop):
 data layer (`data/words/<ch>.json`, `lemmas.json`, `text.json`;
 `docs/data-shapes.md`), and the shell's `app/reader.js` uses it:
 - reading modes: notes, every note open, translation only, interlinear;
-- the interlinear itself, with transliteration, Strong's senses (labelled as
-  an identifier, not the translation) and morphology in plain words
-  (`lang/hebrew_morph.py`). Tap a word for every occurrence of its lemma;
+- the interlinear itself, with transliteration, a gloss labelled as an
+  identifier and not the translation (Strong's senses for Hebrew, "a lexicon
+  gloss" for Greek; the key line and tooltips name the book), and morphology
+  in plain words (`lang/hebrew_morph.py`, `lang/greek_morph.py`). Since
+  0.13.0, learned from Matthew's interlinear pilot (`Matthew/docs/interlinear-pilot.md`):
+  - a verse with no block of its own (inside a `data-verses` table, or a
+    block-formatted passage) gets a box labelled with its reference, right
+    after the element that declares it, or before the next verse when
+    nothing declares it (Lane, 2026-10-01). A verse jump resolves to that
+    box, or to the declaring element when the interlinear is off;
+  - a mount waits on a generation counter, so switching mode or unit
+    mid-fetch never leaves boxes behind or doubles them, and a jump waits
+    for the boxes;
+  - the key line sits above the first verse (core fragments have no verse
+    wrapper);
+  - the gloss has its own `--gloss` token, 4.5:1 on the box in both themes;
+- tapping a word opens `#/search/<lemma id>`: that word's block first and
+  open, then the tracked roots and the other words that match (Lane's L4,
+  every book). A Strong's number shows only its own word, never loose
+  matches on the digits;
 - search across references, tagged roots, lemmas and the study's English;
-- `#/ref/<C:V>` and `#/lemma/<key>` routes;
+  the address follows the box (`#/search/<query>`);
+- `#/ref/<C:V>` and `#/search/<query>` routes (`#/lemma/<key>`, the old
+  word link, still redirects there);
 - "continue where you left off";
 - `#/print`, the whole study on one page with every note open.
 
@@ -533,6 +552,28 @@ blocks carry the Greek wording, written fresh for core books (Lane's calls,
 - four NT genre cautions as strong suggestions: Gospel parallels, LXX
   quotations, the argument of a letter, apocalyptic imagery;
 - a `logizomai` worked example.
+
+**Greek proven end to end (0.13.0, Lane's L3).** The porter has run Greek
+units: a scratch Matthew made with `new_book.py --language greek` took
+copies of Matthew's contract-shaped source artifacts for units 9-14 (read
+only; Matthew is untouched) through the normal loop: `port`, promotions
+with `colour`, the thread delta, `data-w`, retrofit, `build`, `audit`,
+`test`. Every unit passed `biblecore test`, and two runs from nothing gave
+byte-identical books (191 files), the way the system map's unit-4 replay
+did for Hebrew. The replay and its log are in `../greek-proof/`. What it
+taught core:
+- chapter-seam verse labels (`11:1`) are read everywhere the porter looks,
+  and retrofit and the gap stubs say `"verse": "C:V"` in a unit that
+  crosses a chapter;
+- a candidate may propose `seq` (a phrase thread), previewed like `ids`;
+- an itinerary stop may cite a range (`12:1–8`);
+- the retrofit recipe `data-w` points to ships in the template's CLAUDE.md.
+`tests/test_greek_port.py` ports a small Greek unit through the CLI, and
+`verify-words` (in `biblecore test` as `words`) re-reads MorphGNT or OSHB
+without the transliterator and checks the interlinear data against it.
+What Matthew's older artifacts needed and a template-shaped one won't (a
+missing `retro` list, Greek-script `stems`, legend-less units, itinerary
+labels in `<sup>`) was fixed in the copies, not in core.
 
 **Lexical bridge (F2).** `canon/bridge.json` holds one row per canon thread's
 key word: the Hebrew ids, the LXX lemma(s) with a verse, and the NT lemma(s)

@@ -55,6 +55,10 @@ const MODE_KEY = () => `${storagePrefix()}:mode`;
 const readMode = () => { try { return localStorage.getItem(MODE_KEY()) || "notes"; } catch (e) { return "notes"; } };
 const bookRef = () => ({ name: bookInfo.book || manifest?.book || "", osis: bookInfo.osis, abbrev: bookInfo.abbrev });
 const siteTitle = () => `${manifest?.book || ""} Study`.trim();
+const language = () => bookInfo.language || manifest?.language || "hebrew";
+// the interlinear's wording: the book's name and language (reader.js)
+const ilOpts = () => ({ book: bookRef().name || "the book", language: language() });
+let loading = 0;      // bumped per loadUnit, so a slower earlier load stands down
 
 applySettings();
 init();
@@ -131,7 +135,7 @@ function wireModes() {
     try { localStorage.setItem(MODE_KEY(), m); } catch (err) { /* private mode */ }
     applyMode(m);
     if (!content.querySelector("article.unit")) return;
-    if (m === "interlinear") mountInterlinear(content);
+    if (m === "interlinear") mountInterlinear(content, ilOpts());
     else unmountInterlinear(content);
     openAll(content, m === "open");
   });
@@ -342,6 +346,7 @@ function buildUnitNav() {
 /* ------------------------------------------------------------------- router */
 
 function route() {
+  loading++;  // a unit still loading for the last route stands down
   const hash = location.hash.replace(/^#\/?/, "");
   const [slug, anchor] = hash.split("/");
 
@@ -351,13 +356,22 @@ function route() {
     else searchLink.removeAttribute("aria-current");
   }
 
-  if (slug === "search" || slug === "lemma") {
+  // the interlinear's old word links (#/lemma/<key>) still work (Lane, 2026-10-01)
+  if (slug === "lemma") {
+    location.replace(anchor ? `#/search/${anchor}` : "#/search");
+    return;
+  }
+
+  if (slug === "search") {
     markCurrent(null);
     pager.innerHTML = "";
     document.title = `Search — ${siteTitle()}`;
+    // #/search/<query> pre-fills and runs it: a tapped word's lemma id comes
+    // in this way; plain #/search brings back the last query
     renderSearch(content, manifest.units, storagePrefix(), {
       book: bookRef(),
-      initial: slug === "lemma" && anchor ? `=${decodeURIComponent(anchor)}` : null,
+      language: language(),
+      initial: anchor ? decodeURIComponent(anchor) : null,
     });
     content.scrollIntoView({ block: "start" });
     return;
@@ -412,6 +426,7 @@ function route() {
 }
 
 async function loadUnit(unit, anchor) {
+  const me = ++loading;
   markCurrent(unit.slug);
   content.innerHTML = `<p class="loading">Loading ${escapeHtml(unit.title)}…</p>`;
 
@@ -420,10 +435,12 @@ async function loadUnit(unit, anchor) {
     const url = bust(new URL(`../units/${unit.slug}.html`, import.meta.url));
     html = await (await fetch(url)).text();
   } catch (e) {
-    content.innerHTML = `<p class="missing">Could not load <code>units/${unit.slug}.html</code>.</p>`;
+    if (me === loading) content.innerHTML = `<p class="missing">Could not load <code>units/${unit.slug}.html</code>.</p>`;
     return;
   }
+  if (me !== loading) return;   // another unit (or search) was opened meanwhile
 
+  unmountInterlinear(content);  // cancels a mount still waiting on the last unit's words
   content.innerHTML = html;
   renderPlacement(content, unit);
   hoistStructureBlocks(content);
@@ -435,13 +452,18 @@ async function loadUnit(unit, anchor) {
   enhanceSpotlights(content, comps.filter((c) => c.role === "verse-aside"));
   const mode = readMode();
   if (mode === "open") openAll(content, true);
-  if (mode === "interlinear") mountInterlinear(content);
   wireRoots(content, unit, manifest.units);
   wireFootnotes();
   buildPager(unit);
   document.title = `Unit ${unit.n} · ${unit.title} — ${siteTitle()}`;
 
   rememberPosition(storagePrefix(), unit.slug, anchor && /^\d+:\d+$/.test(anchor) ? anchor : null);
+  // a verse inside a table or a block has its own box only once the
+  // interlinear is in, so a jump waits for it
+  if (mode === "interlinear") {
+    await mountInterlinear(content, { ...ilOpts(), passage: unit.passage });
+    if (me !== loading) return;
+  }
   if (anchor) {
     const el = findVerse(content, anchor) || document.getElementById(anchor);
     if (el) requestAnimationFrame(() => jumpTo(el));

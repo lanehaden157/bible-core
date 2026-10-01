@@ -58,6 +58,11 @@ def test_text_colours_read_on_their_paper():
                 c = theme.contrast(tok[k], tok["--bg"])
                 if c < 3.5:
                     fails.append(f"{osis} {'dark' if dark else 'light'} {k} {tok[k]} on {tok['--bg']}: {c:.2f}")
+            # the interlinear gloss is small text on the word box's panel
+            c = theme.contrast(tok["--gloss"], tok["--panel"])
+            if c < 4.5:
+                fails.append(f"{osis} {'dark' if dark else 'light'} --gloss {tok['--gloss']} "
+                             f"on --panel {tok['--panel']}: {c:.2f}")
             if theme.contrast(tok["--mast-fg"], e["primary"]) < 3:
                 fails.append(f"{osis}: masthead text {tok['--mast-fg']} on {e['primary']}")
     return fails[:10]

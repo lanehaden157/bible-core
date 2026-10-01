@@ -228,6 +228,9 @@ def _palette(div, book, dark):
         "--mast-fg": paper if contrast(paper, p) >= contrast(ink, p) else ink,
         "--emblem-fg": paper if contrast(paper, s) >= contrast(ink, s) else ink,
     })
+    # the interlinear gloss: small text on the box's --panel, so bronze moved
+    # until it reads 4.5:1 there (Lane, 2026-10-01: the NT's was 3.9:1)
+    tokens["--gloss"] = readable(tokens["--accent-bronze"], tokens["--panel"], toward, 4.5)
     return tokens
 
 
