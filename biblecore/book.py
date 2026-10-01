@@ -44,8 +44,12 @@ CORPUS_KEYS = {"kind", "pin", "word_ids"}
 # book leaves it empty.
 # `test_idempotent: false` drops `biblecore test`'s build-idempotence check
 # for a book whose units are built by its own pipeline (Matthew).
+# `colour_de_min` is the CIEDE2000 distance under which two colours read as
+# one (colour.de_min). 10 is the default; a book that tracks more threads than
+# a well of that spacing holds (about 60 colours) sets a lower floor and
+# generates a well to match (tools/make_well.py).
 CHECK_DEFAULTS = {"opens_note_required": True, "skip_fragment_checks": [],
-                  "test_idempotent": True}
+                  "test_idempotent": True, "colour_de_min": 10}
 # "sync" lists only what a book adds to or drops from core's default synced
 # files (biblecore.sync.DEFAULT_SYNC): `extra` takes paths or glob patterns,
 # `skip` takes paths or patterns matched against the resolved paths.
@@ -116,6 +120,9 @@ def validate_config(cfg):
             errs.append(f"'{k}' must be a list of strings")
     for k in sorted(set(cfg.get("checks") or {}) - set(CHECK_DEFAULTS)):
         errs.append(f"checks: unknown check '{k}' (known: {sorted(CHECK_DEFAULTS)})")
+    de = (cfg.get("checks") or {}).get("colour_de_min", CHECK_DEFAULTS["colour_de_min"])
+    if isinstance(de, bool) or not isinstance(de, (int, float)) or not 3 <= de <= 20:
+        errs.append("checks.colour_de_min must be a number from 3 to 20")
     skip = (cfg.get("checks") or {}).get("skip_fragment_checks", [])
     if not (isinstance(skip, list) and all(isinstance(x, str) for x in skip)):
         errs.append("checks.skip_fragment_checks must be a list of strings")

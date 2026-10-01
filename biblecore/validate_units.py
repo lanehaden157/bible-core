@@ -9,7 +9,7 @@ out of contract unnoticed. (learned: Joshua A1, a regenerated meta block
 failed the project's own validator on every build, silently.)
 
 Colour distance is checked too, as a warning: two roots in one unit closer
-than DE_MIN read as one colour.
+than de_min() (book.json checks.colour_de_min, default 10) read as one colour.
 """
 import glob
 import os
@@ -18,7 +18,7 @@ import sys
 
 from biblecore import meta as um
 from biblecore.book import book
-from biblecore.colour import DE_MIN, closest_pairs
+from biblecore.colour import closest_pairs, de_min
 
 def unit_colours(slug, roots, threads, units_json):
     """root -> hex for every root tagged in this unit, tracked or local.
@@ -43,11 +43,12 @@ def unit_colours(slug, roots, threads, units_json):
 def check_colours(slug, colours):
     """Warn on same-unit pairs under DE_MIN, and show the ranked ceiling."""
     out = []
+    floor = de_min()
     pairs = closest_pairs(colours, limit=3)
     for d, ra, ca, rb, cb in pairs:
-        if d < DE_MIN:
+        if d < floor:
             out.append(f"colours close: '{ra}' ({ca}) / '{rb}' ({cb}) "
-                       f"dE2000={d:.1f}, under {DE_MIN}")
+                       f"dE2000={d:.1f}, under {floor:g}")
     if pairs:
         ranked = ", ".join(f"{ra}/{rb} {d:.1f}" for d, ra, _, rb, _ in pairs)
         out.append(f"closest pairs in this unit (dE2000): {ranked}")

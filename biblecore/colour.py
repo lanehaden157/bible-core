@@ -7,7 +7,7 @@ Every colour on the site is assigned here, never picked by eye. Local roots
 get a per-unit colour (assign_hues); newly promoted tracked threads get a
 book-wide one (assign_tracked_colors). Both draw from the book's palette
 well (book.json "palette"), in order, taking the first colour at least
-DE_MIN CIEDE2000 from everything already in play.
+de_min() CIEDE2000 from everything already in play.
 
 Seeded from Joshua's port_artifact.py / validate_units.py.
 """
@@ -17,6 +17,16 @@ import math
 from biblecore.book import book
 
 DE_MIN = 10          # CIEDE2000 distance below which two roots read as one
+                     # (the default; book.json checks.colour_de_min overrides)
+
+
+def de_min():
+    """This book's colour-spacing floor: book.json checks.colour_de_min, else
+    DE_MIN. Falls back to DE_MIN when no book is in play (colour maths alone)."""
+    try:
+        return book().check("colour_de_min")
+    except Exception:
+        return DE_MIN
 
 
 def _lab(h):
@@ -99,6 +109,22 @@ def ciede2000(a, b):
     return math.sqrt((dLp / SL) ** 2 + (dCp / SC) ** 2 + (dHp / SH) ** 2
                      + RT * (dCp / SC) * (dHp / SH))
 
+def luminance(h):
+    """WCAG relative luminance of a hex colour."""
+    h = h.lstrip("#")
+    def lin(c):
+        c /= 255
+        return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = (lin(int(h[i:i + 2], 16)) for i in (0, 2, 4))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def contrast(a, b):
+    """WCAG contrast ratio between two hex colours (1 to 21)."""
+    la, lb = sorted((luminance(a), luminance(b)), reverse=True)
+    return (la + 0.05) / (lb + 0.05)
+
+
 MIN_L, MIN_C = 30, 20    # Lab lightness / chroma floor for a first-choice colour
 
 
@@ -112,7 +138,7 @@ def readable(h):
 def assign_hues(local_roots, taken, well=None):
     """local_roots: [names]; taken: [hex already used in this unit]. Return {name: hex}.
 
-    Picks the first readable() well colour at least DE_MIN from everything in
+    Picks the first readable() well colour at least de_min() from everything in
     play. When the well is exhausted against this unit, falls back to the
     colour *furthest* from what is taken (never an exact duplicate by
     rote), and validate_units reports the compromise.
@@ -123,10 +149,11 @@ def assign_hues(local_roots, taken, well=None):
     # the same dull grey as its neighbours once dark mode lifts it toward
     # white. Those are used only once every readable colour is too close.
     ordered = [c for c in well if readable(c)] + [c for c in well if not readable(c)]
+    floor = de_min()
     out, used = {}, list(taken)
     for name in local_roots:
         pick = next((c for c in ordered
-                     if all(ciede2000(c, u) >= DE_MIN for u in used)), None)
+                     if all(ciede2000(c, u) >= floor for u in used)), None)
         if pick is None:
             pick = max(well, key=lambda c: min((ciede2000(c, u) for u in used),
                                                default=float("inf")))

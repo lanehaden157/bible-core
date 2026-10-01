@@ -164,7 +164,12 @@ Joshua A1/A2: a regenerated meta block failed the project's own validator.**)**
 - Tracked threads have fixed colours across the book, and local roots get a
   per-unit colour. Both are **assigned by algorithm** (colours picked by eye
   collided before; hand-pick one only if Lane asks). Each book supplies its
-  own palette well.
+  own palette well. Two roots in a unit read as one colour under CIEDE2000
+  10, but only about 60 colours fit at that spacing, so a book that tracks
+  more threads than that (a Gospel) sets `checks.colour_de_min` (Matthew: 7,
+  a 124-colour well), generates its well with `tools/make_well.py`, and, if
+  units already shipped, re-assigns their colours with `tools/recolour.py`
+  (colours only; no tag or word changes).
 - Notable one-off translation choices, and words with a canon history, get a
   local root (with an `echo` for the canon history).
 - `translit` shape is a **language** setting (C1). Hebrew uses one bare root
