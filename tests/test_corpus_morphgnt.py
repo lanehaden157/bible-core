@@ -17,7 +17,7 @@ from biblecore.corpus import morphgnt
 from biblecore.lang.greek_morph import describe
 
 MATTHEW = support.MATTHEW_SRC  # read-only inputs (corpora, its own pipeline)
-MGNT = os.path.join(MATTHEW, "pipeline", "corpus", "morphgnt")
+MGNT = os.path.join(support.MATTHEW_CORPUS, "morphgnt")
 LEXICON = os.path.join(support.CORE, "corpus", "lexicon", "lexemes.yaml")
 GREEK = re.compile("[Ͱ-Ͽἀ-῿]")
 _tmp = None

@@ -13,8 +13,8 @@ from biblecore import book as bookmod
 from biblecore import leads
 
 MATTHEW = support.MATTHEW_SRC  # read-only inputs (corpora, its own pipeline)
-LXX_DIR = os.path.join(MATTHEW, "pipeline", "corpus", "lxx")
-MGNT_DIR = os.path.join(MATTHEW, "pipeline", "corpus", "morphgnt")
+LXX_DIR = os.path.join(support.MATTHEW_CORPUS, "lxx")
+MGNT_DIR = os.path.join(support.MATTHEW_CORPUS, "morphgnt")
 UNIT_N = 13
 
 
@@ -24,11 +24,11 @@ def _have():
 
 
 def _matthew_module(name):
-    path = os.path.join(MATTHEW, "pipeline", f"{name}.py")
+    path = os.path.join(support.MATTHEW_PIPE, f"{name}.py")
     spec = importlib.util.spec_from_file_location(f"matthew_{name}", path)
     mod = importlib.util.module_from_spec(spec)
     old = sys.path[:]
-    sys.path.insert(0, os.path.join(MATTHEW, "pipeline"))
+    sys.path.insert(0, support.MATTHEW_PIPE)
     try:
         spec.loader.exec_module(mod)
     finally:
@@ -52,7 +52,7 @@ def test_parity_with_matthews_own_canon_leads():
     if not _have():
         return ["Matthew's LXX/MorphGNT corpus not found next to bible-core"]
     if not os.path.exists(os.path.join(MATTHEW, "pipeline", "canon_leads.py")):
-        return []  # retired in Matthew's phase E; the parity was proven then
+        return []  # retired (Matthew's phase E, then archive/pipeline); the parity was proven then
     row = next(u for u in json.load(open(os.path.join(support.copy_of("Matthew"), "data", "units.json"),
                                          encoding="utf-8"))["units"] if u["n"] == UNIT_N)
     passage = row["passage"]

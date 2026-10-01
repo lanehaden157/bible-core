@@ -15,7 +15,7 @@ import support
 from biblecore.lang import greek
 
 MATTHEW = support.MATTHEW_SRC  # read-only inputs (corpora, its own pipeline)
-MORPHGNT = os.path.join(MATTHEW, "pipeline", "corpus", "morphgnt", "61-Mt-morphgnt.txt")
+MORPHGNT = os.path.join(support.MATTHEW_CORPUS, "morphgnt", "61-Mt-morphgnt.txt")
 
 CASES = {
     # letters, eta/omega macrons
@@ -93,9 +93,9 @@ def test_lemma_key_strips_movable_letter():
 
 
 def test_parity_with_matthew_over_every_word():
-    src = os.path.join(MATTHEW, "pipeline", "greek.py")
+    src = os.path.join(support.MATTHEW_PIPE, "greek.py")
     if not (os.path.exists(src) and os.path.exists(MORPHGNT)):
-        return ["Matthew checkout (pipeline/greek.py + MorphGNT) not found next to bible-core"]
+        return ["Matthew checkout (archive/pipeline/greek.py + corpus/morphgnt) not found next to bible-core"]
     spec = importlib.util.spec_from_file_location("matthew_greek", src)
     theirs = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(theirs)

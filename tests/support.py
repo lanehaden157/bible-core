@@ -128,6 +128,10 @@ def copy_of(name):
 JOSHUA_SRC = SOURCES["Joshua"]
 NUMBERS_SRC = SOURCES["Numbers"]
 MATTHEW_SRC = SOURCES["Matthew"]
+# Matthew's fetched corpora (`python -m biblecore fetch` there) and its retired
+# pipeline, kept in archive/ as the reference the parity tests compare against
+MATTHEW_CORPUS = os.path.join(MATTHEW_SRC, "corpus")
+MATTHEW_PIPE = os.path.join(MATTHEW_SRC, "archive", "pipeline")
 JOSHUA = copy_of("Joshua")
 WLC = os.path.join(JOSHUA_SRC, "node_modules", "morphhb", "wlc")
 LEXICON = os.path.join(JOSHUA_SRC, "corpus", "lexicon", "HebrewStrong.xml")

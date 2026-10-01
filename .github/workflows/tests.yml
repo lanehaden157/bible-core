@@ -70,17 +70,19 @@ jobs:
         working-directory: Numbers
         run: npm ci --no-fund --no-audit
 
-      # MorphGNT + LXX, pinned by commit in fetch_corpus.py
+      # MorphGNT + LXX, pinned by commit in biblecore/fetch.py (Matthew's own vendored copy)
       - name: Cache Matthew corpus
         id: matthew-corpus
         uses: actions/cache@v4
         with:
-          path: Matthew/pipeline/corpus
-          key: corpus-matthew-${{ hashFiles('Matthew/pipeline/fetch_corpus.py') }}
+          path: |
+            Matthew/corpus/morphgnt
+            Matthew/corpus/lxx
+          key: corpus-matthew-${{ hashFiles('Matthew/biblecore/fetch.py') }}
       - name: Fetch Matthew corpus
         if: steps.matthew-corpus.outputs.cache-hit != 'true'
         working-directory: Matthew
-        run: python pipeline/fetch_corpus.py
+        run: python -m biblecore fetch
 
       # tests that need a sibling's data skip quietly when it's missing, so
       # a failed install must fail here rather than pass the suite hollow
@@ -89,7 +91,7 @@ jobs:
           for p in Joshua/node_modules/morphhb/wlc/VerseMap.xml \
                    Numbers/node_modules/morphhb/wlc/VerseMap.xml \
                    Joshua/Joshua-words.tsv Numbers/book.json \
-                   Matthew/pipeline/corpus/morphgnt Matthew/pipeline/corpus/lxx; do
+                   Matthew/corpus/morphgnt Matthew/corpus/lxx; do
             test -e "$p" || { echo "missing: $p"; exit 1; }
           done
 

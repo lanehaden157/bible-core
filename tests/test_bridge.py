@@ -12,8 +12,8 @@ import support
 from biblecore.lang import greek
 
 BIBLE = os.path.dirname(support.CORE)
-PIPE = os.path.join(BIBLE, "Matthew", "pipeline")
-MGNT = os.path.join(PIPE, "corpus", "morphgnt")
+MGNT = os.path.join(support.MATTHEW_CORPUS, "morphgnt")
+LXX_DIR = os.path.join(support.MATTHEW_CORPUS, "lxx")
 BRIDGE = json.load(open(os.path.join(support.CORE, "canon", "bridge.json"), encoding="utf-8"))
 REF_RE = re.compile(r"^((?:\d )?[A-Za-z]+) (\d+):(\d+)")
 NT_STEMS = {"Matt": "61-Mt", "1 Cor": "67-1Co"}
@@ -62,22 +62,14 @@ def test_nt_words_in_their_verses():
 
 
 def test_lxx_words_in_their_verses():
-    src = os.path.join(PIPE, "greek_corpus.py")
-    if not os.path.exists(os.path.join(PIPE, "corpus", "lxx", "lex_utf8.tf")):
+    if not os.path.exists(os.path.join(LXX_DIR, "lex_utf8.tf")):
         return []
-    spec = importlib.util.spec_from_file_location("matthew_greek_corpus", src)
-    import sys
-    sys.path.insert(0, PIPE)
-    try:
-        gc = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(gc)
-        lxx = gc.load_lxx()
-    finally:
-        sys.path.remove(PIPE)
+    from biblecore.corpus import lxx as lxx_mod
+    lxx = lxx_mod.load_lxx(LXX_DIR, greek.lemma_key)
     fails = []
     by_verse = {}   # (book, chapter, verse) -> lemma keys; one pass, not one per row
     for name, rows in lxx.items():
-        if name == gc.LXX_BOOKS_KEY:   # the book-order list, not verses
+        if name == lxx_mod.BOOKS_KEY:   # the book-order list, not verses
             continue
         for r in rows:
             by_verse.setdefault((name, r[0], r[1]), set()).add(r[2])

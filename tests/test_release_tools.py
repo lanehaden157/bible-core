@@ -204,10 +204,7 @@ def test_changed_paths_lists_each_file():
 
 def test_core_books_come_from_books_json():
     names = [n for n, _root in core_sync.core_books()]
-    fails = [f"{n} missing from core_books" for n in ("Numbers", "Joshua") if n not in names]
-    if "Matthew" in names:
-        fails.append("Matthew (kind legacy) listed as a core book")
-    return fails
+    return [f"{n} missing from core_books" for n in ("Numbers", "Joshua", "Matthew") if n not in names]
 
 
 def _scratch_repo_book(d):

@@ -31,7 +31,7 @@ from biblecore import book as bookmod
 from biblecore import fetch
 
 TEMPLATE = os.path.join(support.CORE, "template")
-MATTHEW_CORPUS = os.path.join(support.SOURCES["Matthew"], "pipeline", "corpus")
+MATTHEW_CORPUS = support.MATTHEW_CORPUS
 # words a Greek book's template text shouldn't carry (they belong to the
 # Hebrew blocks), and the reverse
 HEBREW_ONLY = ("Strong's", "Masoretic", "HebrewStrong", "morphhb", "binyan", "npm ci",
@@ -262,10 +262,10 @@ def test_fetch_is_a_no_op_for_hebrew():
 
 
 def test_fetch_pins_match_matthews_corpus():
-    """Core's pins are Matthew's fetch_corpus.py commits; its fetched files
+    """Core's pins are the commits in Matthew's retired fetch_corpus.py (archive/pipeline); its fetched files
     (the ones the parity tests read) must have the pinned sha1s."""
     if not os.path.isdir(MATTHEW_CORPUS):
-        print("  skipped: no ../Matthew/pipeline/corpus (python pipeline/fetch_corpus.py there)")
+        print("  skipped: no ../Matthew/corpus (python -m biblecore fetch there)")
         return []
     fails = []
     for name, src in fetch.SOURCES.items():
@@ -277,7 +277,7 @@ def test_fetch_pins_match_matthews_corpus():
                 fails.append(f"{name}/{f}: Matthew's sha1 {fetch.sha1_of(p)} != pin {want}")
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "_matthew_fetch", os.path.join(support.SOURCES["Matthew"], "pipeline", "fetch_corpus.py"))
+        "_matthew_fetch", os.path.join(support.MATTHEW_PIPE, "fetch_corpus.py"))
     mf = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mf)
     if mf.MORPHGNT_SHA != fetch.SOURCES["morphgnt"]["commit"]:
