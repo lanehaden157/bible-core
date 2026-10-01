@@ -49,6 +49,17 @@
 19. **Lane**: optional. Press "Run workflow" on the hub repo's Actions tab, or wait for the daily rebuild.
 20. **Claude**: session files (`session_index.md`, `improvements_log.md`, summary). Record anything the unit taught about core as a proposed core change, not a book-only patch.
 
+## NT books: things worth knowing first
+Learned from porting copies of Matthew's units 9–14 into a scratch Greek book (Greek-in-core pass 2, 2026-10-01; `../greek-proof/README.md`). Strong suggestions, not rules; revise them once a real NT book has shipped a few units.
+- **Palette, before unit 1.** A Gospel tracks something like 80 threads. The template's 65-colour starter well runs out of colours at ΔE 10 long before that, so generate the book its own larger well at setup (step 5), not halfway through.
+- **Block-formatted passages.** A prayer, hymn or long quotation set as one block should carry `data-verses="C:V–V"` naming the verses it holds. Then the audit counts those verses as covered and the interlinear puts their words right after the block. Without it, the verses look missing. The Lord's Prayer case is still untested on real data; the first one is worth a browser check (interlinear on, jump to a verse inside the block).
+- **Artifacts to the template contract.** Matthew's older units tripped the porter on: a missing `threads.retro` list, Greek-script `stems` on candidates, a unit with no colour key, an aside anchored to the wrong verse, and itinerary `<sup>`s holding labels. A template-shaped artifact avoids all of these, so if the chat side drifts toward Matthew's habits, point it back at the style reference.
+- **Phrase threads.** A title like *son of David* is a phrase thread: the candidate can propose `"seq": ["huios", "dauid"]` and the thread delta previews it like `ids`.
+- **Chapter seams.** Units that cross a chapter can label the first verse `11:1`. Retrofit entries and gap stubs then name verses `"C:V"`.
+- **English phrasal verbs.** Expect `data-w` to ask for eyes where one Greek word is two English spans ("hand … over"). The retrofit recipe in the book's CLAUDE.md covers it.
+- **Itineraries** in a Gospel move by scene: a stop's `<sup>` may be a range (`12:1–8`).
+- **A worked example of the loop.** `../greek-proof/replay.py` runs port, promotions, delta, `data-w`, retrofit, build, audit and test end to end. It's useful as a reference for the commands in order.
+
 ## G. When core moves (any session, as needed)
 21. **Claude, in bible-core**: `tools/release.py X.Y.Z --note "..."`, then `tools/core_sync.py --all` (vendor, build, test, commit per book). Push after your OK; each push runs CI.
 22. **Claude, in a book session**: occasionally `python ../bible-core/tools/core_diff.py . --template`; take what fits, then `--set-base`.

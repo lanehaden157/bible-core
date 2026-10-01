@@ -434,7 +434,8 @@ unit loop):
      `"corpus": {"kind": "morphgnt", …}` and `versification` `source` in
      `book.json` (the Greek paths are `book.py`'s defaults), no
      `package.json`. `biblecore corpus` also checks that every lemma finds
-     a lexicon gloss.
+     a lexicon gloss. Read "NT books: things worth knowing first" in
+     `docs/new-book.md` before the first unit.
    - **Template text:** template files carry language blocks
      (`<!-- lang: greek -->` … `<!-- /lang -->`, `# lang:` in yml and
      `.gitignore`), and the book keeps its own language's. That covers the
