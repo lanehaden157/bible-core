@@ -244,16 +244,18 @@ def _append_candidate_preview(lines, root, cand):
     the review step before Lane commits an id set to data/roots.json (the
     id-based analogue of Matthew's stem preview, Joshua's
     archive/phase-0.6-plan.md §1)."""
-    ids = cand.get("ids")
-    if not ids:
-        lines.append(f"    - no ids proposed yet; once some are, run "
-                     f"`python -m biblecore audit --ids {root}` "
+    ids, seq = cand.get("ids"), cand.get("seq")
+    if not ids and not seq:
+        lines.append(f"    - no ids proposed yet (or `seq`, for a fixed phrase); once "
+                     f"some are, run `python -m biblecore audit --ids {root}` "
                      f"against a draft data/roots.json entry to preview coverage")
         return
+    # a phrase thread (roots.json `seq`, ordered lemma ids) previews the same way
+    entry = {"seq": seq} if seq else {"ids": ids}
     try:
 
         words = atc.load_words()
-        hits = atc.source_hits_for_root(words, ids)
+        hits = atc.source_hits_for_entry(words, entry)
         wbi = atc.words_by_id(words)
     except Exception as exc:  # pragma: no cover
         lines.append(f"    - (id preview unavailable: {exc})")
@@ -264,8 +266,9 @@ def _append_candidate_preview(lines, root, cand):
         surface = wbi[wid]["surface"]
         e = by_form.setdefault(surface, {"n": 0, "wid": wid})
         e["n"] += 1
+    key, val = ("seq", seq) if seq else ("ids", ids)
     lines.append(f"    - if promoted, data/roots.json entry: "
-                 f"`\"{root}\": {{\"ids\": {json.dumps(ids)}, \"note\": \"...\"}}`")
+                 f"`\"{root}\": {{\"{key}\": {json.dumps(val, ensure_ascii=False)}, \"note\": \"...\"}}`")
     total = sum(e["n"] for e in by_form.values())
     lines.append(f"    - those ids match **{total}** word(s) book-wide "
                  f"({len(by_form)} distinct surface form(s)):")
@@ -321,9 +324,13 @@ def _append_coverage(lines, slug, html, passage, retrofit_applied=True):
                      f"fragment leaves untagged** — add to `retrofit-tags.json` "
                      f"`add` (fill in `text`):")
         lines.append("")
+        # a unit that crosses a chapter repeats bare verse numbers (10:1 and
+        # 11:1), so its stubs name the verse as "C:V" (retrofit reads both)
+        lo, hi = atc.parse_range(passage)
         for g in cov["gaps"]:
             txt = (g["text"][:90] + "…") if len(g["text"]) > 90 else g["text"]
-            lines.append(f'    {{ "unit": "{slug}", "verse": {g["v"]}, '
+            verse = f'"{g["ch"]}:{g["v"]}"' if lo[0] != hi[0] else g["v"]
+            lines.append(f'    {{ "unit": "{slug}", "verse": {verse}, '
                          f'"text": "???", "root": "{g["root"]}", "w": "{g["word_id"]}", '
                          f'"why": "{g["translit"]} {g["ch"]}:{g["v"]}" }},')
             if txt:

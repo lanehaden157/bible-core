@@ -59,7 +59,6 @@ def _data(name):
 
 
 VBLOCK = re.compile(r'<(?:div|p)\s+class="v"[^>]*>(.*?)</(?:div|p)>', re.S)
-NUM = re.compile(r'<span class="n">(\d+)</span>')
 SPAN_ATTRS = re.compile(r'<span\s+class="r"([^>]*)>')
 DATA_ROOT = re.compile(r'data-root="([a-z0-9-]+)"')
 DATA_W = re.compile(r'data-w="([^"]*)"')
@@ -336,14 +335,26 @@ def tagged_map(html, lo, hi, maxv, present, slug="?"):
     return tagged, warn, holefilled
 
 
-def verse_text(html, v):
-    """Best-effort detagged English of a verse, for the report."""
+def verse_text(html, v, ch=None, first_ch=None):
+    """Best-effort detagged English of a verse, for the report. Given `ch`
+    and the unit's opening chapter, the chapter is rolled the way data_w
+    rolls it, so 11:1 isn't read as 10:1 in a unit that crosses one."""
+    cur, prev = first_ch, None
     for m in VBLOCK.finditer(html):
         seg = m.group(1)
-        nums = NUM.findall(seg)
-        if nums and int(nums[0]) == v:
+        nm = NUM_CV.search(seg)
+        if not nm:
+            continue
+        n = int(nm.group(2))
+        if cur is not None:
+            if nm.group(1):
+                cur, prev = int(nm.group(1)), None
+            elif prev is not None and n < prev:
+                cur += 1
+            prev = n
+        if n == v and (ch is None or cur is None or cur == ch):
             t = detag(re.sub(r"<sup\b.*?</sup>", "", seg, flags=re.S))
-            return re.sub(r"^\d+\s*", "", t)
+            return re.sub(r"^(?:\d+:)?\d+\s*", "", t)
     return ""
 
 
@@ -480,7 +491,7 @@ def coverage_for_fragment(slug, html, passage, threads_json=None, roots_json=Non
                 gaps.append({"thread": tid, "root": root_slug, "word_id": wid,
                              "ch": cv[0], "v": cv[1], "surface": wbi[wid]["surface"],
                              "translit": _translit_row(wbi[wid]),
-                             "text": verse_text(html, cv[1])})
+                             "text": verse_text(html, cv[1], cv[0], lo[0])})
         for wid in sorted(tagged_ids):
             row = wbi.get(wid)
             if row is None:
@@ -568,10 +579,13 @@ def audit(only=None, stub_for=None, unit_slugs=None):
                       f"‹{g['surface']}› ({g['translit']})")
                 if g["text"]:
                     print(f"             “{g['text'][:96]}”")
+                # "C:V" in a unit that crosses a chapter (retrofit reads both)
+                lo, hi = parse_range(u["passage"])
+                verse = f'"{g["ch"]}:{g["v"]}"' if lo[0] != hi[0] else g["v"]
                 stub_lines.append((tid,
-                    f'    {{ "unit": "{u["slug"]}", "verse": {g["v"]}, '
-                    f'"text": "???", "root": "{g["root"]}", '
-                    f'"why": "{g["translit"]} {g["ch"]}:{g["v"]} ({g["word_id"]})" }},'))
+                    f'    {{ "unit": "{u["slug"]}", "verse": {verse}, '
+                    f'"text": "???", "root": "{g["root"]}", "w": "{g["word_id"]}", '
+                    f'"why": "{g["translit"]} {g["ch"]}:{g["v"]}" }},'))
             for w in ws:
                 total_wrong += 1
                 print(f"      WRONG  {w['ch']}:{w['v']}  {w['word_id']}  "

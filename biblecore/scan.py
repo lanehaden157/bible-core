@@ -22,7 +22,8 @@ import re
 from biblecore.book import book
 
 VBLOCK = re.compile(r'<(div|p)\s+class="v"[^>]*>(.*?)</\1>', re.S)
-NUM = re.compile(r'<span class="n">(\d+)</span>')
+# the verse number; a chapter-seam label ("11:1") counts as its verse
+NUM = re.compile(r'<span class="n">\s*(?:\d+:)?(\d+)\s*</span>')
 ROOTSPAN = re.compile(r'data-root="([a-z0-9-]+)"')
 HITSPAN = re.compile(r'<span [^>]*\bdata-root="([a-z0-9-]+)"[^>]*>(.*?)</span>', re.S)
 TAGS = re.compile(r"<[^>]+>")
@@ -44,7 +45,7 @@ def scan_unit(html):
         nums = NUM.findall(seg)
         verse = int(nums[0]) if nums else None
         # detag, then drop the leading verse-number marker from the snippet text
-        plain = re.sub(r"^\d+\s*", "", detag(seg))
+        plain = re.sub(r"^(?:\d+:)?\d+\s*", "", detag(seg))
 
         for r in ROOTSPAN.findall(seg):
             e = roots.setdefault(r, blank())

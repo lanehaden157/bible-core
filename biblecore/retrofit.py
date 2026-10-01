@@ -11,9 +11,10 @@ no-ops once applied, so the build re-runs it every time.
   strip_span   whole unit: unwrap every <span class="CLS">…</span>, keeping the
                inner text
   add          wrap the first untagged occurrence of `text` in verse `verse`
-               (optional "cls": "rl" for a root-linked, uncounted span, default
+               (a number, or "C:V" in a unit that crosses a chapter;
+               optional "cls": "rl" for a root-linked, uncounted span, default
                 "r"; optional "nth": 2 to pick the 2nd .v block with that number
-                in a cross-chapter unit; optional "w": OSHB word id, required
+                in a cross-chapter unit; optional "w": the corpus word id, required
                 by unit_meta.validate() when `root` is a tracked thread)
   retag        change data-root on the span wrapping `text` in `verse`
                (optional "w": inject/update data-w on the retagged span --
@@ -41,9 +42,39 @@ from biblecore.book import book
 SPAN = r'<span class="r[l]?"[^>]*\bdata-root="%s"[^>]*>([^<]*)</span>'
 
 
+VBLOCK_ANY = re.compile(r'<(div|p) class="v">.*?</\1>', re.S)
+NUM_CV = re.compile(r'<span class="n">\s*(?:(\d+):)?(\d+)\s*</span>')
+CV_STR = re.compile(r"^(\d+):(\d+)$")
+
+
 def vblock(html, verse, nth=1):
     """(start, end) of the nth .v block whose number is `verse`. `nth` (default
-    1) disambiguates cross-chapter units where a bare verse number repeats."""
+    1) disambiguates cross-chapter units where a bare verse number repeats.
+
+    `verse` may also be "C:V" (what the porter's gap stubs write for a unit
+    that crosses a chapter): the chapter is rolled the way data_w and the
+    reader roll it -- the unit's passage seeds it, an explicit "11:1" label
+    resets it, a bare number that goes backwards moves to the next chapter."""
+    cv = CV_STR.match(str(verse))
+    if cv:
+        want = (int(cv.group(1)), int(cv.group(2)))
+        from biblecore import meta as um
+        passage = (um.parse(html) or {}).get("passage", "")
+        first = re.search(r"(\d+):\d+", passage)
+        ch, prev = (int(first.group(1)) if first else want[0]), None
+        for m in VBLOCK_ANY.finditer(html):
+            nm = NUM_CV.search(m.group(0))
+            if not nm:
+                continue
+            v = int(nm.group(2))
+            if nm.group(1):
+                ch, prev = int(nm.group(1)), None
+            elif prev is not None and v < prev:
+                ch += 1
+            prev = v
+            if (ch, v) == want:
+                return (m.start(), m.end())
+        return None
     pat = re.compile(r'<(?:div|p) class="v">(?:(?!</(?:div|p)>).)*?<span class="n">'
                      + re.escape(str(verse)) + r'</span>.*?</(?:div|p)>', re.S)
     hits = list(pat.finditer(html))

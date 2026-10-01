@@ -256,8 +256,9 @@ def validate(meta, threads_json=None):
             if k in c:
                 errs.append(f"{where}: '{k}' is not part of the schema — "
                             "candidates are {root, why, ids?, refs?} now "
-                            "(id-based, style reference §2/§3), not Hebrew "
-                            "consonant-skeleton stems")
+                            "(id-based, style reference §2/§3), not stem "
+                            "strings; propose lemma ids, or leave them for "
+                            "Claude Code to fill")
         if "ids" in c:
             id_re = _lemma_id_re()
             if not isinstance(c["ids"], list) or not all(
@@ -265,6 +266,13 @@ def validate(meta, threads_json=None):
                 errs.append(f"{where}: 'ids' must be a list of lemma ids matching "
                             f"{id_re.pattern} (Hebrew: '2763', '2763a'; "
                             f"Greek: 'klēronomeō')")
+        if "seq" in c:
+            # a fixed phrase (roots.json `seq`): the content words' lemma ids, in order
+            id_re = _lemma_id_re()
+            if not isinstance(c["seq"], list) or len(c["seq"]) < 2 or not all(
+                    isinstance(x, str) and id_re.match(x) for x in c["seq"]):
+                errs.append(f"{where}: 'seq' must be an ordered list of two or more "
+                            f"lemma ids (a fixed phrase, e.g. ['huios', 'dauid'])")
         if "refs" in c:
             if not isinstance(c["refs"], list) or not all(
                     isinstance(x, str) and _REF_RE.match(x) for x in c["refs"]):

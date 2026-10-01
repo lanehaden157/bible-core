@@ -146,6 +146,11 @@ def test_itin():
     fails = []
     if chk(ITIN_OK, META):
         fails.append(f"good itin rejected: {chk(ITIN_OK, META)}")
+    # a stop that covers a scene cites a range (Matthew 12: Grainfield 12:1–8)
+    for rng in ("33:5–6", "33:5-6", "33:5–34:2"):
+        ok = ITIN_OK.replace("<sup>33:5</sup></span>", f"<sup>{rng}</sup></span>", 1)
+        if chk(ok, META):
+            fails.append(f"range sup {rng} rejected: {chk(ok, META)}")
     bad = {
         "outside block": ITIN_OK.replace('<section class="block"><h2>Stations</h2>', '').replace('</section>', ''),
         "ends on arrow": ITIN_OK.replace('</div></section>', '<span class="arr">→</span></div></section>'),

@@ -105,7 +105,7 @@ def plan(html, passage, threads_json=None, roots_json=None):
                     f"{root_slug} {ch}:{v}: {len(spans)} span(s) but "
                     f"{len(want)} source hit(s) -- left alone. One span over "
                     f"two {book().language_name} words, one word as two spans, or a real "
-                    f"mismatch; see CLAUDE.md retrofit recipe step 4.")
+                    f"mismatch; see the retrofit recipe in CLAUDE.md (step 2).")
                 continue
 
             for (a_s, a_e, existing), wid in zip(spans, want):

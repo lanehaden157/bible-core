@@ -6,7 +6,8 @@ What the site relies on:
   2. its direct children are only `span.stop` and `span.arr`, alternating,
      starting and ending with a stop;
   3. every stop names a place, and a `<sup>` in a stop, if present, is a
-     verse reference `C:V`.
+     verse reference: `C:V`, or a range `C:V–V` / `C:V–C:V` for a stop
+     that covers a pericope (a Gospel moves by scenes; Lane, 2026-10-01).
 """
 import re
 
@@ -14,7 +15,7 @@ ITIN_RE = re.compile(r'<div\s+class="itin"[^>]*>(.*?)</div>', re.S)
 SECTION_OPEN_RE = re.compile(r'<section\s+class="block"[^>]*>')
 CHILD_RE = re.compile(r'<span\s+class="(stop|arr)"[^>]*>((?:(?!<span\s+class="(?:stop|arr)").)*?)</span>(?=\s*(?:<span\s+class="(?:stop|arr)"|$))', re.S)
 SUP_RE = re.compile(r"<sup>(.*?)</sup>", re.S)
-CV_RE = re.compile(r"^\d+:\d+$")
+CV_RE = re.compile(r"^\d+:\d+(?:\s*[–-]\s*(?:\d+:)?\d+)?$")
 TAG_RE = re.compile(r"<[^>]+>")
 
 
@@ -48,5 +49,5 @@ def check(html, meta):
             for s in SUP_RE.findall(k.group(2)):
                 if not CV_RE.match(s.strip()):
                     errs.append(f"{where}: stop '{name}' has <sup>{s}</sup> -- a "
-                                f"stop's sup is its verse, 'C:V'")
+                                f"stop's sup is its verse, 'C:V' (or a range, 'C:V–V')")
     return errs
