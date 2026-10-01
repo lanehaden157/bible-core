@@ -12,6 +12,7 @@ Commands:
   validate              hard-gate built fragments
   scan                  -> data/occurrences.json
   verify-occurrences    independent recount
+  verify-words          independent check of data/words/ + lemmas.json against the source
   roots                 validate data/roots.json
   digest                -> threads-digest.md
   colour ROOT [...]     colours for threads about to be promoted
@@ -49,6 +50,7 @@ COMMANDS = {
     "validate": ("biblecore.validate_units", "main"),
     "scan": ("biblecore.scan", "main"),
     "verify-occurrences": ("biblecore.verify_occurrences", "main"),
+    "verify-words": ("biblecore.verify_words", "main"),
     "roots": ("biblecore.roots", "main"),
     "digest": ("biblecore.digest", "main"),
     "colour": ("biblecore.colour", "main"),

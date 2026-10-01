@@ -9,6 +9,8 @@ acceptance checks a book can run on itself:
 
   pin          book.json "core", CORE_VERSION and the package agree
   corpus       the word table and reading text load
+  words        data/words/ and lemmas.json agree with the source, read
+               independently (verify_words.py)
   data         roots.json validates; every data/*.json parses
   units        every built unit validates (validate step)
   contracts    every built unit carries a contract stamp no newer than core
@@ -66,6 +68,11 @@ def check_corpus():
     if not words or not reading:
         return ["word table or reading text is empty"], []
     return [], [f"{len(reading)} verses, {len(words)} words"]
+
+
+def check_words():
+    from biblecore import verify_words
+    return verify_words.check()
 
 
 def check_data():
@@ -188,6 +195,7 @@ def check_idempotent():
 CHECKS = [
     ("pin", check_pin),
     ("corpus", check_corpus),
+    ("words", check_words),
     ("data", check_data),
     ("units", check_units),
     ("contracts", check_contracts),
