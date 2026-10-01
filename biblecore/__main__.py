@@ -24,6 +24,8 @@ Commands:
                         move built units to a newer contract
   test [--quick]        check this book: core pin, units, audit, build idempotence
   corpus                build the word table and reading text from the corpus
+  fetch [--force|--check]
+                        a Greek book's pinned corpus, sha1-checked (no-op for Hebrew)
   units-from-map [MAP] [--kinds outer,inner] [--dry]
                         unit rows + groupings from the literary unit map
   sync-check [--mark-synced [FILE ...] | --mark-pasted]
@@ -57,12 +59,13 @@ COMMANDS = {
     "manifest": ("biblecore.manifest", "main"),
     "migrate": ("biblecore.migrate", "main"),
     "test": ("biblecore.selftest", "main"),
+    "fetch": ("biblecore.fetch", "main"),
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }
 # commands whose main() parses its arguments with argparse (its own --help);
 # every other one gets its module docstring for -h/--help and doesn't run
-ARGPARSED = {"port", "data-w", "leads", "migrate", "units-from-map"}
+ARGPARSED = {"port", "data-w", "leads", "migrate", "units-from-map", "fetch"}
 HELP = ("-h", "--help")
 
 
@@ -178,9 +181,12 @@ def _show_book(argv):
     for line in status_lines(b):
         print(line)
     print("paths")
-    for k in ("words", "reading", "units", "data", "css", "source", "out",
-              "retrofit", "retro", "wlc"):
-        print(f"  {k:10} {b.path(k)}")
+    corpus = ("morphgnt", "lxx", "greek_lexicon") if b.language == "greek" else ("wlc",)
+    keys = ("words", "reading", "units", "data", "css", "source", "out",
+            "retrofit", "retro") + corpus
+    w = max(10, *(len(k) for k in keys))
+    for k in keys:
+        print(f"  {k:{w}} {b.path(k)}")
     return 0
 
 

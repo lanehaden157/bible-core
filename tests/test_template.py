@@ -102,26 +102,30 @@ def test_template_has_no_unfilled_placeholders_after_instantiation():
 
 
 def test_new_book_gets_the_ci_workflow_unchanged():
-    # structural audit B3: every book runs the same workflow, so new_book
-    # copies it byte for byte and it holds none of the template's placeholders
+    # structural audit B3: every book of a language runs the same workflow,
+    # so new_book copies it byte for byte (its language blocks resolved) and
+    # it holds none of the template's placeholders
+    from new_book import keep_language
     rel = os.path.join(".github", "workflows", "tests.yml")
     src = os.path.join(support.CORE, "template", rel)
     if not os.path.exists(src):
         return [f"template has no {rel}"]
     fails = []
-    if PLACEHOLDER_RE.search(open(src, encoding="utf-8").read()):
+    text = open(src, encoding="utf-8").read()
+    if PLACEHOLDER_RE.search(text):
         fails.append(f"template {rel} holds a placeholder; it must be the same in every book")
-    d = tempfile.mkdtemp(prefix="bc-tpl-")
-    try:
-        make_book(d, "Numbers", "Num", "numbers")
-        got = os.path.join(d, rel)
-        if not os.path.exists(got):
-            fails.append(f"new book has no {rel}")
-        elif open(got, "rb").read() != open(src, "rb").read():
-            fails.append(f"new book's {rel} differs from the template's")
-        return fails
-    finally:
-        shutil.rmtree(d)
+    for language, name, osis in (("hebrew", "Numbers", "Num"), ("greek", "Mark", "Mark")):
+        d = tempfile.mkdtemp(prefix="bc-tpl-")
+        try:
+            make_book(d, name, osis, name.lower(), language=language)
+            got = os.path.join(d, rel)
+            if not os.path.exists(got):
+                fails.append(f"new {language} book has no {rel}")
+            elif open(got, encoding="utf-8").read() != keep_language(text, language):
+                fails.append(f"new {language} book's {rel} differs from the template's")
+        finally:
+            shutil.rmtree(d)
+    return fails
 
 
 def test_new_book_gets_the_template_gitattributes():

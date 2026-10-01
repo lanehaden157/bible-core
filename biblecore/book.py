@@ -190,6 +190,11 @@ class Book:
         return self.cfg["language"]
 
     @property
+    def language_name(self):
+        """The language as printed in messages ('Hebrew', 'Greek')."""
+        return self.language.capitalize()
+
+    @property
     def versification(self):
         return self.cfg.get("versification", "kjv")
 

@@ -23,9 +23,17 @@ exception and live in `threads.json`.
 Tag **every** occurrence with the one slug, **including where the English uses a
 different word** — the tag follows the lexeme, not the gloss.
 
+<!-- lang: hebrew -->
 `translit` is one bare root form (Hebrew books), not a list of inflected forms;
 `gloss` is plain English (§3). No stem/binyan labels. A stem split that matters
 goes in a thread `note` or a verse `.gloss`, in plain language.
+<!-- /lang -->
+<!-- lang: greek -->
+`translit` is the lexical form (the lemma as a lexicon lists it, `klēronomeō`),
+not a list of inflected forms; `gloss` is plain English (§3). No tense or voice
+labels. A grammatical point that matters goes in a thread `note` or a verse
+`.gloss`, in plain language.
+<!-- /lang -->
 
 Every slug must resolve — in `threads-digest.md` or this artifact's `roots[]` —
 or the build fails. **`roots[]` is local roots only**: don't re-declare a
@@ -58,6 +66,7 @@ No original-language string is ever compared to another. **(learned:**
 consonant-substring matching measured 0–42% recall on Joshua's weak-root
 verbs.**)**
 
+<!-- lang: hebrew -->
 One root often spans several Strong's numbers, and one number can bundle
 senses worth splitting, so a root is a **decision**, recorded as an id set
 with a note. A bare id (`2416`) claims every lexeme under the number; a
@@ -66,12 +75,30 @@ suffixed id (`2416e`) claims exactly one.
 ```html
 <span class="r" data-root="devote" data-w="068w5">devoted</span>
 ```
+<!-- /lang -->
+<!-- lang: greek -->
+A Greek book's lemma ids are transliterated lemmas (`klēronomeō`), with a
+digit only where two lemmas share a spelling (`tis`, `tis2`). One root often
+spans several lemmas (a verb, its noun, its compounds: `klēronomeō`,
+`klēronomia`, `klēronomos`), so a root is a **decision**, recorded as an id
+set with a note.
+
+```html
+<span class="r" data-root="inherit" data-w="01050506">will inherit</span>
+```
+<!-- /lang -->
 
 Local roots don't need `data-w`, and neither do tracked spans inside a `data-verses` component (a condensed table cell is a colour-only summary tag). **You never hand-chase word ids**: the porter
 fills them by per-verse alignment and reports the few it can't decide.
 
+<!-- lang: hebrew -->
 **Never hand-type Hebrew; pull by word id. (learned:** NFC normalisation alone
 reorders marks in 47% of Joshua's words.**)**
+<!-- /lang -->
+<!-- lang: greek -->
+**Never hand-type Greek; pull by word id.** Accents and breathings give one
+word several spellings; its id has one.
+<!-- /lang -->
 
 ---
 
@@ -117,10 +144,17 @@ The porter moves these into `data/canon.json` and the canon registries in
 
 ### `roots[]` — every entry `{root, translit, gloss, example?, echo?}`
 
+<!-- lang: hebrew -->
 `root` matches `[a-z0-9-]+`. **No** `color`/`colour`, **no** `kind`/`members`,
 no other keys. `gloss` is a short general definition — no stem or
 part-of-speech labels. Never seed a gloss from Strong's first definition
 (misleading in 9 of 16 sampled Joshua words).
+<!-- /lang -->
+<!-- lang: greek -->
+`root` matches `[a-z0-9-]+`. **No** `color`/`colour`, **no** `kind`/`members`,
+no other keys. `gloss` is a short general definition in plain English — no
+tense, voice or part-of-speech labels.
+<!-- /lang -->
 
 ### `threads` — `{opens, payoffs, candidates, retro}`
 
@@ -130,9 +164,16 @@ All four present, each a list, empty allowed.
 `threads-digest.md` (propose new ones via `candidates`); `note` is the
 one-line popover prose.
 
+<!-- lang: hebrew -->
 **`candidates[]`** — `{root, why, ids?, refs?}`. Proposals only; `ids` are the
 lemma ids you saw (evidence), copied as the word table spells them (`"6485 a"`
 is fine; the porter reads it as `6485a`), `refs` a few representative verses
+<!-- /lang -->
+<!-- lang: greek -->
+**`candidates[]`** — `{root, why, ids?, refs?}`. Proposals only; `ids` are the
+lemma ids you saw (evidence), copied as the word table spells them
+(`klēronomeō`), `refs` a few representative verses
+<!-- /lang -->
 as bare `C:V`. **Claude
 decides whether a candidate is promoted, biased toward book-wide**, and asks
 Lane only when genuinely unsure.
@@ -214,6 +255,7 @@ unit 1's first draft named eight sources and two repo files.**)**
 
 ---
 
+<!-- lang: hebrew -->
 ## 5. Hebrew in English ✎
 
 **Transliteration** comes only from the core's Hebrew adapter
@@ -225,6 +267,24 @@ Scheme: a diacritic only where the plain letter is already claimed (`ḥ ṭ ś`
 **Translation philosophy.** A fresh, wooden-but-readable rendering from the
 Hebrew, not a polish of an existing English version. Creative, intentional
 glosses are encouraged.
+<!-- /lang -->
+<!-- lang: greek -->
+## 5. Greek in English ✎
+
+**Transliteration** comes only from the core's Greek adapter
+(`biblecore/lang/greek.py`; its test file is the authoritative definition),
+and this is the scheme to follow by hand: η → `ē` and ω → `ō` (the macron
+tells the letter apart, it isn't vowel length); `th ph ch ps` for θ φ χ ψ,
+`y` for υ except in `ou au eu`; γγ/γκ → `ng`/`nk`; rough breathing → initial
+`h`, initial ρ → `rh`; accents, smooth breathing and iota subscript dropped.
+*kyrios* standing for the divine name is rendered **Yahweh**. A Hebrew word
+(behind a Septuagint word, or a Semitism) uses the Hebrew scheme (`ḥ ṭ ś`,
+`ʾ`/`ʿ`, no vowel length).
+
+**Translation philosophy.** A fresh, wooden-but-readable rendering from the
+Greek (SBLGNT), not a polish of an existing English version. Creative,
+intentional glosses are encouraged.
+<!-- /lang -->
 
 **Wording.** Check `translation-choices.md` (which starts from
 `canon-conventions.md`) before rendering a lexeme. A better
@@ -236,20 +296,51 @@ glossary at unit 10 and paid with a retroactive audit.**)**
 
 ## 6. Judgment
 
+<!-- lang: hebrew -->
 **Be tough on structures.** Chiasms and rings only when textually verifiable.
 Prefer the Masoretic paragraph breaks (`candidate-boundaries.md`) over
 patterns you noticed. **(learned:** eight over-reaching chiasms were cut from
 Matthew.**)**
+<!-- /lang -->
+<!-- lang: greek -->
+**Be tough on structures.** Chiasms and rings only when textually verifiable.
+Weigh the book's own markers (formulae, transitions, a change of scene or
+speaker) and the patterns you notice together: neither outranks the other,
+and where they disagree, say so and argue for the boundary you choose.
+**(learned:** eight over-reaching chiasms were cut from Matthew.**)**
+<!-- /lang -->
 
 **`threads.json` and `roots.json` are Lane's policy.** Nothing in the pipeline
 writes either.
 
+<!-- lang: hebrew -->
 **Names are joined by hand.** Place-name wordplay is real but Strong's
 etymology is unreliable. Add names to `roots.json` one at a time, with the
 reason.
 
 ✎ **Genre cautions for this book** (lists, law, poetry, …): add them here as
 units surface them.
+<!-- /lang -->
+<!-- lang: greek -->
+**Names are joined by hand.** A Greek name often carries a Hebrew one
+(*Iēsous* is *Yehoshua*); say so where it matters. Add names to `roots.json`
+one at a time, with the reason.
+
+✎ **Genre cautions for this book.** Strong suggestions to start from: keep
+the ones that fit, delete the rest, and add more as units surface them.
+
+- **Gospels:** a difference from a parallel in another Gospel is evidence
+  about this book's emphasis, not the whole reading; compare where it
+  illuminates, not verse by verse.
+- **Old Testament quotations** often follow the Septuagint and can differ
+  from the Hebrew; say which the wording follows when it matters to the
+  reading.
+- **Letters:** follow the argument. The connecting words (for, therefore,
+  but) carry the structure, and a unit should end where a step of the
+  argument does.
+- **Apocalyptic:** the images mostly come from the Prophets; trace them there
+  before reading them as a code for later events.
+<!-- /lang -->
 
 ---
 
@@ -294,8 +385,14 @@ exists. Until then the shape is:
   "passage": "{{BOOK}} 1:1–10",
   "title": "Working Title",
   "roots": [
+<!-- lang: hebrew -->
     { "root": "count", "translit": "paqad", "gloss": "count, muster, attend to",
       "echo": "Gen 50:24 — 'God will surely attend to you'" }
+<!-- /lang -->
+<!-- lang: greek -->
+    { "root": "count", "translit": "logizomai", "gloss": "count, reckon, credit to",
+      "echo": "Gen 15:6 — 'it was counted to him as righteousness'" }
+<!-- /lang -->
   ],
   "threads": { "opens": [], "payoffs": [], "candidates": [], "retro": [] }
 }
@@ -338,10 +435,19 @@ the model):
     | | **PART ONE — Label (1:1–25:18)** | |
     | | *I. Label (1:1–10:10)* | |
     | 01 | 1:1–54 | Title |
+<!-- lang: hebrew -->
     | 17 | 16:36–17:13 [Heb 17:1–28] | Title |
 
 Bold rows open an outer grouping, italic rows an inner one; both are
 optional. Passages are in English numbering, with any Hebrew difference in
 `[Heb ...]`. Renumbering after units ship means editing
+<!-- /lang -->
+<!-- lang: greek -->
+    | 02 | 1:18–2:23 | Title |
+
+Bold rows open an outer grouping, italic rows an inner one; both are
+optional. Passages are in English numbering, which the SBLGNT shares.
+Renumbering after units ship means editing
+<!-- /lang -->
 `threads.json` opens/payoffs, every `retro` entry, and every fragment's meta
 block, so confirm it before unit 1.

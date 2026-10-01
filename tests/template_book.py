@@ -2,8 +2,9 @@
 
 make_book(dest, name, osis, slug) copies template/ to dest, fills the
 {{BOOK}}/{{OSIS}}/{{ABBREV}}/{{SLUG}} placeholders (file names included),
-and vendors this checkout's biblecore/ + canon files, the same way
-tools/core_sync.py does minus the git bookkeeping.
+resolves the language blocks (`language`, default hebrew), and vendors
+this checkout's biblecore/ + canon files, the same way tools/core_sync.py
+does minus the git bookkeeping.
 """
 import os
 import shutil
@@ -15,8 +16,8 @@ sys.path.insert(0, os.path.join(support.CORE, "tools"))
 from new_book import instantiate  # noqa: E402
 
 
-def make_book(dest, name, osis, slug, abbrev=None):
-    instantiate(dest, name, osis, slug, abbrev)
+def make_book(dest, name, osis, slug, abbrev=None, language="hebrew"):
+    instantiate(dest, name, osis, slug, abbrev, language)
     shutil.copytree(os.path.join(support.CORE, "biblecore"), os.path.join(dest, "biblecore"),
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
     from core_sync import copy_canon_files

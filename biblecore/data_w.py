@@ -104,7 +104,7 @@ def plan(html, passage, threads_json=None, roots_json=None):
                 report.append(
                     f"{root_slug} {ch}:{v}: {len(spans)} span(s) but "
                     f"{len(want)} source hit(s) -- left alone. One span over "
-                    f"two Hebrew words, one word as two spans, or a real "
+                    f"two {book().language_name} words, one word as two spans, or a real "
                     f"mismatch; see CLAUDE.md retrofit recipe step 4.")
                 continue
 

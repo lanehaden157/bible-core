@@ -316,7 +316,8 @@ def _append_coverage(lines, slug, html, passage, retrofit_applied=True):
         lines.append("Every tracked-thread occurrence in this passage is tagged. ✓")
         return
     if cov["gaps"]:
-        lines.append(f"**{len(cov['gaps'])} occurrence(s) the Hebrew has but the "
+        lines.append(f"**{len(cov['gaps'])} occurrence(s) the "
+                     f"{book().language_name} has but the "
                      f"fragment leaves untagged** — add to `retrofit-tags.json` "
                      f"`add` (fill in `text`):")
         lines.append("")

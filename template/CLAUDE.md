@@ -71,9 +71,20 @@ first and stage explicit paths.
 
 ## Corpus
 
+<!-- lang: hebrew -->
 ✎ Record the morphhb pin, the verse/word/paragraph counts `python -m biblecore corpus`
 reports, and the check against a printed edition. If a count drifts on
 re-fetch, flag it loudly.
+<!-- /lang -->
+<!-- lang: greek -->
+MorphGNT (SBLGNT, all 27 books) and the LXX are git-ignored: after a fresh
+clone, `python -m biblecore fetch` puts them back at the pins in the vendored
+core and checks every file's sha1 (CI runs it too). A sha1 failure means the
+corpus isn't the pinned one: flag it loudly, don't build on it.
+
+✎ Record the MorphGNT pin (book.json `corpus.pin`), the verse and word counts
+`python -m biblecore corpus` reports, and the check against a printed SBLGNT.
+<!-- /lang -->
 
 ## Session files
 

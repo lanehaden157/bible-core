@@ -162,8 +162,9 @@ def template_drift(book_root, base=None, head="HEAD"):
       new      the template added it; the book doesn't have it
       removed  the template dropped it; the book still has it
     """
-    from new_book import fill
+    from new_book import fill, for_language, keep_language
     cfg = _book_cfg(book_root)
+    language = cfg.get("language", "hebrew")
     base = base or cfg.get("template")
     if not base:
         raise RuntimeError("book.json has no \"template\" base; record one with "
@@ -174,8 +175,11 @@ def template_drift(book_root, base=None, head="HEAD"):
     for rel in sorted(before | after):
         if rel.endswith(".gitkeep") or rel.startswith(BOOK_OWNED + GENERATED):
             continue
-        old = _show(base, rel) if rel in before else None
-        new = _show(head, rel) if rel in after else None
+        if not for_language(rel, language):
+            continue
+        # each side as a book of this language gets it (its lang blocks)
+        old = keep_language(_show(base, rel), language) if rel in before else None
+        new = keep_language(_show(head, rel), language) if rel in after else None
         if old == new:
             continue
         old = fill(old, subs) if old is not None else None

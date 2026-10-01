@@ -1,5 +1,10 @@
 __pycache__/
 *.pyc
 node_modules/
+# lang: greek
+# MorphGNT + LXX: `python -m biblecore fetch` puts them back (pinned, sha1-checked)
+corpus/morphgnt/
+corpus/lxx/
+# /lang
 out/
 project-side/sync-state.json

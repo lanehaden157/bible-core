@@ -277,15 +277,20 @@ def main(argv=None):
     for line in _update_book_json(b.root, used, map_rel):
         print(line)
 
-    if not a.no_leads and b.language == "hebrew":
+    if not a.no_leads and b.language in ("hebrew", "greek"):
         nxt = next((u["n"] for u in new["units"] if not u.get("built")), None)
-        if nxt is not None:
-            if os.path.exists(b.path("lexicon")):
-                from biblecore import leads
-                leads.main([str(nxt)])
-            else:
-                print(f"no lexicon at {os.path.relpath(b.path('lexicon'), b.root)} "
-                      f"-- canon leads skipped (tools/new_book.py copies it)")
+        # Hebrew leads read Strong's glosses; Greek ones the fetched NT + LXX
+        need = ["lexicon"] if b.language == "hebrew" else ["morphgnt", "lxx"]
+        missing = [k for k in need if not os.path.exists(b.path(k))]
+        if nxt is not None and not missing:
+            from biblecore import leads
+            leads.main([str(nxt)])
+        elif nxt is not None:
+            how = ("tools/new_book.py copies it" if b.language == "hebrew"
+                   else "run `python -m biblecore fetch`")
+            what = "lexicon at " if b.language == "hebrew" else ""
+            print(f"no {what}{' or '.join(os.path.relpath(b.path(k), b.root) for k in missing)} "
+                  f"-- canon leads skipped ({how})")
     print("next: python -m biblecore build, then sync")
     return 0
 
