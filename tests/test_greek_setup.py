@@ -314,6 +314,8 @@ def test_greek_book_from_the_template_builds_and_tests():
                 fails.append(f"`biblecore {' '.join(args)}` exited {r.returncode}:\n"
                              + (r.stdout + r.stderr)[-1500:])
                 return fails
+            if args == ("corpus",) and "lemmas have a gloss" not in r.stdout:
+                fails.append(f"`biblecore corpus` printed no lexicon check:\n{r.stdout}")
         r = _cli(d, "book")
         for want in ("morphgnt", "lxx", "greek_lexicon"):
             if want not in r.stdout:

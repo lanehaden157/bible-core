@@ -1,6 +1,7 @@
 # corpus/
 
-Shared corpus files `tools/new_book.py` copies into a new book.
+Shared corpus files `tools/new_book.py` copies into a new book. The Greek
+book's larger corpora are fetched instead (below).
 
 - `lexicon/HebrewStrong.xml` — Strong's Hebrew dictionary in XML, from the
   OpenScriptures HebrewLexicon project
@@ -23,3 +24,21 @@ Shared corpus files `tools/new_book.py` copies into a new book.
   the same licence — the site's own text, notes and code are unaffected,
   since they are separate works shown alongside it, not built from it. The
   site credits both MorphGNT projects (main.js `SOURCES`, `.site-foot`).
+
+## Fetched for a Greek book (`python -m biblecore fetch`)
+
+Not kept here: `biblecore/fetch.py` pins them and downloads them into the book
+(git-ignored there), checking every file's sha1. The commits are Matthew's
+`pipeline/fetch_corpus.py`'s; the sha1s were taken 2026-10-01 and match
+Matthew's copies.
+
+- **MorphGNT SBLGNT** (https://github.com/morphgnt/sblgnt, commit
+  `aaed91e57c8e4a8dc9a2383e129ca5e75fe6393d`): all 27 `*-morphgnt.txt`
+  files, ~11 MB, into `paths.morphgnt` (`corpus/morphgnt`). The SBLGNT text
+  is under the SBLGNT EULA (https://sblgnt.com/license); the morphology and
+  lemmatization are CC BY-SA 3.0. The site footer credits both (main.js
+  `SOURCES`).
+- **CenterBLC LXX** (https://github.com/CenterBLC/LXX, commit
+  `4829f3746c84d75576702498e75a68856358f289`, `tf/1935/`, Rahlfs 1935):
+  `book.tf`, `chapter.tf`, `verse.tf`, `lex_utf8.tf`, ~15.5 MB, into
+  `paths.lxx` (`corpus/lxx`). MIT. Read by canon leads only.

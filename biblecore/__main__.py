@@ -72,9 +72,26 @@ HELP = ("-h", "--help")
 def _corpus(argv):
     from biblecore import corpus
     from biblecore.book import book
-    counts = corpus.adapter().build(book())
+    b = book()
+    counts = corpus.adapter().build(b)
     print(json.dumps(counts))
     print("check these counts against a printed edition before trusting the corpus")
+    if b.language == "greek":
+        # the interlinear's glosses: MorphGNT sub-projects have drifted on
+        # accents before, so check every lemma finds its lexicon entry
+        import os
+        from biblecore.corpus import morphgnt
+        from biblecore.lang import greek_lexicon
+        if os.path.exists(b.path("greek_lexicon")):
+            glosses = greek_lexicon.load_glosses(b.path("greek_lexicon"))
+            forms = morphgnt.lemma_forms(b)
+            used = sorted({r["lemma"] for r in morphgnt.load_words(b)})
+            miss = [k for k in used if not glosses.get(forms.get(k))]
+            print(f"lexicon: {len(used) - len(miss)} of {len(used)} lemmas have a gloss"
+                  + (f"; none for {', '.join(miss)}" if miss else ""))
+        else:
+            print(f"lexicon: none at {os.path.relpath(b.path('greek_lexicon'), b.root)} "
+                  f"(tools/new_book.py copies it); the interlinear will have no glosses")
     return 0
 
 

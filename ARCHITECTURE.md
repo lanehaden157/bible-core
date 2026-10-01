@@ -253,7 +253,7 @@ Matthew keeps its own "Lane decides" policy.
 | axis | Joshua | Matthew | default for a new book |
 |---|---|---|---|
 | language / transliteration | Hebrew, `hebrew.py`, no vowel length | Greek, `greek.py`, ē/ō | from the language adapter. **Schemes are frozen per language, never harmonised (H10).** |
-| corpus | OSHB, word ids | MorphGNT (SBLGNT), word ids (0.7.0) | a corpus with word ids whenever one exists |
+| corpus | OSHB, word ids | MorphGNT (SBLGNT), word ids (0.7.0) | a corpus with word ids whenever one exists, pinned: npm (morphhb) for Hebrew, `python -m biblecore fetch` for Greek |
 | groupings | 4 movements | 3 movements + 5 discourses | `groupings: [{kind, n, label, span, units}]`, where the book picks the kinds (D11) |
 | optional components | echo | ring, table, itinerary, compare, synoptic | from the registry (`biblecore/components/`), enabled in `book.json`; template enables echo + list |
 | `opens.note` | required | optional | required |
@@ -417,15 +417,31 @@ project side after bootstrap (the order Numbers went in). `docs/new-book.md`
 is the full checklist around them (who does what, the claude.ai project, the
 unit loop):
 
-1. `python tools/new_book.py ../<Book> --book <Book> --osis <OSIS> [--github]`
+1. `python tools/new_book.py ../<Book> --book <Book> --osis <OSIS> [--language greek] [--github]`
    copies the template with its placeholders filled, vendors the core, copies
-   the Strong's lexicon (`corpus/lexicon/`, sha1-checked), runs `npm install` +
-   `python -m biblecore corpus` + `build` (whose `assets` step writes the app
-   shell), and makes the first commit. `book.json` gets `core` and the
-   template base (`template`, this checkout's commit) filled in.
-   `--github` also creates the public repo, enables Pages and runs the first
-   sync; without it the script prints those commands. Check the corpus counts
-   against a printed edition.
+   the lexicon (`corpus/lexicon/`, sha1-checked), puts the corpus on disk
+   and runs `python -m biblecore corpus` + `build` (whose `assets` step
+   writes the app shell), and makes the first commit. `book.json` gets
+   `core` and the template base (`template`, this checkout's commit) filled
+   in. `--github` also creates the public repo, enables Pages and runs the
+   first sync; without it the script prints those commands. Check the corpus
+   counts against a printed edition. The language (default `hebrew`) picks:
+   - **Hebrew:** Strong's lexicon, `npm install` (morphhb, pinned in
+     `package.json`), `versification` `kjv`.
+   - **Greek:** the MorphGNT lexicon, `python -m biblecore fetch` (below),
+     `"corpus": {"kind": "morphgnt", …}` and `versification` `source` in
+     `book.json` (the Greek paths are `book.py`'s defaults), no
+     `package.json`. `biblecore corpus` also checks that every lemma finds
+     a lexicon gloss.
+   - **Template text:** template files carry language blocks
+     (`<!-- lang: greek -->` … `<!-- /lang -->`, `# lang:` in yml and
+     `.gitignore`), and the book keeps its own language's. That covers the
+     pasted field, the style reference, `translation-choices.md`, CLAUDE.md's
+     corpus section, `.gitignore` and the CI workflow. `core_diff --template`
+     resolves them the same way.
+
+   `--no-register` skips the `canon/books.json` row (a scratch or test book;
+   a scratch Matthew would otherwise overwrite Matthew's legacy row).
 2. Once the map is delivered, run `python -m biblecore units-from-map --kinds
    <outer>,<inner>` in the book. It reads the map's Overview table, adds
    unit rows and groupings to `data/units.json` (additive: existing rows and
@@ -484,11 +500,38 @@ Matthew's MorphGNT and SBLGNT files read-only (`tests/test_corpus_morphgnt.py`):
 - `roots.validate` and the audit find *klēronomeō* at 5:5 and *eleos* at 9:13;
 - `emit` writes a Greek interlinear with no native script.
 
-A Greek book sets `"language": "greek"`, `"corpus": {"kind": "morphgnt", …}`,
-`"versification": "source"` and `paths.morphgnt` (plus `paths.greek_lexicon`
-and `paths.lxx` since 0.9.2). The template's chat-side
-text and style reference are still Hebrew-shaped, so adapt them when the
-first NT book starts (G12).
+A Greek book sets `"language": "greek"`, `"corpus": {"kind": "morphgnt", …}`
+and `"versification": "source"`; its corpus paths (`morphgnt`, `lxx`,
+`greek_lexicon`) default to `corpus/…`. `new_book.py --language greek`
+writes all of this (0.12.0, Greek-in-core pass 1).
+
+**The Greek corpus (0.12.0, Lane's L1).** `python -m biblecore fetch` is the
+Greek book's `npm ci`. The pins live in `biblecore/fetch.py`, the same commits
+as Matthew's `pipeline/fetch_corpus.py`, so a book's corpus moves only with its
+vendored core:
+- MorphGNT SBLGNT, all 27 books. Leads read the rest of the NT, and the
+  lemma ids number a shared transliteration by first appearance across every
+  file on disk, so a book with fewer files could spell an id differently.
+- The four CenterBLC LXX feature files that `corpus/lxx.py` reads.
+
+Every file has a sha1, checked on download and on every run. A mismatch
+exits 1 and names the file (`--force` replaces it, `--check` checks without
+the network). The files are git-ignored in the book; `lexemes.yaml` is copied
+from core and committed. For a Hebrew book `fetch` does nothing.
+
+**Chat-side text for Greek (G12, closed 0.12.0).** The template's language
+blocks carry the Greek wording, written fresh for core books (Lane's calls,
+2026-10-01). Greek books get:
+- "a little Greek and Hebrew", with grammar categories named;
+- the LXX-first lens, with the Hebrew behind it where it matters;
+- the transliteration scheme spelled out in style reference §5, since the
+  chat side can't run `lang/greek.py`;
+- general gloss rules, with no Strong's;
+- boundaries argued from the book's own markers and the patterns noticed,
+  weighed together (Hebrew got the same change);
+- four NT genre cautions as strong suggestions: Gospel parallels, LXX
+  quotations, the argument of a letter, apocalyptic imagery;
+- a `logizomai` worked example.
 
 **Lexical bridge (F2).** `canon/bridge.json` holds one row per canon thread's
 key word: the Hebrew ids, the LXX lemma(s) with a verse, and the NT lemma(s)
@@ -542,9 +585,13 @@ the process, so a harness that calls test functions directly is covered too
 (structural audit B1). `run.py` still fails the run if a file there
 changes, which also covers child processes. Set up with `git clone` of each next to
 bible-core, `npm install` in `../Joshua` and `../Numbers` (morphhb), and
-`python pipeline/fetch_corpus.py` in `../Matthew`. The Greek path also has
-its own small scratch book (`tests/greek_book.py`), so it is tested without
-Matthew. Its strongest check:
+`python pipeline/fetch_corpus.py` in `../Matthew` (`test_greek_setup` checks
+those files against core's `fetch.py` pins). The Greek path also has its own
+small scratch book (`tests/greek_book.py`), so it is tested without Matthew.
+On it, `test_greek_setup` runs a Greek book made from the template through
+the CLI: `corpus`, `build`, `test`, `book` and `units-from-map`. It also tests
+the fetch's sha1 failures against a local `file://` mirror, so the suite
+needs no network. Its strongest check:
 Joshua rebuilt from the template, porting its four source artifacts through
 the CLI, reproduces Joshua's committed units byte for byte with a clean
 thread audit, and its build writes the same app shell as Joshua's
@@ -560,10 +607,12 @@ GitHub Actions, on every push and pull request:
   beside it from their pushed `main`, installs morphhb and Matthew's corpus
   (cached), checks that data is in place (the sibling tests would otherwise
   skip quietly), and runs `python tests/run.py`.
-- Each book runs `python -m biblecore test` (with `npm ci`, since without
-  morphhb's verse map a Hebrew book's English numbering quietly falls back to
-  the Hebrew) from `.github/workflows/tests.yml`. The template ships it
-  unchanged (`test_template` checks), so a new book has CI from its first
+- Each book runs `python -m biblecore test` from `.github/workflows/tests.yml`.
+  A Hebrew book runs `npm ci` first, since without morphhb's verse map its
+  English numbering quietly falls back to the Hebrew. A Greek book runs a
+  cached `python -m biblecore fetch`, which checks every sha1 on a cache hit
+  too. The template ships the workflow unchanged apart from its language
+  block (`test_template` checks both), so a new book has CI from its first
   push. Commits touching only `project-side/` or session files skip it.
 A failed run emails the pusher (GitHub's default notification).
 

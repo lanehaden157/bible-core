@@ -31,7 +31,9 @@ books.
   built into the sibling `../hub` repo, which rebuilds itself daily from a
   GitHub Action.
 - `corpus/` — shared corpus files a new book gets a copy of (the Strong's
-  lexicon; for a Greek book, the MorphGNT lexicon).
+  lexicon; for a Greek book, the MorphGNT lexicon). A Greek book fetches its
+  MorphGNT and LXX files with `python -m biblecore fetch` (pins and licences
+  in `corpus/README.md`).
 - `tests/` — `python tests/run.py`. Reads the sibling `../Joshua` (the
   reference book), `../Numbers` and `../Matthew` checkouts through temporary
   copies (`tests/support.py`), which also refuses any write into them, and
@@ -41,7 +43,7 @@ books.
 - `.github/workflows/tests.yml` — the same suite on GitHub Actions, on every
   push and PR, with the siblings cloned beside it. The book-side workflow is
   `template/.github/workflows/tests.yml` (`biblecore test`), identical in
-  every book.
+  every book of a language (npm for Hebrew, `biblecore fetch` for Greek).
 
 Status and history: `../session_index.md` and the other `Bible/` session files
 one level up.
