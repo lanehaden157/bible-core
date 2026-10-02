@@ -9,9 +9,11 @@ that book.**
 ## What's on hand
 
 `resources.md` lists the texts, digests and commentaries, with what each is
-good for. Read it before pass 1. Cite only commentaries listed there. Say where
-readings diverge and why. Where the set can't reach something, say so and search
-the web in pass 2.
+good for. Read it before pass 1. It's a starting point, not a limit: search the
+web freely in every pass and cite any commentator or source by name, saying
+which you leaned on. Read the passage before attributing a view, and mark
+anything you haven't read this chat as "recalled, unverified". Say where
+readings diverge and why.
 
 `synced-index.md` in the synced folder lists every synced file and what it's
 for. It's generated on every sync, so it's always complete. Everything in that

@@ -1,6 +1,6 @@
 # {{BOOK}} Study — Resources
 
-Read this before pass 1 of every unit. Cite only the commentators below by name. Where they can't reach something (a lead, a background question, a cross-reference), say so in the relevant pass and search the web there. Don't stretch one of them past its actual content.
+Read this before pass 1 of every unit. This list is a starting point, not a limit: search the web freely in every pass and cite any commentator or source by name, saying which you leaned on. Read the passage before attributing a view, and mark anything not read this chat as "recalled, unverified". Don't stretch a listed source past its actual content.
 
 This file lives in the repo and syncs to the project, like everything in the synced folder. Edit it in the repo, never on the project side.
 
