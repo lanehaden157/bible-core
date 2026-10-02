@@ -196,3 +196,21 @@ def test_retrofit_finds_a_chapter_verse_by_rolling():
     if retrofit.vblock(html, "10:2") is not None:
         fails.append("vblock found a verse the fragment doesn't have")
     return fails
+
+
+def test_retrofit_add_twice_in_a_verse_by_word_id():
+    from biblecore import retrofit
+    html = ('<p class="v"><span class="n">19</span>the five loaves, then the loaves.</p>')
+    fails = []
+    for w in ("01141912", "01141928"):
+        it = {"unit": "u", "verse": 19, "root": "bread", "text": "loaves", "w": w}
+        html, msg = retrofit.apply_add(html, it)
+        if not msg.startswith("ADD"):
+            fails.append(f"add w={w}: {msg}")
+    again, msg = retrofit.apply_add(html, {"unit": "u", "verse": 19, "root": "bread",
+                                           "text": "loaves", "w": "01141928"})
+    if html.count('data-root="bread"') != 2:
+        fails.append(f"two adds should leave two spans: {html}")
+    if again != html or not msg.startswith("ok"):
+        fails.append(f"a replay should change nothing: {msg}")
+    return fails

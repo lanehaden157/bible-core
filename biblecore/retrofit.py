@@ -94,8 +94,13 @@ def apply_add(html, it):
     cls = it.get("cls", "r")
     w_attr = f' data-w="{it["w"]}"' if it.get("w") else ""
     tag = f'<span class="{cls}" data-root="{it["root"]}"{w_attr}>{it["text"]}</span>'
-    already = re.search(r'<span class="r[l]?" data-root="%s"[^>]*>%s</span>'
-                        % (re.escape(it["root"]), re.escape(it["text"])), seg)
+    # With a `w`, "already" means that word is tagged, so one verse can take
+    # two adds with the same English ("the five loaves" ... "the loaves").
+    already = (re.search(r'<span class="r[l]?" data-root="%s" data-w="%s"'
+                         % (re.escape(it["root"]), re.escape(it["w"])), seg)
+               if it.get("w") else
+               re.search(r'<span class="r[l]?" data-root="%s"[^>]*>%s</span>'
+                         % (re.escape(it["root"]), re.escape(it["text"])), seg))
     if already:
         return html, f"ok   {it['unit']} v{it['verse']} {it['root']}: already tagged"
     pat = re.compile(r'(?<![\w-])' + re.escape(it["text"]) + r'(?![\w-])')
