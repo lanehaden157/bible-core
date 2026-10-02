@@ -42,6 +42,7 @@
 - 0.15.0: per-book colour spacing (Matthew onto core, pass 1). `book.json` `checks.colour_de_min` (default 10) is the floor validation and the porter use; `tools/make_well.py` generates a book's own readable, contrast-checked well at that spacing (ΔE 7 holds 124 colours, ΔE 10 only ~60); `tools/recolour.py` re-assigns a shipped book's colours from it, colours only.
 - 0.15.1: Matthew is a core book (pass 1 of 2): the shell takes old `#/unit-NN/vN` links, `canon/books.json` lists Matthew as kind core, ARCHITECTURE's Matthew paragraph says boxed units; core's tests and CI read Matthew's corpus from `corpus/` and its retired pipeline from `archive/pipeline`.
 - 0.15.2: retrofit add with a w is idempotent by word id, so a verse can add the same English twice (Matthew 14:19 loaves)
+- 0.15.3: core-workflow.md and the resources template no longer limit citation to listed commentaries
 
 ## What this is
 
