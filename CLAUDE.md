@@ -7,15 +7,17 @@ how to start a book (§8).
 **State:** the version is `biblecore/__init__.py`; `python tests/run.py`
 prints the test count; each book's state (units, threads, core pin, sync,
 pasted field) is `python -m biblecore book` in that book. None of it is
-written here, so it can't go stale. Numbers and Joshua are on core; Matthew
-is standalone (below). The platform-level record (status and
+written here, so it can't go stale. Numbers, Joshua and Matthew are on core
+(Matthew's units 1-13 boxed, below). The platform-level record (status and
 history) is `../session_index.md`. The core is forward-looking, built for future books.
-Matthew is **standalone** (decided 2026-09-29): Lane reverted it to its
-pre-core state (old app shell, own `pipeline/`, no `book.json`, units 1-13; the
-core-era work is at its tag `pre-revert-2026-09-29`). It is a 'legacy' book in
-the hub (`vN` links) and gets no core syncs. Core stays for future books;
-don't plan a Matthew migration. Core's Greek work (MorphGNT, LXX) was proven
-against Matthew's data and still reads it read-only for parity tests.
+Matthew is a core book with units 1-13 **boxed** (2026-10-01): stamped
+`contract: "legacy"` (ARCHITECTURE §5), prose and structure as built, tag edits
+only. From unit 14 it runs core's loop like Numbers and Joshua. (Lane reverted
+it to its pre-core state on 2026-09-29 and chose this form the next day; that
+state is at its tag `pre-revert-2026-09-29`, and its old `pipeline/` is in its
+`archive/pipeline/`.) Core's Greek work (MorphGNT, LXX) was proven against
+Matthew's data, and the parity tests still read its corpus and archived
+pipeline read-only.
 
 ## Concurrent sessions
 
