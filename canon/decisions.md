@@ -27,4 +27,4 @@ ask again.
 
 | date | proposal | why |
 |---|---|---|
-| 2026-09-22 | Requiring shipped books to migrate onto the shared core | Forward-only: migration is opt-in. Joshua opted in 2026-09-26; Matthew tried it and reverted on 2026-09-29 (standalone). |
+| 2026-09-22 | Requiring shipped books to migrate onto the shared core | Forward-only: migration is opt-in. Joshua opted in 2026-09-26; Matthew tried it and reverted on 2026-09-29, then came onto core on 2026-10-01 with units 1-13 boxed (`legacy`) and later units through the loop. |

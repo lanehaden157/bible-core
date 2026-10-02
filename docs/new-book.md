@@ -58,6 +58,7 @@ Learned from porting copies of Matthew's units 9–14 into a scratch Greek book 
 - **Chapter seams.** Units that cross a chapter can label the first verse `11:1`. Retrofit entries and gap stubs then name verses `"C:V"`.
 - **English phrasal verbs.** Expect `data-w` to ask for eyes where one Greek word is two English spans ("hand … over"). The retrofit recipe in the book's CLAUDE.md covers it.
 - **Itineraries** in a Gospel move by scene: a stop's `<sup>` may be a range (`12:1–8`).
+- **A real port, Matthew unit 14 (2026-10-01).** Only two artifact fixes were needed (itinerary `<sup>`s, and the book's own meta key `descriptor`, which a book declares in `book.json` `meta_keys`; otherwise the port stops at "unknown top-level key"). Seven promotions tagged into earlier units by `data-w` plus `retrofit` `add` took one session; an `add` with a `w` is idempotent on that word, so a verse can add the same English twice ("the five loaves ... the loaves").
 - **A worked example of the loop.** `../greek-proof/replay.py` runs port, promotions, delta, `data-w`, retrofit, build, audit and test end to end. It's useful as a reference for the commands in order.
 
 ## G. When core moves (any session, as needed)

@@ -57,8 +57,9 @@ learned there. **Joshua runs on this core since 2026-09-26** (Lane reversed
 the 2026-09-22 "not migrating" call): vendored package, `book.json`, core
 build and sync, and since 0.8.5 the template's app shell with its own
 `theme.css`. Its units came through byte-identical apart from the contract
-stamp. Matthew is **standalone** (decided 2026-09-29): its own app shell and
-`pipeline/`, no core syncs (§8). Core's Greek work was proven against its data.
+stamp. Matthew joined on 2026-10-01 with units 1-13 boxed (`legacy`, §5): tag
+edits only, and unit 14 on through core's loop. Core's Greek work was proven
+against its data.
 
 Where a rule gives a reason, the reason matters more than the rule. Items
 marked **(learned)** each cost a real mistake. Read the lesson before relaxing
