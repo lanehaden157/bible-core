@@ -406,6 +406,9 @@ body.text-center .unit .v .n { display: inline; width: auto; margin-right: 4px; 
   letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 8px;
 }
 .unit .spot-div { height: 1px; background: var(--rule-soft); margin: 12px -16px; }
+/* a component's own display (.synoptic is display:block) must not beat the
+   hidden attribute the chip toggles */
+.unit .aside-box[hidden], .unit .verse-note[hidden] { display: none; }
 
 /* ---- root hover tip + click popover ---- */
 
