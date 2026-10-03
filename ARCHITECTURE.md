@@ -43,6 +43,7 @@
 - 0.15.1: Matthew is a core book (pass 1 of 2): the shell takes old `#/unit-NN/vN` links, `canon/books.json` lists Matthew as kind core, ARCHITECTURE's Matthew paragraph says boxed units; core's tests and CI read Matthew's corpus from `corpus/` and its retired pipeline from `archive/pipeline`.
 - 0.15.2: retrofit add with a w is idempotent by word id, so a verse can add the same English twice (Matthew 14:19 loaves)
 - 0.15.3: core-workflow.md and the resources template no longer limit citation to listed commentaries
+- 0.15.4: synoptic (and any display:block aside-box) now collapses: .aside-box[hidden] wins over the component's display
 
 ## What this is
 
