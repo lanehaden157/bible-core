@@ -44,6 +44,7 @@
 - 0.15.2: retrofit add with a w is idempotent by word id, so a verse can add the same English twice (Matthew 14:19 loaves)
 - 0.15.3: core-workflow.md and the resources template no longer limit citation to listed commentaries
 - 0.15.4: synoptic (and any display:block aside-box) now collapses: .aside-box[hidden] wins over the component's display
+- 0.16.0: Interlinear: verse-number toggle, original script (data/script/), Plain/Notes/Original mode pill, restyled settings
 
 ## What this is
 
