@@ -25,6 +25,9 @@ Checks (any failure exits 1):
      with n and refs matching the words; a Greek t is its id without the
      homograph digit. A Greek lemma without a gloss fails (the MorphGNT
      lexicon covers the NT); Hebrew ones are listed, since Strong's has gaps.
+  7. data/script/<ch>.json matches the words verse for verse and word for
+     word, every entry in the original script and nothing else (the one
+     place native script is written)
 """
 import glob
 import json
@@ -42,6 +45,10 @@ TRANSLIT = {
     "hebrew": re.compile(r"^[A-Za-zʾʿḥṭśš̲-]+$"),
 }
 NATIVE = re.compile(r"[Ͱ-Ͽἀ-῿֐-׿]")
+SCRIPT = {
+    "greek": re.compile(r"^[Ͱ-Ͽἀ-῿̀-ͯ’ʼ]+$"),
+    "hebrew": re.compile(r"^[֐-׿יִ-ﭏ]+$"),
+}
 # a source code left undecoded: MorphGNT "V-" / "3PAI-S--", OSHB "HC/Vpw3ms"
 RAW_MORPH = re.compile(r"^(?:[A-Z][A-Za-z0-9-]*:|[HA][A-Z][a-z0-9]*(?:/[A-Z][a-z0-9]*)*$)")
 OSIS = "{http://www.bibletechnologies.net/2003/OSIS/namespace}"
@@ -185,6 +192,8 @@ def check(b=None):
                     if not refs[lid] or refs[lid][-1] != ref:
                         refs[lid].append(ref)
 
+    errs += _check_script(b, chapters, words_dir)
+
     lem = json.load(open(os.path.join(b.path("data"), "lemmas.json"),
                          encoding="utf-8")).get("lemmas", {})
     if set(lem) != set(counts):
@@ -210,6 +219,33 @@ def check(b=None):
     notes.insert(0, f"{len(chapters)} chapters, {len(src)} verses, {n_rows} words, "
                     f"{len(lem)} lemmas")
     return errs, notes
+
+
+def _check_script(b, chapters, words_dir):
+    errs = []
+    script_dir = os.path.join(b.path("data"), "script")
+    pat = SCRIPT[b.language]
+    for c in chapters:
+        wp, sp = os.path.join(words_dir, f"{c}.json"), os.path.join(script_dir, f"{c}.json")
+        if not os.path.exists(wp):
+            continue
+        if not os.path.exists(sp):
+            errs.append(f"script/{c}.json missing")
+            continue
+        words = json.load(open(wp, encoding="utf-8")).get("verses", {})
+        script = json.load(open(sp, encoding="utf-8")).get("verses", {})
+        if set(script) != set(words):
+            errs.append(f"script/{c}.json: verses differ from words/{c}.json")
+            continue
+        for v, rows in words.items():
+            forms = script[v]
+            if len(forms) != len(rows):
+                errs.append(f"{c}:{v}: {len(forms)} script forms for {len(rows)} words")
+                continue
+            bad = [f for f in forms if not pat.match(f or "")]
+            if bad:
+                errs.append(f"{c}:{v}: not {b.language} script: {bad[:3]}")
+    return errs
 
 
 def main(argv=None):

@@ -67,6 +67,9 @@ def test_emit_outputs():
                    if f.endswith(".json") and ("words" in root or f in ("lemmas.json", "text.json")))
     if HEB.search(blob):
         fails.append("native script in the emitted data")
+    sc = json.load(open(os.path.join(d, "script", "1.json"), encoding="utf-8"))["verses"]["1"]
+    if len(sc) != len(words["verses"]["1"]) or not all(HEB.search(f) and "/" not in f for f in sc):
+        fails.append(f"script/1.json verse 1: {sc[:3]}")
     before = open(os.path.join(d, "lemmas.json"), encoding="utf-8").read()
     out = io.StringIO()
     with contextlib.redirect_stdout(out):

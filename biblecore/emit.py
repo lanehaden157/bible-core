@@ -18,7 +18,15 @@ Writes, for the app's interlinear, reading modes and search:
                         endnote markers stripped. Condensed verses (data-verses)
                         have no entry, since the fragment doesn't write them out.
 
-No native script is written anywhere. Deterministic, so re-running changes
+  data/script/<ch>.json {"c": 1, "verses": {"1": ["...", ...]}}: each
+                        word in the original script, parallel to words/<ch>.json
+                        (same verses, same order), for the interlinear's top
+                        line only. Hebrew drops OSHB's morpheme slashes and
+                        the cantillation, keeping the vowels.
+
+Native script is written there and nowhere else: words, lemmas and text stay
+transliterated, so search and every other reader of them are unchanged
+(Lane, 2026-10-07: the interlinear shows the Greek). Deterministic, so re-running changes
 nothing. The whole book's words are emitted, not only built units, so
 "every occurrence of this lemma" covers the book.
 """
@@ -34,6 +42,9 @@ from biblecore.book import book
 SUP_RE = re.compile(r"<sup\b.*?</sup>", re.S)
 TAG_RE = re.compile(r"<[^>]+>")
 WS_RE = re.compile(r"\s+")
+# OSHB morpheme slashes and the cantillation marks (U+0591-U+05AF, meteg,
+# paseq, sof pasuq); the vowels stay
+HEB_STRIP_RE = re.compile("[/֑-ֽ֯׀׃]")
 FORM_RE = re.compile(r'<entry id="H(\d+)">.*?<w[^>]*>(.*?)</w>', re.S)
 
 
@@ -69,6 +80,7 @@ def words_by_chapter(b):
     lang = adapter(b.language)
     describe = _describe()
     by_ch = defaultdict(lambda: defaultdict(list))
+    script = defaultdict(lambda: defaultdict(list))
     lemma_refs = defaultdict(list)
     for w in corpus.adapter().load_words(b):
         key = main_lemma(w["lemma"])
@@ -78,11 +90,19 @@ def words_by_chapter(b):
         if w.get("lang") == "aramaic":
             row["a"] = 1
         by_ch[w["ch"]][str(w["v"])].append(row)
+        script[w["ch"]][str(w["v"])].append(native_form(w["surface"], b.language))
         if key:
             ref = f"{w['ch']}:{w['v']}"
             if not lemma_refs[key] or lemma_refs[key][-1] != ref:
                 lemma_refs[key].append(ref)
-    return by_ch, lemma_refs
+    return by_ch, lemma_refs, script
+
+
+def native_form(surface, language):
+    """The word as the interlinear shows it in the original script."""
+    if language == "hebrew":
+        return HEB_STRIP_RE.sub("", surface or "")
+    return surface or ""
 
 
 def lemmas(b, lemma_refs, counts):
@@ -155,7 +175,7 @@ def _write_json(path, obj):
 
 def main(argv=None):
     b = book()
-    by_ch, lemma_refs = words_by_chapter(b)
+    by_ch, lemma_refs, script = words_by_chapter(b)
     counts = defaultdict(int)
     for ch in by_ch.values():
         for ws in ch.values():
@@ -164,9 +184,12 @@ def main(argv=None):
                     counts[w["l"]] += 1
     wrote = 0
     wdir = os.path.join(b.path("data"), "words")
+    sdir = os.path.join(b.path("data"), "script")
     for ch in sorted(by_ch):
         verses = OrderedDict((v, by_ch[ch][v]) for v in sorted(by_ch[ch], key=int))
         wrote += _write_json(os.path.join(wdir, f"{ch}.json"), {"c": ch, "verses": verses})
+        sv = OrderedDict((v, script[ch][v]) for v in sorted(script[ch], key=int))
+        wrote += _write_json(os.path.join(sdir, f"{ch}.json"), {"c": ch, "verses": sv})
     lem = lemmas(b, lemma_refs, counts)
     wrote += _write_json(b.data("lemmas.json"), {"lemmas": lem})
     text = verse_text(b)

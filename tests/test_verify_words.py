@@ -32,6 +32,9 @@ def _edit(path, fn):
 
 def _corruptions(first_ch_file, lemmas_file, native):
     """(name, path, edit) -- each should make the check fail."""
+    script_file = os.path.join(os.path.dirname(os.path.dirname(first_ch_file)), "script",
+                               os.path.basename(first_ch_file))
+
     def first_row(d):
         return d["verses"][sorted(d["verses"], key=int)[0]][0]
     return [
@@ -39,6 +42,10 @@ def _corruptions(first_ch_file, lemmas_file, native):
         ("native script", first_ch_file, lambda d: first_row(d).update(t=native)),
         ("raw parsing", first_ch_file, lambda d: first_row(d).update(m="V-:3PAI-S--")),
         ("extra key", first_ch_file, lambda d: first_row(d).update(x=1)),
+        ("script out of step", script_file,
+         lambda d: d["verses"][sorted(d["verses"], key=int)[0]].pop()),
+        ("translit in the script", script_file,
+         lambda d: d["verses"][sorted(d["verses"], key=int)[0]].__setitem__(0, "bara")),
         ("lemma count", lemmas_file, lambda d: next(iter(d["lemmas"].values())).update(n=999)),
     ]
 
@@ -68,6 +75,10 @@ def test_hebrew_clean_and_corrupted():
         cfg = support.joshua_config()
         cfg["paths"] = dict(cfg["paths"], data=os.path.join(tmp, "data"))
         bookmod.use(bookmod.Book(cfg, support.JOSHUA))
+        # the copy's data re-emitted, so it carries this core's layers
+        # (data/script/) whatever core Joshua last built with
+        with contextlib.redirect_stdout(io.StringIO()):
+            emit.main([])
         errs, notes = verify_words.check()
         fails = [f"clean Joshua failed: {errs[:5]}"] if errs else []
         if not notes or "verses" not in notes[0]:

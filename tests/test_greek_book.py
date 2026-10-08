@@ -83,8 +83,13 @@ def test_emit_writes_a_greek_interlinear_with_glosses():
     assert lem["tis2"]["t"] == "tis" and lem["tis2"]["refs"] == ["1:3"], lem["tis2"]
     assert lem["legō"]["g"] == "", lem["legō"]  # not in the lexicon: empty, not a guess
     blob = "".join(open(os.path.join(r, f), encoding="utf-8").read()
-                   for r, _d, fs in os.walk(data) for f in fs)
+                   for r, _d, fs in os.walk(data) for f in fs
+                   if os.path.basename(r) != "script")
     assert not GREEK.search(blob), "native Greek script in emitted data"
+    # the one place native script is written: the interlinear's top line
+    sc = json.load(open(os.path.join(data, "script", "1.json"), encoding="utf-8"))
+    assert sc["verses"]["1"] == ["Βίβλος",
+                                 "γενέσεως"], sc["verses"]["1"]
 
 
 def test_leads_phrase_shared_with_the_lxx():

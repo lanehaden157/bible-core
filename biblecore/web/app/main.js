@@ -18,8 +18,8 @@
 import { loadThreadData, loadCanon, resolveUnit, injectPalette, rebuildLegend, wireRoots } from "./threads.js";
 import { enhanceSpotlights, openAll } from "./spotlight.js";
 import { renderSearch } from "./search.js";
-import { MODES, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
-         parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js";
+import { MODES, modeLabel, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
+         prepVerseNumbers, wireVerseNumbers, parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js";
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
@@ -52,7 +52,20 @@ let overlayKind = null; // e.g. "discourse": marks, brackets, a placement line
 const storagePrefix = () => (manifest?.book || "study").toLowerCase().replace(/[^a-z0-9]+/g, "-");
 const CENTER_TEXT_KEY = () => `${storagePrefix()}:centerText`;
 const MODE_KEY = () => `${storagePrefix()}:mode`;
-const readMode = () => { try { return localStorage.getItem(MODE_KEY()) || "notes"; } catch (e) { return "notes"; } };
+const OPEN_NOTES_KEY = () => `${storagePrefix()}:openNotes`;
+// "open" was a mode until 0.16: it reads as Notes with every note open
+const readMode = () => {
+  try {
+    const m = localStorage.getItem(MODE_KEY()) || "notes";
+    if (m === "open") {
+      localStorage.setItem(MODE_KEY(), "notes");
+      localStorage.setItem(OPEN_NOTES_KEY(), "1");
+      return "notes";
+    }
+    return MODES.some(([x]) => x === m) ? m : "notes";
+  } catch (e) { return "notes"; }
+};
+const readOpenNotes = () => { try { return localStorage.getItem(OPEN_NOTES_KEY()) === "1"; } catch (e) { return false; } };
 const bookRef = () => ({ name: bookInfo.book || manifest?.book || "", osis: bookInfo.osis, abbrev: bookInfo.abbrev });
 const siteTitle = () => `${manifest?.book || ""} Study`.trim();
 const language = () => bookInfo.language || manifest?.language || "hebrew";
@@ -93,6 +106,7 @@ async function init() {
   wireSettingsToggle();
   wireModes();
   wireAppearance();
+  wireVerseNumbers(content, ilOpts);
   window.addEventListener("hashchange", route);
   route();
 }
@@ -115,30 +129,59 @@ function wireAppearance() {
   if (!box) return;
   const cur = document.documentElement.dataset.theme || "auto";
   const opts = [["auto", "Match the system"], ["light", "Light"], ["dark", "Dark"]];
-  box.innerHTML = opts.map(([v, label]) =>
-    `<label class="settings-row"><input type="radio" name="appearance" value="${v}"${v === cur ? " checked" : ""}> ${label}</label>`).join("");
-  box.addEventListener("change", (e) => {
-    document.documentElement.dataset.theme = e.target.value;
-    try { localStorage.setItem("bible:theme", e.target.value); } catch (err) { /* private mode */ }
+  segmented(box, "appearance", opts.map(([v, label]) => [v, v === "auto" ? "System" : label, label]), cur, (v) => {
+    document.documentElement.dataset.theme = v;
+    try { localStorage.setItem("bible:theme", v); } catch (err) { /* private mode */ }
   });
 }
 
-/* reading-mode radios, built from reader.js MODES */
-function wireModes() {
-  const box = document.getElementById("setting-modes");
-  if (!box) return;
-  const cur = readMode();
-  box.innerHTML = MODES.map(([m, label]) =>
-    `<label class="settings-row"><input type="radio" name="mode" value="${m}"${m === cur ? " checked" : ""}> ${label}</label>`).join("");
-  box.addEventListener("change", (e) => {
-    const m = e.target.value;
-    try { localStorage.setItem(MODE_KEY(), m); } catch (err) { /* private mode */ }
-    applyMode(m);
-    if (!content.querySelector("article.unit")) return;
-    if (m === "interlinear") mountInterlinear(content, ilOpts());
-    else unmountInterlinear(content);
-    openAll(content, m === "open");
+/* A row of pill buttons acting as one radio group: [[value, label, title]] */
+function segmented(box, name, opts, cur, onPick) {
+  box.classList.add("seg");
+  box.setAttribute("role", "radiogroup");
+  box.innerHTML = opts.map(([v, label, title]) =>
+    `<button type="button" role="radio" data-v="${v}" aria-checked="${v === cur}" title="${escapeHtml(title || label)}">` +
+    `${escapeHtml(label)}</button>`).join("");
+  const pick = (v) => {
+    box.querySelectorAll("button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.v === v)));
+    onPick(v);
+  };
+  box.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-v]");
+    if (b && b.getAttribute("aria-checked") !== "true") pick(b.dataset.v);
   });
+  box.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    const bs = [...box.querySelectorAll("button")];
+    const i = bs.findIndex((b) => b.getAttribute("aria-checked") === "true");
+    const n = bs[(i + (e.key === "ArrowRight" ? 1 : bs.length - 1)) % bs.length];
+    n.focus();
+    pick(n.dataset.v);
+  });
+}
+
+/* the top bar's Plain / Notes / Greek pill, from reader.js MODES, and the
+   settings panel's "Open every note" switch */
+function wireModes() {
+  const box = document.getElementById("mode-pill");
+  if (box) {
+    segmented(box, "mode", MODES.map(([m, , title]) => [m, modeLabel(m, language()), title]), readMode(), (m) => {
+      try { localStorage.setItem(MODE_KEY(), m); } catch (err) { /* private mode */ }
+      applyMode(m);
+      if (!content.querySelector("article.unit")) return;
+      if (m === "interlinear") mountInterlinear(content, ilOpts());
+      else unmountInterlinear(content);
+      openAll(content, m !== "plain" && readOpenNotes());
+    });
+  }
+  const open = document.getElementById("setting-open-notes");
+  if (open) {
+    open.checked = readOpenNotes();
+    open.addEventListener("change", () => {
+      try { localStorage.setItem(OPEN_NOTES_KEY(), open.checked ? "1" : "0"); } catch (err) { /* private mode */ }
+      if (content.querySelector("article.unit")) openAll(content, open.checked);
+    });
+  }
 }
 
 function wireSettingsToggle() {
@@ -446,12 +489,13 @@ async function loadUnit(unit, anchor) {
   hoistStructureBlocks(content);
   normalizeSectionHeadings(content);
   indexVerses(content, unit);
+  prepVerseNumbers(content, language());
   const resolved = resolveUnit(unit);
   injectPalette(unit, resolved);
   rebuildLegend(content, resolved);
   enhanceSpotlights(content, comps.filter((c) => c.role === "verse-aside"));
   const mode = readMode();
-  if (mode === "open") openAll(content, true);
+  if (mode !== "plain" && readOpenNotes()) openAll(content, true);
   wireRoots(content, unit, manifest.units);
   wireFootnotes();
   buildPager(unit);

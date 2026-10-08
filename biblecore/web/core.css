@@ -75,10 +75,10 @@ a.lex:hover { border-bottom-color: var(--ink-soft); }
   z-index: 30;
   background: var(--panel);
   border: 1px solid var(--rule);
-  border-radius: 8px;
   box-shadow: 0 14px 30px rgba(24, 18, 8, 0.18);
-  padding: 14px 18px;
-  min-width: 220px;
+  padding: 14px 18px 12px;
+  min-width: 250px;
+  border-radius: 12px;
 }
 .settings-row {
   display: flex; align-items: center; gap: 9px;
@@ -579,24 +579,51 @@ body.mode-plain .unit .spot-controls,
 body.mode-plain .unit sup.en,
 body.mode-plain .unit .notes { display: none !important; }
 
-/* interlinear: one row of word cells under each verse */
-.unit .il { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: -6px 0 16px 42px; }
-.unit .il-w { display: inline-flex; flex-direction: column; min-width: 3.2em; padding: 3px 6px; border: 1px solid var(--rule-soft); border-radius: 5px; background: var(--panel); line-height: 1.25; border-bottom: 1px solid var(--rule-soft); }
-.unit .il-w:hover { border-color: var(--ink-soft); }
-.unit .il-w i { font-size: 15px; color: var(--ink); }
+/* interlinear: under a verse, its words as columns on a soft tray (the
+   original, the transliteration, the gloss, the grammar). Tapping the verse
+   number opens or folds one verse; the mode pill's third choice opens all. */
+.unit .v[data-ref] > .n { cursor: pointer; border-radius: 3px; text-underline-offset: 4px; transition: color .15s; }
+.unit .v[data-ref] > .n:hover { text-decoration: underline dotted 1px; }
+.unit .v[data-ref] > .n:focus-visible { outline: 2px solid var(--accent-bronze); outline-offset: 2px; }
+.unit .v.il-open > .n { text-decoration: underline solid 2px; text-decoration-color: var(--accent-clay); }
+.unit .il { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: -4px 0 18px 42px; padding: 10px 14px 12px; background: var(--panel); border-radius: 10px; text-indent: 0; }
+.unit .il-w { display: inline-flex; flex-direction: column; align-items: flex-start; padding: 2px 5px 3px; border: none; border-radius: 6px; line-height: 1.3; color: inherit; transition: background .15s; }
+.unit .il-w:hover, .unit .il-w:focus-visible, .unit .il-w.il-hi { background: color-mix(in srgb, var(--flash) 55%, transparent); outline: none; }
+.unit .il-s { font-family: "Gentium Book Plus", var(--serif), serif; font-size: 19px; color: var(--ink); line-height: 1.25; }
+.unit .il[dir="rtl"] .il-w { align-items: flex-end; }
+.unit .il[dir="rtl"] .il-s { font-family: "Noto Serif Hebrew", var(--serif), serif; font-size: 20px; direction: rtl; }
+.unit .il-w i { font-size: 13px; color: var(--ink-soft); }
 /* --gloss: the book's secondary colour moved until it reads 4.5:1 on the
-   box's --panel (theme.py); a book with no division theme keeps bronze */
-.unit .il-w b { font-weight: 400; font-size: 12.5px; color: var(--gloss, var(--accent-bronze)); }
-.unit .il-w small { font-size: 10.5px; color: var(--ink-soft); max-width: 14em; }
-.unit .il-w b { max-width: 14em; }
-.unit .il-w.il-arc { border-style: dashed; }
+   tray's --panel (theme.py); a book with no division theme keeps bronze */
+.unit .il-w b { font-weight: 400; font-size: 12.5px; color: var(--gloss, var(--accent-bronze)); max-width: 12em; }
+.unit .il-w small { font-size: 10.5px; color: var(--ink-soft); max-width: 12em; letter-spacing: .01em; }
+.unit .il-w.il-arc .il-s { text-decoration: underline dashed 1px; text-underline-offset: 5px; }
+/* a tracked word in the English lights with its column (data-w) */
+.unit .v .il-hi { background: color-mix(in srgb, var(--flash) 55%, transparent); border-radius: 3px; }
 .unit .il-key { font-size: 13.5px; font-style: italic; color: var(--ink-soft); margin: 0 0 18px; }
 /* a verse with no block of its own (inside a data-verses table or a
-   block-formatted passage) gets a box labelled with its reference */
+   block-formatted passage) gets a row labelled with its reference */
 .unit .il-gap { margin-top: 0; }
 .unit .il-ref { flex: 0 0 100%; font-family: var(--display); font-size: 13px; font-weight: 600; color: var(--accent-clay); }
 body.text-center .unit .il { justify-content: center; margin-left: 0; }
 body.text-center .unit .il-ref { text-align: center; }
+
+/* segmented pill (reading mode in the top bar, appearance in settings) */
+.seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--rule); border-radius: 999px; background: var(--panel); }
+.seg button { font: inherit; font-size: 13px; line-height: 1.2; color: var(--ink-soft); background: none; border: none; border-radius: 999px; padding: 4px 11px; cursor: pointer; transition: background .15s, color .15s; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-checked="true"] { color: var(--ink); background: color-mix(in srgb, var(--accent-bronze) 22%, var(--panel)); }
+.seg button:focus-visible { outline: 2px solid var(--accent-bronze); outline-offset: 1px; }
+.settings-panel .seg { display: flex; }
+.settings-panel .seg button { flex: 1; }
+
+/* settings switches */
+.settings-switch { justify-content: space-between; padding: 5px 0; }
+.settings-switch input[role="switch"] { appearance: none; -webkit-appearance: none; position: relative; flex: 0 0 auto; width: 34px; height: 20px; margin: 0; border-radius: 999px; background: var(--rule); transition: background .18s; }
+.settings-switch input[role="switch"]::before { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); transition: transform .18s; }
+.settings-switch input[role="switch"]:checked { background: var(--accent-bronze); }
+.settings-switch input[role="switch"]:checked::before { transform: translateX(14px); }
+.settings-switch input[role="switch"]:focus-visible { outline: 2px solid var(--accent-bronze); outline-offset: 2px; }
 
 /* search: grouped result blocks */
 .sr-block { margin: 0 0 30px; }
@@ -619,8 +646,9 @@ body.text-center .unit .il-ref { text-align: center; }
 .print-unit + .print-unit { margin-top: 60px; padding-top: 30px; border-top: 2px solid var(--rule); }
 
 @media (max-width: 720px) {
-  .unit .il { margin-left: 26px; }
+  .unit .il { margin-left: 0; padding: 8px 10px 10px; gap: 6px 10px; }
   .unit .il-w small { display: none; }
+  .seg button { padding: 4px 9px; }
 }
 
 @media print {

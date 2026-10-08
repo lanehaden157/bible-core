@@ -6,11 +6,13 @@
      data/words/<ch>.json  per-word translit, lemma key, morphology in words
      data/lemmas.json      lemma -> translit, gloss (Strong's for Hebrew, the
                            MorphGNT lexicon for Greek), count, refs
+     data/script/<ch>.json each word in the original script (interlinear only)
      data/text.json        the study's own English per built verse
 
    Glosses identify a word for the reader, never the study's rendering,
-   and the interlinear says so. No native script: the data
-   layer carries none. */
+   and the interlinear says so. Native script is in data/script/<ch>.json
+   only (each word, parallel to words/<ch>.json), for the interlinear's top
+   line; everything else is transliterated. */
 
 const DATA = (p) => new URL(`../data/${p}`, import.meta.url);
 const cache = new Map();
@@ -112,12 +114,16 @@ function declaredBlocks(root) {
 
 /* ---------------------------------------------------------- reading modes */
 
+/* The top bar's pill, left to right. "interlinear" is labelled by the
+   book's language (modeLabel). Every note open is a setting of its own now,
+   not a mode (Lane, 2026-10-07). */
 export const MODES = [
-  ["notes", "Translation with notes (tap * to open)"],
-  ["open", "Translation with every note open"],
-  ["plain", "Translation only"],
-  ["interlinear", "Interlinear (word by word)"],
+  ["plain", "Plain", "Translation only"],
+  ["notes", "Notes", "Translation with notes (tap * to open)"],
+  ["interlinear", "Original", "Every verse with its words (tap a verse number for one)"],
 ];
+export const modeLabel = (m, language) =>
+  m === "interlinear" ? (LANGUAGE[language] || "Original") : (MODES.find((x) => x[0] === m)?.[1] || m);
 
 export function applyMode(mode) {
   for (const [m] of MODES) document.body.classList.toggle(`mode-${m}`, m === mode);
@@ -137,19 +143,33 @@ const GLOSS_KEY = {
   greek: "a lexicon gloss (it identifies the word; it isn't this study's translation)",
 };
 const LANGUAGE = { hebrew: "Hebrew", greek: "Greek" };
+const LANG_TAG = { hebrew: "he", greek: "grc" };
 
 const HEADING_SEL = "h2, h3, .sectionhead, .spot-controls";
+const loadScript = (c) => getJSON(`script/${c}.json`).then((d) => d?.verses || {});
 
-/* Word boxes under every indexed verse of root (indexVerses first). opts:
+/* one chapter's words, script and the lemmas, fetched once and cached */
+async function chapterData(chapters) {
+  const [lemmas, ...rest] = await Promise.all([
+    loadLemmas(), ...chapters.map(loadChapter), ...chapters.map(loadScript)]);
+  const n = chapters.length;
+  return {
+    lemmas,
+    words: new Map(chapters.map((c, i) => [c, rest[i] || {}])),
+    script: new Map(chapters.map((c, i) => [c, rest[n + i] || {}])),
+  };
+}
+
+/* Word columns under every indexed verse of root (indexVerses first). opts:
    {book: the book's name, language: "hebrew" | "greek", passage: the
-   unit's passage}. A verse with no block of its own gets a labelled box:
+   unit's passage}. A verse with no block of its own gets a labelled row:
    right after the element that declares it (data-verses), or, when nothing
    does, just before the next verse (Lane, 2026-10-01). Resolves once the
-   boxes are in; an unmount or a newer mount meanwhile cancels this one
+   rows are in; an unmount or a newer mount meanwhile cancels this one
    (Matthew's pilot, note 5), so a mode or unit switch mid-fetch never
-   leaves boxes behind or doubles them. */
+   leaves rows behind or doubles them. Rows a reader opened one at a time
+   are replaced, not doubled. */
 export async function mountInterlinear(root, opts = {}) {
-  if (root.querySelector(".il")) return;
   const gen = (root._ilGen = (root._ilGen || 0) + 1);
   const verses = [...root.querySelectorAll(".v[data-ref]")];
   if (!verses.length) return;
@@ -157,26 +177,26 @@ export async function mountInterlinear(root, opts = {}) {
   const range = passageRange(opts.passage || unitPassage(root)) || [refs[0], refs[refs.length - 1]];
   const chapters = [];
   for (let c = range[0][0]; c <= range[1][0]; c++) chapters.push(c);
-  const [lemmas, ...chs] = await Promise.all([loadLemmas(), ...chapters.map(loadChapter)]);
-  if (root._ilGen !== gen || root.querySelector(".il")) return;
-  const byCh = new Map(chapters.map((c, i) => [c, chs[i] || {}]));
-  const o = { book: opts.book || "the book", language: opts.language || "hebrew" };
+  const data = await chapterData(chapters);
+  if (root._ilGen !== gen) return;
+  clearRows(root);
+  const o = ilOptions(opts);
 
   verses.forEach((el, i) => {
-    const ws = byCh.get(refs[i][0])?.[refs[i][1]];
-    if (ws?.length) el.after(box(ws, refs[i], lemmas, o, false));
+    const b = verseRow(data, refs[i], o, false);
+    if (b) { el.after(b); setOpen(el, true); }
   });
 
   // the passage's other verses: declared by a block, or not written out
   const have = new Set(verses.map((el) => el.dataset.ref));
   const declared = declaredBlocks(root);
-  const after = new Map();  // declaring element -> the last box put after it
+  const after = new Map();  // declaring element -> the last row put after it
   for (const c of chapters) {
-    const vs = Object.keys(byCh.get(c)).map(Number).sort((a, b) => a - b);
+    const vs = Object.keys(data.words.get(c)).map(Number).sort((a, b) => a - b);
     for (const v of vs) {
       const cv = [c, v];
       if (have.has(`${c}:${v}`) || cmp(cv, range[0]) < 0 || cmp(range[1], cv) < 0) continue;
-      const b = box(byCh.get(c)[v], cv, lemmas, o, true);
+      const b = verseRow(data, cv, o, true);
       const d = declared.find((x) => cmp(x.lo, cv) <= 0 && cmp(cv, x.hi) <= 0);
       if (d) {
         (after.get(d.el) || d.el).after(b);
@@ -188,33 +208,140 @@ export async function mountInterlinear(root, opts = {}) {
       else (lastBox(verses[verses.length - 1]) || verses[verses.length - 1]).after(b);
     }
   }
-
-  if (!root.querySelector(".il-key")) {
-    const key = document.createElement("p");
-    key.className = "il-key";
-    key.textContent = `Interlinear: the ${LANGUAGE[o.language] || "original"} transliterated, ` +
-      `${GLOSS_KEY[o.language] || GLOSS_KEY.hebrew} and the grammar. Tap a word to find every ` +
-      `place it occurs in ${o.book}.`;
-    keyAnchor(root)?.before(key);
-  }
+  addKey(root, o);
 }
 
 export function unmountInterlinear(root) {
   root._ilGen = (root._ilGen || 0) + 1;
-  root.querySelectorAll(".il, .il-key").forEach((e) => e.remove());
+  clearRows(root);
 }
 
-function box(ws, [c, v], lemmas, o, gap) {
+function clearRows(root) {
+  root.querySelectorAll(".il, .il-key").forEach((e) => e.remove());
+  root.querySelectorAll(".v.il-open").forEach((v) => setOpen(v, false));
+}
+
+/* One verse's words, opened or closed by tapping its number (Lane,
+   2026-10-07), in any mode. The row folds open and shut. */
+export async function toggleVerse(root, verse, opts = {}) {
+  const open = verse.nextElementSibling?.matches(".il:not(.il-gap)") ? verse.nextElementSibling : null;
+  if (open) {
+    setOpen(verse, false);
+    fold(open, false, () => {
+      open.remove();
+      if (!root.querySelector(".il")) root.querySelector(".il-key")?.remove();
+    });
+    return;
+  }
+  const ref = verse.dataset.ref;
+  if (!ref) return;
+  const cv = ref.split(":").map(Number);
+  const gen = root._ilGen;
+  const data = await chapterData([cv[0]]);
+  if (root._ilGen !== gen || verse.nextElementSibling?.matches(".il:not(.il-gap)")) return;
+  const o = ilOptions(opts);
+  const b = verseRow(data, cv, o, false);
+  if (!b) return;
+  verse.after(b);
+  setOpen(verse, true);
+  fold(b, true);
+  addKey(root, o);
+}
+
+/* verse numbers as the toggle: focusable, announced, keyboard-operable */
+export function prepVerseNumbers(root, language) {
+  const name = LANGUAGE[language] || "original";
+  root.querySelectorAll(".v[data-ref] > .n").forEach((n) => {
+    n.setAttribute("role", "button");
+    n.tabIndex = 0;
+    n.setAttribute("aria-expanded", "false");
+    n.title = `Show the ${name} of ${n.parentElement.dataset.ref}`;
+  });
+}
+
+export function wireVerseNumbers(root, optsFn) {
+  const hit = (e) => e.target.closest?.(".unit .v[data-ref] > .n");
+  root.addEventListener("click", (e) => {
+    const n = hit(e);
+    if (n) toggleVerse(root, n.parentElement, optsFn());
+  });
+  root.addEventListener("keydown", (e) => {
+    const n = hit(e);
+    if (n && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      toggleVerse(root, n.parentElement, optsFn());
+    }
+  });
+  // a word and its English (data-w, on tracked words) light up together
+  const pair = (e, on) => {
+    const w = e.target.closest?.(".il-w[data-w]");
+    const r = !w && e.target.closest?.(".unit [data-w]");
+    if (w) {
+      const v = w.closest(".il")?.previousElementSibling;
+      v?.querySelectorAll(`[data-w~="${w.dataset.w}"]`).forEach((x) => x.classList.toggle("il-hi", on));
+      w.classList.toggle("il-hi", on);
+    } else if (r) {
+      const row = r.closest(".v")?.nextElementSibling;
+      if (!row?.matches(".il")) return;
+      r.dataset.w.split(/\s+/).forEach((id) =>
+        row.querySelector(`.il-w[data-w="${id}"]`)?.classList.toggle("il-hi", on));
+      r.classList.toggle("il-hi", on);
+    }
+  };
+  for (const [ev, on] of [["mouseover", true], ["mouseout", false], ["focusin", true], ["focusout", false]]) {
+    root.addEventListener(ev, (e) => pair(e, on));
+  }
+}
+
+function setOpen(verse, on) {
+  verse.classList.toggle("il-open", on);
+  verse.querySelector(":scope > .n")?.setAttribute("aria-expanded", String(on));
+}
+
+/* height animation; reduced motion just shows or removes it */
+function fold(el, open, done) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { done?.(); return; }
+  const h = el.scrollHeight;
+  el.style.overflow = "hidden";
+  const frames = open
+    ? [{ height: "0px", opacity: 0 }, { height: `${h}px`, opacity: 1 }]
+    : [{ height: `${h}px`, opacity: 1 }, { height: "0px", opacity: 0 }];
+  const a = el.animate(frames, { duration: 220, easing: "cubic-bezier(.2,.7,.2,1)" });
+  a.onfinish = () => { el.style.overflow = ""; done?.(); };
+}
+
+function ilOptions(opts) {
+  return { book: opts.book || "the book", language: opts.language || "hebrew" };
+}
+
+function addKey(root, o) {
+  if (root.querySelector(".il-key")) return;
+  const key = document.createElement("p");
+  key.className = "il-key";
+  key.textContent = `Under each verse: the ${LANGUAGE[o.language] || "original"}, its ` +
+    `transliteration, ${GLOSS_KEY[o.language] || GLOSS_KEY.hebrew} and the grammar. Tap a ` +
+    `word to find every place it occurs in ${o.book}; tap a verse number to fold its words away.`;
+  keyAnchor(root)?.before(key);
+}
+
+function verseRow(data, [c, v], o, gap) {
+  const ws = data.words.get(c)?.[v];
+  if (!ws?.length) return null;
+  const script = data.script.get(c)?.[v] || [];
   const el = document.createElement("div");
   el.className = gap ? "il il-gap" : "il";
-  el.setAttribute("aria-label", `Interlinear, ${c}:${v}`);
+  el.setAttribute("aria-label", `${LANGUAGE[o.language] || "Original"}, ${c}:${v}`);
+  if (o.language === "hebrew") el.dir = "rtl";
   if (gap) el.dataset.ref = `${c}:${v}`;
   const gloss = o.language === "hebrew" ? senses : (g) => g || "";
-  el.innerHTML = (gap ? `<span class="il-ref">${c}:${v}</span>` : "") + ws.map((w) => {
-    const lem = lemmas[w.l] || {};
+  const tag = LANG_TAG[o.language] || "";
+  el.innerHTML = (gap ? `<span class="il-ref">${c}:${v}</span>` : "") + ws.map((w, i) => {
+    const lem = data.lemmas[w.l] || {};
     const title = [lem.g && `Gloss: ${lem.g}`, w.m, lem.n && `${lem.n}× in ${o.book}`]
       .filter(Boolean).join(" · ");
-    return `<a class="il-w${w.a ? " il-arc" : ""}" href="#/search/${encodeURIComponent(w.l)}" title="${esc(title)}">` +
+    const s = script[i] ? `<span class="il-s" lang="${tag}">${esc(script[i])}</span>` : "";
+    return `<a class="il-w${w.a ? " il-arc" : ""}" data-w="${esc(w.w)}" dir="ltr" ` +
+      `href="#/search/${encodeURIComponent(w.l)}" title="${esc(title)}">` + s +
       `<i>${esc(w.t)}</i><b>${esc(gloss(lem.g) || "—")}</b><small>${esc(w.m)}</small></a>`;
   }).join("");
   return el;
@@ -225,7 +352,7 @@ function unitPassage(root) {
   catch (e) { return ""; }
 }
 
-/* the last box right after a verse (its own, then any gap boxes) */
+/* the last row right after a verse (its own, then any gap rows) */
 function lastBox(verse) {
   let at = null;
   for (let n = verse.nextElementSibling; n?.classList.contains("il"); n = n.nextElementSibling) at = n;

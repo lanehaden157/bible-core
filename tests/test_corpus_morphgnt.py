@@ -119,7 +119,8 @@ def test_emit_greek():
     if not any(x["l"] == "klēronomeō" for x in v5):
         fails.append(f"Matt 5:5 words: {[x['l'] for x in v5]}")
     blob = "".join(open(os.path.join(r, f), encoding="utf-8").read()
-                   for r, _d, fs in os.walk(os.path.join(_tmp, "data")) for f in fs)
+                   for r, _d, fs in os.walk(os.path.join(_tmp, "data")) for f in fs
+                   if os.path.basename(r) != "script")
     if GREEK.search(blob):
         fails.append("native Greek script in emitted data")
     lemmas = json.load(open(os.path.join(_tmp, "data", "lemmas.json"), encoding="utf-8"))["lemmas"]
