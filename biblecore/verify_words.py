@@ -27,7 +27,8 @@ Checks (any failure exits 1):
      lexicon covers the NT); Hebrew ones are listed, since Strong's has gaps.
   7. data/script/<ch>.json matches the words verse for verse and word for
      word, every entry in the original script and nothing else (the one
-     place native script is written)
+     place native script is written). A book built before core 0.16 has
+     no data/script/ at all: that's a note to rebuild, not a failure
 """
 import glob
 import json
@@ -192,7 +193,11 @@ def check(b=None):
                     if not refs[lid] or refs[lid][-1] != ref:
                         refs[lid].append(ref)
 
-    errs += _check_script(b, chapters, words_dir)
+    if os.path.isdir(os.path.join(b.path("data"), "script")):
+        errs += _check_script(b, chapters, words_dir)
+    else:
+        notes.append("no data/script/ yet (built before core 0.16): rebuild for the "
+                     "interlinear's original-script line")
 
     lem = json.load(open(os.path.join(b.path("data"), "lemmas.json"),
                          encoding="utf-8")).get("lemmas", {})
