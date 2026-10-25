@@ -45,6 +45,7 @@
 - 0.15.3: core-workflow.md and the resources template no longer limit citation to listed commentaries
 - 0.15.4: synoptic (and any display:block aside-box) now collapses: .aside-box[hidden] wins over the component's display
 - 0.16.0: Interlinear: verse-number toggle, original script (data/script/), Plain/Notes/Original mode pill, restyled settings
+- 0.17.0: Earlier-story boxes (aside.story, labelled chips, canon harvest), research pass before the verse-by-verse in the workflow, Greek noun sweep on the leads sheet, no synoptic cap
 
 ## What this is
 
