@@ -87,6 +87,33 @@ def install_guard():
 install_guard()
 
 
+# -- the Greek reference corpus, loaded once --------------------------------
+
+# leads.load_greek_corpus() reads all of MorphGNT and the LXX (~3 s); the
+# Greek leads tests ask for the same corpus several times over. Read from a
+# sibling checkout, it can't change during the run (the guard above), so the
+# first load is kept and handed out again. Nothing mutates it (leads._memo
+# already relies on that), and a held corpus also keeps _memo's indexes warm.
+# Corpora in temp folders (greek_book) load fresh every time.
+from biblecore import leads as _leads  # noqa: E402
+
+_load_greek_corpus = _leads.load_greek_corpus
+_greek_corpora = {}
+
+
+def _cached_greek_corpus(lxx_path=None):
+    b = bookmod.book()
+    paths = (os.path.abspath(lxx_path or b.path("lxx")), os.path.abspath(b.path("morphgnt")))
+    if not all(_under_sibling(p) for p in paths):
+        return _load_greek_corpus(lxx_path)
+    if paths not in _greek_corpora:
+        _greek_corpora[paths] = _load_greek_corpus(lxx_path)
+    return _greek_corpora[paths]
+
+
+_leads.load_greek_corpus = _cached_greek_corpus
+
+
 # -- copies of the sibling checkouts ----------------------------------------
 
 # not copied: history, installed packages, the vendored core (tests use this
