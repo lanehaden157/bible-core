@@ -1,16 +1,20 @@
 """A book's canon rows: intertext edges and type-scene instances (G9).
 
-    python -m biblecore canon          # re-harvest echo edges -> data/canon.json
+    python -m biblecore canon          # re-harvest echo + story rows -> data/canon.json
 
 data/canon.json holds two lists, each row tagged with where it came from:
 
   intertext   {from, to, kind, unit, note?, source}
-              kind: quotation | allusion | echo | type-scene
+              kind: quotation | allusion | echo | type-scene | story |
+                    character | reuse
   typescenes  {id, ref, unit, note?, label?, source}
 
 `source` is "echo" for edges harvested from the built fragments' own
 `aside.echo` lines and roots[].echo fields (re-derived on every build, so
-editing an echo updates its edges), or "meta" for rows the chat side put in
+editing an echo updates its edges), "story" for rows harvested the same way
+from `aside.story` boxes (one intertext row per reference in the box's
+par-ref, kind = its data-kind; a type-scene row for its data-scene), or
+"meta" for rows the chat side put in
 a unit's meta block (`intertext[]`, `typescenes[]`), merged by the porter
 and kept until that unit is re-ported. bible-core's tools/canon_collect.py
 rolls every book's file up into bible-core/canon/.
@@ -25,7 +29,8 @@ import re
 
 from biblecore.book import book
 
-KINDS = ("quotation", "allusion", "echo", "type-scene")
+KINDS = ("quotation", "allusion", "echo", "type-scene", "story", "character", "reuse")
+HARVESTED = ("echo", "story")   # sources re-derived from the fragments on every build
 
 # Book names as fragments write them (English abbreviations, both
 # testaments). A ref needs one of these in front of it, so prose like
@@ -46,6 +51,7 @@ _MORE = re.compile(r"\s*([;,])\s*(?:(\d+):)?(\d+)(?:" + _DASH + r"(\d+(?::\d+)?)
                    r"(?!\s*" + _NAMES + ")")
 
 ECHO_RE = re.compile(r'<aside\s+class="echo"\s+data-anchor="(\d+):(\d+)"[^>]*>(.*?)</aside>', re.S)
+STORY_RE = re.compile(r'<aside\s+class="story"([^>]*)>(.*?)</aside>', re.S)
 CV_RE = re.compile(r"^\d+:\d+$")
 ID_RE = re.compile(r"^[a-z0-9-]+$")
 
@@ -119,6 +125,38 @@ def harvest(html, n, abbrev=None, meta=None):
             for to in parse_refs(r["echo"]):
                 add(frm, to, f"root {r['root']}")
     return rows
+
+
+def _attr(attrs, name):
+    m = re.search(r'\b' + name + r'="([^"]*)"', attrs)
+    return m.group(1) if m else None
+
+
+def _span_text(body, cls):
+    m = re.search(r'<span class="' + cls + r'">(.*?)</span>', body, re.S)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m.group(1))).strip() if m else ""
+
+
+def harvest_stories(html, n, abbrev=None):
+    """(intertext rows, typescene rows) from one built fragment's aside.story
+    boxes (source "story")."""
+    abbrev = abbrev or book().abbrev
+    it, ts = [], []
+    for attrs, body in STORY_RE.findall(html):
+        frm = _attr(attrs, "data-anchor")
+        kind = _attr(attrs, "data-kind")
+        if not frm or not CV_RE.match(frm) or kind not in KINDS:
+            continue    # the component check reports it; don't harvest junk
+        title = _span_text(body, "par-title")
+        for to in parse_refs(_span_text(body, "par-ref")):
+            it.append({"from": f"{abbrev} {frm}", "to": to, "kind": kind,
+                       "unit": n, "note": title, "source": "story"})
+        scene = _attr(attrs, "data-scene")
+        if kind == "type-scene" and scene and ID_RE.match(scene):
+            where = _attr(attrs, "data-span") or frm
+            ts.append({"id": scene, "ref": f"{abbrev} {where}", "unit": n,
+                       "note": title, "source": "story"})
+    return it, ts
 
 
 # ------------------------------------------------------------ meta entries
@@ -213,21 +251,28 @@ def merge_meta(meta, n):
 
 
 def main(argv=None):
-    """Re-harvest echo rows from every built unit; keep meta rows."""
+    """Re-harvest echo and story rows from every built unit; keep meta rows."""
     from biblecore import meta as um
     b = book()
     built = {u["n"] for u in um._load("units.json")["units"] if u.get("built")}
     d = load()
-    echo_rows = []
+    echo_rows, story_rows, story_ts = [], [], []
     for n in sorted(built):
         path = b.unit_path(n)
         if os.path.exists(path):
             with open(path, encoding="utf-8") as fh:
-                echo_rows += harvest(fh.read(), n)
-    d["intertext"] = [r for r in d["intertext"] if r["source"] != "echo"] + echo_rows
+                html = fh.read()
+            echo_rows += harvest(html, n)
+            it, ts = harvest_stories(html, n)
+            story_rows += it
+            story_ts += ts
+    d["intertext"] = ([r for r in d["intertext"] if r["source"] not in HARVESTED]
+                      + echo_rows + story_rows)
+    d["typescenes"] = [r for r in d["typescenes"] if r["source"] not in HARVESTED] + story_ts
     save(d)
     meta_n = sum(1 for r in d["intertext"] if r["source"] == "meta")
-    print(f"canon: {len(echo_rows)} echo edge(s), {meta_n} meta edge(s), "
+    print(f"canon: {len(echo_rows)} echo edge(s), {len(story_rows)} story edge(s), "
+          f"{meta_n} meta edge(s), "
           f"{len(d['typescenes'])} type-scene instance(s) -> "
           f"{os.path.relpath(_path(), b.root)}")
     return 0

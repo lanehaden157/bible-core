@@ -53,7 +53,7 @@ ROLES = [
     ("{book}-words.tsv", "the word table: word ids, lemma ids, morphology. Candidate ids come from here (generated)"),
     ("{slug}-versification.md", "verses whose English number differs from the corpus's (generated)"),
     ("{slug}-literary-unit-map.md", "the unit map: every unit's passage, title and grouping"),
-    ("canon-leads-unit-*.md", "the intertext pass's starting list for one unit (generated)"),
+    ("canon-leads-unit-*.md", "one unit's word leads and noun sweep for the research pass (generated)"),
 ]
 
 

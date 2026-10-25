@@ -1,0 +1,10 @@
+{
+  "name": "story",
+  "summary": "an earlier story told beside a verse: a different, earlier event with the same shape, with its background, what's the same, what's different and what it does here",
+  "classes": ["story", "par-ref", "par-title", "par-story", "par-match", "par-diff", "par-does", "par-later"],
+  "role": "verse-aside",
+  "selector": "aside.story",
+  "toggle": {"sym": "◈", "label": "earlier story", "each": true, "cls": "story-toggle",
+             "labels": {"attr": "data-kind", "map": {"type-scene": "Type scene"}, "default": "Earlier story"}},
+  "since": "0.17.0"
+}

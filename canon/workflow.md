@@ -20,46 +20,66 @@ for. It's generated on every sync, so it's always complete. Everything in that
 folder round-trips from the repo automatically; nothing there is uploaded by
 hand. The style reference holds every artifact rule.
 
-## Per unit: four passes, pause and present after each
+## Per unit: four passes, one turn each
 
-1. **Pre-read briefing.** Flowing prose, with no headers, bullets or bold. Cover
-   placement, ANE background, genre, intertextual setup, vocabulary to watch,
-   and tensions to hold. Orient; don't resolve.
+Passes 1 and 3 are for Lane, who listens to them read aloud, so they're spoken
+prose. Passes 2 and 4 are working passes, split out so no one turn carries too
+much and loses context. Pause after each pass for Lane's go-ahead.
 
-2. **Verse-by-verse.** Same prose, depth over speed; split a unit when a crux
-   deserves room. Earlier-Scripture roots and canonical trajectories come first,
-   then wordplay, structures only where real, ANE background, and the commentary
-   dialogue with tensions left open. Note devotional weight lightly. Search the
-   web throughout. Cite commentators by name freely here.
+1. **Briefing (for listening).** Flowing prose, with no headers, bullets or
+   bold. Cover placement, ANE background, genre, intertextual setup, vocabulary
+   to watch, and tensions to hold. The intertextual setup also names the
+   earlier stories the unit seems to lean on, scene by scene, without telling
+   them yet. Orient; don't resolve.
 
-3. **Intertext pass.** Its own turn, after Lane confirms pass 2. Start from
-   `canon-leads-unit-NN.md` in the synced folder: a generated list of where the
-   unit's rare words and shared two-word phrases occur elsewhere in the canon.
-   It's a word search, not a judgment. It's blind to common words, themes and
-   type-scenes, and for a Hebrew book to the New Testament (a Greek book's
-   sheet reads the LXX and the rest of the NT, but not its Synoptic
-   parallels), so the pass starts there but doesn't end there.
+2. **Research (a working pass, not presented).** Scene by scene, in writing:
+   - the people, places and objects, and where they appeared before;
+   - the story's shape (a feast, a feeding in want, a crossing, a commissioning,
+     a prophet rejected at home, …);
+   - the nearest earlier story with that shape, read in the target text;
+   - what's the same and what's different;
+   - what it does here (irony, reversal, identification, fulfilment, warning);
+   - later reuse.
 
-   The deliverable is a ledger, as a table. It has one row per link considered,
-   with the verse, the target text, the kind of link (shared word, shared phrase,
-   type-scene, allusion, later reuse, New Testament reception), the evidence, where
-   you found it, a strength (strong, possible, weak), and a verdict: a root `echo`,
-   an `aside.echo`, a footnote, or drop, with the reason. Rejected rows stay in the
-   ledger. Some strong suggestions:
-   - Every lead on the sheet gets a row, and you read the target verse.
-   - Every tracked thread and notable word gets "where does this first appear,
-     and where does it come back?"
-   - Central people, places and objects get a web search for later reuse and
-     type-scenes.
+   Search the web for the central people, places and objects. Then the word
+   leads, `canon-leads-unit-NN.md` in the synced folder: a generated list of
+   where the unit's rare words and shared two-word phrases occur elsewhere, and
+   (for a Greek book) a noun sweep of the unit's people, places and objects
+   with their first LXX verse and the other gospels' verses. It's a word
+   search, not a judgment. A lead that falls inside a story already found is
+   evidence for it; the rest are judged on their own (root `echo`,
+   `aside.echo`, footnote, or drop). Then, where the book has parallel
+   accounts (the other gospels for a gospel, Chronicles beside Kings), each
+   scene against them. Every tracked thread and notable word gets "where does
+   this first appear, and where does it come back?" Prune as you go.
 
-   A typical unit considers fifteen to thirty links and keeps six to twelve.
+   The output is a **notes file** (a chat-side output file, not pasted into
+   chat). It doubles as the full ledger: every link considered, with the
+   verse, the target text, the kind, the evidence, a strength (strong,
+   possible, weak) and the verdict, rejected rows included; and for a story
+   worth telling, the story, same, different and what it does. Passes 3 and 4
+   read it. In chat, say one line: research done, ready for the
+   verse-by-verse. Lane doesn't read the notes file.
 
-   Present the ledger and pause. Lane marks what to keep before the artifact is
-   drafted.
+3. **Verse-by-verse (for listening).** Flowing prose, depth over speed, built
+   on the notes; split a unit when a crux deserves room. Earlier-Scripture
+   roots and canonical trajectories come first, then wordplay, structures only
+   where real, ANE background, and the commentary dialogue with tensions left
+   open. When a verse reaches an earlier story, tell it there: its
+   background, what matches, what's different, and what this passage does with
+   it. Meaningful differences from a parallel account are spoken in place
+   too. Spoken style throughout: no verse numbers, references or original
+   script in the telling, and names said the way a person would say them ("the
+   book of Genesis", not "Gen 40:20"). Note devotional weight lightly. Search
+   the web throughout. Cite commentators by name freely here.
 
-4. **Artifact skeleton.** Only after Lane confirms. Draft it in the shape of
-   the book's style reference (`<book>_study_style_reference.md`), which holds
-   every artifact rule.
+   End with a short spoken list of what will go into the artifact: the story
+   boxes, the parallel-account boxes, the notable echoes. That list is Lane's
+   veto point, usually a quick yes.
+
+4. **Artifact (a working pass).** Only after Lane confirms. Build it from the
+   notes file and pass 3, in the shape of the book's style reference
+   (`<book>_study_style_reference.md`), which holds every artifact rule.
    - Mark roots with `data-root` only. Don't hand-chase `data-w` ids; the porter
      fills them.
    - Keep glosses short. Longer material goes in footnotes with a bold lead.
@@ -69,7 +89,7 @@ hand. The style reference holds every artifact rule.
    Lane's Claude Code session handles transliteration, validation, colours,
    word ids and porting.
 
-## Seven standing moves during pass 2
+## Seven standing moves during pass 3
 
 Each one turns an observation into an action:
 
@@ -78,15 +98,17 @@ Each one turns an observation into an action:
 - A root recurs across units but isn't tracked → flag it as a candidate, with the
   lemma ids you saw.
 - A single notable translation choice → flag it for a local `roots[]` entry.
-- A word with an earlier-Scripture history, or a distinctive later reuse → note
-  it for the intertext pass's ledger.
+- A word with an earlier-Scripture history, or a distinctive later reuse, that
+  the notes missed → add it to the notes file with its verdict.
 - A missed or wrong tag in an earlier unit → a `threads.retro` entry, not a
   prose aside.
-- A quotation, allusion or type-scene (commissioning, scouts, water crossing,
-  census, …) → an `intertext[]` or `typescenes[]` entry in the meta block.
-  Echo asides are harvested automatically, so don't repeat them. Check
-  `canon-decisions.md` before proposing a canon thread or type-scene that may
-  already be settled.
+- An earlier story or type-scene (commissioning, scouts, water crossing,
+  census, …) → an `aside.story` box where the book enables it (it's harvested
+  into the canon, type-scene included, so no meta entry); otherwise, and for a
+  quotation or allusion, an `intertext[]` or `typescenes[]` entry in the meta
+  block. Echo asides are harvested automatically too, so don't repeat them.
+  Check `canon-decisions.md` before proposing a canon thread or type-scene that
+  may already be settled.
 - A wording or data call only Lane can make → don't ask here. Render your best
   provisional choice, flag it in the fragment, and add a `questions[]` entry.
 

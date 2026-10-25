@@ -111,3 +111,31 @@ def test_parity_with_matthews_own_canon_leads():
     if len(our_rare) < 3:
         fails.append(f"suspiciously few rare leads found: {len(our_rare)}")
     return fails
+
+
+def test_noun_sweep():
+    """Every proper and narrative noun, no rarity cutoff; stock nouns and the
+    rare-word list's nouns left out; each with its first LXX verse and the
+    other gospels' verses."""
+    if not _have():
+        return ["Matthew's LXX/MorphGNT corpus not found next to bible-core"]
+    nt, lxx, _order = leads.load_greek_corpus()
+    nouns = leads.passage_nouns_greek("Matthew 15:1–39")
+    rows = {r["key"]: r for r in leads.noun_sweep_greek(nt, lxx, nouns, skip={"phyteia"})}
+    fails = []
+    for want in ("artos", "thalassa", "oros", "tyros", "spyris"):
+        if want not in rows:
+            fails.append(f"{want} missing from the sweep")
+    for gone in ("iēsous", "theos", "mathētēs", "phyteia"):
+        if gone in rows:
+            fails.append(f"{gone} should be left out")
+    a = rows.get("artos", {})
+    if a.get("here", [None])[0] != "15:2" or "Matt" in a.get("gospels", {}) \
+            or not a.get("gospels", {}).get("Mark") or not a.get("lxx_first"):
+        fails.append(f"artos row wrong: {a}")
+    if not rows.get("tyros", {}).get("proper"):
+        fails.append("tyros not marked as a name")
+    md = "\n".join(leads._render_sweep(list(rows.values())))
+    if "**Matt 15:2**" not in md or "*(name)*" not in md:
+        fails.append("sweep render lost its verse heads or name marks")
+    return fails

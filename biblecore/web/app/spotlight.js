@@ -6,6 +6,9 @@
      gets its own chip: `box` wraps the verse's asides of that kind in one
      panel headed `head` (compare -> a ✦ "Rendering" spotlight), `each` gives
      every aside its own chip and leaves it where it is (aside.synoptic, ✧).
+     `labels` ({attr, map, default}) also prints a word on each chip, read
+     from the aside's own attribute (aside.story: "◈ Type scene" for
+     data-kind="type-scene", "◈ Earlier story" otherwise).
    main.js passes the components in from data/components.json. Runs on the
    freshly loaded fragment; the fragments themselves are untouched. */
 
@@ -46,13 +49,20 @@ export function enhanceSpotlights(root, comps = []) {
   return count;
 }
 
-function chipFor(verse, box, cls, sym, label, n) {
+function chipFor(verse, box, cls, sym, label, n, shown) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = cls;
   btn.setAttribute("aria-expanded", "false");
   btn.setAttribute("aria-label", `Show ${label} for this verse${n > 1 ? ` (${n})` : ""}`);
   btn.textContent = sym;
+  if (shown) {
+    btn.classList.add("has-label");
+    const w = document.createElement("span");
+    w.className = "chip-label";
+    w.textContent = shown;
+    btn.append(w);
+  }
   btn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(box, btn, box.hidden); });
   verse.append(" ", btn);
   box._btn = btn;
@@ -94,7 +104,15 @@ function mountBox(verse, insertAfter, items, t) {
 function mountEach(verse, el, t) {
   el.classList.add("aside-box");
   el.hidden = true;
-  chipFor(verse, el, `spot-toggle ${t.cls || ""}`.trim(), t.sym, t.label, 1);
+  const shown = chipLabel(el, t.labels);
+  chipFor(verse, el, `spot-toggle ${t.cls || ""}`.trim(), t.sym,
+    shown ? shown.toLowerCase() : t.label, 1, shown);
+}
+
+function chipLabel(el, labels) {
+  if (!labels) return "";
+  const v = labels.attr ? el.getAttribute(labels.attr) : null;
+  return (labels.map && v != null && labels.map[v]) || labels.default || "";
 }
 
 function setOpen(box, btn, open) {

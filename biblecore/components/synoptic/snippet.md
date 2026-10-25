@@ -13,3 +13,9 @@ beside Chronicles), anchored to the verse it follows:
 
 `data-anchor` must match the verse it follows, and the `<h4>` is required
 (it is the panel's own title). The site hides each one behind its own ✧ chip.
+
+**How many.** No cap. Every scene another account tells gets checked, and
+every one where this book's change is telling (an addition, an omission, a
+reordering, a rewording that shifts the point) gets a box: often three to six
+a unit. The same event in another account is a synoptic, never an
+`aside.story`.

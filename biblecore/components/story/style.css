@@ -1,0 +1,39 @@
+/* aside.story -- an earlier story told beside a verse; app/spotlight.js hides
+   each one behind its own labelled ◈ chip (component.json "toggle", each:
+   true, labels by data-kind). Olive accent (slate blue in some divisions),
+   clear of echo's Jordan, synoptic's clay and the spotlight's bronze. The
+   Same / Different / What it does labels come from here, not the fragment;
+   a book renames them in theme.css (--story-match-label, --story-diff-label,
+   --story-does-label, --story-later-label). */
+.unit .story {
+  display: block; text-indent: 0; margin: 6px 0 18px; padding: 12px 16px 14px;
+  background: color-mix(in srgb, var(--panel) 78%, var(--bg));
+  border: 1px solid var(--rule-soft); border-left: 3px solid var(--accent-olive); border-radius: 4px;
+  font-size: 15.5px; line-height: 1.55; page-break-inside: avoid; break-inside: avoid;
+}
+.unit .story > h4 {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0 0 8px;
+  font-family: var(--display); font-weight: 600;
+}
+.unit .story .par-title { font-size: 16px; color: var(--ink); }
+.unit .story .par-ref { font-variant: small-caps; letter-spacing: .05em; font-size: 13px; font-weight: 400; color: var(--ink-soft); }
+.unit .story .par-story,
+.unit .story .par-diff,
+.unit .story .par-does,
+.unit .story .par-later { margin: 0 0 8px; text-indent: 0; }
+.unit .story .par-match { margin: 0 0 8px; padding-left: 20px; }
+.unit .story .par-match li { margin: 2px 0; }
+.unit .story .par-match::before { content: var(--story-match-label, "Same"); display: block; margin-left: -20px; }
+.unit .story .par-diff::before { content: var(--story-diff-label, "Different") ": "; }
+.unit .story .par-does::before { content: var(--story-does-label, "What it does") ": "; }
+.unit .story .par-later::before { content: var(--story-later-label, "Later") ": "; }
+.unit .story .par-match::before,
+.unit .story .par-diff::before,
+.unit .story .par-does::before,
+.unit .story .par-later::before { font-family: var(--display); font-weight: 600; font-style: normal; color: var(--accent-olive); }
+.unit .story .par-later { font-style: italic; color: var(--ink-soft); margin-bottom: 0; }
+.unit .story > :last-child { margin-bottom: 0; }
+.unit .story-toggle { color: var(--accent-olive); border-color: var(--accent-olive); }
+.unit .story-toggle:hover { color: var(--panel); background: color-mix(in srgb, var(--accent-olive) 55%, transparent); }
+.unit .story-toggle.is-open { color: var(--panel); background: var(--accent-olive); border-color: var(--accent-olive); }
+@media (max-width: 720px) { .unit .story { padding: 10px 12px 12px; } }

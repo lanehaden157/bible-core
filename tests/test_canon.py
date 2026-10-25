@@ -46,6 +46,28 @@ def test_harvest_joshua_unit_1_echoes():
     assert all(r["source"] == "echo" and r["kind"] == "echo" for r in rows)
 
 
+def test_harvest_stories():
+    html = ('<p class="v"><span class="n">6</span> t.</p>'
+            '<aside class="story" data-anchor="14:6" data-span="14:3–12" data-kind="type-scene" '
+            'data-scene="royal-birthday-feast" data-strength="strong"><h4>'
+            '<span class="par-title">Pharaoh’s birthday feast</span> '
+            '<span class="par-ref">Gen 40:20–22; 41:13</span></h4><p class="par-story">x</p></aside>'
+            '<aside class="story" data-anchor="14:20" data-kind="story" data-strength="possible">'
+            '<h4><span class="par-title">Elisha</span> <span class="par-ref">2 Kgs 4:42–44</span></h4></aside>'
+            '<aside class="story" data-anchor="bad" data-kind="story"><h4>'
+            '<span class="par-ref">Gen 1:1</span></h4></aside>')
+    it, ts = canon.harvest_stories(html, 14, abbrev="Matt")
+    got = {(r["from"], r["to"], r["kind"]) for r in it}
+    assert got == {("Matt 14:6", "Gen 40:20–22", "type-scene"), ("Matt 14:6", "Gen 41:13", "type-scene"),
+                   ("Matt 14:20", "2 Kgs 4:42–44", "story")}, got
+    assert all(r["source"] == "story" and r["unit"] == 14 for r in it)
+    assert it[0]["note"] == "Pharaoh’s birthday feast", it[0]
+    assert ts == [{"id": "royal-birthday-feast", "ref": "Matt 14:3–12", "unit": 14,
+                   "note": "Pharaoh’s birthday feast", "source": "story"}], ts
+    # a story box's kinds are allowed in a meta block's intertext[] too
+    assert canon.validate_meta({"intertext": [{"ref": "1:1", "to": "Gen 1:1", "kind": "character"}]}) == []
+
+
 def test_meta_entries_validate():
     good = {"intertext": [{"ref": "6:24", "to": "Ps 67:1", "kind": "echo", "note": "x"}],
             "typescenes": [{"id": "blessing", "ref": "6:23", "label": "Priestly blessing"}]}

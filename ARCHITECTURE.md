@@ -415,14 +415,22 @@ roles (`sync.ROLES`). Nothing else restates that list. **(learned:** four
 hand-written lists drifted the day files were added.**)** Settled cross-book calls go in `canon/decisions.md`
 (`canon-decisions.md`, F22). The loop, as a default:
 
-1. Pre-read briefing (flowing prose).
-2. Verse-by-verse (flowing prose; commentators named freely).
-3. **Intertext pass**, starting from the generated `canon-leads` sheet, with a
-   ledger that keeps its rejected rows. Lane marks what to keep.
-4. Artifact skeleton, with `questions[]` for Lane's calls.
+1. Briefing (flowing prose, for listening), naming the earlier stories the
+   unit leans on without telling them.
+2. **Research** (a working pass): scene by scene, the earlier stories with the
+   same shape, then the generated `canon-leads` sheet (word leads and a noun
+   sweep), then the parallel accounts. Its output is a notes file that keeps
+   its rejected rows; chat gets one line.
+3. Verse-by-verse (flowing prose, for listening; commentators named freely),
+   telling each earlier story where a verse reaches it, and ending with the
+   list of what goes in the artifact (Lane's veto point).
+4. Artifact (a working pass), from the notes and pass 3, with `questions[]`
+   for Lane's calls.
 
-The six standing moves (thread opens/pays off, candidate, notable choice,
-canon echo, retro, question) go in the template. A book changes the lens
+(0.17.0 reordered this: the intertext work used to be a separate pass 3 after
+the verse-by-verse, so what it found never reached the passes Lane listens to.)
+The seven standing moves (thread opens/pays off, candidate, notable choice,
+canon echo, retro, story or type-scene, question) go in the template. A book changes the lens
 (commentary set, genre cautions) in its own instructions.
 
 Claude Code side: port, then fill `data-w`, then validate, then build and

@@ -41,7 +41,7 @@ def _quiet(fn, *a):
 def test_registry_shape():
     reg = components.registry()
     fails = []
-    if set(reg) != {"echo", "list", "poem", "itin", "textform", "compare", "synoptic"}:
+    if set(reg) != {"echo", "list", "poem", "itin", "textform", "compare", "synoptic", "story"}:
         fails.append(f"registry has {sorted(reg)}")
     for c in reg.values():
         for f in ("style.css", "snippet.md", "__init__.py"):
@@ -180,6 +180,53 @@ def test_textform():
         if not chk(h, META):
             fails.append(f"textform check missed: {name}")
     return fails
+
+
+STORY_OK = (
+    '<p class="v"><span class="n">6:24</span> t.</p>'
+    '<aside class="story" data-anchor="6:24" data-kind="type-scene" data-scene="blessing" '
+    'data-strength="strong"><h4><span class="par-title">Aaron blesses</span> '
+    '<span class="par-ref">Lev 9:22–23</span></h4>'
+    '<p class="par-story">Aaron lifts his hands.</p><ul class="par-match"><li>hands</li></ul>'
+    '<p class="par-diff">No words given.</p><p class="par-does">Supplies the words.</p></aside>')
+
+
+def test_story():
+    chk = components.registry()["story"].check
+    fails = []
+    if chk(STORY_OK, META):
+        fails.append(f"good story rejected: {chk(STORY_OK, META)}")
+    plain = STORY_OK.replace('data-kind="type-scene" data-scene="blessing"', 'data-kind="story"')
+    if chk(plain, META):
+        fails.append(f"good plain story rejected: {chk(plain, META)}")
+    for name, h in {
+        "wrong anchor": STORY_OK.replace('data-anchor="6:24"', 'data-anchor="6:25"'),
+        "unknown kind": plain.replace('data-kind="story"', 'data-kind="theme"'),
+        "weak": STORY_OK.replace('"strong"', '"weak"'),
+        "type-scene without id": STORY_OK.replace(' data-scene="blessing"', ''),
+        "scene on a plain story": plain.replace('data-kind="story"', 'data-kind="story" data-scene="x"'),
+        "bad span": STORY_OK.replace('data-strength', 'data-span="6:22-x" data-strength'),
+        "no difference": STORY_OK.replace('<p class="par-diff">No words given.</p>', ''),
+        "no story": STORY_OK.replace('class="par-story"', 'class="par-x"'),
+        "no does": STORY_OK.replace('class="par-does"', 'class="par-x"'),
+        "no ref": STORY_OK.replace('Lev 9:22–23', 'Leviticus'),
+        "no title": STORY_OK.replace('class="par-title"', 'class="par-x"'),
+        "no header": STORY_OK.replace('<h4>', '<p>').replace('</h4>', '</p>'),
+        "script": STORY_OK.replace('hands</li>', 'χεῖρας</li>'),
+        "data-root": STORY_OK.replace('<li>hands', '<li><span data-root="hand">hands</span>'),
+        "class r": STORY_OK.replace('<li>hands', '<li><span class="r">hands</span>'),
+    }.items():
+        if not chk(h, META):
+            fails.append(f"story check missed: {name}")
+    return fails
+
+
+def test_story_chip_labels_reach_the_manifest():
+    m = components.app_manifest([components.registry()["story"]])["components"][0]
+    lab = m.get("toggle", {}).get("labels", {})
+    if lab.get("map", {}).get("type-scene") != "Type scene" or lab.get("default") != "Earlier story":
+        return [f"story labels lost: {m}"]
+    return []
 
 
 def test_new_components_skip_older_contracts():

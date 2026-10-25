@@ -49,7 +49,7 @@ own English, no citation.
 **`echo`** — optional on any root: one line saying where the word has already
 appeared, or where it reappears distinctively later, shown in the root's
 popover with a "cf.". Lead with the reference, then what it adds. Echoes come
-from the kept rows of the intertext pass's ledger, not from memory at
+from the kept rows of the research pass's notes file, not from memory at
 drafting time.
 
 **Resist a richer taxonomy. (learned:** a root/motif two-tier model was built
@@ -133,8 +133,9 @@ The porter moves these into `data/canon.json` and the canon registries in
 
 - `intertext[]` — `{ref, to, kind, note?}`: `ref` a bare `"C:V"` in this
   book, `to` a reference like `"Ps 67:1"`, `kind` one of `quotation`,
-  `allusion`, `echo`, `type-scene`. An `aside.echo` or a root's `echo` is
-  already harvested as an `echo` edge, so list here only what those don't
+  `allusion`, `echo`, `type-scene`, `story`, `character`, `reuse`. An
+  `aside.echo`, a root's `echo` or an `aside.story` box (where the book
+  enables it) is already harvested, so list here only what those don't
   say: a quotation, an allusion without an aside, a link worth keeping
   without cluttering the page.
 - `typescenes[]` — `{id, ref, note?, label?}`: `id` from the type-scene
