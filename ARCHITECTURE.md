@@ -47,6 +47,7 @@
 - 0.16.0: Interlinear: verse-number toggle, original script (data/script/), Plain/Notes/Original mode pill, restyled settings
 - 0.17.0: Earlier-story boxes (aside.story, labelled chips, canon harvest), research pass before the verse-by-verse in the workflow, Greek noun sweep on the leads sheet, no synoptic cap
 - 0.18.0: Two-chat workflow: research chat writes a handoff (canon/handoff-template.md), fresh build chat does pass 4; unit meta gains checks[] and threads.promote[]; questions[] limited to Lane-only calls
+- 0.19.0: lxx command (verse lemmas, --expect, --checks runs a unit's checks[], '!lemma' = absent); audit prints ready retrofit add JSON with candidate text; port --answers FILE; biblecore test notes CRLF policy files
 
 ## What this is
 
