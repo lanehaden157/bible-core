@@ -15,8 +15,10 @@ weak-root verbs, which is why this is id-based.)
 
     python -m biblecore audit             # every tracked thread
     python -m biblecore audit give devote  # just these
-    python -m biblecore audit --stub give  # retrofit-tags stubs
-                                                           # for give's gaps
+    python -m biblecore audit --stub give  # only give's gaps in the `add` block
+                                           # (every gap prints ready `add` JSON
+                                           # at the end regardless: unit, verse,
+                                           # root, text, w)
     python -m biblecore audit --ids kol give
                         # every surface form + ref a root's id set pulls in,
                         # counted by word id (not lemma occurrence -- Beth-el
@@ -358,6 +360,66 @@ def verse_text(html, v, ch=None, first_ch=None):
     return ""
 
 
+# ------------------------------------------------- retrofit `add` entries
+
+def known_renderings(root_slug):
+    """{English text: count} of the spans already tagged `root_slug` in the
+    book's built units -- how this root has been rendered so far."""
+    pat = re.compile(r'<span class="r[l]?"[^>]*\bdata-root="%s"[^>]*>([^<]+)</span>'
+                     % re.escape(root_slug))
+    out = {}
+    for _u, html in built_units(_data("units.json")):
+        for m in pat.finditer(html):
+            out[m.group(1)] = out.get(m.group(1), 0) + 1
+    return out
+
+
+def candidate_text(html, verse, renderings):
+    """The English to wrap for a gap in `verse` (a number, or "C:V"): the
+    text of the one rendering this root has had elsewhere that sits free
+    (outside any tag) in the verse, as the verse spells it; None if none
+    does or two different ones do. retrofit's add finds the same free
+    occurrence, so a text found here is one `add` can place."""
+    from biblecore import retrofit
+    span = retrofit.vblock(html, verse)
+    if not span:
+        return None
+    # words already inside a tagged span aren't free (retrofit's tag-aware
+    # search skips markup, not the text a span wraps)
+    seg = re.sub(r'<span class="r[l]?"[^>]*>.*?</span>', "\x00", html[span[0]:span[1]],
+                 flags=re.S)
+    found = set()
+    for r in renderings:
+        for form in {r, r[:1].upper() + r[1:], r[:1].lower() + r[1:]}:
+            pat = re.compile(r'(?<![\w-])' + re.escape(form) + r'(?![\w-])')
+            hit = retrofit._first_outside_tags(seg, pat)
+            if hit:
+                found.add(seg[hit[0]:hit[1]])
+    # "love" inside "love your" etc. is the same free word; keep the longest
+    found = {f for f in found if not any(f != g and f in g for g in found)}
+    return found.pop() if len(found) == 1 else None
+
+
+def add_entry(gap, slug, passage, html, cache=None):
+    """The retrofit-tags.json `add` entry for one coverage gap, ready to
+    paste: {unit, verse, root, text, w, why}. `text` is the candidate from
+    candidate_text(), or "???" for a human to fill in. `cache` ({root:
+    known_renderings}) saves re-reading the units for each gap."""
+    lo, hi = parse_range(passage)
+    # "C:V" in a unit that crosses a chapter (retrofit reads both)
+    verse = f'{gap["ch"]}:{gap["v"]}' if lo[0] != hi[0] else gap["v"]
+    cache = {} if cache is None else cache
+    if gap["root"] not in cache:
+        cache[gap["root"]] = known_renderings(gap["root"])
+    text = candidate_text(html, verse, cache[gap["root"]]) or "???"
+    return {"unit": slug, "verse": verse, "root": gap["root"], "text": text,
+            "w": gap["word_id"], "why": f'{gap["translit"]} {gap["ch"]}:{gap["v"]}'}
+
+
+def add_entry_line(entry):
+    return "    " + json.dumps(entry, ensure_ascii=False) + ","
+
+
 # ----------------------------------------------------------------- audit
 
 def built_units(units_json):
@@ -544,6 +606,7 @@ def audit(only=None, stub_for=None, unit_slugs=None):
     total_strays = 0
     total_missing_w = 0
     stub_lines = []
+    renderings = {}  # root slug -> known_renderings, read once per root
     covs = {}  # slug -> coverage_for_fragment result, computed once, reused below
 
     for u, html in units:
@@ -579,13 +642,8 @@ def audit(only=None, stub_for=None, unit_slugs=None):
                       f"‹{g['surface']}› ({g['translit']})")
                 if g["text"]:
                     print(f"             “{g['text'][:96]}”")
-                # "C:V" in a unit that crosses a chapter (retrofit reads both)
-                lo, hi = parse_range(u["passage"])
-                verse = f'"{g["ch"]}:{g["v"]}"' if lo[0] != hi[0] else g["v"]
-                stub_lines.append((tid,
-                    f'    {{ "unit": "{u["slug"]}", "verse": {verse}, '
-                    f'"text": "???", "root": "{g["root"]}", "w": "{g["word_id"]}", '
-                    f'"why": "{g["translit"]} {g["ch"]}:{g["v"]}" }},'))
+                stub_lines.append((tid, add_entry_line(
+                    add_entry(g, u["slug"], u["passage"], html, renderings))))
             for w in ws:
                 total_wrong += 1
                 print(f"      WRONG  {w['ch']}:{w['v']}  {w['word_id']}  "
@@ -638,12 +696,13 @@ def audit(only=None, stub_for=None, unit_slugs=None):
         for tid in sorted(undefined):
             print(f"      {tid:14} root=‹{tracked[tid]}›")
 
-    if stub_for is not None:
-        want = set(stub_for)
+    if stub_for is not None or stub_lines:
+        want = set(stub_for or ())
         lines = [ln for tid, ln in stub_lines if not want or tid in want]
-        print(f"\n--- retrofit-tags.json stubs "
+        print(f"\n--- retrofit-tags.json `add` entries "
               f"({'all audited' if not want else ', '.join(sorted(want))}) — "
-              f"fill in \"text\", paste into retrofit-tags.json 'add' ---")
+              f"paste into retrofit/retrofit-tags.json 'add'; check any "
+              f"\"???\" text, then run `python -m biblecore build` ---")
         for ln in lines:
             print(ln)
         if not lines:

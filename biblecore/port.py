@@ -4,6 +4,8 @@
     python -m biblecore port 5 --dry        # show what would change, write nothing
     python -m biblecore port 6 --src X.html # build the thread-delta report from X, write nothing
     python -m biblecore port 1 --force      # re-port an already-built unit
+    python -m biblecore port 5 --answers a.json  # {question topic: answer}: those questions print as
+                                            # answered, and go in the delta as such
 
 For a new unit N:
   1. read source-artifacts/<slug>_NN_*.html
@@ -145,7 +147,7 @@ def merge_units_json(meta, dry, fragment_html=None):
 
 # --------------------------------------------------------------- thread delta
 
-def thread_delta(meta, fragment_html=None, retrofit_applied=True):
+def thread_delta(meta, fragment_html=None, retrofit_applied=True, answers=None):
     threads = {t["id"]: t for t in um._load("threads.json")["threads"]}
     n = meta["unit"]
     slug = meta.get("slug", f"unit-{n:02d}")
@@ -218,11 +220,19 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True):
 
     questions = meta.get("questions", []) or []
     if questions:
-        lines += ["", "## Open questions for Lane", ""]
-        for q in questions:
-            lines.append(f"- **{q.get('topic', '?')}** — {q.get('note', '').strip()}")
-            for opt in q.get("options", []) or []:
-                lines.append(f"    - {opt}")
+        answers = answers or {}
+        open_qs = [q for q in questions if q.get("topic") not in answers]
+        if open_qs:
+            lines += ["", "## Open questions for Lane", ""]
+            for q in open_qs:
+                lines.append(f"- **{q.get('topic', '?')}** — {q.get('note', '').strip()}")
+                for opt in q.get("options", []) or []:
+                    lines.append(f"    - {opt}")
+        done = [q for q in questions if q.get("topic") in answers]
+        if done:
+            lines += ["", "## Questions answered (--answers)", ""]
+            for q in done:
+                lines.append(f"- **{q['topic']}** — {answers[q['topic']]}")
 
     retro = th.get("retro", []) or []
     if retro:
@@ -372,17 +382,13 @@ def _append_coverage(lines, slug, html, passage, retrofit_applied=True):
         lines.append(f"**{len(cov['gaps'])} occurrence(s) the "
                      f"{book().language_name} has but the "
                      f"fragment leaves untagged** — add to `retrofit-tags.json` "
-                     f"`add` (fill in `text`):")
+                     f"`add` (check any `???` text):")
         lines.append("")
-        # a unit that crosses a chapter repeats bare verse numbers (10:1 and
-        # 11:1), so its stubs name the verse as "C:V" (retrofit reads both)
-        lo, hi = atc.parse_range(passage)
+        renderings = {}
         for g in cov["gaps"]:
             txt = (g["text"][:90] + "…") if len(g["text"]) > 90 else g["text"]
-            verse = f'"{g["ch"]}:{g["v"]}"' if lo[0] != hi[0] else g["v"]
-            lines.append(f'    {{ "unit": "{slug}", "verse": {verse}, '
-                         f'"text": "???", "root": "{g["root"]}", "w": "{g["word_id"]}", '
-                         f'"why": "{g["translit"]} {g["ch"]}:{g["v"]}" }},')
+            lines.append(atc.add_entry_line(
+                atc.add_entry(g, slug, passage, html, renderings)))
             if txt:
                 lines.append(f"        # “{txt}”")
     if cov["wrong"]:
@@ -480,20 +486,52 @@ def run_retrofit_and_scan():
 
 # --------------------------------------------------------------- commands
 
-def print_questions(meta):
+def load_answers(path):
+    """{topic: answer} from a --answers JSON file. The answer is the chosen
+    option or free text; anything but a string is read as its JSON text."""
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError) as exc:
+        sys.exit(f"--answers {path}: {exc}")
+    if not isinstance(data, dict):
+        sys.exit(f"--answers {path}: expected an object {{topic: answer}}")
+    return {str(k): v if isinstance(v, str) else json.dumps(v, ensure_ascii=False)
+            for k, v in data.items()}
+
+
+def print_questions(meta, answers=None):
     """Wording/data calls the chat side flagged for Lane (meta.questions[]) --
     printed straight to stdout, at the top of the port, so whoever is
     running port_artifact.py sees them immediately and can ask Lane right
     here instead of the chat side asking on the project side (2026-09-21,
     Lane: 'i dont wanna be answering those on project side'). Also folded
     into the thread-delta report by thread_delta() for the written record,
-    but this is the copy meant to actually get read."""
+    but this is the copy meant to actually get read.
+
+    `answers` ({topic: answer}, from --answers) marks questions already
+    decided: they print as resolved, only the rest as open, and a topic
+    that matches no question is warned about (a misspelt key would
+    otherwise leave its question open without a word)."""
     questions = meta.get("questions", []) or []
+    answers = answers or {}
+    topics = {q.get("topic") for q in questions}
+    for t in sorted(set(answers) - topics):
+        print(f"  warning: --answers has '{t}', but no question has that topic")
     if not questions:
         return
+    open_qs = [q for q in questions if q.get("topic") not in answers]
+    done = [q for q in questions if q.get("topic") in answers]
+    if done:
+        print("")
+        print(f"=== {len(done)} question(s) answered from --answers ===")
+        for q in done:
+            print(f"  [{q['topic']}] -> {answers[q['topic']]}")
+    if not open_qs:
+        return
     print("")
-    print(f"=== {len(questions)} open question(s) for Lane ===")
-    for q in questions:
+    print(f"=== {len(open_qs)} open question(s) for Lane ===")
+    for q in open_qs:
         print(f"  [{q.get('topic', '?')}] {q.get('note', '').strip()}")
         for opt in q.get("options", []) or []:
             print(f"      - {opt}")
@@ -512,7 +550,7 @@ def print_checks(meta):
         print(" ", line)
 
 
-def port_one(n, dry, src=None, force=False):
+def port_one(n, dry, src=None, force=False, answers=None):
     b = book()
     os.makedirs(b.path("out"), exist_ok=True)
     if src:
@@ -544,7 +582,7 @@ def port_one(n, dry, src=None, force=False):
             print("  -", e)
         sys.exit(1)
 
-    print_questions(meta)
+    print_questions(meta, answers)
     print_checks(meta)
 
     fragment = to_fragment(raw, n)
@@ -574,7 +612,7 @@ def port_one(n, dry, src=None, force=False):
     dest = b.unit_path(n)
     if no_write:
         why = "dry run" if dry else "--src: writing nothing"
-        delta = thread_delta(meta, fragment, retrofit_applied=False)
+        delta = thread_delta(meta, fragment, retrofit_applied=False, answers=answers)
         print(f"[{why}] would write {dest}")
         print(f"[{why}] local hues: { {k: v['color'] for k, v in local_roots.items()} }")
         nretro = len((meta.get("threads", {}) or {}).get("retro", []) or [])
@@ -617,7 +655,7 @@ def port_one(n, dry, src=None, force=False):
     # coverage against the fragment as it now stands on disk (retrofit applied)
     with open(dest, encoding="utf-8") as fh:
         final = fh.read()
-    delta = thread_delta(meta, final, retrofit_applied=True)
+    delta = thread_delta(meta, final, retrofit_applied=True, answers=answers)
     print(f"\n>>> REVIEW THE THREAD DELTA: {delta}")
     print("\nported. view in the browser, apply the thread delta if accepted, then commit.")
 
@@ -632,9 +670,14 @@ def main(argv=None):
                          "(for dry-running the porter on a practice fragment)")
     ap.add_argument("--force", action="store_true",
                     help="allow replacing an already-built units/unit-NN.html")
+    ap.add_argument("--answers", metavar="FILE",
+                    help="JSON {question topic: answer} for the artifact's "
+                         "questions[]: those print as answered (and go in the "
+                         "thread delta as such), only the rest as open. Lets "
+                         "the dry run and the real port share one set of answers")
     a = ap.parse_args(argv)
     if not a.unit:
         ap.error("give a unit number")
-    port_one(a.unit, a.dry, a.src, a.force)
+    port_one(a.unit, a.dry, a.src, a.force, load_answers(a.answers) if a.answers else None)
     return 0
 

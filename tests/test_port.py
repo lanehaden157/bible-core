@@ -325,6 +325,82 @@ def test_print_questions_writes_to_stdout():
            "Yam Suf" in out and "Reed Sea or Red Sea?" in out, out)
 
 
+QUESTIONS_META = {
+    "unit": 6, "slug": "unit-06", "passage": "Joshua 6:1-27", "title": "Jericho",
+    "roots": [],
+    "threads": {"opens": [], "payoffs": [], "candidates": [], "retro": []},
+    "questions": [
+        {"topic": "Yam Suf", "note": "Reed Sea or Red Sea?", "options": ["Reed Sea", "Red Sea"]},
+        {"topic": "herem", "note": "devoted or transliterated?"}],
+}
+
+
+def _printed(meta, answers):
+    import io
+    import contextlib
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        pa.print_questions(meta, answers)
+    return buf.getvalue()
+
+
+def test_answered_questions_print_as_resolved_and_the_rest_as_open():
+    out = _printed(QUESTIONS_META, {"Yam Suf": "Reed Sea"})
+    _check("an answered question should print as answered",
+           "1 question(s) answered" in out and "[Yam Suf] -> Reed Sea" in out, out)
+    _check("only the unanswered question should stay open",
+           "1 open question(s)" in out and "[herem]" in out
+           and "Reed Sea or Red Sea?" not in out, out)
+
+
+def test_every_question_answered_leaves_none_open():
+    out = _printed(QUESTIONS_META, {"Yam Suf": "Red Sea", "herem": "devoted"})
+    _check("no open-questions header when all are answered",
+           "open question" not in out and "2 question(s) answered" in out, out)
+
+
+def test_an_answer_for_no_question_is_warned_about():
+    out = _printed(QUESTIONS_META, {"yam suf": "Reed Sea"})  # wrong case
+    _check("a topic that matches nothing should warn",
+           "warning" in out and "'yam suf'" in out, out)
+    _check("and the question stays open", "2 open question(s)" in out, out)
+
+
+def test_thread_delta_records_answers_and_lists_only_open_questions():
+    with _ScratchProject() as sp:
+        path = pa.thread_delta(QUESTIONS_META, answers={"Yam Suf": "Reed Sea"})
+        delta = open(path, encoding="utf-8").read()
+        _check("delta should record the answer",
+               "## Questions answered" in delta and "**Yam Suf** — Reed Sea" in delta, delta)
+        _check("delta should keep the unanswered question open",
+               "## Open questions for Lane" in delta and "**herem**" in delta
+               and "Reed Sea or Red Sea?" not in delta, delta)
+
+
+def test_answers_file_loads_and_bad_ones_exit():
+    d = tempfile.mkdtemp(prefix="bc-ans-")
+    good = os.path.join(d, "a.json")
+    with open(good, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump({"Yam Suf": "Reed Sea", "n": 3}, fh)
+    _check("answers load as topic -> text", pa.load_answers(good) == {"Yam Suf": "Reed Sea", "n": "3"},
+           str(pa.load_answers(good)))
+    for name, body in (("list.json", "[1]"), ("broken.json", "{")):
+        p = os.path.join(d, name)
+        with open(p, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(body)
+        try:
+            pa.load_answers(p)
+        except SystemExit:
+            continue
+        _check(f"{name} should exit", False, "no SystemExit")
+    try:
+        pa.load_answers(os.path.join(d, "missing.json"))
+    except SystemExit:
+        pass
+    else:
+        _check("a missing answers file should exit", False, "no SystemExit")
+
+
 def test_thread_delta_reports_promotions_and_checks():
     with _ScratchProject() as sp:
         meta = {

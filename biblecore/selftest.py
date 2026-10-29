@@ -86,7 +86,25 @@ def check_data():
     rc, out = _quiet(roots.main, [])
     if rc:
         errs.append("roots.json fails validation:\n" + out.strip())
-    return errs, []
+    return errs, crlf_notes()
+
+
+def crlf_notes():
+    """Policy files saved with CRLF (an editor, or a script run on Windows
+    without newline="\n") make git warn "CRLF will be replaced by LF" on
+    every commit. The core writes LF itself; this catches the rest."""
+    root = book().root
+    bad = []
+    for pat in ("data/*.json", "retrofit/*.json"):
+        for p in sorted(glob.glob(os.path.join(root, pat))):
+            with open(p, "rb") as fh:
+                if b"\r\n" in fh.read():
+                    bad.append(os.path.relpath(p, root).replace(os.sep, "/"))
+    if not bad:
+        return []
+    return [f"{len(bad)} file(s) have CRLF line endings ({', '.join(bad)}): git warns "
+            f"on every commit. Rewrite them with LF (a script that writes them "
+            f"should open(..., newline=\"\\n\"))"]
 
 
 def check_units():

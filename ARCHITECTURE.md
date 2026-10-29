@@ -165,7 +165,8 @@ Joshua A1/A2: a regenerated meta block failed the project's own validator.**)**
   earlier units' meta) is a note in the artifact's prose.
 - `checks[]` = `{ref, claim, expect}` (0.18.0). Claims about other passages'
   text for the code side to verify against the corpus; `expect` is a string
-  or a list of lemma(s). `port` prints them in their own section and the
+  or a list of lemma(s), `"!lemma"` for one that should be absent. A Greek
+  book runs them with `lxx --checks N` (0.19.0). `port` prints them in their own section and the
   thread delta lists them; they are never questions. Consumed at port.
 - `threads.promote[]` (optional, 0.18.0) = `{entry, reach, retrofit}`: a thread
   ready for `threads.json` (`id, root, ids, gloss, opens, payoffs`, no

@@ -61,6 +61,10 @@ provisional choice. The build chat asks these in chat before building.
 ## Checks for code
 
 Claims about other passages' Greek or Hebrew that the code side can verify
-against the corpus. One row each: `ref, claim, expected lemma(s)`. These become
-`checks[]` in the unit meta. They are not questions and Lane doesn't answer
-them.
+against the corpus. One row each: `ref, claim, expected lemma(s)`. Give the
+lemma in transliteration (`petra`, `hades`; macrons optional). For a claim that
+a word is *absent* ("Isa 22:22 has no word for key"), write the lemma with a
+leading `!` (`!kleis`). A ref may name several passages (`Isa 38:10 / Wis 16:13`);
+their words are pooled. These become `checks[]` in the unit meta and run in one
+go with `python -m biblecore lxx --checks N` (LXX refs). They are not questions
+and Lane doesn't answer them.

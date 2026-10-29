@@ -213,7 +213,7 @@ goes in `translation-choices.md` or the thread/root entry.
 **`checks[]`** — `{ref, claim, expect}`. A claim about another passage's text
 that the code side can verify against the corpus (`ref` like `"Isa 22:22"`,
 `claim` what the artifact says, `expect` the lemma(s) it should find, a string
-or a list). These never go in `questions[]`: the porter prints them in their
+or a list; `"!lemma"` says the word should be *absent*). These never go in `questions[]`: the porter prints them in their
 own section, they have no options and Lane doesn't answer them.
 
 ---

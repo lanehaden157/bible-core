@@ -16,6 +16,8 @@ Commands:
   roots                 validate data/roots.json
   digest                -> threads-digest.md
   colour ROOT [...]     colours for threads about to be promoted
+  lxx BOOK C:V [--expect LEMMA ...] | --checks UNIT
+                        an LXX verse's lemmas; a unit's checks[] run against it
   leads [N|--all] [--rare N]
                         canon leads (Hebrew Bible; LXX + NT for a Greek book)
   canon                 echo edges + meta rows -> data/canon.json
@@ -55,6 +57,7 @@ COMMANDS = {
     "digest": ("biblecore.digest", "main"),
     "colour": ("biblecore.colour", "main"),
     "leads": ("biblecore.leads", "main"),
+    "lxx": ("biblecore.lxx_lookup", "main"),
     "canon": ("biblecore.canon", "main"),
     "units-from-map": ("biblecore.units_map", "main"),
     "emit": ("biblecore.emit", "main"),
@@ -67,7 +70,7 @@ COMMANDS = {
 }
 # commands whose main() parses its arguments with argparse (its own --help);
 # every other one gets its module docstring for -h/--help and doesn't run
-ARGPARSED = {"port", "data-w", "leads", "migrate", "units-from-map", "fetch"}
+ARGPARSED = {"port", "data-w", "leads", "lxx", "migrate", "units-from-map", "fetch"}
 HELP = ("-h", "--help")
 
 

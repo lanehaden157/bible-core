@@ -54,8 +54,9 @@ Shape (style reference §3):
   checks     [ {ref, claim, expect} ]
              Claims about other passages' text the code side can verify
              against the corpus; `expect` is a string or a list of expected
-             lemma(s). Printed by the port in their own section, consumed and
-             dropped like questions.
+             lemma(s); "!lemma" says that lemma should be absent. Printed by the
+             port in their own section (`python -m biblecore lxx --checks N`
+             runs them against the LXX), consumed and dropped like questions.
 
 Unknown top-level keys are a hard validate() failure (learned: Matthew's
 `descriptor`/`discourse` were authored for eleven units and silently

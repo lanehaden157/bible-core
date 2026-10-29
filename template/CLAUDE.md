@@ -15,14 +15,17 @@ status), read from its data. It isn't written here, so it can't go stale.
 ## Commands (run from this folder)
 
     python -m biblecore book             # where the book stands (see State above)
-    python -m biblecore port 5 [--dry]   # port source-artifacts/{{SLUG}}_05_translation.html (--force re-ports)
+    python -m biblecore port 5 [--dry]   # port source-artifacts/{{SLUG}}_05_translation.html (--force re-ports;
+                                         # --answers FILE: {question topic: answer} so a dry run's answers carry over)
     python -m biblecore build            # everything downstream of units/*.html
-    python -m biblecore audit            # tracked-thread coverage (--ids ROOT to preview an id set)
+    python -m biblecore audit            # tracked-thread coverage (--ids ROOT to preview an id set);
+                                         # gaps end with ready `add` JSON for retrofit/retrofit-tags.json
     python -m biblecore test [--quick]   # check the book: pin, units, contracts, build idempotence
     python -m biblecore sync             # mirror chat-side files, commit and push (after Lane's OK)
 
 `python -m biblecore` lists the rest: `colour` and `data-w` for promoting a
-thread, `leads`, `units-from-map`, `corpus`, `migrate` after re-vendoring,
+thread, `leads`, `lxx` (a Greek book: an LXX verse's lemmas, and a unit's
+`checks[]` run against them), `units-from-map`, `corpus`, `migrate` after re-vendoring,
 `sync-check --mark-pasted` after pasting the instruction field.
 
 GitHub Actions runs `python -m biblecore test` on every push
