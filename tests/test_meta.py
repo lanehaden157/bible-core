@@ -806,6 +806,76 @@ def test_worked_example_validates_clean():
            "threads.json fixture", not errs, errs)
 
 
+
+# ------------------------------------------------- checks[] and threads.promote[]
+
+def _promote(**entry_over):
+    entry = {"id": "devote", "root": "devote", "ids": ["2764"],
+             "gloss": "ban, devote to destruction",
+             "opens": {"unit": 6, "ref": "6:17", "note": "the ban begins"},
+             "payoffs": [{"unit": 7, "ref": "7:1", "note": "Achan breaks it"}]}
+    entry.update(entry_over)
+    return {"entry": entry, "reach": "3 occurrences, retrofit in units 2, 5",
+            "retrofit": [2, 5]}
+
+
+def test_checks_clean_entries_pass():
+    meta = _meta(checks=[{"ref": "Isa 22:22", "claim": "no word for key",
+                          "expect": ["kleis"]},
+                         {"ref": "Deut 5:26", "claim": "living God",
+                          "expect": "theos + zaō"}])
+    errs = um.validate(meta)
+    _check("well-formed checks[] should pass", not errs, errs)
+
+
+def test_checks_bad_entries_fail():
+    meta = _meta(checks=[{"ref": "Isa 22:22", "claim": "x"},
+                         {"claim": "y", "expect": "z"},
+                         {"ref": "a", "claim": "b", "expect": "c", "extra": 1}])
+    errs = um.validate(meta)
+    for i in range(3):
+        _check(f"checks[{i}] should fail", any(f"checks[{i}]" in e for e in errs), errs)
+    _check("checks must be a list", um.validate(_meta(checks="x")) != [])
+
+
+def test_checks_is_dropped_by_generate():
+    units_json = {"units": [{"n": 1, "slug": "unit-01", "passage": "Joshua 1:1-18",
+                              "title": "Commission", "movement": 1, "roots": {}}]}
+    meta = um.generate(1, units_json=units_json, threads_json={"threads": []})
+    _check("generate() never adds checks or threads.promote",
+           "checks" not in meta and "promote" not in meta["threads"], meta)
+
+
+def test_promote_clean_entry_passes():
+    meta = _meta(threads={**_EMPTY_THREADS, "promote": [_promote()]})
+    errs = um.validate(meta, {"threads": [{"id": "strong", "root": "strong"}]})
+    _check("a ready promote[] entry should pass", not errs, errs)
+
+
+def test_promote_bad_entries_fail():
+    cases = {
+        "missing reach": {**_promote(), "reach": ""},
+        "retrofit not ints": {**_promote(), "retrofit": ["unit-02"]},
+        "no ids": _promote(ids=[]),
+        "no gloss": _promote(gloss=""),
+        "no opens": _promote(opens=None),
+        "payoff without ref": _promote(payoffs=[{"unit": 7}]),
+        "colour carried": _promote(color="#fff"),
+        "bad id": _promote(id="Not Ok"),
+    }
+    for name, p in cases.items():
+        errs = um.validate(_meta(threads={**_EMPTY_THREADS, "promote": [p]}),
+                           {"threads": []})
+        _check(f"promote[] {name} should fail", any("promote[0]" in e for e in errs), errs)
+
+
+def test_promote_of_existing_thread_fails():
+    meta = _meta(threads={**_EMPTY_THREADS, "promote": [_promote(id="strong", root="strong")]})
+    errs = um.validate(meta, {"threads": [{"id": "strong", "root": "strong"}]})
+    _check("promoting an id threads.json already has should fail",
+           any("already a thread" in e for e in errs), errs)
+
+
 # ------------------------------------------------------------------- runner
 
 def main():

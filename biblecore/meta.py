@@ -27,7 +27,8 @@ Shape (style reference §3):
              reappears later, shown in the root popover.
   threads    { opens:[{id,ref,note}], payoffs:[{id,ref,note}],
                candidates:[{root,why,ids?,refs?}],
-               retro:[{unit,verse,text,root,why,nth?,op?,w?}] }
+               retro:[{unit,verse,text,root,why,nth?,op?,w?}],
+               promote?:[{entry,reach,retrofit}] }
              All four sub-keys required, each a list, empty lists fine.
              opens/payoffs `note` is required unless book.json turns
              checks.opens_note_required off. candidates PROPOSE threads
@@ -35,13 +36,26 @@ Shape (style reference §3):
              EARLIER units; `w` is optional in the artifact because the
              porter fills data-w. candidates/retro are consumed by the
              porter and never regenerated.
+             promote (optional) is a thread ready to add to threads.json:
+             entry {id,root,ids,gloss,opens:{unit,ref,note?},payoffs:[{unit,
+             ref,note?}],translit?,note?}, reach (a sentence: "N occurrences,
+             retrofit in units X, Y"), retrofit [unit numbers]. Where
+             candidates leave the id set to Claude Code, promote hands it over
+             ready. Consumed at port like candidates.
   contract   str      core version the unit was ported under ("0.3.0");
                         stamped by the porter, moved only by migrations
                         (contract.py). Absent on units ported before 0.3.0.
   questions  [ {topic, note, options?} ]
              Wording/data calls only Lane can make, surfaced at port time in
              Claude Code rather than asked on the project side. Consumed and
-             dropped like candidates/retro.
+             dropped like candidates/retro. Lane-only calls: a ruled wording
+             (translation-choices.md, earlier units' meta) is a note in the
+             prose, and code checks go in `checks`, never here.
+  checks     [ {ref, claim, expect} ]
+             Claims about other passages' text the code side can verify
+             against the corpus; `expect` is a string or a list of expected
+             lemma(s). Printed by the port in their own section, consumed and
+             dropped like questions.
 
 Unknown top-level keys are a hard validate() failure (learned: Matthew's
 `descriptor`/`discourse` were authored for eleven units and silently
@@ -116,6 +130,8 @@ REQUIRED = ("unit", "passage", "title", "roots", "threads")
 # key and having it silently pass.
 CORE_TOP_LEVEL_KEYS = {
     "unit", "slug", "passage", "title", "roots", "threads", "questions",
+    # claims for the code side to verify, consumed at port (0.18.0)
+    "checks",
     # canon rows (G9), consumed at port like questions -- see canon.py
     "intertext", "typescenes",
     # core version the unit was written against (D7) -- see contract.py
@@ -132,6 +148,10 @@ def allowed_top_level_keys():
 
 # threads must carry all four of these, each a list (style reference §3).
 THREADS_SUBKEYS = ("opens", "payoffs", "candidates", "retro")
+# optional: a list when present (0.18.0)
+THREADS_OPTIONAL_SUBKEYS = ("promote",)
+PROMOTE_ENTRY_KEYS = {"id", "root", "ids", "gloss", "translit", "opens",
+                      "payoffs", "note"}
 
 _ID_RE = re.compile(r"^\d+[a-z]?$")
 _REF_RE = re.compile(r"^\d+:\d+$")
@@ -170,6 +190,90 @@ def normalize_candidates(meta):
                 notes.append(f"threads.candidates[{i}] ({c.get('root', '?')}): "
                              f"id '{x}' read as '{ids[j]}'")
     return notes
+
+
+def _validate_checks(checks):
+    if checks is None:
+        return []
+    if not isinstance(checks, list):
+        return ["checks must be a list"]
+    errs = []
+    for i, c in enumerate(checks):
+        where = f"checks[{i}]"
+        if not isinstance(c, dict):
+            errs.append(f"{where}: must be an object {{ref, claim, expect}}")
+            continue
+        for k in ("ref", "claim"):
+            if not (isinstance(c.get(k), str) and c[k].strip()):
+                errs.append(f"{where}: missing '{k}' (a non-empty string)")
+        e = c.get("expect")
+        if not ((isinstance(e, str) and e.strip()) or (
+                isinstance(e, list) and e and all(
+                    isinstance(x, str) and x.strip() for x in e))):
+            errs.append(f"{where}: 'expect' must be a string or a non-empty "
+                        "list of strings (the expected lemma(s))")
+        for k in set(c) - {"ref", "claim", "expect"}:
+            errs.append(f"{where}: unknown key '{k}' -- a check is "
+                        "{ref, claim, expect}")
+    return errs
+
+
+def _validate_promote(promote, threads_json=None):
+    """threads.promote[]: {entry, reach, retrofit}, entry being a ready
+    threads.json entry (see the module docstring)."""
+    if not promote or not isinstance(promote, list):
+        return []
+    id_re = _lemma_id_re()
+    known = {t["id"] for t in (threads_json or {}).get("threads", [])}
+    errs = []
+    for i, p in enumerate(promote):
+        where = f"threads.promote[{i}]"
+        if not isinstance(p, dict):
+            errs.append(f"{where}: must be an object {{entry, reach, retrofit}}")
+            continue
+        for k in set(p) - {"entry", "reach", "retrofit"}:
+            errs.append(f"{where}: unknown key '{k}' -- {{entry, reach, retrofit}}")
+        if not (isinstance(p.get("reach"), str) and p["reach"].strip()):
+            errs.append(f"{where}: missing 'reach' (e.g. \"16 occurrences, "
+                        "retrofit in units 1, 2, 5\")")
+        rf = p.get("retrofit")
+        if not (isinstance(rf, list) and all(
+                isinstance(x, int) and not isinstance(x, bool) for x in rf)):
+            errs.append(f"{where}: 'retrofit' must be a list of unit numbers "
+                        "(empty if none)")
+        e = p.get("entry")
+        if not isinstance(e, dict):
+            errs.append(f"{where}: missing 'entry' (a threads.json entry)")
+            continue
+        for k in set(e) - PROMOTE_ENTRY_KEYS:
+            errs.append(f"{where}.entry: unknown key '{k}' -- allowed: "
+                        f"{sorted(PROMOTE_ENTRY_KEYS)}; the site assigns colour")
+        for k in ("id", "root"):
+            if not (isinstance(e.get(k), str)
+                    and re.fullmatch(r"[a-z0-9-]+", e[k])):
+                errs.append(f"{where}.entry: '{k}' must be a [a-z0-9-] string")
+        if not (isinstance(e.get("gloss"), str) and e["gloss"].strip()):
+            errs.append(f"{where}.entry: missing 'gloss'")
+        ids = e.get("ids")
+        if not (isinstance(ids, list) and ids and all(
+                isinstance(x, str) and id_re.match(x) for x in ids)):
+            errs.append(f"{where}.entry: 'ids' must be a non-empty list of "
+                        f"lemma ids matching {id_re.pattern}")
+        if e.get("id") in known:
+            errs.append(f"{where}.entry: '{e.get('id')}' is already a thread "
+                        "in data/threads.json -- use threads.opens/payoffs")
+        op = e.get("opens")
+        if not (isinstance(op, dict) and isinstance(op.get("unit"), int)
+                and isinstance(op.get("ref"), str) and op["ref"].strip()):
+            errs.append(f"{where}.entry: 'opens' must be {{unit, ref, note?}}")
+        pays = e.get("payoffs")
+        if not (isinstance(pays, list) and all(
+                isinstance(x, dict) and isinstance(x.get("unit"), int)
+                and isinstance(x.get("ref"), str) and x["ref"].strip()
+                for x in pays)):
+            errs.append(f"{where}.entry: 'payoffs' must be a list of "
+                        "{unit, ref, note?}")
+    return errs
 
 
 def validate(meta, threads_json=None):
@@ -278,6 +382,12 @@ def validate(meta, threads_json=None):
                     isinstance(x, str) and _REF_RE.match(x) for x in c["refs"]):
                 errs.append(f"{where}: 'refs' must be a list of 'C:V' strings "
                             f"(e.g. '6:5')")
+
+    for key in THREADS_OPTIONAL_SUBKEYS:
+        if key in th and not isinstance(th[key], list):
+            errs.append(f"threads.{key} must be a list")
+    errs += _validate_promote(th.get("promote"), threads_json)
+    errs += _validate_checks(meta.get("checks"))
 
     for i, q in enumerate(meta.get("questions", []) or []):
         where = f"questions[{i}]"

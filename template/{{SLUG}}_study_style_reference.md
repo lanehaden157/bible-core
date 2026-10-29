@@ -123,6 +123,7 @@ and `discourse` were authored for eleven units and silently discarded.**)**
 | `slug` | — | str | `"unit-06"`; derived from `unit` if omitted |
 | ✎ grouping keys | — | int | one per grouping kind in `book.json` (e.g. `movement`); looked up from the unit map if omitted |
 | `questions` | — | array | wording/data calls only Lane can make, §3a |
+| `checks` | — | array | claims for the code side to verify, §3a |
 | `intertext` | — | array | cross-book links worth recording, below |
 | `typescenes` | — | array | type-scene instances in this unit, below |
 
@@ -157,9 +158,9 @@ no other keys. `gloss` is a short general definition in plain English — no
 tense, voice or part-of-speech labels.
 <!-- /lang -->
 
-### `threads` — `{opens, payoffs, candidates, retro}`
+### `threads` — `{opens, payoffs, candidates, retro, promote?}`
 
-All four present, each a list, empty allowed.
+The first four present, each a list, empty allowed; `promote` is optional.
 
 **`opens[]` / `payoffs[]`** — `{id, ref, note}`. `id` must exist in
 `threads-digest.md` (propose new ones via `candidates`); `note` is the
@@ -184,18 +185,36 @@ Lane only when genuinely unsure.
 `add` (default), `retag`, `retag_word`, `untag_word`, `unwrap`, `strip_span`,
 `text`. `w` is optional — the porter fills it.
 
+**`promote[]`** (optional) — `{entry, reach, retrofit}`: a new thread ready for
+`threads.json`, taken from the handoff. `entry` is `{id, root, ids, gloss,
+opens: {unit, ref, note?}, payoffs: [{unit, ref, note?}], translit?, note?}`
+(`ids` the lemma ids; no colour, the site assigns it), `reach` a sentence
+("16 occurrences, retrofit in units 1, 2, 5"), `retrofit` the unit numbers
+that need tags added. Use it for a thread Lane has ruled on with the reach in
+view; `candidates[]` stays for a proposal that still needs an id set.
+
 ---
 
-## 3a. `questions[]` — asking Lane in Claude Code, not on the project side
+## 3a. `questions[]` and `checks[]` — for Lane and for the code side
 
-**`questions[]`** — `{topic, note, options?}`. A wording or data call only Lane
-can make goes here **instead of** being asked in chat. `topic` is a few words;
-`note` is the question, answerable cold; `options` optional short answers.
-Render your best provisional choice so the draft keeps moving, and flag it.
-Claude Code then asks Lane each question in the AskUserQuestion popup
-(multiple choice, `options` become the choices, best provisional first), which
-Lane prefers to a chat list. The porter prints every question at port time; the
-decision then goes in `translation-choices.md` or the thread/root entry.
+**`questions[]`** — `{topic, note, options?}`. A call only Lane can make, with a
+genuinely open alternative the unit's argument depends on. Before adding one,
+read `translation-choices.md` and the earlier units' meta: a wording already
+ruled is used, and a note about it goes in the artifact's prose, not here. The
+build chat first puts the handoff's questions to Lane in chat; only what's still
+open goes in `questions[]`. `topic` is a few words; `note` is the question,
+answerable cold; `options` optional short answers. Render your best
+provisional choice so the draft keeps moving, and flag it. Claude Code then
+asks Lane each question in the AskUserQuestion popup (multiple choice,
+`options` become the choices, best provisional first), which Lane prefers to a
+chat list. The porter prints every question at port time; the decision then
+goes in `translation-choices.md` or the thread/root entry.
+
+**`checks[]`** — `{ref, claim, expect}`. A claim about another passage's text
+that the code side can verify against the corpus (`ref` like `"Isa 22:22"`,
+`claim` what the artifact says, `expect` the lemma(s) it should find, a string
+or a list). These never go in `questions[]`: the porter prints them in their
+own section, they have no options and Lane doesn't answer them.
 
 ---
 
@@ -349,8 +368,8 @@ the ones that fit, delete the rest, and add more as units surface them.
 ## 7. Before saving — the checklist
 
 1. One `<article>`, nothing above or below it.
-2. Meta parses as JSON; required keys and all four `threads` sub-keys; no
-   unknown top-level keys.
+2. Meta parses as JSON; required keys and the four required `threads` sub-keys
+   (`promote` optional); no unknown top-level keys.
 3. Every `roots[]` entry: `root` + bare `translit` + plain `gloss`, optional
    `example`/`echo`; nothing else.
 4. Every notable translation choice has a local span and `roots[]` entry, and
@@ -369,6 +388,11 @@ the ones that fit, delete the rest, and add more as units surface them.
 15. No named commentator or project-internal reference in prose.
 16. Glosses are short, longer material is in footnotes, and the unit's
     intertextual links are surfaced.
+
+17. Every `questions[]` entry is a call only Lane can make, with a genuinely
+    open alternative, and isn't a wording `translation-choices.md` or an earlier
+    unit already rules. Claims about other passages' text are in `checks[]`.
+18. Every `threads.promote[]` entry is complete (`entry`, `reach`, `retrofit`).
 
 Save as `{{SLUG}}_NN_translation.html`, zero-padded, and present the file.
 

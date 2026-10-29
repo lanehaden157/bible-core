@@ -159,7 +159,18 @@ Joshua A1/A2: a regenerated meta block failed the project's own validator.**)**
 - `questions[]` = `{topic, note, options?}`. These are wording and data calls
   that only Lane can make. They surface in Claude Code at port time rather
   than being asked on the project side. They are consumed at port time and
-  never regenerated.
+  never regenerated. A `questions[]` entry has a genuinely open alternative
+  the unit's argument depends on; a wording already ruled (`translation-choices.md`,
+  earlier units' meta) is a note in the artifact's prose.
+- `checks[]` = `{ref, claim, expect}` (0.18.0). Claims about other passages'
+  text for the code side to verify against the corpus; `expect` is a string
+  or a list of lemma(s). `port` prints them in their own section and the
+  thread delta lists them; they are never questions. Consumed at port.
+- `threads.promote[]` (optional, 0.18.0) = `{entry, reach, retrofit}`: a thread
+  ready for `threads.json` (`id, root, ids, gloss, opens, payoffs`, no
+  colour), its reach in words, and the units that need a retrofit. `port`
+  turns it into a ready delta with the id-set preview. Consumed at port;
+  `candidates[]` stays for proposals that still need an id set.
 
 ### Colour and tagging
 
@@ -425,8 +436,18 @@ hand-written lists drifted the day files were added.**)** Settled cross-book cal
 3. Verse-by-verse (flowing prose, for listening; commentators named freely),
    telling each earlier story where a verse reaches it, and ending with the
    list of what goes in the artifact (Lane's veto point).
-4. Artifact (a working pass), from the notes and pass 3, with `questions[]`
-   for Lane's calls.
+   After Lane's yes, the research chat writes `<book>_NN_handoff.md`
+   (`canon/handoff-template.md`, synced as `canon-handoff-template.md`).
+4. Artifact (a working pass), in a **fresh build chat** that opens with the
+   pasted handoff (0.18.0): built from the handoff, the style reference and
+   the synced files, without redoing the research. It asks Lane about
+   anything missing or contradictory instead of re-researching, puts the
+   handoff's questions to Lane in chat, and uses `questions[]` only for what
+   remains. The handoff carries the ledger rows that ship plus a count of
+   what was dropped; the full ledger stays in the research chat.
+
+(0.18.0 split passes 1-3 and pass 4 into two chats so each gets a whole
+context; the research can run on a lighter model and the build on a heavier one.)
 
 (0.17.0 reordered this: the intertext work used to be a separate pass 3 after
 the verse-by-verse, so what it found never reached the passes Lane listens to.)

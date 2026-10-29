@@ -325,6 +325,52 @@ def test_print_questions_writes_to_stdout():
            "Yam Suf" in out and "Reed Sea or Red Sea?" in out, out)
 
 
+def test_thread_delta_reports_promotions_and_checks():
+    with _ScratchProject() as sp:
+        meta = {
+            "unit": 6, "slug": "unit-06", "passage": "Joshua 6:1-27",
+            "title": "Jericho", "roots": [],
+            "threads": {"opens": [], "payoffs": [], "candidates": [], "retro": [],
+                        "promote": [{
+                            "entry": {"id": "bless", "root": "bless", "ids": ["1288"],
+                                      "gloss": "bless",
+                                      "opens": {"unit": 1, "ref": "1:1"},
+                                      "payoffs": [{"unit": 6, "ref": "6:26", "note": "curse"}]},
+                            "reach": "12 occurrences, retrofit in units 2, 5",
+                            "retrofit": [2, 5]}]},
+            "checks": [{"ref": "Isa 22:22", "claim": "no word for key",
+                        "expect": ["kleis"]}],
+        }
+        path = pa.thread_delta(meta)
+        delta = open(path, encoding="utf-8").read()
+        _check("delta should have a promotions section",
+               "## Thread promotions (ready to apply)" in delta, delta)
+        _check("delta should carry the ready threads.json entry and the reach",
+               '"id": "bless"' in delta and "12 occurrences" in delta, delta)
+        _check("delta should name the retrofit units", "retrofit in units: 2, 5" in delta, delta)
+        _check("delta should not put colour on the entry", '"color"' not in delta, delta)
+        _check("delta should list the checks in their own section",
+               "## Checks for code" in delta and "Isa 22:22" in delta
+               and "expect: kleis" in delta, delta)
+        _check("checks must not appear under open questions",
+               "## Open questions for Lane" not in delta, delta)
+
+
+def test_print_checks_is_its_own_section():
+    import io
+    import contextlib
+    meta = {"checks": [{"ref": "Deut 5:26", "claim": "living God", "expect": "zaō"}],
+            "questions": []}
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        pa.print_questions(meta)
+        pa.print_checks(meta)
+    out = buf.getvalue()
+    _check("print_checks should print a check(s) for code section",
+           "check(s) for code" in out and "Deut 5:26" in out and "zaō" in out, out)
+    _check("checks must not be printed as questions", "open question" not in out, out)
+
+
 def test_missing_meta_block_is_a_hard_error():
     with _ScratchProject() as sp:
         open(os.path.join(sp.src, "joshua_07_translation.html"), "w",

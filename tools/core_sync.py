@@ -46,6 +46,7 @@ CANON_FILES = {
     "conventions.md": "canon-conventions.md",
     "decisions.md": "canon-decisions.md",
     "workflow.md": "core-workflow.md",
+    "handoff-template.md": "canon-handoff-template.md",
 }
 
 

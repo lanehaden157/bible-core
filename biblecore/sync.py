@@ -43,7 +43,8 @@ INDEX_NAME = "synced-index.md"
 ROLES = [
     ("{slug}_study_style_reference.md", "the artifact contract: every rule for a unit's fragment. Authoritative for pass 4"),
     ("resources.md", "the commentary inventory: what's on hand and what each is good for. Read before pass 1"),
-    ("core-workflow.md", "the shared loop: what's on hand, the four passes, the standing moves, scope (vendored from bible-core)"),
+    ("core-workflow.md", "the shared loop: what's on hand, the four passes across two chats, the standing moves, scope (vendored from bible-core)"),
+    ("canon-handoff-template.md", "the shape of the research chat's handoff to the build chat (vendored from bible-core)"),
     ("translation-choices.md", "this book's wording decisions, starting from canon-conventions.md. Check before rendering a lexeme"),
     ("canon-conventions.md", "shared wording defaults across books (vendored from bible-core)"),
     ("canon-decisions.md", "calls already settled across books; check before proposing a canon thread or type-scene (vendored)"),
@@ -71,6 +72,7 @@ DEFAULT_SYNC = [
     ("canon-conventions.md", True),
     ("canon-decisions.md", True),
     ("core-workflow.md", True),
+    ("canon-handoff-template.md", True),
     ("<components_ref>", True),
     ("<digest>", True),
     ("<data>/roots.json", True),

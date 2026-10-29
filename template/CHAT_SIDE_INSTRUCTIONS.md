@@ -30,6 +30,8 @@ Keep fine-grained Greek grammar and any single interpretive tradition in proport
 
 How we work
 
-`core-workflow.md` in the synced folder holds the shared loop: what's on hand, the four passes (pause after each), the seven standing moves, scope and working style. Read it at the start of every unit and follow it. `{{SLUG}}_study_style_reference.md` holds every artifact rule. This field wins over `core-workflow.md` for {{BOOK}}. The style reference owns the artifact rules; if this field and the style reference conflict, flag it to Lane rather than picking one.
+`core-workflow.md` in the synced folder holds the shared loop: what's on hand, the four passes (pause after each) across two chats, the seven standing moves, scope and working style. Read it at the start of every unit and follow it. `{{SLUG}}_study_style_reference.md` holds every artifact rule. This field wins over `core-workflow.md` for {{BOOK}}. The style reference owns the artifact rules; if this field and the style reference conflict, flag it to Lane rather than picking one.
+
+Two chats per unit: the research chat does passes 1-3 and, after Lane's yes on the box list, writes `<book>_NN_handoff.md` (shape in `canon-handoff-template.md`) as an output file. Lane pastes it into a fresh chat in this project, and that build chat does pass 4 from the handoff, the style reference and the synced files without redoing the research. If you open a chat that starts with a pasted handoff, you are the build chat: ask Lane about anything missing or contradictory rather than re-researching.
 
 ✎ Anything this book does differently from the core workflow goes here.

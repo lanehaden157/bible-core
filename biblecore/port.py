@@ -7,7 +7,8 @@
 
 For a new unit N:
   1. read source-artifacts/<slug>_NN_*.html
-  2. validate its unit-meta block (a hard gate) and print any questions[]
+  2. validate its unit-meta block (a hard gate) and print any questions[] and, in a separate
+     section, any checks[] for code
   3. prefix endnote ids (u0N-n1, ...) so they stay unique site-wide
   4. fill data-w by per-verse alignment (data_w.py), reporting what it can't
   5. merge the unit into data/units.json (local roots get a colour here)
@@ -15,8 +16,8 @@ For a new unit N:
      dry-checking each against its target first
   7. write units/unit-NN.html, then retrofit + scan + verify occurrences
   8. write the thread-delta report (out/thread-delta-NN.md): opens/payoffs
-     to fold into threads.json, candidates with an id-set preview, open
-     questions, fragment findings, and tracked-thread coverage
+     to fold into threads.json, candidates with an id-set preview, ready
+     promotions (threads.promote[]), checks, open questions, fragment findings, and tracked-thread coverage
 
 Nothing is committed and threads.json is never written: review the fragment
 in the browser, apply the delta by hand if accepted, then commit.
@@ -201,6 +202,20 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True):
                              "(review A13).")
             _append_candidate_preview(lines, root, c)
 
+    promote = th.get("promote", []) or []
+    if promote:
+        lines += ["", "## Thread promotions (ready to apply)", "",
+                  "Each is a ready `data/threads.json` entry and `data/roots.json` "
+                  "id set. Add them if accepted, take the colour from `python -m "
+                  "biblecore colour`, then run `data-w N` for each retrofit unit "
+                  "and `build` (it audits).", ""]
+        for p_ in promote:
+            lines += _promotion_lines(p_)
+
+    checks = meta.get("checks", []) or []
+    if checks:
+        lines += ["", "## Checks for code", ""] + _check_lines(checks)
+
     questions = meta.get("questions", []) or []
     if questions:
         lines += ["", "## Open questions for Lane", ""]
@@ -227,9 +242,10 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True):
         _append_coverage(lines, slug, fragment_html, meta.get("passage", ""),
                          retrofit_applied)
 
-    if not touched and not cands and not retro and not questions:
+    if not (touched or cands or retro or questions or promote or checks):
         lines.append("_no tracked threads opened or paid off in this unit, "
-                     "no candidates, no retro fixes, no open questions._")
+                     "no candidates, no promotions, no retro fixes, no checks, "
+                     "no open questions._")
 
     out = book().path("out")
     os.makedirs(out, exist_ok=True)
@@ -237,6 +253,40 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True):
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(lines) + "\n")
     return path
+
+
+def _promotion_lines(p):
+    """One threads.promote[] item as a ready delta: the threads.json entry,
+    the roots.json id set, the reach and the id-set preview."""
+    e = p.get("entry", {})
+    entry = {"id": e.get("id"), "root": e.get("root")}
+    for k in ("translit", "gloss"):
+        if e.get(k):
+            entry[k] = e[k]
+    entry.update({"status": "open", "tagged": True, "opens": e.get("opens"),
+                  "payoffs": e.get("payoffs", [])})
+    if e.get("note"):
+        entry["note"] = e["note"]
+    rf = p.get("retrofit") or []
+    out = [f"- `{e.get('id')}` — reach: {p.get('reach', '').strip()}",
+           f"    - threads.json (no colour yet): "
+           f"`{json.dumps(entry, ensure_ascii=False)}`",
+           f"    - retrofit in units: "
+           + (", ".join(str(u) for u in rf) if rf else "none")
+           + (" (`python -m biblecore data-w N`; leftovers to "
+              "`retrofit/retrofit-tags.json`)" if rf else "")]
+    _append_candidate_preview(out, e.get("root", "?"), {"ids": e.get("ids")})
+    return out
+
+
+def _check_lines(checks):
+    out = []
+    for c in checks:
+        exp = c.get("expect")
+        exp = ", ".join(exp) if isinstance(exp, list) else exp
+        out.append(f"- `{c.get('ref', '?')}` — {c.get('claim', '').strip()} "
+                   f"(expect: {exp})")
+    return out
 
 
 def _append_candidate_preview(lines, root, cand):
@@ -449,6 +499,19 @@ def print_questions(meta):
             print(f"      - {opt}")
 
 
+def print_checks(meta):
+    """Claims about other passages' text that the chat side wants the code
+    side to verify (meta.checks[]). Their own section: not questions, Lane
+    doesn't answer them."""
+    checks = meta.get("checks", []) or []
+    if not checks:
+        return
+    print("")
+    print(f"=== {len(checks)} check(s) for code (not for Lane) ===")
+    for line in _check_lines(checks):
+        print(" ", line)
+
+
 def port_one(n, dry, src=None, force=False):
     b = book()
     os.makedirs(b.path("out"), exist_ok=True)
@@ -482,6 +545,7 @@ def port_one(n, dry, src=None, force=False):
         sys.exit(1)
 
     print_questions(meta)
+    print_checks(meta)
 
     fragment = to_fragment(raw, n)
 

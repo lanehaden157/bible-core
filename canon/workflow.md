@@ -20,7 +20,11 @@ for. It's generated on every sync, so it's always complete. Everything in that
 folder round-trips from the repo automatically; nothing there is uploaded by
 hand. The style reference holds every artifact rule.
 
-## Per unit: four passes, one turn each
+## Per unit: four passes, two chats
+
+Passes 1-3 run in a **research chat**; pass 4 runs in a fresh **build chat**
+that opens with the handoff pasted in. Research and building each get a whole
+context, and the handoff is the only thing that crosses between them.
 
 Passes 1 and 3 are for Lane, who listens to them read aloud, so they're spoken
 prose. Passes 2 and 4 are working passes, split out so no one turn carries too
@@ -57,9 +61,19 @@ much and loses context. Pause after each pass for Lane's go-ahead.
    chat). It doubles as the full ledger: every link considered, with the
    verse, the target text, the kind, the evidence, a strength (strong,
    possible, weak) and the verdict, rejected rows included; and for a story
-   worth telling, the story, same, different and what it does. Passes 3 and 4
-   read it. In chat, say one line: research done, ready for the
+   worth telling, the story, same, different and what it does. Pass 3 and the
+   handoff read it; it stays in the research chat and never goes to the build
+   chat. In chat, say one line: research done, ready for the
    verse-by-verse. Lane doesn't read the notes file.
+
+   Two checks belong here, so they're cheap to act on later:
+   - Before raising anything for Lane, read `translation-choices.md` and the
+     earlier units' meta (`data/units.json` roots, `threads-digest.md`). A
+     wording that's already ruled is used, not re-asked.
+   - For any thread you mean to propose, count its occurrences in the word
+     table and name the earlier units it reaches. Promotion needs a retrofit
+     in each of those units, and Lane should rule on it with that cost in
+     view.
 
 3. **Verse-by-verse (for listening).** Flowing prose, depth over speed, built
    on the notes; split a unit when a crux deserves room. Earlier-Scripture
@@ -77,14 +91,33 @@ much and loses context. Pause after each pass for Lane's go-ahead.
    boxes, the parallel-account boxes, the notable echoes. That list is Lane's
    veto point, usually a quick yes.
 
-4. **Artifact (a working pass).** Only after Lane confirms. Build it from the
-   notes file and pass 3, in the shape of the book's style reference
-   (`<book>_study_style_reference.md`), which holds every artifact rule.
+   **After the yes, write the handoff.** Fill `canon-handoff-template.md`
+   (synced) into `<book>_NN_handoff.md` as a chat-side output file and present
+   it, then say one line: handoff ready, open a fresh chat in this project and
+   paste it. It carries only the ledger rows that ship, plus a one-line count
+   of what was dropped; the full ledger stays in the notes file. Condense pass
+   3 into what the artifact must carry; don't paste the spoken prose.
+
+4. **Artifact (a working pass, in the build chat).** The build chat opens with
+   the pasted handoff. Build from the handoff, the style reference
+   (`<book>_study_style_reference.md`, which holds every artifact rule) and
+   the synced files. Don't redo the research. If the handoff is missing
+   something or contradicts itself or a synced file, ask Lane in chat; don't
+   re-research to fill the gap.
+   - Start by putting the handoff's "questions for Lane" to Lane, in chat.
+     What's still unresolved after that goes in `questions[]`.
    - Mark roots with `data-root` only. Don't hand-chase `data-w` ids; the porter
      fills them.
    - Keep glosses short. Longer material goes in footnotes with a bold lead.
-   - Any wording or data call Lane needs to make goes in `questions[]`, not
-     asked in chat.
+   - `questions[]` is for calls only Lane can make, with a genuinely open
+     alternative the unit's argument depends on. Check
+     `translation-choices.md` and earlier units' meta first: a ruled wording
+     gets a note in the artifact's prose, not a question. Code checks never go
+     in `questions[]`.
+   - Carry the handoff's "checks for code" into the meta's `checks[]` as
+     `{ref, claim, expect}`, and its ready thread promotions into
+     `threads.promote[]`. `port` prints the checks in their own section and
+     turns the promotions into a ready delta.
 
    Lane's Claude Code session handles transliteration, validation, colours,
    word ids and porting.
@@ -109,8 +142,14 @@ Each one turns an observation into an action:
   block. Echo asides are harvested automatically too, so don't repeat them.
   Check `canon-decisions.md` before proposing a canon thread or type-scene that
   may already be settled.
-- A wording or data call only Lane can make → don't ask here. Render your best
-  provisional choice, flag it in the fragment, and add a `questions[]` entry.
+- A wording or data call only Lane can make → in the research chat, put it in
+  the handoff's "questions for Lane" with options; the build chat asks. Render
+  your best provisional choice meanwhile.
+- A claim about the Greek or Hebrew text of another passage that the code side
+  can check against the corpus → a "checks for code" row (`ref, claim,
+  expected lemma(s)`), never a question.
+- A thread row that cites this unit's verses → list it in the handoff for the
+  code side to check; the chat side can't see `threads.json` per unit.
 
 ## Scope
 
