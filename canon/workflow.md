@@ -104,8 +104,23 @@ much and loses context. Pause after each pass for Lane's go-ahead.
    the synced files. Don't redo the research. If the handoff is missing
    something or contradicts itself or a synced file, ask Lane in chat; don't
    re-research to fill the gap.
-   - Start by putting the handoff's "questions for Lane" to Lane, in chat.
-     What's still unresolved after that goes in `questions[]`.
+   - **Ask the open calls before drafting anything.** After reading the
+     handoff, the style reference and the synced files, list every call that is
+     Lane's to make: each item in the handoff's "Calls for Lane"; every
+     rendering the handoff marks provisional or "to flag", wherever it sits;
+     every place you'd depart from the handoff's wording because a synced file
+     rules differently (say which file and what it rules); and every new
+     rendering of a lexeme `translation-choices.md` doesn't cover. Ask them by
+     AskUserQuestion popup, up to 4 per call, batched across calls, best
+     provisional choice first and marked "(Recommended)". Items that only
+     follow an existing ruling can be grouped into one "keep these as ruled?"
+     question. Wait for the answers, then draft. The handoff saying "none" is
+     never a reason to skip this; if there is truly nothing to ask, say so in
+     one line before drafting. If an answer is a question ("what's more
+     literal?"), answer it and confirm the choice before editing. What's still
+     unresolved after that goes in `questions[]`.
+   - Never settle a call yourself or override a handoff rendering silently. A
+     departure from the handoff goes through the popup above.
    - Mark roots with `data-root` only. Don't hand-chase `data-w` ids; the porter
      fills them.
    - Keep glosses short. Longer material goes in footnotes with a bold lead.
@@ -143,8 +158,12 @@ Each one turns an observation into an action:
   Check `canon-decisions.md` before proposing a canon thread or type-scene that
   may already be settled.
 - A wording or data call only Lane can make → in the research chat, put it in
-  the handoff's "questions for Lane" with options; the build chat asks. Render
-  your best provisional choice meanwhile.
+  the handoff's "Calls for Lane" with options; the build chat asks. Render
+  your best provisional choice meanwhile. Before writing the handoff, scan
+  Verse by verse for "provisional", "check" and "match": each hit is a numbered
+  call or a ruling citation. State the count in the heading ("Calls for Lane
+  (8)"). A provisional rendering appears only in that section; Verse by verse
+  points to it by number.
 - A claim about the Greek or Hebrew text of another passage that the code side
   can check against the corpus → a "checks for code" row (`ref, claim,
   expected lemma(s)`), never a question.

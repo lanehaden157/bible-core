@@ -27,7 +27,9 @@ that looks odd here but is settled.
 What the artifact must carry, in verse order, condensed from pass 3. Not the
 spoken prose. Per verse (skip verses with nothing to carry):
 
-- renderings, with the provisional choice where it's still open;
+- renderings that are settled (cite the ruling). A rendering still open is not
+  written here: point to its call ("see Call 3"), and keep the provisional
+  wording only in "Calls for Lane";
 - roots to tag (`data-root` slugs, tracked or local, with translit and gloss
   for a local one);
 - gloss and footnote points, each with a bold lead for a footnote.
@@ -52,11 +54,22 @@ Only the rows that ship. End with a one-line count of what the ledger dropped
   cite verses of this unit, flagged for the code side to check against the
   unit map.
 
-## Questions for Lane
+## Calls for Lane (N) (the build chat asks these first)
 
-Only genuinely open calls the unit's argument depends on. Checked first against
-`translation-choices.md` and earlier units' meta. Each with its options and the
-provisional choice. The build chat asks these in chat before building.
+Every call that is Lane's to make, numbered, with the count in the heading. This
+is the only place a provisional rendering, a "to flag" wording or an open
+question appears in the handoff. Each call: the verse, 2-3 options with the
+recommended one first, and a one-line reason for each.
+
+Include every provisional rendering that `translation-choices.md` or an earlier
+unit's meta doesn't already settle. A settled ruling that merely looks odd goes
+under "Rulings in play", not here. "None" is allowed only if Verse by verse has
+no provisional rendering. Prose lines such as "provisional wording, not
+questions" aren't allowed: anything flagged provisional elsewhere must have a
+numbered call here.
+
+The build chat puts these to Lane by popup before drafting, and adds any
+rendering conflicts of its own.
 
 ## Checks for code
 
@@ -66,5 +79,5 @@ lemma in transliteration (`petra`, `hades`; macrons optional). For a claim that
 a word is *absent* ("Isa 22:22 has no word for key"), write the lemma with a
 leading `!` (`!kleis`). A ref may name several passages (`Isa 38:10 / Wis 16:13`);
 their words are pooled. These become `checks[]` in the unit meta and run in one
-go with `python -m biblecore lxx --checks N` (LXX refs). They are not questions
+go with `python -m biblecore lxx --checks N` (LXX refs). They are not calls
 and Lane doesn't answer them.

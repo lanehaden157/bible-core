@@ -201,8 +201,9 @@ view; `candidates[]` stays for a proposal that still needs an id set.
 genuinely open alternative the unit's argument depends on. Before adding one,
 read `translation-choices.md` and the earlier units' meta: a wording already
 ruled is used, and a note about it goes in the artifact's prose, not here. The
-build chat first puts the handoff's questions to Lane in chat; only what's still
-open goes in `questions[]`. `topic` is a few words; `note` is the question,
+build chat asks every open call by popup before drafting (handoff calls, provisional
+renderings, conflicts with synced rulings); only what Lane left open goes in
+`questions[]`. `topic` is a few words; `note` is the question,
 answerable cold; `options` optional short answers. Render your best
 provisional choice so the draft keeps moving, and flag it. Claude Code then
 asks Lane each question in the AskUserQuestion popup (multiple choice,

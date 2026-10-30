@@ -31,6 +31,7 @@ Commands:
                         a Greek book's pinned corpus, sha1-checked (no-op for Hebrew)
   units-from-map [MAP] [--kinds outer,inner] [--dry]
                         unit rows + groupings from the literary unit map
+  handoff-check FILE    warn if a handoff hides provisional renderings outside "Calls for Lane"
   sync-check [--mark-synced [FILE ...] | --mark-pasted]
                         which chat-side files need syncing or re-pasting
   sync                  mirror chat-side files, commit, push
@@ -65,6 +66,7 @@ COMMANDS = {
     "migrate": ("biblecore.migrate", "main"),
     "test": ("biblecore.selftest", "main"),
     "fetch": ("biblecore.fetch", "main"),
+    "handoff-check": ("biblecore.handoff_check", "main"),
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }
