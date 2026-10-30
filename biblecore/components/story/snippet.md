@@ -26,6 +26,8 @@ sentence can carry is an `aside.echo`.
   box; it stays in the notes or becomes a footnote.
 - Required: the `<h4>` with `par-title` and `par-ref`, then `par-story`,
   `par-diff` and `par-does`. **No box ships without a stated difference.**
+  The `par-ref` must include verses, e.g. `Exod 24:15–18`; a bare chapter
+  list like `Exod 24; 34` fails at build.
   `par-match` and `par-later` are optional.
 - The site supplies the labels (Same, Different, What it does, Later), so
   don't write them. It hides each box behind its own ◈ chip, labelled

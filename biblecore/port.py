@@ -152,8 +152,8 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True, answers=None):
     n = meta["unit"]
     slug = meta.get("slug", f"unit-{n:02d}")
     lines = [f"# Thread delta — Unit {n}", "",
-             "Apply by hand to `data/threads.json` if accepted. "
-             "The porter does not touch threads.json.", ""]
+             "Apply to `data/threads.json` if accepted: `python -m biblecore apply-delta "
+             f"{n}` takes the ready lines below. The porter does not touch threads.json.", ""]
 
     th = meta.get("threads", {})
     touched = []
@@ -550,7 +550,7 @@ def print_checks(meta):
         print(" ", line)
 
 
-def port_one(n, dry, src=None, force=False, answers=None):
+def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False):
     b = book()
     os.makedirs(b.path("out"), exist_ok=True)
     if src:
@@ -602,12 +602,37 @@ def port_one(n, dry, src=None, force=False, answers=None):
         print("  needs eyes:", line)
 
     no_write = dry or bool(src)
+    with open(b.data("units.json"), encoding="utf-8", newline="") as fh:
+        units_before = fh.read()
     local_roots = merge_units_json(meta, no_write, fragment)
     r = um._unit_row(um._load("units.json"), n)
     for g in b.groupings:
         if not meta.get(g) and r and r.get(g):
             meta[g] = r[g]
     fragment = um.inject(fragment, um.generate(n) if not no_write else meta)
+
+    # Validate before anything lands on disk: a failed fragment check used to
+    # leave a half-written --force port and still print "ported". units.json
+    # was merged above, so put it back if the fragment is refused.
+    if not no_write and not write_invalid:
+        try:
+            threads_json = um._load("threads.json")
+        except Exception:
+            threads_json = {"threads": []}
+        ferrs = um.validate_fragment(fragment, meta=meta, threads_json=threads_json)
+        if not os.path.exists(os.path.join(b.path("css"), "core.css")):
+            # a book's first port runs before its first build has made core.css
+            ferrs = [e for e in ferrs if "no stylesheet in css/" not in e
+                     and "doesn't enable" not in e]
+        if ferrs:
+            with open(b.data("units.json"), "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(units_before)
+            print("FRAGMENT INVALID -- nothing written:")
+            for e in ferrs:
+                print("  -", e)
+            print("Fix the source artifact and port again, or --write-invalid to "
+                  "write it anyway for review.")
+            sys.exit(1)
 
     dest = b.unit_path(n)
     if no_write:
@@ -670,6 +695,9 @@ def main(argv=None):
                          "(for dry-running the porter on a practice fragment)")
     ap.add_argument("--force", action="store_true",
                     help="allow replacing an already-built units/unit-NN.html")
+    ap.add_argument("--write-invalid", action="store_true",
+                    help="write the fragment even if its fragment checks fail "
+                         "(default: refuse, leaving the built unit untouched)")
     ap.add_argument("--answers", metavar="FILE",
                     help="JSON {question topic: answer} for the artifact's "
                          "questions[]: those print as answered (and go in the "
@@ -678,6 +706,6 @@ def main(argv=None):
     a = ap.parse_args(argv)
     if not a.unit:
         ap.error("give a unit number")
-    port_one(a.unit, a.dry, a.src, a.force, load_answers(a.answers) if a.answers else None)
+    port_one(a.unit, a.dry, a.src, a.force, load_answers(a.answers) if a.answers else None, a.write_invalid)
     return 0
 

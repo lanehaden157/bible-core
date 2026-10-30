@@ -5,6 +5,7 @@ Commands:
   build                 re-derive everything downstream of the fragments
   assets                css + component list for the enabled components
   port N [--dry|--src X|--force]   port a research artifact
+  apply-delta N [--dry] apply a thread delta's ready payoffs/opens to data/threads.json
   audit [...]           tracked-thread coverage (--ids ROOT, --unit unit-06, --stub, --check)
   data-w N [--dry]      fill data-w on a built unit by alignment
   retrofit              apply the retrofit specs
@@ -46,6 +47,7 @@ COMMANDS = {
     "build": ("biblecore.build", "main"),
     "assets": ("biblecore.assets", "main"),
     "port": ("biblecore.port", "main"),
+    "apply-delta": ("biblecore.apply_delta", "main"),
     "audit": ("biblecore.audit", "main"),
     "data-w": ("biblecore.data_w", "main"),
     "retrofit": ("biblecore.retrofit", "main"),
@@ -72,7 +74,7 @@ COMMANDS = {
 }
 # commands whose main() parses its arguments with argparse (its own --help);
 # every other one gets its module docstring for -h/--help and doesn't run
-ARGPARSED = {"port", "data-w", "leads", "lxx", "migrate", "units-from-map", "fetch"}
+ARGPARSED = {"port", "apply-delta", "data-w", "leads", "lxx", "migrate", "units-from-map", "fetch"}
 HELP = ("-h", "--help")
 
 
@@ -218,6 +220,8 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8")
     if not argv or argv[0] in ("-h", "--help", "help"):
         print(__doc__)
         return 0

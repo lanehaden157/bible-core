@@ -477,6 +477,47 @@ def test_invalid_meta_is_a_hard_error():
         _check("porting an artifact with invalid meta must sys.exit", failed, None)
 
 
+def test_invalid_fragment_writes_nothing_and_keeps_the_built_unit():
+    with _ScratchProject() as sp:
+        src = os.path.join(sp.src, "joshua_06_translation.html")
+        raw = open(src, encoding="utf-8").read()
+        bad = raw.replace("</article>", '<p class="v"><span class="nope">x</span></p>\n</article>', 1)
+        _check("fixture should have an article to break", bad != raw, None)
+        open(src, "w", encoding="utf-8").write(bad)
+        dest = os.path.join(sp.units, "unit-06.html")
+        open(dest, "w", encoding="utf-8").write("OLD")
+        units_before = open(os.path.join(sp.data, "units.json"), encoding="utf-8").read()
+        try:
+            pa.port_one(6, dry=False, src=None, force=True)
+            code = None
+        except SystemExit as e:
+            code = e.code
+        _check("an invalid fragment should exit 1", code == 1, code)
+        _check("the built unit should be left alone",
+               open(dest, encoding="utf-8").read() == "OLD", None)
+        _check("units.json should be restored",
+               open(os.path.join(sp.data, "units.json"), encoding="utf-8").read() == units_before, None)
+
+
+def test_apply_delta_adds_payoffs_once_and_skips_the_rest():
+    from biblecore import apply_delta as ad
+    text = "\n".join([
+        "- **payoff** `a` at 1:1",
+        '    - add to `a`.payoffs: `{"unit": 3, "ref": "1:1", "note": "x"}`',
+        '    - add to `a`.payoffs: `{"unit": 2, "ref": "2:1"}`',
+        '    - add to `zz`.payoffs: `{"unit": 3, "ref": "1:1"}`',
+        '    - set `a`.opens: `{"unit": 1, "ref": "1:1", "note": "o"}`'])
+    items = ad.parse_delta(text)
+    _check("four ready lines should parse", len(items) == 4, items)
+    th = {"threads": [{"id": "a", "payoffs": [{"unit": 2, "ref": "2:1"}]}]}
+    applied, skipped = ad.apply(th, items)
+    _check("the new payoff and the opens apply", len(applied) == 2, applied)
+    _check("the duplicate and the unknown thread skip", len(skipped) == 2, skipped)
+    _check("payoffs stay in unit order",
+           [p["unit"] for p in th["threads"][0]["payoffs"]] == [2, 3], th)
+    _check("a second run changes nothing", ad.apply(th, items)[0] == [], th)
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:
