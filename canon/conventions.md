@@ -58,13 +58,3 @@ offered as defaults.
 
 - **goel.** Open in Joshua ("avenger" vs. "redeemer"). Numbers 35 (cities of
   refuge) and 5:8 will force it.
-
-## Log
-
-- 2026-09-22: File created from the Joshua and Matthew glossaries (D15/F20,
-  deferred from Joshua G3 until it had a shared home).
-- 2026-09-22: ḥesed left untranslated as the Hebrew Bible default (Lane).
-  Greek books keep their own choice for *eleos*.
-- 2026-09-29: the divine-name, sky and life/being rows reworded positively
-  ("always Yahweh", "always sky/skies"), dropping the "never" phrasings (Lane).
-  No rendering changed.

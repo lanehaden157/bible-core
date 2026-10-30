@@ -38,20 +38,15 @@ def main(argv=None):
         f"Generated from `data/threads.json` (version {data.get('version', '?')}). "
         f"{len(threads)} threads, {openc} open.",
         "",
-        "**This is the source of truth for thread tagging.** In a unit's fragment, "
-        "a root that appears in the `id` column below is a *tracked thread*: tag "
-        "every occurrence `<span class=\"r\" data-root=\"<id>\" data-w=\"<word "
-        "id>\">…</span>` (the word id from `" + words + "`) and list it "
-        "under `threads.opens` / `threads.payoffs` in the unit-meta block, with a "
-        "matching id set in `data/roots.json`. A root that is recurring but *not* "
-        "here is unit-local — tag it with its own name (no `data-w` needed) and "
-        "just declare it in the unit's own `roots`. To propose promoting a local "
-        "root to a tracked thread, add it to `threads.candidates` with a one-line "
-        "reason (the Strong's/lemma `ids` you've actually observed in "
-        "`" + words + "`, plus a few representative `refs`, if you have them). "
-        "**Claude decides, biased toward book-wide**: a local root that later "
-        "pays off is worse than a tracked one that doesn't, so promote on a "
-        "real second sighting. Ask Lane only when genuinely unsure.",
+        "**The source of truth for thread tagging.** Tag every occurrence of a "
+        "thread below with `<span class=\"r\" data-root=\"<id>\">…</span>` (the "
+        "porter fills `data-w`) and list it under `threads.opens` / "
+        "`threads.payoffs`. A root not listed here is unit-local: declare it in "
+        "the unit's `roots`. To propose one, add it to `threads.candidates` with "
+        "a one-line reason and the lemma `ids` you saw in `" + words + "`. "
+        "**Claude decides, biased toward book-wide** (a local root that later "
+        "pays off is worse than a tracked one that doesn't), and asks Lane only "
+        "when genuinely unsure.",
         "",
     ]
 
@@ -68,17 +63,17 @@ def main(argv=None):
         print(f"wrote {out} — 0 threads (empty threads.json, round trip OK)")
         return 0
 
-    lines += [
-        "| id | root (data-root) | translit | gloss | opens | payoffs | status |",
-        "|---|---|---|---|---|---|---|",
-    ]
+    # A column that says the same thing on every row costs tokens and adds nothing.
+    show_root = any(t["id"] != t["root"] for t in threads)
+    show_status = len({t.get("status", "") for t in threads}) > 1
+    head = ["id"] + ["root (data-root)"] * show_root + ["translit", "gloss", "opens", "payoffs"] + ["status"] * show_status
+    lines += ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
     for t in sorted(threads, key=lambda x: (x.get("opens", {}).get("unit", 99), x["id"])):
         payoffs = " · ".join(_ref(p) for p in t.get("payoffs", [])) or "—"
-        lines.append(
-            f"| `{t['id']}` | `{t['root']}` | {t.get('translit', '')} | "
-            f"{t.get('gloss', '')} | {_ref(t.get('opens', {}))} | {payoffs} | "
-            f"{t.get('status', '')} |"
-        )
+        row = [f"`{t['id']}`"] + [f"`{t['root']}`"] * show_root + [
+            t.get("translit", ""), t.get("gloss", ""), _ref(t.get("opens", {})), payoffs,
+        ] + [t.get("status", "")] * show_status
+        lines.append("| " + " | ".join(row) + " |")
 
     lines += ["", "## Notes per thread", ""]
     for t in sorted(threads, key=lambda x: x["id"]):

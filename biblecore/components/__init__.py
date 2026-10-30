@@ -129,5 +129,9 @@ def reference(comps, book_name):
            "section 4 lists the base components and any book-specific notes. "
            "Any unit may use any component listed here.\n"]
     for c in comps:
-        out.append(f"\n## {c.name} — {c.spec['summary']}\n\n" + c.read("snippet.md").strip() + "\n")
+        # some snippets open with their own heading; the summary line replaces it
+        body = c.read("snippet.md").strip()
+        if body.startswith(f"## {c.name}"):
+            body = body.split("\n", 1)[1].strip()
+        out.append(f"\n## {c.name} — {c.spec['summary']}\n\n" + body + "\n")
     return "\n".join(out)
