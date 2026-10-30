@@ -36,8 +36,8 @@ dropped ("14 rows considered, 9 ship, 5 dropped").
 ## Threads
 
 - **Opens and payoffs:** each with a one-line popover note.
-- **Promotion candidates:** each as a ready `threads.json` entry (`id`, `root`,
-  lemma ids, `gloss`, `opens`, `payoffs`) with its reach, e.g. "16 occurrences,
+- **Promotion candidates:** each as a ready `threads.json` entry (`id` as an
+  ASCII `[a-z0-9-]` slug, `root` only if it differs from `id`, lemma ids, `gloss`, `opens`, `payoffs`) with its reach, e.g. "16 occurrences,
   retrofit in units 1, 2, 5, 11". These become `threads.promote[]`.
 - **Retro entries:** fixes to earlier units' tags (`threads.retro[]`).
 - **Rows citing this unit's verses:** thread rows in `threads-digest.md` for
