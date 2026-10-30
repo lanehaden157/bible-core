@@ -31,6 +31,21 @@ def test_add_wraps_free_text():
     _check("add message starts with ADD", msg.startswith("ADD"), msg)
 
 
+def test_add_inside_longer_span_of_same_root_is_a_noop():
+    html = _verse(7, 'do not <span class="r" data-root="skandalon" data-w="x1">'
+                     'trip them up</span> now')
+    new, msg = ar.apply_add(html, {"unit": "unit-17", "verse": 7,
+                                    "root": "skandalon", "text": "trip"})
+    _check("no nested span", new == html, new)
+    _check("logged as already tagged", "already tagged" in msg, msg)
+    new, msg = ar.apply_add(html, {"unit": "unit-17", "verse": 7,
+                                    "root": "skandalon", "text": "trip", "w": "x1"})
+    _check("same word id also a no-op", new == html, new)
+    new, msg = ar.apply_add(html, {"unit": "unit-17", "verse": 7,
+                                    "root": "skandalon", "text": "trip", "w": "x2"})
+    _check("a different word id is not swallowed", new != html, new)
+
+
 def test_add_with_w_injects_data_w():
     html = _verse(3, "and all Israel with him")
     new, msg = ar.apply_add(html, {"unit": "unit-01", "verse": 3,

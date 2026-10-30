@@ -101,6 +101,19 @@ def apply_add(html, it):
                if it.get("w") else
                re.search(r'<span class="r[l]?" data-root="%s"[^>]*>%s</span>'
                          % (re.escape(it["root"]), re.escape(it["text"])), seg))
+    if not already:
+        # the text may already sit inside a longer span of the same root
+        # ("trip" inside <span ...>trip them up</span>): tagging it again
+        # would nest a span, so it counts as tagged
+        for sm in re.finditer(r'<span class="r[l]?" data-root="%s"([^>]*)>([^<]*)</span>'
+                              % re.escape(it["root"]), seg):
+            sw = re.search(r'data-w="([^"]*)"', sm.group(1))
+            if it.get("w") and sw and sw.group(1) != it["w"]:
+                continue
+            if re.search(r'(?<![\w-])' + re.escape(it["text"]) + r'(?![\w-])',
+                         sm.group(2)):
+                already = True
+                break
     if already:
         return html, f"ok   {it['unit']} v{it['verse']} {it['root']}: already tagged"
     pat = re.compile(r'(?<![\w-])' + re.escape(it["text"]) + r'(?![\w-])')

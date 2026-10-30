@@ -59,6 +59,24 @@ REF_RE = re.compile(
     r"(?:\s*[-–—]\s*(?:(\d+):)?(\d+))?")
 
 
+# New Testament book names (first word of a ref): not in the LXX, so a check
+# against one is skipped, not an error.
+NT_BOOKS = {
+    "matt", "matthew", "mt", "mark", "mk", "luke", "lk", "john", "jn", "acts",
+    "rom", "romans", "cor", "corinthians", "gal", "galatians", "eph",
+    "ephesians", "phil", "philippians", "col", "colossians", "thess",
+    "thessalonians", "tim", "timothy", "titus", "phlm", "philemon", "heb",
+    "hebrews", "jas", "james", "pet", "peter", "jude", "rev", "revelation",
+}
+
+
+def is_nt_ref(text):
+    """True when every passage in a ref string names an NT book."""
+    names = [m.group(1) for m in REF_RE.finditer(text)]
+    return bool(names) and all(
+        re.sub(r"^[1-3]", "", _norm(n)) in NT_BOOKS for n in names)
+
+
 def _norm(name):
     return re.sub(r"[\s.]", "", name).lower()
 
@@ -201,6 +219,10 @@ def main(argv=None):
             return 0
         counts = {}
         for c in checks:
+            if is_nt_ref(c.get("ref", "")):
+                print(f"{'SKIPPED':10} {c['ref']} — not LXX (New Testament)")
+                counts["skipped (not LXX)"] = counts.get("skipped (not LXX)", 0) + 1
+                continue
             try:
                 r = run_check(lxx, codes, c)
             except ValueError as exc:

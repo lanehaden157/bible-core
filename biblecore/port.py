@@ -269,7 +269,8 @@ def _promotion_lines(p):
     """One threads.promote[] item as a ready delta: the threads.json entry,
     the roots.json id set, the reach and the id-set preview."""
     e = p.get("entry", {})
-    entry = {"id": e.get("id"), "root": e.get("root")}
+    root = e.get("root") or e.get("id")      # root defaults to id
+    entry = {"id": e.get("id"), "root": root}
     for k in ("translit", "gloss"):
         if e.get(k):
             entry[k] = e[k]
@@ -278,14 +279,20 @@ def _promotion_lines(p):
     if e.get("note"):
         entry["note"] = e["note"]
     rf = p.get("retrofit") or []
+    rentry = {"ids": e.get("ids"), "note": e.get("note") or e.get("gloss", "")}
     out = [f"- `{e.get('id')}` — reach: {p.get('reach', '').strip()}",
            f"    - threads.json (no colour yet): "
            f"`{json.dumps(entry, ensure_ascii=False)}`",
+           # the two lines `apply-delta` reads (colour assigned there)
+           f"    - add thread `{e.get('id')}`: "
+           f"`{json.dumps(entry, ensure_ascii=False)}`",
+           f"    - add root `{root}`: "
+           f"`{json.dumps(rentry, ensure_ascii=False)}`",
            f"    - retrofit in units: "
            + (", ".join(str(u) for u in rf) if rf else "none")
            + (" (`python -m biblecore data-w N`; leftovers to "
               "`retrofit/retrofit-tags.json`)" if rf else "")]
-    _append_candidate_preview(out, e.get("root", "?"), {"ids": e.get("ids")})
+    _append_candidate_preview(out, root, {"ids": e.get("ids")})
     return out
 
 

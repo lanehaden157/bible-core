@@ -99,6 +99,17 @@ def test_checks_run_from_a_json_file_and_count_each_status():
         assert want in out, (want, out)
 
 
+def test_nt_refs_are_skipped_not_errors():
+    _check_ = lx.is_nt_ref
+    assert _check_("Matt 5:3") and _check_("1 Cor 3:1") and not _check_("Gen 1:1")
+    path = os.path.join(_root, "nt-checks.json")
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump([{"ref": "Matt 5:3", "claim": "a", "expect": "x"},
+                   {"ref": "Gen 2:4", "claim": "b", "expect": "biblos"}], fh)
+    rc, out = _run("--checks", path)
+    assert "1 confirmed" in out and "1 skipped (not LXX)" in out and "error" not in out, out
+
+
 def test_checks_are_read_from_a_source_artifact():
     src = os.path.join(_root, "source-artifacts")
     os.makedirs(src, exist_ok=True)

@@ -518,6 +518,28 @@ def test_apply_delta_adds_payoffs_once_and_skips_the_rest():
     _check("a second run changes nothing", ad.apply(th, items)[0] == [], th)
 
 
+def test_apply_delta_creates_promoted_thread_and_root():
+    from biblecore import apply_delta as ad
+    text = "\n".join([
+        '    - add thread `debt`: `{"id": "debt", "root": "debt", "gloss": "owed", '
+        '"status": "open", "tagged": true, "opens": {"unit": 3, "ref": "3:1"}, "payoffs": []}`',
+        '    - add root `debt`: `{"ids": ["opheilo"], "note": "owed"}`',
+        '    - add to `debt`.payoffs: `{"unit": 4, "ref": "4:1"}`'])
+    promos = ad.parse_promotions(text)
+    _check("two promotion lines parse", len(promos) == 2, promos)
+    th, roots = {"threads": [{"id": "a", "color": "#111111"}]}, {"roots": {}}
+    applied, skipped = ad.apply_promotions(th, roots, promos,
+                                           colours={"debt": "#222222"})
+    _check("thread and root created", len(applied) == 2 and not skipped, applied)
+    t = th["threads"][-1]
+    _check("colour, open, tagged",
+           (t["color"], t["status"], t["tagged"]) == ("#222222", "open", True), t)
+    _check("roots entry", roots["roots"]["debt"]["ids"] == ["opheilo"], roots)
+    ad.apply(th, ad.parse_delta(text))
+    _check("same-delta payoff applies to the new thread", len(t["payoffs"]) == 1, t)
+    _check("re-run skips", len(ad.apply_promotions(th, roots, promos)[1]) == 2, th)
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:

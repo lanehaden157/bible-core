@@ -37,11 +37,12 @@ Shape (style reference §3):
              porter fills data-w. candidates/retro are consumed by the
              porter and never regenerated.
              promote (optional) is a thread ready to add to threads.json:
-             entry {id,root,ids,gloss,opens:{unit,ref,note?},payoffs:[{unit,
+             entry {id,root?,ids,gloss,opens:{unit,ref,note?},payoffs:[{unit,
              ref,note?}],translit?,note?}, reach (a sentence: "N occurrences,
              retrofit in units X, Y"), retrofit [unit numbers]. Where
              candidates leave the id set to Claude Code, promote hands it over
-             ready. Consumed at port like candidates.
+             ready. Consumed at port like candidates. root defaults to id
+             (ASCII [a-z0-9-]); this unit's retro[] may tag a promoted id.
   contract   str      core version the unit was ported under ("0.3.0");
                         stamped by the porter, moved only by migrations
                         (contract.py). Absent on units ported before 0.3.0.
@@ -249,10 +250,18 @@ def _validate_promote(promote, threads_json=None):
         for k in set(e) - PROMOTE_ENTRY_KEYS:
             errs.append(f"{where}.entry: unknown key '{k}' -- allowed: "
                         f"{sorted(PROMOTE_ENTRY_KEYS)}; the site assigns colour")
+        # `root` is optional and defaults to `id` (threads.json convention:
+        # root == id); give it only if it really differs, ASCII [a-z0-9-].
         for k in ("id", "root"):
+            if k == "root" and "root" not in e:
+                continue
             if not (isinstance(e.get(k), str)
                     and re.fullmatch(r"[a-z0-9-]+", e[k])):
-                errs.append(f"{where}.entry: '{k}' must be a [a-z0-9-] string")
+                errs.append(f"{where}.entry: '{k}' ({e.get(k)!r}) must be an "
+                            "ASCII [a-z0-9-] slug, not the Greek/Hebrew "
+                            "(transliterate: 'kerdaino', 'opheil')"
+                            + ("; omit 'root' to use the id" if k == "root"
+                               else ""))
         if not (isinstance(e.get("gloss"), str) and e["gloss"].strip()):
             errs.append(f"{where}.entry: missing 'gloss'")
         ids = e.get("ids")
@@ -412,6 +421,15 @@ def validate(meta, threads_json=None):
     if threads_json is not None:
         ids = {t["id"] for t in threads_json["threads"]}
         roots = {t["root"] for t in threads_json["threads"]}
+        # A thread this unit promotes counts as tracked for its own retro[]
+        # (the promotion and the earlier-unit tags land together).
+        promoted = {(p_.get("entry") or {}).get("id") for p_ in
+                    (th.get("promote") or []) if isinstance(p_, dict)}
+        promoted |= {(p_.get("entry") or {}).get("root") or
+                     (p_.get("entry") or {}).get("id")
+                     for p_ in (th.get("promote") or []) if isinstance(p_, dict)}
+        promoted.discard(None)
+        roots |= promoted
         for key in ("opens", "payoffs"):
             for e in th.get(key, []) or []:
                 if e.get("id") not in ids:

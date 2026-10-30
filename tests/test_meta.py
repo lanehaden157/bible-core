@@ -281,6 +281,37 @@ def test_retro_add_tracked_root_with_w_passes():
            not any("valid 'w'" in e for e in errs), errs)
 
 
+def _promo_item(**entry):
+    e = {"id": "debt", "gloss": "owed", "ids": ["2764"],
+         "opens": {"unit": 3, "ref": "3:1"}, "payoffs": []}
+    e.update(entry)
+    return {"entry": e, "reach": "2 occurrences", "retrofit": [6]}
+
+
+def test_retro_may_tag_a_thread_this_unit_promotes():
+    meta = _meta(threads={**_EMPTY_THREADS, "promote": [_promo_item()],
+                          "retro": [{"unit": "unit-06", "verse": 5, "text": "debt",
+                                    "root": "debt", "why": "promoted here"}]})
+    errs = um.validate(meta, threads_json=_THREADS_JSON)
+    _check("retro onto this unit's own promotion passes",
+           not any("neither a tracked thread" in e for e in errs), errs)
+    meta["threads"]["retro"][0]["root"] = "other"
+    errs = um.validate(meta, threads_json=_THREADS_JSON)
+    _check("retro onto an unknown root still fails",
+           any("neither a tracked thread" in e for e in errs), errs)
+
+
+def test_promote_root_is_optional_and_nonascii_is_explained():
+    errs = um.validate(_meta(threads={**_EMPTY_THREADS, "promote": [_promo_item()]}),
+                       threads_json=_THREADS_JSON)
+    _check("promote without root passes", not any("promote" in e for e in errs), errs)
+    errs = um.validate(_meta(threads={**_EMPTY_THREADS,
+                       "promote": [_promo_item(root="kerdaìnō")]}),
+                       threads_json=_THREADS_JSON)
+    _check("non-ASCII root explained",
+           any("ASCII" in e and "omit 'root'" in e for e in errs), errs)
+
+
 def test_retro_retag_tracked_root_may_omit_w():
     meta = _meta(threads={**_EMPTY_THREADS,
                           "retro": [{"unit": "unit-02", "verse": 5, "text": "gave",
