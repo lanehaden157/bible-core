@@ -51,6 +51,7 @@
 - 0.20.0: Calls for Lane: one handoff section, build chat asks every open call by popup before drafting, handoff-check lint
 - 0.21.0: port validates the fragment before writing (--write-invalid to override); apply-delta N applies a thread delta's ready payoffs/opens; story par-ref needs verses; UTF-8 stderr
 - 0.22.0: Instruction trim: leaner workflow, handoff template and digest; compare snippet uses div
+- 0.22.1: biblecore test: warn-only size budget for instruction files
 
 ## What this is
 
