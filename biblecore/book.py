@@ -48,8 +48,10 @@ CORPUS_KEYS = {"kind", "pin", "word_ids"}
 # one (colour.de_min). 10 is the default; a book that tracks more threads than
 # a well of that spacing holds (about 60 colours) sets a lower floor and
 # generates a well to match (tools/make_well.py).
+# `doc_budget_kb` overrides selftest.DOC_BUDGET_KB per document for a book whose
+# instruction files should stay tighter (or may run larger) than the default.
 CHECK_DEFAULTS = {"opens_note_required": True, "skip_fragment_checks": [],
-                  "test_idempotent": True, "colour_de_min": 10}
+                  "test_idempotent": True, "colour_de_min": 10, "doc_budget_kb": {}}
 # "sync" lists only what a book adds to or drops from core's default synced
 # files (biblecore.sync.DEFAULT_SYNC): `extra` takes paths or glob patterns,
 # `skip` takes paths or patterns matched against the resolved paths.
@@ -123,6 +125,17 @@ def validate_config(cfg):
     de = (cfg.get("checks") or {}).get("colour_de_min", CHECK_DEFAULTS["colour_de_min"])
     if isinstance(de, bool) or not isinstance(de, (int, float)) or not 3 <= de <= 20:
         errs.append("checks.colour_de_min must be a number from 3 to 20")
+    budget = (cfg.get("checks") or {}).get("doc_budget_kb", {})
+    if not isinstance(budget, dict):
+        errs.append("checks.doc_budget_kb must be an object of {document: KB}")
+    else:
+        from biblecore.selftest import DOC_BUDGET_KB
+        for k, v in sorted(budget.items()):
+            if k not in DOC_BUDGET_KB:
+                errs.append(f"checks.doc_budget_kb: unknown document '{k}' "
+                            f"(known: {sorted(DOC_BUDGET_KB)})")
+            elif isinstance(v, bool) or not isinstance(v, (int, float)) or v <= 0:
+                errs.append(f"checks.doc_budget_kb.{k} must be a positive number")
     skip = (cfg.get("checks") or {}).get("skip_fragment_checks", [])
     if not (isinstance(skip, list) and all(isinstance(x, str) for x in skip)):
         errs.append("checks.skip_fragment_checks must be a list of strings")

@@ -228,6 +228,26 @@ def test_selftest_checks():
     return fails
 
 
+def test_doc_budget():
+    fails = []
+    chat = os.path.join(_tmp, "CHAT_SIDE_INSTRUCTIONS.md")
+    checks = book().cfg.setdefault("checks", {})
+    try:
+        open(chat, "w", encoding="utf-8").write("x" * 6000)
+        errs, notes = selftest.check_docs()
+        if errs or not any("CHAT_SIDE_INSTRUCTIONS.md 6.0 KB, budget 5" in n for n in notes):
+            fails.append(f"an oversized field wasn't noted: {errs} {notes}")
+        # a warning, never a failure, and a book can set its own budget
+        checks["doc_budget_kb"] = {"field": 7}
+        errs, notes = selftest.check_docs()
+        if errs or any("CHAT_SIDE" in n for n in notes):
+            fails.append(f"doc_budget_kb override ignored: {errs} {notes}")
+    finally:
+        checks.pop("doc_budget_kb", None)
+        os.remove(chat)
+    return fails
+
+
 def test_sync_check_paste_tracking():
     from biblecore import sync
     chat = os.path.join(_tmp, "CHAT_SIDE_INSTRUCTIONS.md")

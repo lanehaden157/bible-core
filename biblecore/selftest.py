@@ -16,6 +16,7 @@ acceptance checks a book can run on itself:
   contracts    every built unit carries a contract stamp no newer than core
   example      the style reference's worked example (section 8) validates, if it has one
   audit        tracked-thread coverage (reported, not a failure)
+  docs         instruction files against their size budgets (reported, not a failure)
   idempotent   re-running the build's hard steps changes no file (data,
                units, digest, css/, app/, index.html); anything it would
                change is reported and put back
@@ -33,6 +34,12 @@ from biblecore import __version__, contract
 from biblecore.book import book
 
 FENCE_RE = re.compile(r"```html\n(.*?)```", re.S)
+
+# Instruction files a chat or session reads whole, in KB. Each addition looks
+# reasonable alone, so nothing else notices them adding up. A book tightens or
+# loosens one with checks.doc_budget_kb.
+DOC_BUDGET_KB = {"field": 5, "claude": 7, "style_reference": 24,
+                 "translation_choices": 16, "resources": 9, "workflow": 9}
 
 
 def _quiet(fn, *a):
@@ -168,6 +175,23 @@ def check_audit():
     return [], [f"{n} coverage issue(s)" + (" (run `python -m biblecore audit`)" if n else "")]
 
 
+def check_docs():
+    b = book()
+    paths = {"field": b.path("chat_side"), "claude": os.path.join(b.root, "CLAUDE.md"),
+             "style_reference": b.path("style_reference"),
+             "translation_choices": os.path.join(b.root, "translation-choices.md"),
+             "resources": os.path.join(b.root, "resources.md"),
+             "workflow": os.path.join(b.root, "core-workflow.md")}
+    budget = {**DOC_BUDGET_KB, **b.check("doc_budget_kb")}
+    over = []
+    for doc, path in paths.items():
+        if path and os.path.exists(path):
+            kb = os.path.getsize(path) / 1000
+            if kb > budget[doc]:
+                over.append(f"{os.path.basename(path)} {kb:.1f} KB, budget {budget[doc]}")
+    return [], ["over budget: " + ", ".join(over) + " -- trim, or move detail out"] if over else []
+
+
 def _snapshot():
     b = book()
     paths = glob.glob(os.path.join(b.path("data"), "*.json"))
@@ -225,6 +249,7 @@ CHECKS = [
     ("contracts", check_contracts),
     ("example", check_example),
     ("audit", check_audit),
+    ("docs", check_docs),
     ("idempotent", check_idempotent),
 ]
 
