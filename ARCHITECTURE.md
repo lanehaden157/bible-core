@@ -48,6 +48,7 @@
 - 0.17.0: Earlier-story boxes (aside.story, labelled chips, canon harvest), research pass before the verse-by-verse in the workflow, Greek noun sweep on the leads sheet, no synoptic cap
 - 0.18.0: Two-chat workflow: research chat writes a handoff (canon/handoff-template.md), fresh build chat does pass 4; unit meta gains checks[] and threads.promote[]; questions[] limited to Lane-only calls
 - 0.19.0: lxx command (verse lemmas, --expect, --checks runs a unit's checks[], '!lemma' = absent); audit prints ready retrofit add JSON with candidate text; port --answers FILE; biblecore test notes CRLF policy files
+- 0.20.0: Calls for Lane: one handoff section, build chat asks every open call by popup before drafting, handoff-check lint
 
 ## What this is
 
