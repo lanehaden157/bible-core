@@ -52,6 +52,7 @@
 - 0.21.0: port validates the fragment before writing (--write-invalid to override); apply-delta N applies a thread delta's ready payoffs/opens; story par-ref needs verses; UTF-8 stderr
 - 0.22.0: Instruction trim: leaner workflow, handoff template and digest; compare snippet uses div
 - 0.22.1: biblecore test: warn-only size budget for instruction files
+- 0.23.0: promote[] and retro[] work in one unit (retro accepts the unit's own promotions), root defaults to id, apply-delta creates promoted threads and roots, retro add skips text inside a same-root span, lxx --checks skips NT refs, docs/retrofit.md
 
 ## What this is
 
