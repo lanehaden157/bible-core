@@ -49,6 +49,7 @@
 - 0.18.0: Two-chat workflow: research chat writes a handoff (canon/handoff-template.md), fresh build chat does pass 4; unit meta gains checks[] and threads.promote[]; questions[] limited to Lane-only calls
 - 0.19.0: lxx command (verse lemmas, --expect, --checks runs a unit's checks[], '!lemma' = absent); audit prints ready retrofit add JSON with candidate text; port --answers FILE; biblecore test notes CRLF policy files
 - 0.20.0: Calls for Lane: one handoff section, build chat asks every open call by popup before drafting, handoff-check lint
+- 0.21.0: port validates the fragment before writing (--write-invalid to override); apply-delta N applies a thread delta's ready payoffs/opens; story par-ref needs verses; UTF-8 stderr
 
 ## What this is
 
