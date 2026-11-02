@@ -1,7 +1,7 @@
 # Handoff template: `<book>_NN_handoff.md`
 
 Vendored from `bible-core/canon/handoff-template.md`. The research chat fills
-this in after Lane's yes on the box list and presents it as an output file;
+this in after Lane's yes on the box list and hands it over as a download;
 Lane pastes it into a fresh chat in the project. Say what the artifact must
 carry, not how the research got there. Leave an empty section's heading in with
 "none", so the build chat knows it was considered.

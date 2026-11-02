@@ -464,6 +464,15 @@ The seven standing moves (thread opens/pays off, candidate, notable choice,
 canon echo, retro, story or type-scene, question) go in the template. A book changes the lens
 (commentary set, genre cautions) in its own instructions.
 
+**How a chat reaches the files.** Synced files aren't on disk in a project
+chat, don't show in listings, and reach project search only as excerpts, so
+the access rule can't live in a synced file. The field's "Where things are"
+block holds it: download whole files from raw GitHub (the repos are public),
+with the fetch tool and then search as fallbacks. Keep paths and chat tool
+names in that block where you can, because they've changed underneath the
+docs before. **(learned:** the rule sat in Joshua's `resources.md`, which a
+chat couldn't read until it already knew the rule.**)**
+
 Claude Code side: port, then fill `data-w`, then validate, then build and
 audit, then check in a browser, then commit. The project-side sync is a
 mirror, so the instruction field **points at the synced files instead of

@@ -13,8 +13,9 @@ which you leaned on. Read a passage before attributing a view, mark anything you
 haven't read this chat as "recalled, unverified", and say where readings diverge
 and why.
 
-`synced-index.md` lists every synced file and what it's for. That folder
-round-trips from the repo; nothing there is uploaded by hand.
+`synced-index.md` lists every synced file and what it's for. They come from
+the repo, nothing is uploaded by hand, and the instruction field's "Where
+things are" says how to get them.
 
 ## Per unit: four passes, two chats
 
@@ -76,7 +77,7 @@ passes 2 and 4 are working passes. Pause after each pass for Lane's go-ahead.
    veto point.
 
    **After the yes, write the handoff.** Fill `canon-handoff-template.md` into
-   `<book>_NN_handoff.md` as a chat-side output file and present it, then say
+   `<book>_NN_handoff.md` as a chat-side output file and hand it over as a download, then say
    one line: handoff ready, open a fresh chat in this project and paste it.
 
 4. **Artifact (a working pass, in the build chat).** Build from the handoff,

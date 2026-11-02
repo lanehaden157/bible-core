@@ -395,7 +395,7 @@ the ones that fit, delete the rest, and add more as units surface them.
     unit already rules. Claims about other passages' text are in `checks[]`.
 18. Every `threads.promote[]` entry is complete (`entry`, `reach`, `retrofit`).
 
-Save as `{{SLUG}}_NN_translation.html`, zero-padded, and present the file.
+Save as `{{SLUG}}_NN_translation.html`, zero-padded, and hand it over as a download.
 
 ---
 

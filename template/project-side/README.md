@@ -17,6 +17,10 @@ To sync another file, add it to `book.json` → `sync.extra` (a path or a glob
 pattern); to stop syncing a default, add it to `sync.skip`. A file every book
 should sync belongs in core's `DEFAULT_SYNC`, with a role in `ROLES`.
 
+A project chat doesn't get these as files: they aren't on disk or in listings,
+and project search returns excerpts. The block "Where things are" in
+`CHAT_SIDE_INSTRUCTIONS.md` tells it to download them whole from raw GitHub.
+
 **Not synced:**
 
 | file | direction | why |
