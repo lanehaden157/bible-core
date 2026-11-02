@@ -55,6 +55,7 @@
 - 0.23.0: promote[] and retro[] work in one unit (retro accepts the unit's own promotions), root defaults to id, apply-delta creates promoted threads and roots, retro add skips text inside a same-root span, lxx --checks skips NT refs, docs/retrofit.md
 - 0.23.1: handoff template: promotion root optional (defaults to id), ASCII slug
 - 0.23.2: chat access: field block for reaching synced files, wording no longer assumes a folder or a tool name
+- 0.24.0: consistency audit: workflow precedence ladder + single rules (questions, passes, box list, promotion, citing, script, names), handoff Decisions section and per-book box kinds, warn-only logs check in biblecore test
 
 ## What this is
 
