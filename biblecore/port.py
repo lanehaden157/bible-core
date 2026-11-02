@@ -208,7 +208,8 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True, answers=None):
     if promote:
         lines += ["", "## Thread promotions (ready to apply)", "",
                   "Each is a ready `data/threads.json` entry and `data/roots.json` "
-                  "id set. Add them if accepted, take the colour from `python -m "
+                  "id set, already decided upstream (any close call went to "
+                  "Lane as a handoff call). Add them, take the colour from `python -m "
                   "biblecore colour`, then run `data-w N` for each retrofit unit "
                   "and `build` (it audits).", ""]
         for p_ in promote:

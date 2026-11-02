@@ -17,6 +17,8 @@ acceptance checks a book can run on itself:
   example      the style reference's worked example (section 8) validates, if it has one
   audit        tracked-thread coverage (reported, not a failure)
   docs         instruction files against their size budgets (reported, not a failure)
+  logs         session_index.md / improvements_log.md whose newest core version
+               is older than book.json's pin (reported, not a failure)
   idempotent   re-running the build's hard steps changes no file (data,
                units, digest, css/, app/, index.html); anything it would
                change is reported and put back
@@ -192,6 +194,35 @@ def check_docs():
     return [], ["over budget: " + ", ".join(over) + " -- trim, or move detail out"] if over else []
 
 
+LOG_CORE_RE = re.compile(r"core[^\n]{0,40}?\b(\d+\.\d+\.\d+)\b", re.I)
+
+
+def _vtuple(v):
+    return tuple(int(x) for x in v.split("."))
+
+
+def check_logs():
+    """Warn when a book's log files stop mentioning core at an older version
+    than the pin: the logs have gone stale. Warn only."""
+    b = book()
+    pin = b.cfg.get("core")
+    if not pin or not re.match(r"^\d+\.\d+\.\d+$", str(pin)):
+        return [], []
+    stale = []
+    for name in ("session_index.md", "improvements_log.md"):
+        path = os.path.join(b.root, name)
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            found = LOG_CORE_RE.findall(fh.read())
+        if not found:
+            continue
+        newest = max(found, key=_vtuple)
+        if _vtuple(newest) < _vtuple(pin):
+            stale.append(f"{name} stops at core {newest}, pin is {pin}")
+    return [], (["; ".join(stale) + " -- log the later core changes"] if stale else [])
+
+
 def _snapshot():
     b = book()
     paths = glob.glob(os.path.join(b.path("data"), "*.json"))
@@ -250,6 +281,7 @@ CHECKS = [
     ("example", check_example),
     ("audit", check_audit),
     ("docs", check_docs),
+    ("logs", check_logs),
     ("idempotent", check_idempotent),
 ]
 

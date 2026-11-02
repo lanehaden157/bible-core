@@ -1,8 +1,8 @@
 # Handoff template: `<book>_NN_handoff.md`
 
 Vendored from `bible-core/canon/handoff-template.md`. The research chat fills
-this in after Lane's yes on the box list and hands it over as a download;
-Lane pastes it into a fresh chat in the project. Say what the artifact must
+this in after Lane's yes on the box list (the closing spoken list of pass 3) and hands it over as a download;
+Lane pastes it into a fresh chat in the project. Say what the fragment must
 carry, not how the research got there. Leave an empty section's heading in with
 "none", so the build chat knows it was considered.
 
@@ -18,7 +18,7 @@ that looks odd here but is settled.
 
 ## Verse by verse
 
-What the artifact must carry, in verse order, condensed from pass 3. Per verse
+What the fragment must carry, in verse order, condensed from pass 3. Per verse
 (skip verses with nothing to carry):
 
 - settled renderings (cite the ruling). A rendering still open is not written
@@ -28,10 +28,29 @@ What the artifact must carry, in verse order, condensed from pass 3. Per verse
 
 ## Approved boxes
 
-One draft for each story box, parallel-account box, echo box and OT pointer Lane
-approved: the verse it anchors to, the text it points at, then background, same,
-different, and what it does here. End with a one-line count of what the ledger
-dropped ("14 rows considered, 9 ship, 5 dropped").
+One draft for each box Lane approved: the verse it anchors to, the text it
+points at, then background, same, different, and what it does here. Label each
+with its kind. The kinds are a per-book mapping (the style reference says which
+the book enables; a kind it doesn't enable isn't used):
+
+| kind | where it lands |
+|---|---|
+| story | `aside.story` box |
+| parallel / synoptic | `aside.synoptic` box |
+| echo | `aside.echo` box |
+| OT pointer | the book's own pointer form, if its style reference defines one |
+| intertext | `intertext[]` entry in the unit meta (no box) |
+| type-scene | `typescenes[]` entry in the unit meta (no box) |
+
+End with a one-line count of what the ledger dropped ("14 rows considered, 9
+ship, 5 dropped").
+
+## Decisions
+
+Wording and glossary calls Lane made in this research chat (a chat can't write to
+the repo): lexeme or phrase, the rendering chosen, and the reason, one line each.
+Claude Code applies them to `translation-choices.md` and the glossary after the
+session. "None" if there are none.
 
 ## Threads
 

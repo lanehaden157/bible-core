@@ -28,8 +28,10 @@ Before rendering a Greek word in a new unit, check here and in the canon
 <!-- /lang -->
 conventions for a prior decision and match it. If a different rendering fits
 better in one verse, use it and flag the deviation; Lane decides whether it's
-a one-off or a correction. Any session that changes a rendering updates the
-row and the Log in the same turn. If a unit and this file disagree, the unit
+a one-off or a correction. A rendering decided in a chat goes in the handoff's
+"Decisions" (chats can't write to the repo); Claude Code updates the row and the
+Log after the session, and a Claude Code session that changes one updates both
+in the same turn. If a unit and this file disagree, the unit
 is more likely right; flag the mismatch.
 
 ## Glossary

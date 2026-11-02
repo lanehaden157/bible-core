@@ -228,6 +228,27 @@ def test_selftest_checks():
     return fails
 
 
+def test_log_versions():
+    fails = []
+    b = book()
+    old_pin, pin = b.cfg.get("core"), "0.23.2"
+    b.cfg["core"] = pin
+    log = os.path.join(_tmp, "session_index.md")
+    try:
+        open(log, "w", encoding="utf-8").write("- 2026-10-28 core 0.19.0 vendored\n")
+        errs, notes = selftest.check_logs()
+        if errs or not any("session_index.md stops at core 0.19.0" in n for n in notes):
+            fails.append(f"a stale log wasn't noted: {errs} {notes}")
+        open(log, "w", encoding="utf-8").write(f"- core {pin} vendored\n")
+        errs, notes = selftest.check_logs()
+        if errs or any("session_index.md" in n for n in notes):
+            fails.append(f"a current log was noted: {errs} {notes}")
+    finally:
+        os.remove(log)
+        b.cfg["core"] = old_pin
+    return fails
+
+
 def test_doc_budget():
     fails = []
     chat = os.path.join(_tmp, "CHAT_SIDE_INSTRUCTIONS.md")

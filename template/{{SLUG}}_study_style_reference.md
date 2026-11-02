@@ -309,8 +309,9 @@ intentional glosses are encouraged.
 
 **Wording.** Check `translation-choices.md` (which starts from
 `canon-conventions.md`) before rendering a lexeme. A better
-verse-specific rendering is fine — **flag the deviation**. Update the file in
-the same turn as any wording decision. **(learned:** Matthew started its
+verse-specific rendering is fine — **flag the deviation**. A chat records a wording
+decision in the handoff's "Decisions"; Claude Code updates the file after the
+session (or in the same turn, if it made the decision). **(learned:** Matthew started its
 glossary at unit 10 and paid with a retroactive audit.**)**
 
 ---

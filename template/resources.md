@@ -1,6 +1,6 @@
 # {{BOOK}} Study — Resources
 
-Read this before pass 1 of every unit. This list is a starting point, not a limit: search the web freely in every pass and cite any commentator or source by name, saying which you leaned on. Read the passage before attributing a view, and mark anything not read this chat as "recalled, unverified". Don't stretch a listed source past its actual content.
+Read this before pass 1 of every unit. This list is a starting point, not a limit: search the web freely in every pass and say which source you leaned on, naming only sources listed here or found by search (core-workflow.md, "Citing"). Read the passage before attributing a view, and mark anything not read this chat as "recalled, unverified". Don't stretch a listed source past its actual content.
 
 This file lives in the repo and syncs to the project, like every synced file. Edit it in the repo, never on the project side.
 

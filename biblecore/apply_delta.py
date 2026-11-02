@@ -15,6 +15,9 @@ and, for a promotion (threads.promote[]):
 
 which creates the threads.json entry (colour from `colour`, status open,
 tagged true) and the data/roots.json entry. Skipped if either already exists.
+Applying is mechanical: the decision to promote was made upstream (Claude
+decides; Lane saw any close call as a "Calls for Lane" item), so no further
+sign-off is needed here.
 
 A payoff is skipped when the thread already has one for that unit, and an
 opens when the thread already has a noted one, so re-running is harmless.

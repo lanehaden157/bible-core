@@ -41,7 +41,8 @@ Shape (style reference §3):
              ref,note?}],translit?,note?}, reach (a sentence: "N occurrences,
              retrofit in units X, Y"), retrofit [unit numbers]. Where
              candidates leave the id set to Claude Code, promote hands it over
-             ready. Consumed at port like candidates. root defaults to id
+             ready. Claude decides what to promote; a close call reaches Lane
+             through the handoff's "Calls for Lane" before it is written here. Consumed at port like candidates. root defaults to id
              (ASCII [a-z0-9-]); this unit's retro[] may tag a promoted id.
   contract   str      core version the unit was ported under ("0.3.0");
                         stamped by the porter, moved only by migrations
