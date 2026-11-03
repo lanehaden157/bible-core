@@ -28,7 +28,7 @@
 
 ## D. Book documents (Claude drafts, Lane approves)
 12. **Claude**: fill `resources.md` from your list, and draft the ✎ sections of the style reference and `CHAT_SIDE_INSTRUCTIONS.md` (lens, genre cautions). Mark them tentative. A book-only synced file goes in `book.json` `sync.extra`. Run `python -m biblecore sync` once you OK the push.
-13. **Lane**: paste `CHAT_SIDE_INSTRUCTIONS.md` into the project's instruction field, then tell Claude, who runs `sync-check --mark-pasted`. `biblecore book` and every build say when it needs a re-paste.
+13. **Lane**: paste `CHAT_SIDE_INSTRUCTIONS.md` into the project's instruction field, when Claude says it's ready (and again whenever Claude says it changed). Nothing tracks the paste.
 
 ## E. Unit map
 14. **Lane (chat side)**: first project conversation. Compile the resources and produce the literary unit map, using the Overview table format in style ref §9.

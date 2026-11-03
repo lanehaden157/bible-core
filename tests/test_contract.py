@@ -1,5 +1,5 @@
 """D7 contract versions, migrations, the data manifest (F17), the book-side
-self-test (D9) and sync-check's paste tracking (D6), on a scratch copy of
+self-test (D9), on a scratch copy of
 Joshua."""
 import contextlib
 import io
@@ -266,29 +266,4 @@ def test_doc_budget():
     finally:
         checks.pop("doc_budget_kb", None)
         os.remove(chat)
-    return fails
-
-
-def test_sync_check_paste_tracking():
-    from biblecore import sync
-    chat = os.path.join(_tmp, "CHAT_SIDE_INSTRUCTIONS.md")
-    open(chat, "w", encoding="utf-8").write("field v1\n")
-    os.makedirs(os.path.join(_tmp, "project-side"), exist_ok=True)
-    import subprocess
-    subprocess.run(["git", "init", "-q"], cwd=_tmp, check=True)
-
-    def out():
-        buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            sync.check_main([])
-        return buf.getvalue()
-    fails = []
-    if "PASTE BY HAND" not in out():
-        fails.append("never-pasted field not flagged")
-    _quiet(sync.check_main, ["--mark-pasted"])
-    if "PASTE BY HAND" in out():
-        fails.append("flagged right after --mark-pasted")
-    open(chat, "w", encoding="utf-8").write("field v2\n")
-    if "PASTE BY HAND" not in out():
-        fails.append("changed field not flagged")
     return fails

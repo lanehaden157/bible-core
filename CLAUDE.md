@@ -5,8 +5,8 @@ shared shape, where books are expected to differ, how the core changes, and
 how to start a book (§8).
 
 **State:** the version is `biblecore/__init__.py`; `python tests/run.py`
-prints the test count; each book's state (units, threads, core pin, sync,
-pasted field) is `python -m biblecore book` in that book. None of it is
+prints the test count; each book's state (units, threads, core pin, sync)
+is `python -m biblecore book` in that book. None of it is
 written here, so it can't go stale. Numbers, Joshua and Matthew are on core
 (Matthew's units 1-13 boxed, below). The platform-level record (status and
 history) is `../session_index.md`. The core is forward-looking, built for future books.

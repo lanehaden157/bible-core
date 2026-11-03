@@ -9,7 +9,7 @@ differ are in `bible-core/ARCHITECTURE.md`; shared wording defaults in
 `bible-core/canon/conventions.md`.
 
 **State:** `python -m biblecore book` prints where the book stands (units
-built and planned, tracked threads, core pin vs vendored copy, sync and paste
+built and planned, tracked threads, core pin vs vendored copy, sync
 status), read from its data. It isn't written here, so it can't go stale.
 
 ## Commands (run from this folder)
@@ -25,8 +25,7 @@ status), read from its data. It isn't written here, so it can't go stale.
 
 `python -m biblecore` lists the rest: `colour` and `data-w` for promoting a
 thread, `leads`, `lxx` (a Greek book: an LXX verse's lemmas, and a unit's
-`checks[]` run against them), `units-from-map`, `corpus`, `migrate` after re-vendoring,
-`sync-check --mark-pasted` after pasting the instruction field.
+`checks[]` run against them), `units-from-map`, `corpus`, `migrate` after re-vendoring.
 
 GitHub Actions runs `python -m biblecore test` on every push
 (`.github/workflows/tests.yml`, shipped unchanged by bible-core's template;

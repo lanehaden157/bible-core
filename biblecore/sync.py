@@ -2,7 +2,6 @@
 
     python -m biblecore sync-check                  # which files changed since last synced
     python -m biblecore sync-check --mark-synced [FILE ...]
-    python -m biblecore sync-check --mark-pasted    # after pasting the instruction field
     python -m biblecore sync                        # mirror into project-side/synced/,
                                                     # commit and push if anything changed
 
@@ -18,9 +17,9 @@ It's the ONE place the synced files are listed. The READMEs, core-workflow.md
 and resources.md point at it rather than restating the list, since hand
 lists drifted every time a file was added.
 
-The project's instruction field can't be synced; it's pasted by hand from
-CHAT_SIDE_INSTRUCTIONS.md (book.json paths.chat_side). sync-check says when
-that file has changed since the last `--mark-pasted`.
+The project's instruction field can't be synced; Lane pastes it by hand from
+CHAT_SIDE_INSTRUCTIONS.md (book.json paths.chat_side) when told it changed.
+Nothing tracks that.
 Seeded from Joshua's check_project_sync.py + sync_to_github.py.
 """
 import fnmatch
@@ -207,31 +206,11 @@ def mark_synced(rels):
     save_state(state)
 
 
-PASTED_KEY = "__pasted__"
-
-
-def _chat_side_rel():
-    root = Path(book().root)
-    p = Path(book().path("chat_side"))
-    return p.relative_to(root).as_posix() if p.exists() else None
-
-
 def check_main(argv=None):
     args = list(argv or [])
     root = Path(book().root)
     tracked = resolve()
     state = load_state()
-
-    if args and args[0] == "--mark-pasted":
-        rel = _chat_side_rel()
-        if rel is None:
-            print("no chat-side instructions file to mark")
-            return 1
-        state[PASTED_KEY] = {"file": rel, "hash": hash_file(root / rel),
-                             "pasted_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
-        save_state(state)
-        print(f"  marked pasted: {rel}")
-        return 0
 
     if args and args[0] == "--mark-synced":
         now = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -271,28 +250,19 @@ def check_main(argv=None):
         print(f"\n({len(ok)} file(s) already in sync)")
     if not tracked:
         print("No files to sync.")
-    if st["paste"] in ("changed", "never"):
-        print(f"PASTE BY HAND: {st['chat_side']} changed since it was last pasted into the "
-              f"project's instruction field. Paste it, then run "
-              f"`python -m biblecore sync-check --mark-pasted`.")
     return 1 if stale or orphaned else 0
 
 
 def status(b=None):
     """Where the mirror and the instruction field stand, without printing:
-    {tracked, stale, missing, ok, orphans, chat_side, paste, pasted_at}.
-    `paste` is "pasted", "changed" (edited since the last --mark-pasted),
-    "never" (no paste recorded) or None (the book has no field file)."""
+    {tracked, stale, missing, ok, orphans}."""
     b = b or book()
     root = Path(b.root)
     tracked = resolve(b)
     state = load_state()
-    rel_chat = _chat_side_rel()
-    hashes = hash_files([root / rel for rel in tracked] + ([root / rel_chat] if rel_chat else []))
-    pasted = state.get(PASTED_KEY)
+    hashes = hash_files([root / rel for rel in tracked])
     out = {"tracked": tracked, "stale": [], "missing": [], "ok": [],
-           "orphans": orphans(b), "chat_side": rel_chat, "paste": None,
-           "pasted_at": (pasted or {}).get("pasted_at")}
+           "orphans": orphans(b)}
     for rel in tracked:
         current = hashes[root / rel]
         if current is None:
@@ -301,9 +271,6 @@ def status(b=None):
             out["stale"].append(rel)
         else:
             out["ok"].append(rel)
-    if rel_chat:
-        out["paste"] = ("never" if not pasted else
-                        "pasted" if pasted.get("hash") == hashes[root / rel_chat] else "changed")
     return out
 
 

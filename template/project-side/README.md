@@ -25,5 +25,5 @@ and project search returns excerpts. The block "Where things are" in
 
 | file | direction | why |
 |---|---|---|
-| `CHAT_SIDE_INSTRUCTIONS.md` | pasted by hand into the instruction field | the connector can't write the field. `sync-check` says when it needs re-pasting; run `sync-check --mark-pasted` after pasting |
+| `CHAT_SIDE_INSTRUCTIONS.md` | pasted by hand into the instruction field | the connector can't write the field. Claude says when it changed; Lane pastes it. Nothing tracks the paste |
 | `source-artifacts/{{SLUG}}_NN_translation.html` | project → repo | each unit's artifact, saved into the repo before `port` |

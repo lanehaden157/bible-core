@@ -428,10 +428,9 @@ easy to add in `book.py`; keys nothing reads don't stay.
 
 The shared loop lives in `canon/workflow.md`, vendored into each book as
 `core-workflow.md` and synced to the project side (D6). The project's
-instruction field (`CHAT_SIDE_INSTRUCTIONS.md`, pasted by hand) keeps only the
+instruction field (`CHAT_SIDE_INSTRUCTIONS.md`, pasted by hand when Lane is told it changed; nothing tracks that) keeps only the
 study's language rules, the lens and the book's departures, and points at
-that file. `sync-check` says when the field needs re-pasting (`--mark-pasted`
-after pasting). Every other chat-side file is synced from the repo, including
+that file. Every other chat-side file is synced from the repo, including
 `resources.md` (0.7.1: repo-owned, never uploaded by hand), and each sync
 writes `synced-index.md`, the one generated list of synced files with their
 roles (`sync.ROLES`). Nothing else restates that list. **(learned:** four

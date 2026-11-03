@@ -80,7 +80,7 @@ def test_book_prints_state_from_data():
         rc = cli.main(["book"])
     text = out.getvalue()
     want = [f"{built} built of {uj['unit_count']} planned", f"{threads} tracked",
-            "book.json pins", "sync      ", "field     "]
+            "book.json pins", "sync      "]
     fails = [f"missing {w!r} in:\n{text}" for w in want if w not in text]
     if rc:
         fails.append(f"rc {rc}")

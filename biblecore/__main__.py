@@ -33,11 +33,11 @@ Commands:
   units-from-map [MAP] [--kinds outer,inner] [--dry]
                         unit rows + groupings from the literary unit map
   handoff-check FILE    warn if a handoff hides provisional renderings outside "Calls for Lane"
-  sync-check [--mark-synced [FILE ...] | --mark-pasted]
-                        which chat-side files need syncing or re-pasting
+  sync-check [--mark-synced [FILE ...]]
+                        which chat-side files need syncing
   sync                  mirror chat-side files, commit, push
-  book                  the book's state (core pin, units, threads, sync, pasted
-                        field) and its resolved paths
+  book                  the book's state (core pin, units, threads, sync)
+                        and its resolved paths
 """
 import importlib
 import json
@@ -190,13 +190,6 @@ def status_lines(b):
     lines.append(f"sync      {len(st['tracked'])} files, "
                  + (", ".join(todo) + " -> python -m biblecore sync-check" if todo
                     else "all in sync"))
-    paste = {"pasted": f"pasted{' ' + st['pasted_at'][:10] if st['pasted_at'] else ''}; "
-                       f"no changes since",
-             "changed": "changed since the last paste -> PASTE BY HAND, then "
-                        "sync-check --mark-pasted",
-             "never": "no paste recorded -> paste it, then sync-check --mark-pasted",
-             None: "no instruction-field file"}[st["paste"]]
-    lines.append(f"field     {st['chat_side'] or '-'}: {paste}")
     return lines
 
 
