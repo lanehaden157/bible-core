@@ -57,6 +57,7 @@
 - 0.23.2: chat access: field block for reaching synced files, wording no longer assumes a folder or a tool name
 - 0.24.0: consistency audit: workflow precedence ladder + single rules (questions, passes, box list, promotion, citing, script, names), handoff Decisions section and per-book box kinds, warn-only logs check in biblecore test
 - 0.25.0: instruction-field paste tracking removed: no --mark-pasted, no PASTE BY HAND warning, no field line in book; Lane pastes when told
+- 0.26.0: Research leans open: thin-sourced links are 'possible' and flagged tentative to Lane, not dropped (workflow, story snippet, chat-side lens template)
 
 ## What this is
 
