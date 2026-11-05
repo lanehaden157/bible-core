@@ -22,7 +22,8 @@ sentence can carry is an `aside.echo`.
 - `data-kind`: `type-scene`, `story`, `allusion`, `character` or `reuse`. A
   `type-scene` box also names its type-scene: `data-scene="<id>"`. Check the
   canon's type-scene list first; a new id is the book owner's call.
-- `data-strength`: `strong` or `possible`. A weak link never ships as a story
+- `data-strength`: `strong` or `possible`; ship a `possible` link when it's
+  worth Lane's eye, worded as tentative. A weak link never ships as a story
   box; it stays in the notes or becomes a footnote.
 - Required: the `<h4>` with `par-title` and `par-ref`, then `par-story`,
   `par-diff` and `par-does`. **No box ships without a stated difference.**

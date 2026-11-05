@@ -76,7 +76,10 @@ working passes. Pause after each pass for Lane's go-ahead.
    their own (root `echo`, `aside.echo`, footnote, or drop). Where the book has
    parallel accounts (the other gospels, Chronicles beside Kings), check each
    scene against them. Ask of every tracked thread and notable word where it
-   first appears and returns. Prune as you go.
+   first appears and returns. Prune as you go, but lean open: a link that fits
+   the text and has thin outside support is "possible", not a drop. Thin
+   sources or a skeptical literature are not a verdict; drop only what the
+   text itself doesn't bear out.
 
    The output is a **notes file** (an output file, not pasted into chat): the full ledger of every link considered, with verse, target text,
    kind, evidence, strength (strong, possible, weak) and verdict, rejected rows
@@ -102,7 +105,8 @@ working passes. Pause after each pass for Lane's go-ahead.
    Note devotional weight lightly.
 
    End with the box list: the story boxes, the parallel-account boxes and the
-   notable echoes that will go into the fragment.
+   notable echoes that will go into the fragment. Include the "possible" links
+   too, marked tentative with one line on why they're thin, so Lane decides.
 
    **After the yes, write the handoff.** Fill `canon-handoff-template.md` into
    `<book>_NN_handoff.md` as an output file for download, then say one line:
