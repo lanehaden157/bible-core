@@ -37,9 +37,14 @@ silently.
 - **Citing:** name only sources `resources.md` lists or you found by search, in
   chat and the handoff; fragment prose names none unless the style reference
   allows it.
-- **Asking Lane:** the research chat asks in chat. The build chat asks every open
-  call by AskUserQuestion popup before drafting; a handoff listing none gets one
-  line saying so. Books should not override this.
+- **Asking Lane:** the research and verse chats don't stop to ask judgment
+  calls (type-scenes, tentative links, new threads); they go on the box list,
+  marked tentative, where Lane approves or vetoes them with the verse-by-verse
+  in front of them. Whatever stays open becomes "Calls for Lane" in the
+  handoff. Those chats ask in chat only what blocks the work: unit scope, a
+  missing or contradictory file. The build chat asks every open call by
+  AskUserQuestion popup before drafting; a handoff listing none gets one line
+  saying so. Books should not override this.
 - **Promotions:** Claude decides, biased book-wide. A close call goes to Lane
   through the handoff's "Calls for Lane", with the retrofit cost in view.
 - **Decisions made in chat:** a chat can't write to the repo. Wording and
@@ -66,10 +71,20 @@ field's "Where things are" says how to get them.
 
 ## Per unit: four passes, three chats
 
-Passes 1-2 run in a **research chat**, pass 3 and the handoff in a **verse chat**,
-pass 4 in a **build chat**. Each starts fresh; what crosses is a file. Before
-research, `python -m biblecore unit-pack NN` and `sync` give every chat the same
-generated data. Passes 1 and 3 are spoken prose, since Lane listens to them; 2
+Always three chats per unit, never two. Each starts fresh; what crosses is a file.
+
+| Chat | Passes | Takes in | Hands on |
+|---|---|---|---|
+| Research | 1 briefing, 2 research | the pack | the notes file |
+| Verse | 3 verse-by-verse, then the handoff | the notes file | `<book>_NN_handoff.md` |
+| Build | 4 translation fragment | the pasted handoff | the fragment |
+
+**Which chat am I in?** A pasted handoff means the build chat; an uploaded notes
+file means the verse chat; otherwise the research chat. If a book's instruction
+field says otherwise, flag it to Lane.
+
+Before research, `python -m biblecore unit-pack NN` and `sync` give every chat the
+same generated data. Passes 1 and 3 are spoken prose, since Lane listens to them; 2
 and 4 are working passes. Pause after each pass for Lane's go-ahead.
 
 1. **Briefing (research chat, for listening).** Start from the unit pack,
