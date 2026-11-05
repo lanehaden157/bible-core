@@ -503,8 +503,9 @@ def promotion_overlay(meta):
     roots = copy.deepcopy(load_roots())
     promote = (meta.get("threads", {}) or {}).get("promote", []) or []
     lines = []
+    from biblecore.promote import complete
     for p_ in promote:
-        lines += _promotion_lines(p_)
+        lines += _promotion_lines(complete(p_, meta.get("unit"))[0])
     items = ad.parse_promotions("\n".join(lines))
     if items:
         ad.apply_promotions(threads, roots, items)
