@@ -557,3 +557,21 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def test_promotion_overlay_gives_a_promoted_root_a_colour_without_writing():
+    with _ScratchProject() as sp:
+        meta = {"threads": {"promote": [{
+            "entry": {"id": "bless", "root": "bless", "ids": ["1288"],
+                      "gloss": "bless", "opens": {"unit": 1, "ref": "1:1"},
+                      "payoffs": []},
+            "reach": "2 occurrences", "retrofit": []}]}}
+        threads, roots = pa.promotion_overlay(meta)
+        row = [t for t in threads["threads"] if t["id"] == "bless"]
+        _check("overlay should add the promoted thread with a colour",
+               len(row) == 1 and row[0].get("color"), threads)
+        _check("overlay should add its roots.json entry",
+               "bless" in roots.get("roots", {}), roots)
+        on_disk = pa.um._load("threads.json")
+        _check("overlay must not write threads.json",
+               not any(t["id"] == "bless" for t in on_disk["threads"]))

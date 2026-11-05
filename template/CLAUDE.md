@@ -50,6 +50,14 @@ This book's look is `css/theme.css` plus the `book.json` settings (groupings,
 components, theme). A change to the shell itself goes into bible-core's
 `biblecore/web/` and reaches the book with the next vendor and build.
 
+## Generated paths
+
+Commit `data/`, `css/`, `app/`, `index.html`, `units/`, `canon-leads/` and
+`threads-digest.md`: the build regenerates them and they are what the site and
+the hub serve, so a changed one belongs in the commit that caused it. `out/`
+is gitignored scratch (thread deltas, reports); never commit it. A tree that
+is dirty only in `out/` is clean.
+
 ## Policy files
 
 `data/threads.json` and `data/roots.json` are policy: the porter proposes, a

@@ -21,8 +21,10 @@ For a new unit N:
      to fold into threads.json, candidates with an id-set preview, ready
      promotions (threads.promote[]), checks, open questions, fragment findings, and tracked-thread coverage
 
-Nothing is committed and threads.json is never written: review the fragment
-in the browser, apply the delta by hand if accepted, then commit.
+Nothing is committed. threads.json is never written by the port itself (a
+promoting unit is checked against an in-memory copy with the promotions
+applied). Apply the delta (`apply-delta N`) BEFORE a clean build, or let
+`port N --promote` run port, apply-delta, data-w and build in order.
 
 Re-porting a built unit needs --force. (learned: a re-port from a stale
 source artifact silently regressed Joshua unit 1 -- four local roots, the
@@ -481,6 +483,31 @@ def _today():
     return datetime.date.today().isoformat()
 
 
+def promotion_overlay(meta):
+    """(threads_json, roots_json) as they will stand once this unit's
+    threads.promote[] is applied, built in memory and never written. Lets the
+    fragment checks see a promoted root (colour, data-w, roots.json ids)
+    before `apply-delta` has run, so a promoting port needs no
+    --write-invalid. Mirrors apply-delta exactly by parsing the same delta
+    lines."""
+    import copy
+    from biblecore import apply_delta as ad
+    from biblecore.roots import load_roots
+    try:
+        threads = copy.deepcopy(um._load("threads.json"))
+    except Exception:
+        threads = {"threads": []}
+    roots = copy.deepcopy(load_roots())
+    promote = (meta.get("threads", {}) or {}).get("promote", []) or []
+    lines = []
+    for p_ in promote:
+        lines += _promotion_lines(p_)
+    items = ad.parse_promotions("\n".join(lines))
+    if items:
+        ad.apply_promotions(threads, roots, items)
+    return threads, roots
+
+
 def run_retrofit_and_scan():
     from biblecore import retrofit, scan, verify_occurrences
     for name, fn in (("retrofit", retrofit.main), ("scan", scan.main),
@@ -558,7 +585,8 @@ def print_checks(meta):
         print(" ", line)
 
 
-def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False):
+def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False,
+             promote_run=False):
     b = book()
     os.makedirs(b.path("out"), exist_ok=True)
     if src:
@@ -599,7 +627,10 @@ def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False):
     # hand-chase word ids, so the artifact arrives without data-w. Fill them
     # here by per-verse alignment; anything ambiguous is reported and left
     # for a human rather than guessed at.
-    w_edits, w_report = adw.plan(fragment, meta["passage"])
+    # Promotions this unit carries are applied in memory first (never
+    # written), so their roots have a colour, ids and data-w here.
+    eff_threads, eff_roots = promotion_overlay(meta)
+    w_edits, w_report = adw.plan(fragment, meta["passage"], eff_threads, eff_roots)
     if w_edits:
         fragment = adw.apply_edits(fragment, w_edits)
     print("")
@@ -623,11 +654,7 @@ def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False):
     # leave a half-written --force port and still print "ported". units.json
     # was merged above, so put it back if the fragment is refused.
     if not no_write and not write_invalid:
-        try:
-            threads_json = um._load("threads.json")
-        except Exception:
-            threads_json = {"threads": []}
-        ferrs = um.validate_fragment(fragment, meta=meta, threads_json=threads_json)
+        ferrs = um.validate_fragment(fragment, meta=meta, threads_json=eff_threads)
         if not os.path.exists(os.path.join(b.path("css"), "core.css")):
             # a book's first port runs before its first build has made core.css
             ferrs = [e for e in ferrs if "no stylesheet in css/" not in e
@@ -690,7 +717,43 @@ def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False):
         final = fh.read()
     delta = thread_delta(meta, final, retrofit_applied=True, answers=answers)
     print(f"\n>>> REVIEW THE THREAD DELTA: {delta}")
-    print("\nported. view in the browser, apply the thread delta if accepted, then commit.")
+    promote = (meta.get("threads", {}) or {}).get("promote", []) or []
+    if promote_run and promote:
+        _promote_sequence(n, promote)
+        return
+    print("\nported. Next steps:")
+    if promote:
+        ids = ", ".join((p_.get("entry") or {}).get("id", "?") for p_ in promote)
+        print(f"  1. python -m biblecore apply-delta {n}   (adds promoted thread(s) {ids}; "
+              f"must come BEFORE a clean build)")
+        step = 2
+        for u in sorted({u for p_ in promote for u in (p_.get("retrofit") or [])}):
+            print(f"  {step}. python -m biblecore data-w {u}   (retrofit unit {u})")
+            step += 1
+        print(f"  {step}. python -m biblecore build")
+        print(f"  (or all of this in one go: port {n} --promote, plus --force if the unit is built)")
+    else:
+        print("  1. python -m biblecore build")
+        print(f"  2. apply opens/payoffs from the delta if accepted "
+              f"(`apply-delta {n}`), then build again")
+    print("  last. commit (CLAUDE.md lists which generated paths to include)")
+
+
+def _promote_sequence(n, promote):
+    """port --promote: apply-delta, data-w for each retrofit unit, build."""
+    from biblecore import apply_delta, build, data_w
+    print(f"\n=== apply-delta {n} ===")
+    if apply_delta.main([str(n)]):
+        sys.exit("apply-delta failed -- stopping before build")
+    for u in sorted({u for p_ in promote for u in (p_.get("retrofit") or [])}):
+        print(f"\n=== data-w {u} ===")
+        data_w.main([str(u)])   # nonzero just means spans needing a human
+    print("\n=== build ===")
+    rc = build.main([])
+    if rc:
+        sys.exit(f"build failed (rc {rc}); nothing committed.")
+    print("\nported, promoted and built. Review in the browser, then commit "
+          "(CLAUDE.md lists which generated paths to include).")
 
 
 def main(argv=None):
@@ -711,9 +774,13 @@ def main(argv=None):
                          "questions[]: those print as answered (and go in the "
                          "thread delta as such), only the rest as open. Lets "
                          "the dry run and the real port share one set of answers")
+    ap.add_argument("--promote", action="store_true",
+                    help="after porting, run apply-delta, data-w for each "
+                         "promotion's retrofit units, and build, in that order")
     a = ap.parse_args(argv)
     if not a.unit:
         ap.error("give a unit number")
-    port_one(a.unit, a.dry, a.src, a.force, load_answers(a.answers) if a.answers else None, a.write_invalid)
+    port_one(a.unit, a.dry, a.src, a.force, load_answers(a.answers) if a.answers else None,
+             a.write_invalid, a.promote)
     return 0
 

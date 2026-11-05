@@ -166,6 +166,10 @@ def main(argv=None):
         print("  needs eyes:", line)
     print(f"\n{len(edits)} span(s) can be assigned unambiguously; "
           f"{len(report)} need(s) a human.")
+    if not edits and not report:
+        print("Nothing to assign: every span already has data-w, or the "
+              "occurrences are untagged. For untagged ones the gaps are in the "
+              "`add` list of `python -m biblecore audit --unit <slug>`, not here.")
 
     if not edits:
         return 1 if report else 0
