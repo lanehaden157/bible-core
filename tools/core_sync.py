@@ -47,6 +47,7 @@ CANON_FILES = {
     "decisions.md": "canon-decisions.md",
     "workflow.md": "core-workflow.md",
     "handoff-template.md": "canon-handoff-template.md",
+    "ledger-template.md": "canon-ledger-template.md",
 }
 
 

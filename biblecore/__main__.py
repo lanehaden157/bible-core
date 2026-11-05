@@ -32,6 +32,11 @@ Commands:
                         a Greek book's pinned corpus, sha1-checked (no-op for Hebrew)
   units-from-map [MAP] [--kinds outer,inner] [--dry]
                         unit rows + groupings from the literary unit map
+  checks UNIT|FILE      a unit's checks[] against the corpus (Hebrew: transliteration resolved
+                        to lemma ids; Greek: the LXX). One list for Lane
+  unit-pack N [--out FILE]
+                        one unit's lookup file for the research chat (map entry, rulings,
+                        threads, lemma table, leads, source gaps)
   handoff-check FILE    warn if a handoff hides provisional renderings outside "Calls for Lane"
   sync-check [--mark-synced [FILE ...]]
                         which chat-side files need syncing
@@ -68,13 +73,15 @@ COMMANDS = {
     "migrate": ("biblecore.migrate", "main"),
     "test": ("biblecore.selftest", "main"),
     "fetch": ("biblecore.fetch", "main"),
+    "checks": ("biblecore.checks", "main"),
+    "unit-pack": ("biblecore.unit_pack", "main"),
     "handoff-check": ("biblecore.handoff_check", "main"),
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }
 # commands whose main() parses its arguments with argparse (its own --help);
 # every other one gets its module docstring for -h/--help and doesn't run
-ARGPARSED = {"port", "apply-delta", "data-w", "leads", "lxx", "migrate", "units-from-map", "fetch"}
+ARGPARSED = {"checks", "unit-pack", "port", "apply-delta", "data-w", "leads", "lxx", "migrate", "units-from-map", "fetch"}
 HELP = ("-h", "--help")
 
 
