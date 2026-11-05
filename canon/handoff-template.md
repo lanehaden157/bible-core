@@ -1,20 +1,17 @@
 # Handoff template: `<book>_NN_handoff.md`
 
-Vendored from `bible-core/canon/handoff-template.md`. The research chat fills
+Vendored from `bible-core/canon/handoff-template.md`. The verse chat fills
 this in after Lane's yes on the box list (the closing spoken list of pass 3) and hands it over as a download;
 Lane pastes it into a fresh chat in the project. Say what the fragment must
-carry, not how the research got there. Leave an empty section's heading in with
-"none", so the build chat knows it was considered.
+carry, not how the research got there. The handoff holds judgment only: rulings,
+first occurrences, lemma ids and reach are in the unit pack (`unit-pack-NN.md`),
+so don't restate them. Leave an empty section's heading in with "none", so the
+build chat knows it was considered.
 
 ## Scope
 
-Unit number, passage, title, and any scoping calls Lane made.
-
-## Rulings in play
-
-Existing renderings this unit uses, so the build chat doesn't re-ask them, one
-line each: lexeme or phrase, rendering, where it's ruled. Include a rendering
-that looks odd here but is settled.
+Unit number, passage (`C:V-C:V`), title, and any scoping calls Lane made. Add
+`Notes: N rows`, the notes file's row count as the verse chat confirmed it.
 
 ## Verse by verse
 
@@ -28,9 +25,12 @@ What the fragment must carry, in verse order, condensed from pass 3. Per verse
 
 ## Approved boxes
 
-One draft for each box Lane approved: the verse it anchors to, the text it
-points at, then background, same, different, and what it does here. Label each
-with its kind. The kinds are a per-book mapping (the style reference says which
+One draft for each box Lane approved, as `### Title` followed by labelled lines:
+**Kind**, **Anchor** (the C:V in this unit it sits at), **Ref** (the passage it
+points at, with verses), **Story**, **Same**, **Different** and **Does** (what
+it does here). An echo may leave Story, Same and Different out. Text in
+quotation marks is a quote the notes mark VERIFIED; paraphrase without them
+otherwise. The kinds are a per-book mapping (the style reference says which
 the book enables; a kind it doesn't enable isn't used):
 
 | kind | where it lands |
@@ -55,27 +55,36 @@ session. "None" if there are none.
 ## Threads
 
 - **Opens and payoffs:** each with a one-line popover note.
-- **Promotion candidates:** each as a ready `threads.json` entry (`id` as an
-  ASCII `[a-z0-9-]` slug, `root` only if it differs from `id`, lemma ids, `gloss`, `opens`, `payoffs`) with its reach, e.g. "16 occurrences,
-  retrofit in units 1, 2, 5, 11". These become `threads.promote[]`.
+- **Promotion candidates:** each as `id` (an ASCII `[a-z0-9-]` slug), lemma ids
+  copied from the pack's lemma table, `gloss`, the opener note, and the reason.
+  Don't write `opens`/`payoffs` refs, reach or retrofit units, and don't write
+  JSON: code computes them from the lemma set when the unit is ported. A payoff
+  you want is just its unit and note. These become `threads.promote[]`.
 - **Retro entries:** fixes to earlier units' tags (`threads.retro[]`).
-- **Rows citing this unit's verses:** thread rows in `threads-digest.md` for
-  the code side to check against the unit map.
 
 ## Calls for Lane (N) (the build chat asks these first)
 
 Every call that is Lane's to make, numbered, with the count in the heading: the
 only place a provisional rendering, a "to flag" wording or an open question
 appears. Each call: the verse, 2-3 options with the recommended one first, and a
-one-line reason for each. A settled ruling that merely looks odd goes under
-"Rulings in play". "None" is allowed only if "Verse by verse" has no provisional
+one-line reason for each. A settled ruling that merely looks odd is not a call:
+the pack carries it. "None" is allowed only if "Verse by verse" has no provisional
 rendering.
 
 ## Checks for code
 
 Claims about other passages' Greek or Hebrew that the code side can verify
 against the corpus, one row each: `ref, claim, expected lemma(s)`, the lemma in
-transliteration (`petra`, `hades`; macrons optional). For a word that should be
-*absent*, write a leading `!` (`!kleis`). A ref may name several passages
-(`Isa 38:10 / Wis 16:13`); their words are pooled. These become `checks[]`, and
-Lane doesn't answer them.
+transliteration (`petra`, `hades`, `gulgolet`; macrons, apostrophes and doubled
+letters optional). A lemma id from the pack works too (`H1538`). For a word that
+should be *absent*, write a leading `!` (`!kleis`). A ref may name several
+passages (`Isa 38:10 / Wis 16:13`); their words are pooled. These become
+`checks[]`; code resolves the transliteration to lemma ids and returns any that
+don't match as one list for Lane, so write only claims you read, not guesses.
+
+## Source status
+
+Copied from the end of the notes file: what was read this chat, what is
+secondhand, what was unavailable by verse, and where the paragraph markers came
+from. The build chat and Lane use it to see what was actually read. Quote only
+what the notes mark VERIFIED, and without quotation marks for anything else.

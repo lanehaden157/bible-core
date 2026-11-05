@@ -212,8 +212,11 @@ def thread_delta(meta, fragment_html=None, retrofit_applied=True, answers=None):
                   "Lane as a handoff call). Add them, take the colour from `python -m "
                   "biblecore colour`, then run `data-w N` for each retrofit unit "
                   "and `build` (it audits).", ""]
+        from biblecore.promote import complete
         for p_ in promote:
+            p_, pnotes = complete(p_, meta.get("unit"))  # opens, refs, reach from the data
             lines += _promotion_lines(p_)
+            lines += [f"    - **check:** {x}" for x in pnotes]
 
     checks = meta.get("checks", []) or []
     if checks:

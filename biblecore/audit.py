@@ -587,6 +587,35 @@ def coverage_for_unit(slug, threads_json=None, roots_json=None):
     return coverage_for_fragment(slug, html, row["passage"], threads_json, roots_json)
 
 
+def opener_warnings(threads_json, roots_json, units_json, words):
+    """Warnings for tracked threads whose recorded `opens` unit is later than
+    the unit holding the thread's first occurrence in the word table. The
+    id set decides; a hand-set opener drifts when units are built out of
+    order. A warning, never a gate."""
+    spans = []
+    for u in units_json.get("units", []):
+        try:
+            spans.append((u["n"],) + parse_range(u["passage"]))
+        except (AttributeError, TypeError, KeyError):
+            pass
+    roots = roots_json.get("roots", {})
+    out = []
+    for t in threads_json.get("threads", []):
+        ids = (roots.get(t.get("root") or t["id"]) or {}).get("ids") or []
+        rec = (t.get("opens") or {})
+        if not ids or not rec.get("unit"):
+            continue
+        hits = source_hits_for_root(words, ids)
+        if not hits:
+            continue
+        cv = next(iter(hits.values()))
+        first = next((n for n, lo, hi in spans if lo <= cv <= hi), None)
+        if first is not None and rec["unit"] > first:
+            out.append(f"{t['id']}: opens at unit {rec['unit']} ({rec.get('ref', '?')}) but "
+                       f"first occurs at {cv[0]}:{cv[1]} (unit {first}); move `opens` there")
+    return out
+
+
 def audit(only=None, stub_for=None, unit_slugs=None):
     threads_json = _data("threads.json")
     roots_json = load_roots()
@@ -707,6 +736,10 @@ def audit(only=None, stub_for=None, unit_slugs=None):
             print(ln)
         if not lines:
             print("    (no gaps)")
+
+    if not only and not unit_slugs:
+        for w in opener_warnings(threads_json, roots_json, units_json, load_words()):
+            print(f"  ⚠ opener {w}")
 
     scope = "built-unit" if not unit_slugs else "/".join(unit_slugs)
     print(f"\n{total_gaps} gap(s), {total_wrong} wrong-id, {total_strays} stray, "

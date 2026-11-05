@@ -890,7 +890,8 @@ def test_promote_bad_entries_fail():
         "no ids": _promote(ids=[]),
         "no gloss": _promote(gloss=""),
         "no opens": _promote(opens=None),
-        "payoff without ref": _promote(payoffs=[{"unit": 7}]),
+        "payoff with an empty ref": _promote(payoffs=[{"unit": 7, "ref": ""}]),
+        "opens with a stray key": _promote(opens={"note": "x", "foo": 1}),
         "colour carried": _promote(color="#fff"),
         "bad id": _promote(id="Not Ok"),
     }
@@ -898,6 +899,14 @@ def test_promote_bad_entries_fail():
         errs = um.validate(_meta(threads={**_EMPTY_THREADS, "promote": [p]}),
                            {"threads": []})
         _check(f"promote[] {name} should fail", any("promote[0]" in e for e in errs), errs)
+
+
+def test_promote_light_form_passes():
+    """A handoff proposes id, ids, gloss, an opener note; code computes the rest."""
+    p = {"entry": {"id": "devote", "ids": ["2764"], "gloss": "ban",
+                   "opens": {"note": "the ban begins"}, "payoffs": [{"unit": 7, "note": "n"}]}}
+    errs = um.validate(_meta(threads={**_EMPTY_THREADS, "promote": [p]}), {"threads": []})
+    _check("a light promote[] item should pass", not errs, errs)
 
 
 def test_promote_of_existing_thread_fails():

@@ -236,11 +236,12 @@ def _validate_promote(promote, threads_json=None):
             continue
         for k in set(p) - {"entry", "reach", "retrofit"}:
             errs.append(f"{where}: unknown key '{k}' -- {{entry, reach, retrofit}}")
-        if not (isinstance(p.get("reach"), str) and p["reach"].strip()):
+        # reach/retrofit may be left out: promote.complete() computes them
+        if "reach" in p and not (isinstance(p.get("reach"), str) and p["reach"].strip()):
             errs.append(f"{where}: missing 'reach' (e.g. \"16 occurrences, "
                         "retrofit in units 1, 2, 5\")")
         rf = p.get("retrofit")
-        if not (isinstance(rf, list) and all(
+        if "retrofit" in p and not (isinstance(rf, list) and all(
                 isinstance(x, int) and not isinstance(x, bool) for x in rf)):
             errs.append(f"{where}: 'retrofit' must be a list of unit numbers "
                         "(empty if none)")
@@ -274,13 +275,16 @@ def _validate_promote(promote, threads_json=None):
             errs.append(f"{where}.entry: '{e.get('id')}' is already a thread "
                         "in data/threads.json -- use threads.opens/payoffs")
         op = e.get("opens")
-        if not (isinstance(op, dict) and isinstance(op.get("unit"), int)
-                and isinstance(op.get("ref"), str) and op["ref"].strip()):
-            errs.append(f"{where}.entry: 'opens' must be {{unit, ref, note?}}")
+        # unit/ref are computed from the id set when only a note is given
+        if not (isinstance(op, dict) and (
+                (isinstance(op.get("unit"), int) and isinstance(op.get("ref"), str)
+                 and op["ref"].strip())
+                or (set(op) <= {"note"} and "note" in op))):
+            errs.append(f"{where}.entry: 'opens' must be {{unit, ref, note?}} or {{note}}")
         pays = e.get("payoffs")
         if not (isinstance(pays, list) and all(
                 isinstance(x, dict) and isinstance(x.get("unit"), int)
-                and isinstance(x.get("ref"), str) and x["ref"].strip()
+                and (x.get("ref") is None or (isinstance(x["ref"], str) and x["ref"].strip()))
                 for x in pays)):
             errs.append(f"{where}.entry: 'payoffs' must be a list of "
                         "{unit, ref, note?}")
