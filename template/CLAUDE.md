@@ -110,5 +110,6 @@ corpus isn't the pinned one: flag it loudly, don't build on it.
 
 ## Session files
 
-`session_index.md` (read first), `improvements_log.md`, and a
-`session_summary_<date>.md` per session.
+`session_index.md` (read first: standing state plus one line per recent session; older
+lines go to `archive/`), `improvements_log.md` (only what git can't show: decisions, reverts,
+gotchas), and `session_summary_<date>.md` (only for substantial sessions with open questions).
