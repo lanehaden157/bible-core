@@ -167,6 +167,25 @@ def test_empty_book_builds():
         shutil.rmtree(d)
 
 
+def _drop_promotions(folder):
+    """Joshua's threads.json already holds the threads unit 1's artifact
+    promotes (command, forsake, keep), and a port refuses to promote a thread
+    that exists; so the copied artifacts lose their threads.promote[]."""
+    for f in os.listdir(folder):
+        path = os.path.join(folder, f)
+        txt = support.read(path)
+        m = re.search(r'(<script type="application/json" id="unit-meta">)(.*?)(</script>)', txt, re.S)
+        if not m:
+            continue
+        meta = json.loads(m.group(2))
+        if (meta.get("threads") or {}).get("promote"):
+            meta["threads"]["promote"] = []
+            body = json.dumps(meta, indent=2, ensure_ascii=False)
+            txt = txt[:m.start(2)] + "\n" + body + "\n" + txt[m.end(2):]
+            with open(path, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(txt)
+
+
 def test_joshua_from_template_reproduces_joshua():
     d = tempfile.mkdtemp(prefix="bc-joshua-")
     try:
@@ -180,8 +199,9 @@ def test_joshua_from_template_reproduces_joshua():
                         os.path.join(d, "retrofit", "retrofit-tags.json"))
         # Joshua's own look: index.html carries theme.css's hash
         shutil.copyfile(os.path.join(J, "css", "theme.css"), os.path.join(d, "css", "theme.css"))
-        for f in ("threads.json", "roots.json"):
-            shutil.copyfile(os.path.join(J, "data", f), os.path.join(d, "data", f))
+        shutil.copyfile(os.path.join(J, "data", "roots.json"), os.path.join(d, "data", "roots.json"))
+        shutil.copyfile(os.path.join(J, "data", "threads.json"), os.path.join(d, "data", "threads.json"))
+        _drop_promotions(os.path.join(d, "source-artifacts"))
         uj = json.load(open(os.path.join(J, "data", "units.json"), encoding="utf-8"))
         units = [{k: v for k, v in u.items() if k not in ("built", "roots")} | {"built": False}
                  for u in uj["units"]]

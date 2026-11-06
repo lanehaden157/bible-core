@@ -40,8 +40,8 @@ def test_harvest_joshua_unit_1_echoes():
     html = support.read(path)
     rows = canon.harvest(html, 1, abbrev="Josh", meta=um.parse(html))
     pairs = {(r["from"], r["to"]) for r in rows}
-    for want in [("Josh 1:5", "Exod 3:12"), ("Josh 1:13", "Deut 3:18–20"),
-                 ("Josh 1:2", "Gen 13:17"), ("Josh 1:8", "Ps 1:2–3")]:
+    for want in [("Josh 1:5", "Exod 3:12"), ("Josh 1:2", "Deut 3:27"),
+                 ("Josh 1:3", "Gen 13:17"), ("Josh 1:8", "Ps 1:2–3")]:
         assert want in pairs, (want, sorted(pairs)[:10])
     assert all(r["source"] == "echo" and r["kind"] == "echo" for r in rows)
 

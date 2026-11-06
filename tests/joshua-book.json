@@ -13,7 +13,8 @@
     "movement"
   ],
   "components": [
-    "echo"
+    "echo",
+    "story"
   ],
   "checks": {
     "opens_note_required": true
