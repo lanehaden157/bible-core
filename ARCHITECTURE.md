@@ -60,6 +60,7 @@
 - 0.26.0: Research leans open: thin-sourced links are 'possible' and flagged tentative to Lane, not dropped (workflow, story snippet, chat-side lens template)
 - 0.27.0: Research accuracy: unit-pack, checks, promote.complete, opener audit warning, handoff-check extended, three-chat workflow and ledger template
 - 0.28.0: Three chats per unit always (table of passes, which-chat-am-I rule), Asking Lane timing (judgment calls on the box list, blockers only in chat); light-form promotions completed before the port overlay; Joshua test fixtures caught up
+- 0.29.0: Mirror: book.json mirrors + a policy file of pairs (shared words verified against both corpora, strength 3 needs evidence); second-book reader, unit-pack mirror section, mirror component and canon kind, mirror[] proposals (out/mirror-delta.json, mirror keep|decline)
 
 ## What this is
 
