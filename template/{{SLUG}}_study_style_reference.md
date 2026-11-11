@@ -1,117 +1,79 @@
 # {{BOOK}} Study — Style Reference
 
-> **The artifact contract.** What a unit artifact must contain and must not.
-> `CHAT_SIDE_INSTRUCTIONS.md` and `core-workflow.md` say how to work;
-> `resources.md` says what's on hand; `CLAUDE.md` says how the repo behaves.
-> Each rule lives in one of them. `synced-index.md` lists every synced file.
-
-A guide, not a spec: where a rule gives a reason, the reason outranks the rule.
-Rules marked **(learned)** cost something to find in an earlier book — read
-the lesson before relaxing one. This file starts as the shared defaults from
-`bible-core/ARCHITECTURE.md`; **sections marked ✎ are this book's to decide**,
-and anything else can change too, with the reason written here.
-
----
+The artifact contract: what a unit's fragment must and must not contain. How
+to work is in `core-workflow.md`. Where a rule gives a reason, the reason
+outranks the rule. Sections marked ✎ are this book's to decide.
 
 ## 1. Colour policy
 
-One **lexical root** per `data-root` — the root and its same-root forms,
-never a theme or a bundle of words. Split a paired opposition into two roots;
-drop a one-passage wordplay. Fixed phrases the book repeats verbatim are the one
-exception and live in `threads.json`.
-
-Tag **every** occurrence with the one slug, **including where the English uses a
-different word** — the tag follows the lexeme, not the gloss.
-
+- One **lexical root** per `data-root`: the root and its same-root forms,
+  never a theme or a bundle of words. No richer taxonomy (root vs. stem vs.
+  semantic field all get one slug, one colour). Split a paired opposition into
+  two roots; drop a one-passage wordplay. A fixed phrase the book repeats
+  verbatim may be a thread in `threads.json`.
+- Tag **every** occurrence with the one slug, including where the English uses
+  a different word. The tag follows the lexeme, not the gloss.
+- Every slug resolves in `threads-digest.md` or this fragment's `roots[]`, or
+  the build fails. `roots[]` holds local roots only; never re-declare a
+  tracked thread there.
+- **Tag notable words that aren't threads.** A single striking translation
+  choice earns a `data-root` span and a `roots[]` entry. Read for these
+  deliberately.
 <!-- lang: hebrew -->
-`translit` is one bare root form (Hebrew books), not a list of inflected forms;
-`gloss` is plain English (§3). No stem/binyan labels. A stem split that matters
-goes in a thread `note` or a verse `.gloss`, in plain language.
+- `translit` is one bare root form, not a list of inflected forms. `gloss` is
+  plain English with no stem or binyan labels. A stem split that matters goes
+  in a thread `note` or a verse `.gloss`, in plain language.
 <!-- /lang -->
 <!-- lang: greek -->
-`translit` is the lexical form (the lemma as a lexicon lists it, `klēronomeō`),
-not a list of inflected forms; `gloss` is plain English (§3). No tense or voice
-labels. A grammatical point that matters goes in a thread `note` or a verse
-`.gloss`, in plain language.
+- `translit` is the lexical form (`klēronomeō`), not a list of inflected
+  forms. `gloss` is plain English with no tense or voice labels. A grammatical
+  point that matters goes in a thread `note` or a verse `.gloss`, in plain
+  language.
 <!-- /lang -->
+- `example` (optional): one short quoted clause from the unit's own English,
+  no citation.
+- `echo` (optional): one line on where the word already appeared or
+  distinctively returns, reference first, then what it adds. Take echoes from
+  the kept rows of the notes file, not from memory.
 
-Every slug must resolve — in `threads-digest.md` or this artifact's `roots[]` —
-or the build fails. **`roots[]` is local roots only**: don't re-declare a
-tracked thread there; `data/threads.json` is its single source of truth.
+## 2. Root identity: ids, not strings
 
-**Tag notable words even when they aren't threads.** A single striking
-translation choice in a single verse earns a `data-root` span and a full
-`{root, translit, gloss}` entry. Read for these deliberately.
-
-**`example`** — optional on any root: one short quoted clause from the unit's
-own English, no citation.
-
-**`echo`** — optional on any root: one line saying where the word has already
-appeared, or where it reappears distinctively later, shown in the root's
-popover with a "cf.". Lead with the reference, then what it adds. Echoes come
-from the kept rows of the research pass's notes file, not from memory at
-drafting time.
-
-**Resist a richer taxonomy. (learned:** a root/motif two-tier model was built
-and reverted the same day. Root vs. stem vs. semantic field gets the same
-answer: one slug, one colour.**)**
-
----
-
-## 2. Root identity — ids, not strings
-
-**A root is a hand-curated set of lemma ids in `roots.json`; every tracked
-thread occurrence carries its word id** (`data-w`, from `{{BOOK}}-words.tsv`).
-No original-language string is ever compared to another. **(learned:**
-consonant-substring matching measured 0–42% recall on Joshua's weak-root
-verbs.**)**
+A root is a hand-curated set of lemma ids in `roots.json`, and every tracked
+occurrence carries its word id (`data-w`, from `{{BOOK}}-words.tsv`).
+Original-language strings are never compared or hand-typed.
 
 <!-- lang: hebrew -->
 One root often spans several Strong's numbers, and one number can bundle
-senses worth splitting, so a root is a **decision**, recorded as an id set
-with a note. A bare id (`2416`) claims every lexeme under the number; a
-suffixed id (`2416e`) claims exactly one.
+senses worth splitting, so a root is a decision recorded as an id set with a
+note. A bare id (`2416`) claims every lexeme under the number; a suffixed id
+(`2416e`) claims exactly one.
 
 ```html
 <span class="r" data-root="devote" data-w="068w5">devoted</span>
 ```
 <!-- /lang -->
 <!-- lang: greek -->
-A Greek book's lemma ids are transliterated lemmas (`klēronomeō`), with a
-digit only where two lemmas share a spelling (`tis`, `tis2`). One root often
-spans several lemmas (a verb, its noun, its compounds: `klēronomeō`,
-`klēronomia`, `klēronomos`), so a root is a **decision**, recorded as an id
-set with a note.
+Lemma ids are transliterated lemmas (`klēronomeō`), with a digit only where
+two lemmas share a spelling (`tis`, `tis2`). One root often spans several
+lemmas (`klēronomeō`, `klēronomia`, `klēronomos`), so a root is a decision
+recorded as an id set with a note.
 
 ```html
 <span class="r" data-root="inherit" data-w="01050506">will inherit</span>
 ```
 <!-- /lang -->
 
-Local roots don't need `data-w`, and neither do tracked spans inside a `data-verses` component (a condensed table cell is a colour-only summary tag). **You never hand-chase word ids**: the porter
-fills them by per-verse alignment and reports the few it can't decide.
-
-<!-- lang: hebrew -->
-**Never hand-type Hebrew; pull by word id. (learned:** NFC normalisation alone
-reorders marks in 47% of Joshua's words.**)**
-<!-- /lang -->
-<!-- lang: greek -->
-**Never hand-type Greek; pull by word id.** Accents and breathings give one
-word several spellings; its id has one.
-<!-- /lang -->
-
----
+Don't hand-chase word ids: the porter fills `data-w` and reports what it can't
+decide. Local roots don't need `data-w`, and neither do tracked spans inside a
+`data-verses` component.
 
 ## 3. The hard contract
 
-The artifact is **one `<article class="unit" data-unit="N">` and nothing
-else** — no doctype/html/head/body/style/link, no inline `style`, no `--c-*`
+The fragment is one `<article class="unit" data-unit="N">` and nothing else:
+no doctype, html, head, body, style or link, no inline `style`, no `--c-*`
 vars. It opens with `<script type="application/json" id="unit-meta">`.
 
-**Unknown top-level keys are a hard error. (learned:** Matthew's `descriptor`
-and `discourse` were authored for eleven units and silently discarded.**)**
-
-### Top-level keys
+Unknown top-level keys are a hard error.
 
 | key | required | type | rule |
 |---|---|---|---|
@@ -122,113 +84,76 @@ and `discourse` were authored for eleven units and silently discarded.**)**
 | `threads` | ✓ | object | all four sub-keys, empty lists fine |
 | `slug` | — | str | `"unit-06"`; derived from `unit` if omitted |
 | ✎ grouping keys | — | int | one per grouping kind in `book.json` (e.g. `movement`); looked up from the unit map if omitted |
-| `questions` | — | array | wording/data calls only Lane can make, §3a |
-| `checks` | — | array | claims for the code side to verify, §3a |
-| `intertext` | — | array | cross-book links worth recording, below |
-| `typescenes` | — | array | type-scene instances in this unit, below |
+| `questions` | — | array | §3a |
+| `checks` | — | array | §3a |
+| `intertext` | — | array | below |
+| `typescenes` | — | array | below |
 
-### `intertext[]` and `typescenes[]` — canon rows (optional)
-
-The porter moves these into `data/canon.json` and the canon registries in
-`bible-core/canon/`; they aren't re-emitted in the built meta block.
-
-- `intertext[]` — `{ref, to, kind, note?}`: `ref` a bare `"C:V"` in this
-  book, `to` a reference like `"Ps 67:1"`, `kind` one of `quotation`,
-  `allusion`, `echo`, `type-scene`, `story`, `character`, `reuse`. An
-  `aside.echo`, a root's `echo` or an `aside.story` box (where the book
-  enables it) is already harvested, so list here only what those don't
-  say: a quotation, an allusion without an aside, a link worth keeping
-  without cluttering the page.
-- `typescenes[]` — `{id, ref, note?, label?}`: `id` from the type-scene
-  index (`commissioning`, `scouts`, `water-crossing`, `census`,
-  `mountain-theophany`, `annunciation`, ...). A new `id` is fine; give it a
-  `label` and it's added to the index for Lane to place under an arc.
-
-### `roots[]` — every entry `{root, translit, gloss, example?, echo?}`
-
+**`roots[]`**: `{root, translit, gloss, example?, echo?}` and no other keys
+(no `color`, `kind`, `members`). `root` matches `[a-z0-9-]+`. `gloss` is a
+short general definition with no grammatical labels.
 <!-- lang: hebrew -->
-`root` matches `[a-z0-9-]+`. **No** `color`/`colour`, **no** `kind`/`members`,
-no other keys. `gloss` is a short general definition — no stem or
-part-of-speech labels. Never seed a gloss from Strong's first definition
-(misleading in 9 of 16 sampled Joshua words).
+Never seed a gloss from Strong's first definition.
+<!-- /lang -->
+
+**`threads`**: `{opens, payoffs, candidates, retro, promote?}`. The first four
+are always present, each a list.
+
+- `opens[]` / `payoffs[]`: `{id, ref, note}`. `id` must exist in
+  `threads-digest.md`; `note` is the one-line popover prose.
+<!-- lang: hebrew -->
+- `candidates[]`: `{root, why, ids?, refs?}`. Proposals only. `ids` are the
+  lemma ids you saw, copied as the word table spells them (`"6485 a"` is
+  fine); `refs` a few representative verses as bare `C:V`.
 <!-- /lang -->
 <!-- lang: greek -->
-`root` matches `[a-z0-9-]+`. **No** `color`/`colour`, **no** `kind`/`members`,
-no other keys. `gloss` is a short general definition in plain English — no
-tense, voice or part-of-speech labels.
+- `candidates[]`: `{root, why, ids?, refs?}`. Proposals only. `ids` are the
+  lemma ids you saw, copied as the word table spells them (`klēronomeō`);
+  `refs` a few representative verses as bare `C:V`.
 <!-- /lang -->
+  Claude decides whether a candidate is promoted, biased toward book-wide, and
+  asks Lane only when unsure.
+- `retro[]`: `{unit, verse, text, root, why, nth?, op?, w?}`. Fixes for
+  earlier units (`unit` is a slug like `"unit-04"`). `why` is required. `op` is
+  one of `add` (default), `retag`, `retag_word`, `untag_word`, `unwrap`,
+  `strip_span`, `text`. The porter fills `w`.
+- `promote[]`: `{entry, reach?, retrofit?}`, a thread Claude has decided to
+  promote, taken from the handoff. `entry` is `{id, root?, ids, gloss, opens:
+  {unit, note?}, payoffs?: [{unit, note?}], translit?, note?}`: `ids` from the
+  pack's lemma table, no colour, and `root` defaults to `id` (ASCII
+  `[a-z0-9-]`, `kerdaino` not `kerdainō`). Code computes the refs, `reach` and
+  `retrofit` at port. A `retro[]` in the same unit may tag the new id. A
+  proposal that still needs an id set stays in `candidates[]`.
 
-### `threads` — `{opens, payoffs, candidates, retro, promote?}`
+**`intertext[]`**: `{ref, to, kind, note?}`. `ref` is a bare `"C:V"` in this
+book, `to` a reference like `"Ps 67:1"`, `kind` one of `quotation`,
+`allusion`, `echo`, `type-scene`, `story`, `character`, `reuse`. An
+`aside.echo`, a root's `echo` and an `aside.story` box are already harvested
+into the canon, so list only what those don't say.
 
-The first four present, each a list, empty allowed; `promote` is optional.
+**`typescenes[]`**: `{id, ref, note?, label?}`. `id` comes from the type-scene
+index (`commissioning`, `scouts`, `water-crossing`, `census`,
+`mountain-theophany`, `annunciation`, ...). A new `id` needs a `label`.
 
-**`opens[]` / `payoffs[]`** — `{id, ref, note}`. `id` must exist in
-`threads-digest.md` (propose new ones via `candidates`); `note` is the
-one-line popover prose.
+## 3a. `questions[]` and `checks[]`
 
-<!-- lang: hebrew -->
-**`candidates[]`** — `{root, why, ids?, refs?}`. Proposals only; `ids` are the
-lemma ids you saw (evidence), copied as the word table spells them (`"6485 a"`
-is fine; the porter reads it as `6485a`), `refs` a few representative verses
-<!-- /lang -->
-<!-- lang: greek -->
-**`candidates[]`** — `{root, why, ids?, refs?}`. Proposals only; `ids` are the
-lemma ids you saw (evidence), copied as the word table spells them
-(`klēronomeō`), `refs` a few representative verses
-<!-- /lang -->
-as bare `C:V`. **Claude
-decides whether a candidate is promoted, biased toward book-wide**, and asks
-Lane only when genuinely unsure.
+**`questions[]`**: `{topic, note, options?}`. Only a call Lane must make, with
+a real open alternative, that the build chat's popups left unresolved. Never a
+wording `translation-choices.md` or an earlier unit already rules. `topic` is
+a few words, `note` the question answerable cold, `options` short answers.
+Render your best provisional choice and flag it.
 
-**`retro[]`** — `{unit, verse, text, root, why, nth?, op?, w?}`. Fixes for
-**earlier** units (`unit` is a slug like `"unit-04"`). `why` required. `op` ∈
-`add` (default), `retag`, `retag_word`, `untag_word`, `unwrap`, `strip_span`,
-`text`. `w` is optional — the porter fills it.
-
-**`promote[]`** (optional) — `{entry, reach, retrofit}`: a new thread ready for
-`threads.json`, taken from the handoff. `entry` is `{id, root?, ids, gloss,
-opens: {unit, ref, note?}, payoffs: [{unit, ref, note?}], translit?, note?}`
-(`ids` the lemma ids; no colour, the site assigns it; `root` is optional and defaults to `id`, ASCII `[a-z0-9-]` only, e.g. `kerdaino` not `kerdainō`). A `retro[]` in the same unit may tag the new thread's id (the promotion counts as tracked), and `apply-delta` creates its `threads.json` and `roots.json` entries, `reach` a sentence
-("16 occurrences, retrofit in units 1, 2, 5"), `retrofit` the unit numbers
-that need tags added. Use it for a thread Lane has ruled on with the reach in
-view; `candidates[]` stays for a proposal that still needs an id set.
-
----
-
-## 3a. `questions[]` and `checks[]` — for Lane and for the code side
-
-**`questions[]`** — `{topic, note, options?}`. A call only Lane can make, with a
-genuinely open alternative the unit's argument depends on. Before adding one,
-read `translation-choices.md` and the earlier units' meta: a wording already
-ruled is used, and a note about it goes in the artifact's prose, not here. The
-build chat asks every open call by popup before drafting (handoff calls, provisional
-renderings, conflicts with synced rulings); only what Lane left open goes in
-`questions[]`. `topic` is a few words; `note` is the question,
-answerable cold; `options` optional short answers. Render your best
-provisional choice so the draft keeps moving, and flag it. Claude Code then
-asks Lane each question in the AskUserQuestion popup (multiple choice,
-`options` become the choices, best provisional first), which Lane prefers to a
-chat list. The porter prints every question at port time; the decision then
-goes in `translation-choices.md` or the thread/root entry.
-
-**`checks[]`** — `{ref, claim, expect}`. A claim about another passage's text
-that the code side can verify against the corpus (`ref` like `"Isa 22:22"`,
-`claim` what the artifact says, `expect` the lemma(s) it should find, a string
-or a list; `"!lemma"` says the word should be *absent*). These never go in `questions[]`: the porter prints them in their
-own section, they have no options and Lane doesn't answer them.
-
----
+**`checks[]`**: `{ref, claim, expect}`. A claim about another passage's text
+for the code side to verify: `ref` like `"Isa 22:22"`, `claim` what the
+fragment says, `expect` the lemma or lemmas it should find (`"!lemma"` for a
+word that should be absent). These never go in `questions[]`.
 
 ## 4. Components
 
-Deliberately small. The base components below are in every book. **Optional
-components** (echo, count table, poem, itinerary, text-form, …) come from
-bible-core's component registry: `book.json` `"components"` enables them, any
-unit may use any enabled one, and **`components-reference.md`** (synced,
-generated by the build) holds the markup and rules for each one. A class
-that's neither base nor an enabled component fails the build by name. **A new
-class is a decision**, so it goes into the registry with its CSS, its check and
-its snippet.
+The base components are in every book. Optional ones (echo, list, poem,
+itinerary, text-form, …) are enabled in `book.json` `"components"`, and
+`components-reference.md` holds their markup and rules. A class that is
+neither base nor enabled fails the build.
 
 | component | shape | note |
 |---|---|---|
@@ -239,166 +164,124 @@ its snippet.
 | legend | `<section class="block legend" aria-label="color key"><ul></ul></section>` | **required, even as an empty stub** |
 | notes | `<div class="notes"><h2>Notes</h2><ol><li id="n3"><strong>hid him (v4).</strong> …</li></ol></div>` | every `href` resolves to an `id` in the fragment |
 
-**`data-verses`** — any component that presents verses *in place of*
-verse-by-verse text (a table that condenses a repeated formula, say) carries
-`data-verses="C:V–V"` (or `C:V–C:V`) naming exactly the verses it replaces.
-Tracked-thread occurrences in those verses are then reported as covered by
-the component, not as untagged gaps. The build fails if a declared verse is
-also written out as a `p.v`, or if the range reaches outside the unit's
-passage, so the declaration can't quietly excuse text a reader actually sees.
-Say in the pericope's gloss that the verses are condensed.
+**`data-verses`**: a component that presents verses in place of
+verse-by-verse text (a table condensing a repeated formula) carries
+`data-verses="C:V–V"` naming exactly the verses it replaces. Don't also write
+those verses as `p.v`, keep the range inside the unit's passage, and say in
+the pericope's gloss that the verses are condensed.
 
-✎ **This book's optional components:** echo and list (see
-`components-reference.md`). Enable more in `book.json` when a unit needs
-them, and note here anything this book does differently with one.
+✎ **This book's optional components:** echo and list. Enable more in
+`book.json` when a unit needs them, and note here anything this book does
+differently with one.
 
-**(learned:** endnote markers inside `.gloss` hid the footnote behind the
-toggle; the legend was once "optional" and a unit shipped with no colour key;
-asides spliced inside unclosed glosses silently collapsed.**)**
+### Balance
 
-### Balance — what goes where
-
-Strong suggestions:
-
-- **Glosses stay short** — a phrase or one sentence, roughly 25 words or
-  fewer. A grammar point, a textual variant, a debate between readings goes
-  in a **footnote**.
-- **Grammar and medieval commentary are seasoning, not the meal.** Include a
-  grammar point when it changes how the verse reads.
+- **Glosses stay short:** a phrase or one sentence, about 25 words at most. A
+  grammar point, a textual variant or a debate between readings goes in a
+  footnote.
+- **Grammar and commentary are seasoning.** Include a grammar point when it
+  changes how the verse reads.
 - **Intertextuality is the main course.** Say where earlier Scripture stands
-  behind a line and where a line reappears later, including in the New
-  Testament. `aside.echo` for a verse-level link, a root `echo` for a word.
-
-**Voice: no named commentators or resources, and no project-internal
-references, anywhere in fragment prose.** Where views differ, say so in
-general terms and give the content of the disagreement. **(learned:** Joshua
-unit 1's first draft named eight sources and two repo files.**)**
-
----
+  behind a line and where it reappears later. `aside.echo` for a verse-level
+  link, a root `echo` for a word.
+- **Voice:** no named commentators or resources and no project-internal
+  references anywhere in fragment prose. Where views differ, say so in general
+  terms and give the content of the disagreement.
 
 <!-- lang: hebrew -->
 ## 5. Hebrew in English ✎
 
-**Transliteration** comes only from the core's Hebrew adapter
-(`biblecore/lang/hebrew.py`; its test file is the authoritative definition).
-Scheme: a diacritic only where the plain letter is already claimed (`ḥ ṭ ś`,
-`ʾ`/`ʿ`); no vowel length; no spirantization; dagesh forte doubles; `יהוה` →
-`YHWH`, rendered **Yahweh**.
+**Transliteration** follows the core's Hebrew adapter
+(`biblecore/lang/hebrew.py`): a diacritic only where the plain letter is
+already claimed (`ḥ ṭ ś`, `ʾ`/`ʿ`); no vowel length; no spirantization; dagesh
+forte doubles; the divine name is `YHWH`, rendered **Yahweh**.
 
-**Translation philosophy.** A fresh, wooden-but-readable rendering from the
-Hebrew, not a polish of an existing English version. Creative, intentional
-glosses are encouraged.
+**Translation.** A fresh, wooden-but-readable rendering from the Hebrew, not a
+polish of an existing English version. Creative, intentional glosses are
+encouraged.
 <!-- /lang -->
 <!-- lang: greek -->
 ## 5. Greek in English ✎
 
-**Transliteration** comes only from the core's Greek adapter
-(`biblecore/lang/greek.py`; its test file is the authoritative definition),
-and this is the scheme to follow by hand: η → `ē` and ω → `ō` (the macron
-tells the letter apart, it isn't vowel length); `th ph ch ps` for θ φ χ ψ,
+**Transliteration** follows the core's Greek adapter
+(`biblecore/lang/greek.py`): η → `ē` and ω → `ō`; `th ph ch ps` for θ φ χ ψ;
 `y` for υ except in `ou au eu`; γγ/γκ → `ng`/`nk`; rough breathing → initial
 `h`, initial ρ → `rh`; accents, smooth breathing and iota subscript dropped.
 *kyrios* standing for the divine name is rendered **Yahweh**. A Hebrew word
-(behind a Septuagint word, or a Semitism) uses the Hebrew scheme (`ḥ ṭ ś`,
-`ʾ`/`ʿ`, no vowel length).
+uses the Hebrew scheme (`ḥ ṭ ś`, `ʾ`/`ʿ`, no vowel length).
 
-**Translation philosophy.** A fresh, wooden-but-readable rendering from the
-Greek (SBLGNT), not a polish of an existing English version. Creative,
-intentional glosses are encouraged.
+**Translation.** A fresh, wooden-but-readable rendering from the Greek
+(SBLGNT), not a polish of an existing English version. Creative, intentional
+glosses are encouraged.
 <!-- /lang -->
 
 **Wording.** Check `translation-choices.md` (which starts from
-`canon-conventions.md`) before rendering a lexeme. A better
-verse-specific rendering is fine — **flag the deviation**. A chat records a wording
-decision in the handoff's "Decisions"; Claude Code updates the file after the
-session (or in the same turn, if it made the decision). **(learned:** Matthew started its
-glossary at unit 10 and paid with a retroactive audit.**)**
-
----
+`canon-conventions.md`) before rendering a lexeme. A better verse-specific
+rendering is fine if you flag the deviation.
 
 ## 6. Judgment
 
 <!-- lang: hebrew -->
-**Be tough on structures.** Chiasms and rings only when textually verifiable.
-Weigh the Masoretic paragraph breaks (`candidate-boundaries.md`) and the
-patterns you notice together: neither outranks the other, and where they
-disagree, say so and argue for the boundary you choose. **(learned:** eight
-over-reaching chiasms were cut from Matthew.**)**
-<!-- /lang -->
-<!-- lang: greek -->
-**Be tough on structures.** Chiasms and rings only when textually verifiable.
-Weigh the book's own markers (formulae, transitions, a change of scene or
-speaker) and the patterns you notice together: neither outranks the other,
-and where they disagree, say so and argue for the boundary you choose.
-**(learned:** eight over-reaching chiasms were cut from Matthew.**)**
-<!-- /lang -->
-
-**`threads.json` and `roots.json` are Lane's policy.** Nothing in the pipeline
-writes either.
-
-<!-- lang: hebrew -->
-**Names are joined by hand.** Place-name wordplay is real but Strong's
-etymology is unreliable. Add names to `roots.json` one at a time, with the
-reason.
+- **Be tough on structures.** Chiasms and rings only when textually
+  verifiable. Weigh the Masoretic paragraph breaks
+  (`candidate-boundaries.md`) together with the patterns you notice; where
+  they disagree, say so and argue for the boundary you choose.
+- **Names are joined by hand.** Place-name wordplay is real, but Strong's
+  etymology is unreliable.
 
 ✎ **Genre cautions for this book** (lists, law, poetry, …): add them here as
 units surface them.
 <!-- /lang -->
 <!-- lang: greek -->
-**Names are joined by hand.** A Greek name often carries a Hebrew one
-(*Iēsous* is *Yehoshua*); say so where it matters. Add names to `roots.json`
-one at a time, with the reason.
+- **Be tough on structures.** Chiasms and rings only when textually
+  verifiable. Weigh the book's own markers (formulae, transitions, a change of
+  scene or speaker) together with the patterns you notice; where they
+  disagree, say so and argue for the boundary you choose.
+- **Names are joined by hand.** A Greek name often carries a Hebrew one
+  (*Iēsous* is *Yehoshua*); say so where it matters.
 
-✎ **Genre cautions for this book.** Strong suggestions to start from: keep
-the ones that fit, delete the rest, and add more as units surface them.
+✎ **Genre cautions for this book.** Keep the ones that fit and add more as
+units surface them.
 
-- **Gospels:** a difference from a parallel in another Gospel is evidence
-  about this book's emphasis, not the whole reading; compare where it
-  illuminates, not verse by verse.
-- **Old Testament quotations** often follow the Septuagint and can differ
-  from the Hebrew; say which the wording follows when it matters to the
-  reading.
-- **Letters:** follow the argument. The connecting words (for, therefore,
-  but) carry the structure, and a unit should end where a step of the
-  argument does.
-- **Apocalyptic:** the images mostly come from the Prophets; trace them there
-  before reading them as a code for later events.
+- **Gospels:** a difference from a parallel is evidence about this book's
+  emphasis, not the whole reading. Compare where it illuminates, not verse by
+  verse.
+- **Old Testament quotations** often follow the Septuagint; say which the
+  wording follows when it matters.
+- **Letters:** follow the argument. The connecting words carry the structure,
+  and a unit should end where a step of the argument does.
+- **Apocalyptic:** trace the images in the Prophets before reading them as a
+  code for later events.
 <!-- /lang -->
 
----
-
-## 7. Before saving — the checklist
+## 7. Before saving
 
 1. One `<article>`, nothing above or below it.
-2. Meta parses as JSON; required keys and the four required `threads` sub-keys
-   (`promote` optional); no unknown top-level keys.
-3. Every `roots[]` entry: `root` + bare `translit` + plain `gloss`, optional
-   `example`/`echo`; nothing else.
-4. Every notable translation choice has a local span and `roots[]` entry, and
-   so does every word with a canon history, with an `echo`.
+2. Meta parses as JSON: required keys, the four `threads` sub-keys, no unknown
+   top-level keys.
+3. Every `roots[]` entry has `root`, bare `translit`, plain `gloss`, and
+   nothing beyond `example` and `echo`.
+4. Every notable translation choice and every word with a canon history has a
+   local span and a `roots[]` entry (the latter with an `echo`).
 5. Every `opens`/`payoffs` `id` is in `threads-digest.md` and has a `note`.
-6. Every `retro` targets an earlier unit, has a `why`, and resolves.
+6. Every `retro` targets an earlier unit and has a `why`.
 7. Every `data-root` is in `threads-digest.md` or `roots[]`.
 8. Legend present, stub or filled.
 9. Every pericope heading has its `· C:V` range.
 10. `.gloss` and `aside.echo` blocks are closed following siblings, never
     nested; every `aside.echo` has a `data-anchor` matching its verse.
 11. Every endnote `href` resolves to an `id` in the file.
-12. **Zero native Hebrew or Greek anywhere — attribute values included.**
-13. No inline `style`, no `--c-*` vars, no class the stylesheet doesn't know.
+12. **Zero native Hebrew or Greek anywhere, attribute values included.**
+13. No inline `style`, no `--c-*` vars, no unknown class.
 14. Wording matches `translation-choices.md`, or the deviation is flagged.
 15. No named commentator or project-internal reference in prose.
-16. Glosses are short, longer material is in footnotes, and the unit's
-    intertextual links are surfaced.
+16. Glosses are short, and the unit's intertextual links are surfaced.
+17. `questions[]` holds only open calls for Lane; claims about other
+    passages' text are in `checks[]`.
+18. Every `threads.promote[]` entry has an `entry` with `id` and `ids`.
 
-17. Every `questions[]` entry is a call only Lane can make, with a genuinely
-    open alternative, and isn't a wording `translation-choices.md` or an earlier
-    unit already rules. Claims about other passages' text are in `checks[]`.
-18. Every `threads.promote[]` entry is complete (`entry`, `reach`, `retrofit`).
-
-Save as `{{SLUG}}_NN_translation.html`, zero-padded, and hand it over as a download.
-
----
+Save as `{{SLUG}}_NN_translation.html`, zero-padded, and hand it over as a
+download.
 
 ## 8. Worked example ✎
 
@@ -449,14 +332,11 @@ exists. Until then the shape is:
 </article>
 ```
 
----
-
 ## 9. The Literary Unit Map ✎
 
-Comes from the project side once resources are compiled, as
-`{{SLUG}}-literary-unit-map.md`. `python -m biblecore units-from-map` loads it
-from its **Overview** table, so keep that table in this shape (Numbers' map is
-the model):
+Comes from the project side as `{{SLUG}}-literary-unit-map.md`.
+`python -m biblecore units-from-map` loads its **Overview** table, so keep the
+table in this shape:
 
     | # | Passage | Working title |
     |---|---|---|
@@ -477,5 +357,5 @@ Bold rows open an outer grouping, italic rows an inner one; both are
 optional. Passages are in English numbering, which the SBLGNT shares.
 Renumbering after units ship means editing
 <!-- /lang -->
-`threads.json` opens/payoffs, every `retro` entry, and every fragment's meta
+`threads.json` opens/payoffs, every `retro` entry and every fragment's meta
 block, so confirm it before unit 1.

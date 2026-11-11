@@ -15,24 +15,14 @@ learner, trust, turn, good-news, release, …). This file records only what
 <!-- /lang -->
 deviation from a canon default and the reason.
 
-Seeded at unit 1 on purpose: Matthew's glossary arrived at unit 10 and
-immediately cost a retroactive audit.
-
 ## How to use this file
 
-<!-- lang: hebrew -->
-Before rendering a Hebrew word in a new unit, check here and in the canon
-<!-- /lang -->
-<!-- lang: greek -->
-Before rendering a Greek word in a new unit, check here and in the canon
-<!-- /lang -->
-conventions for a prior decision and match it. If a different rendering fits
-better in one verse, use it and flag the deviation; Lane decides whether it's
-a one-off or a correction. A rendering decided in a chat goes in the handoff's
-"Decisions" (chats can't write to the repo); Claude Code updates the row and the
-Log after the session, and a Claude Code session that changes one updates both
-in the same turn. If a unit and this file disagree, the unit
-is more likely right; flag the mismatch.
+Before rendering a word in a new unit, check here and in the canon conventions
+and match a prior decision. If a different rendering fits better in one verse,
+use it and flag the deviation; Lane decides whether it's a one-off or a
+correction. A chat records a decision in the handoff's "Decisions"; Claude Code
+updates the row and the Log. If a unit and this file disagree, flag it: the
+unit is more likely right.
 
 ## Glossary
 

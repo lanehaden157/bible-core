@@ -2,28 +2,23 @@
 
 How files move between this repo and the {{BOOK}} Claude.ai research project.
 
-**Repo → project: synced, never uploaded by hand.** Core supplies the
-default list (`biblecore/sync.py` `DEFAULT_SYNC`); `book.json` → `sync` holds
-only this book's additions (`extra`) and exclusions (`skip`).
-`python -m biblecore sync` mirrors the resolved files flat into
-`project-side/synced/`, removes any mirror file that has left the list, then
-commits and pushes it, and the project's GitHub connector reads that folder. It pushes on its own, so run it when Lane has OK'd
-the push (normally together with the commit that caused the change). Each sync also writes
-`synced/synced-index.md`, the complete list with each file's role. That's
-the only list, so don't restate it elsewhere. `python -m biblecore sync-check`
-reports which files changed since they were last synced (the build runs it too).
+**Repo → project: synced, never uploaded by hand.** `python -m biblecore sync`
+mirrors the sync list flat into `project-side/synced/`, drops files that left
+the list, writes `synced/synced-index.md` (the one complete list; don't restate
+it elsewhere), then commits and pushes. It pushes on its own, so run it only
+once Lane has OK'd the push. `python -m biblecore sync-check` reports what
+changed since the last sync.
 
-To sync another file, add it to `book.json` → `sync.extra` (a path or a glob
-pattern); to stop syncing a default, add it to `sync.skip`. A file every book
-should sync belongs in core's `DEFAULT_SYNC`, with a role in `ROLES`.
+The default list is core's (`biblecore/sync.py` `DEFAULT_SYNC`). To sync
+another file, add a path or glob to `book.json` → `sync.extra`; to drop a
+default, add it to `sync.skip`.
 
-A project chat doesn't get these as files: they aren't on disk or in listings,
-and project search returns excerpts. The block "Where things are" in
-`CHAT_SIDE_INSTRUCTIONS.md` tells it to download them whole from raw GitHub.
+A project chat downloads these whole from raw GitHub ("Where things are" in
+`CHAT_SIDE_INSTRUCTIONS.md`).
 
 **Not synced:**
 
 | file | direction | why |
 |---|---|---|
-| `CHAT_SIDE_INSTRUCTIONS.md` | pasted by hand into the instruction field | the connector can't write the field. Claude says when it changed; Lane pastes it. Nothing tracks the paste |
+| `CHAT_SIDE_INSTRUCTIONS.md` | pasted by hand into the instruction field | the connector can't write the field. Tell Lane when it changed; nothing tracks the paste |
 | `source-artifacts/{{SLUG}}_NN_translation.html` | project → repo | each unit's artifact, saved into the repo before `port` |
