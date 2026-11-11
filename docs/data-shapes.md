@@ -95,8 +95,33 @@ unit's chapter.
                  "label": "…", "source": "meta"}]}
 ```
 
-`source` is `echo` when a row was harvested from the fragments (re-harvested
-every build), or `meta` when it came from a ported meta block.
+`source` is `echo` (or `story`, `mirror`) when a row was harvested from the
+fragments (re-harvested every build), or `meta` when it came from a ported
+meta block. `kind` `mirror` rows run from a unit's anchor verse to the twin
+passage in the mirrored book.
+
+## mirror files · schema 1 (hand-edited policy, named in `book.json` `mirrors`)
+
+```json
+{"version": 1,
+ "centre": {"span": "Exod 19:1 – Num 10:10", "label": "…", "note": "…"},
+ "sources": [{"id": "imes2021", "cite": "…", "what": "…", "boundary_note": "…"}],
+ "pairs": [{"id": "H", "tier": "chiasm", "pos": 5,
+            "here": "Num 11:10–17", "other": "Exod 18:13–18",
+            "title": "The burden", "strength": 3, "poetry": "other",
+            "shared": [{"label": "heavy", "ids": ["3515"],
+                        "where": {"here": "Num 11:14", "other": "Exod 18:18"}}],
+            "beats": [{"title": "…", "here": "…", "other": "…", "shared": []}],
+            "status": "seed", "source": "imes2021", "note": "…"}]}
+```
+
+`here` is the declaring book's side, `other` the mirrored book's (English
+numbering for both). `tier` is `chiasm` (has `pos`, 1 = outermost) or `echo`
+(no position). `strength` is Lane's read: 3 shared words, 2 the same story
+beat, 1 thematic; a 3 needs a `shared` entry whose lemma ids occur in both
+refs. `status` is `seed` (from the research) or `kept` (proposed in a unit and
+kept by Lane). `poetry`, `beats`, `centre` and `sources` are optional.
+Checked by `biblecore mirror` (and `biblecore test`, `build`).
 
 ## palette.json · schema 1 (hand-edited)
 

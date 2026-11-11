@@ -29,6 +29,22 @@ from biblecore import versify
 
 NS = {"o": "http://www.bibletechnologies.net/2003/OSIS/namespace"}
 
+# OSHB book ids (morphhb file names) and the names a study prints for them.
+BOOK_NAMES = {
+    "Gen": "Genesis", "Exod": "Exodus", "Lev": "Leviticus", "Num": "Numbers",
+    "Deut": "Deuteronomy", "Josh": "Joshua", "Judg": "Judges", "Ruth": "Ruth",
+    "1Sam": "1 Samuel", "2Sam": "2 Samuel", "1Kgs": "1 Kings", "2Kgs": "2 Kings",
+    "1Chr": "1 Chronicles", "2Chr": "2 Chronicles", "Ezra": "Ezra",
+    "Neh": "Nehemiah", "Esth": "Esther", "Job": "Job", "Ps": "Psalms",
+    "Prov": "Proverbs", "Eccl": "Ecclesiastes", "Song": "Song of Songs",
+    "Isa": "Isaiah", "Jer": "Jeremiah", "Lam": "Lamentations", "Ezek": "Ezekiel",
+    "Dan": "Daniel", "Hos": "Hosea", "Joel": "Joel", "Amos": "Amos",
+    "Obad": "Obadiah", "Jonah": "Jonah", "Mic": "Micah", "Nah": "Nahum",
+    "Hab": "Habakkuk", "Zeph": "Zephaniah", "Hag": "Haggai", "Zech": "Zechariah",
+    "Mal": "Malachi",
+}
+BOOK_IDS = tuple(BOOK_NAMES)
+
 
 def _local(tag):
     return tag.split("}")[-1] if "}" in tag else tag
@@ -96,23 +112,25 @@ def source_xml(b):
     return os.path.join(b.path("wlc"), f"{b.osis}.xml")
 
 
-def parse(b):
-    """(reading_lines, word_rows, boundaries) for book b."""
-    src = source_xml(b)
+def parse(b, osis=None):
+    """(reading_lines, word_rows, boundaries) for book b, or for another
+    book of the same corpus when `osis` names one (a mirrored book)."""
+    osis = osis or b.osis
+    src = source_xml(b) if osis == b.osis else os.path.join(b.path("wlc"), f"{osis}.xml")
     if not os.path.exists(src):
         raise FileNotFoundError(f"{src} not found -- is morphhb installed "
                                 f"(npm ci) and paths.wlc right in book.json?")
     root = ET.parse(src).getroot()
-    book_div = root.find(f".//o:div[@osisID='{b.osis}']", NS)
+    book_div = root.find(f".//o:div[@osisID='{osis}']", NS)
     if book_div is None:
-        raise ValueError(f"{src} has no <div osisID='{b.osis}'>")
+        raise ValueError(f"{src} has no <div osisID='{osis}'>")
     reading, words, boundaries = [], [], []
     for chapter_el in book_div.findall("o:chapter", NS):
         chap = chapter_el.get("osisID").split(".")[1]
         for verse_el in chapter_el.findall("o:verse", NS):
             v = verse_el.get("osisID").split(".")[2]
-            line = _walk_verse(verse_el, f"{b.osis}.{chap}.{v}", words, boundaries)
-            reading.append(f"{b.osis} {chap}:{v}\t{line}")
+            line = _walk_verse(verse_el, f"{osis}.{chap}.{v}", words, boundaries)
+            reading.append(f"{osis} {chap}:{v}\t{line}")
     return reading, words, boundaries
 
 
@@ -194,6 +212,7 @@ def has_niqqud(s):
 
 
 _words_cache = {}
+_other_cache = {}
 
 
 def load_words(b=None):
@@ -207,14 +226,19 @@ def load_words(b=None):
         return _words_cache[path]
     with open(path, encoding="utf-8") as f:
         raw = list(csv.DictReader(f, delimiter="\t"))
+    out = _display_rows(raw, versify.book_map(b))
+    _words_cache[path] = out
+    return out
+
+
+def _display_rows(raw, vmap):
+    """Word-table dicts with the Ketiv rows dropped and integer ch/v in the
+    displayed numbering; `ref` stays the corpus's own (see versify.py)."""
     is_ketiv = [False] * len(raw)
     for i in range(len(raw) - 1):
         a, c = raw[i], raw[i + 1]
         if a["ref"] == c["ref"] and not has_niqqud(a["surface"]) and has_niqqud(c["surface"]):
             is_ketiv[i] = True
-    # ch/v are in the book's displayed numbering; `ref` stays the corpus's
-    # own (see biblecore/versify.py)
-    vmap = versify.book_map(b)
     out = []
     for i, row in enumerate(raw):
         if is_ketiv[i]:
@@ -222,7 +246,27 @@ def load_words(b=None):
         _bk, ch, v = row["ref"].split(".")
         ch, v = versify.to_display(int(ch), int(v), vmap)
         out.append({**row, "ch": ch, "v": v, "lang": language_of(row["morph"])})
-    _words_cache[path] = out
+    return out
+
+
+def load_other_words(osis, b=None):
+    """A second book of the corpus read the way `load_words` reads this one:
+    dicts of word_id, ref, surface, lemma, morph, plus integer ch/v in the
+    book's displayed numbering (VerseMap.xml, so Exod 8 and 22 come out as
+    English readers number them) and lang. Parsed from the morphhb XML, so
+    nothing has to be generated for the mirrored book."""
+    if b is None:
+        from biblecore.book import book
+        b = book()
+    if osis not in BOOK_IDS:
+        raise ValueError(f"{osis!r} is not an OSHB book id")
+    key = (b.path("wlc"), osis, b.versification)
+    if key in _other_cache:
+        return _other_cache[key]
+    _reading, rows, _bounds = parse(b, osis)
+    raw = [dict(zip(("word_id", "ref", "surface", "lemma", "morph"), r)) for r in rows]
+    out = _display_rows(raw, versify.book_map(b, osis=osis))
+    _other_cache[key] = out
     return out
 
 
@@ -250,6 +294,7 @@ def load_reading(b=None):
 
 def _clear():
     _words_cache.clear()
+    _other_cache.clear()
 
 
 from biblecore.book import on_reset  # noqa: E402

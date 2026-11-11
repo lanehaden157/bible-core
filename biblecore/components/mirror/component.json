@@ -1,0 +1,10 @@
+{
+  "name": "mirror",
+  "summary": "a passage of the mirrored book beside a verse: the twin text, the words the two share, and what the mirror shows here",
+  "classes": ["mirror", "par-ref", "par-title", "strength", "row", "src", "txt", "sh", "take"],
+  "role": "verse-aside",
+  "selector": "aside.mirror",
+  "toggle": {"sym": "⇄", "label": "mirror", "each": true, "cls": "mirror-toggle",
+             "labels": {"default": "Mirror"}},
+  "since": "0.29.0"
+}

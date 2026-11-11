@@ -791,6 +791,26 @@ canon leads (`corpus/lxx.py`, `leads.py`), and the source-credit footer
 (`main.js` `SOURCES`). The mechanics are in those modules' docstrings and their
 tests. Matthew's colours come from its own 124-colour well at ΔE 7 (§2).
 
+**Mirrors (0.29.0).** A book may read another book backwards (Numbers 10-24
+against Exodus 5-18, Carmen Imes's reading). `book.json` `mirrors` names the
+other book (`with`, an OSHB id; Hebrew books only for now) and a policy file
+in `data/` (`file`) of pairs: each has a `here` span and an `other` span in
+English numbering, a `tier` (`chiasm` with a `pos`, or `echo`), Lane's
+`strength` (3 = shared words, 2 = same story beat, 1 = thematic), and the
+`shared` words with the verse each is found in on both sides. The core
+checks the file against both corpora (`biblecore/mirror.py`, run by `build`
+and `biblecore test`; the second book is read by `corpus/oshb.load_other_words`
+through the same `VerseMap.xml` conversion): every ref resolves, every shared
+lemma is in both passages, and a strength-3 pair has a passing shared entry. A
+claim that fails is an error and never a quiet downgrade. Nesting, overlap, an
+order that does not reverse and pairs wider than a unit are reported, not
+failed. The unit pack gets a mirror section; the `mirror` component is the
+box (the build writes its strength dots from the file); a unit's `mirror[]`
+meta key proposes pairs, which land in `out/mirror-delta.json` and reach the
+file only through `python -m biblecore mirror keep`, as `status: kept`.
+Nothing in core names a particular pair of books. The data file shape is in
+`docs/data-shapes.md`.
+
 ## 9. Parked
 
 Lane parked these (2026-09-24/25); none is planned: F8 maps, F9 timelines, F10

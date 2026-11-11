@@ -15,6 +15,9 @@ acceptance checks a book can run on itself:
   units        every built unit validates (validate step)
   contracts    every built unit carries a contract stamp no newer than core
   example      the style reference's worked example (section 8) validates, if it has one
+  mirror       a book that mirrors another: every ref resolves in its corpus, every shared
+               word is in both passages, a strength-3 pair has evidence (nesting and
+               order are reported, not failed)
   audit        tracked-thread coverage (reported, not a failure)
   docs         instruction files against their size budgets (reported, not a failure)
   logs         session_index.md / improvements_log.md whose newest core version
@@ -168,6 +171,11 @@ def check_example():
     return [f"example: {e}" for e in errs], []
 
 
+def check_mirror():
+    from biblecore import mirror
+    return mirror.check()
+
+
 def check_audit():
     from biblecore import audit
     rc_out = io.StringIO()
@@ -279,6 +287,7 @@ CHECKS = [
     ("units", check_units),
     ("contracts", check_contracts),
     ("example", check_example),
+    ("mirror", check_mirror),
     ("audit", check_audit),
     ("docs", check_docs),
     ("logs", check_logs),

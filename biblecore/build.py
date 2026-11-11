@@ -7,6 +7,8 @@ Hard steps (the build fails if one does):
                       components-reference.md for the enabled components
   retrofit            fragment edits from the retrofit specs (idempotent)
   refresh             regenerate each built fragment's meta block
+  mirror              a book that mirrors another: check the data file against both
+                      corpora, write each mirror box's strength dots (mirror.py)
   validate            every built fragment against the contract
   scan                -> data/occurrences.json
   verify-occurrences  independent recount + tagged-flag check
@@ -26,13 +28,15 @@ source-artifacts/. A new unit is `python -m biblecore port N`.
 A book that needs a different sequence writes its own build script that
 calls these steps (ARCHITECTURE.md §5: override, don't edit).
 """
-from biblecore import (assets, audit, canon, digest, emit, leads, manifest, refresh,
-                       retrofit, roots, scan, sync, validate_units, verify_occurrences)
+from biblecore import (assets, audit, canon, digest, emit, leads, manifest, mirror,
+                       refresh, retrofit, roots, scan, sync, validate_units,
+                       verify_occurrences)
 
 STEPS = [
     ("assets", assets.main),
     ("retrofit", retrofit.main),
     ("refresh", refresh.main),
+    ("mirror", mirror.main),
     ("validate", validate_units.main),
     ("scan", scan.main),
     ("verify-occurrences", verify_occurrences.main),

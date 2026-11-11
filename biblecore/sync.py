@@ -54,6 +54,7 @@ ROLES = [
     ("{book}-words.tsv", "the word table: word ids, lemma ids, morphology. Candidate ids come from here (generated)"),
     ("{slug}-versification.md", "verses whose English number differs from the corpus's (generated)"),
     ("{slug}-literary-unit-map.md", "the unit map: every unit's passage, title and grouping"),
+    ("mirror-*.json", "the mirror pairs: which passages of the mirrored book each stretch of this one answers, with the shared words and Lane's strength (policy; a unit proposes new pairs in mirror[])"),
     ("unit-pack-*.md", "one unit's lookup file for the research chat: map entry, rulings, threads with computed first occurrences, lemma table, leads, source gaps (generated; read this instead of recalling ids)"),
     ("canon-leads-unit-*.md", "one unit's word leads and noun sweep for the research pass (generated)"),
 ]
@@ -80,6 +81,7 @@ DEFAULT_SYNC = [
     ("<data>/roots.json", True),
     ("<words>", True),
     ("{slug}-literary-unit-map.md", False),
+    ("<data>/mirror-*.json", False),
     ("<canon_leads>/canon-leads-unit-*.md", False),
     ("<canon_leads>/unit-pack-*.md", False),
     ("<verse_map>", False),

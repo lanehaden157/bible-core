@@ -624,6 +624,15 @@ def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False,
 
     print_questions(meta, answers)
     print_checks(meta)
+    if meta.get("mirror"):
+        from biblecore import mirror
+        props, merrs = mirror.port_proposals(meta, n, write=not (dry or bool(src)))
+        if merrs:
+            print("MIRROR PROPOSALS INVALID:")
+            for e in merrs:
+                print("  -", e)
+            sys.exit(1)
+        mirror.print_proposals(props)
 
     fragment = to_fragment(raw, n)
 

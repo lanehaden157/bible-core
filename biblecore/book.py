@@ -30,7 +30,11 @@ ALLOWED_KEYS = {
     # (its template base; structural audit D3). Read by
     # `tools/core_diff.py <book> --template`, moved by its `--set-base`.
     "template",
+    # books this one mirrors: [{"with": "<OSIS id>", "file": "<name>.json"}];
+    # the file sits in data/ (policy, like threads.json). See mirror.py.
+    "mirrors",
 }
+MIRROR_ENTRY_KEYS = {"with", "file"}
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
 # the corpus numbering is converted through the corpus's own map) or
 # "source" (the corpus numbering as is).
@@ -168,6 +172,42 @@ def validate_config(cfg):
         errs.append("'template' must be a bible-core commit hash (7-40 hex digits)")
     if "palette" in cfg and not isinstance(cfg["palette"], (str, list)):
         errs.append("'palette' must be a path or a list of hex colours")
+    if "mirrors" in cfg:
+        errs += _validate_mirrors(cfg)
+    return errs
+
+
+def _validate_mirrors(cfg):
+    """`mirrors`: a list of {with, file}. `with` is the OSIS id of another
+    book in the corpus (not this one), `file` a bare .json name in data/.
+    Only Hebrew books can mirror for now: the second book is read through
+    the OSHB adapter."""
+    ms = cfg["mirrors"]
+    if not (isinstance(ms, list) and ms):
+        return ["'mirrors' must be a non-empty list of {with, file}"]
+    from biblecore.corpus import oshb
+    errs, seen = [], set()
+    if cfg.get("language") != "hebrew":
+        errs.append("'mirrors' needs language 'hebrew' (the mirrored book is read "
+                    "through OSHB; a Greek book's mirror comes later)")
+    for i, m in enumerate(ms):
+        where = f"mirrors[{i}]"
+        if not isinstance(m, dict):
+            errs.append(f"{where}: must be an object {{with, file}}")
+            continue
+        for k in sorted(set(m) - MIRROR_ENTRY_KEYS):
+            errs.append(f"{where}: unknown key '{k}' -- {{with, file}}")
+        w, f = m.get("with"), m.get("file")
+        if w not in oshb.BOOK_IDS:
+            errs.append(f"{where}: 'with' ({w!r}) must be an OSHB book id such as 'Exod'")
+        elif w == cfg.get("osis"):
+            errs.append(f"{where}: a book cannot mirror itself")
+        elif w in seen:
+            errs.append(f"{where}: '{w}' is listed twice")
+        seen.add(w)
+        if not (isinstance(f, str) and re.fullmatch(r"[A-Za-z0-9_.-]+\.json", f)):
+            errs.append(f"{where}: 'file' ({f!r}) must be a bare file name ending .json "
+                        f"(it lives in the data folder)")
     return errs
 
 
@@ -235,6 +275,11 @@ class Book:
     @property
     def meta_keys(self):
         return list(self.cfg.get("meta_keys", []))
+
+    @property
+    def mirrors(self):
+        """[{with, file}] the books this one mirrors (empty for most)."""
+        return [dict(m) for m in self.cfg.get("mirrors", [])]
 
     def check(self, name):
         v = (self.cfg.get("checks") or {}).get(name, CHECK_DEFAULTS[name])

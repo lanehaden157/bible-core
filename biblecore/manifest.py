@@ -37,6 +37,9 @@ def build():
     rows = units.get("units", [])
     files = {name: {"schema": v} for name, v in SCHEMAS.items()
              if os.path.exists(b.data(name.rstrip("/")))}
+    for m in b.mirrors:
+        if os.path.exists(b.data(m["file"])):
+            files[m["file"]] = {"schema": 1}
     # data files written by later steps (text/, words/, lemmas.json) add
     # themselves here as they arrive
     return {

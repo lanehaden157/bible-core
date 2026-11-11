@@ -1,0 +1,28 @@
+/* aside.mirror -- the mirrored book's twin passage beside a verse; app/spotlight.js
+   hides each one behind its own ⇄ chip (component.json "toggle", each: true).
+   Wine accent (clay in a division without one), clear of echo's Jordan,
+   synoptic's clay, story's olive and the spotlight's bronze. The strength dots
+   are written by the build from the book's mirror data file. */
+.unit .mirror {
+  display: block; text-indent: 0; margin: 6px 0 18px; padding: 12px 16px 14px;
+  background: color-mix(in srgb, var(--panel) 78%, var(--bg));
+  border: 1px solid var(--rule-soft); border-left: 3px solid var(--accent-wine, var(--accent-clay)); border-radius: 4px;
+  font-size: 15.5px; line-height: 1.55; page-break-inside: avoid; break-inside: avoid;
+}
+.unit .mirror > h4 {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; margin: 0 0 8px;
+  font-family: var(--display); font-weight: 600;
+}
+.unit .mirror .par-title { font-size: 16px; color: var(--ink); }
+.unit .mirror .par-ref { font-variant: small-caps; letter-spacing: .05em; font-size: 13px; font-weight: 400; color: var(--ink-soft); }
+.unit .mirror .strength { margin-left: auto; font-size: 13px; letter-spacing: .12em; font-weight: 400; color: var(--accent-wine, var(--accent-clay)); }
+.unit .mirror .row { display: flex; gap: 10px; margin: 0 0 6px; text-indent: 0; }
+.unit .mirror .row .src { flex: 0 0 auto; font-variant: small-caps; letter-spacing: .05em; font-size: 13px; color: var(--ink-soft); padding-top: 2px; }
+.unit .mirror .row .txt { flex: 1 1 auto; }
+.unit .mirror .sh { border-bottom: 2px solid var(--accent-wine, var(--accent-clay)); }
+.unit .mirror .take { margin: 8px 0 0; text-indent: 0; }
+.unit .mirror > :last-child { margin-bottom: 0; }
+.unit .mirror-toggle { color: var(--accent-wine, var(--accent-clay)); border-color: var(--accent-wine, var(--accent-clay)); }
+.unit .mirror-toggle:hover { color: var(--panel); background: color-mix(in srgb, var(--accent-wine, var(--accent-clay)) 55%, transparent); }
+.unit .mirror-toggle.is-open { color: var(--panel); background: var(--accent-wine, var(--accent-clay)); border-color: var(--accent-wine, var(--accent-clay)); }
+@media (max-width: 720px) { .unit .mirror { padding: 10px 12px 12px; } .unit .mirror .row { flex-direction: column; gap: 0; } }

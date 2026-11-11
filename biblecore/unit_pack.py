@@ -14,6 +14,10 @@ Rulings are tied to the unit by transliteration (a consonant skeleton), since
 translation-choices.md is prose; rows that could not be tied are listed by
 headword so nothing is lost silently. Everything else is computed from the
 word table by lemma id.
+
+A book that declares `mirrors` in book.json also gets a "<Book> mirror"
+section (biblecore/mirror.py): the pairs whose side of this book overlaps the
+unit, the twin's word-by-word text, and the shared words as leads.
 """
 import argparse
 import collections
@@ -347,6 +351,10 @@ def build_pack(b, n, min_count=MIN_COUNT):
         L.append(body.strip())
     else:
         L.append(f"_No canon-leads-unit-{n:02d}.md yet: run `python -m biblecore leads {n}`._")
+
+    if b.mirrors:
+        from biblecore import mirror
+        L += [""] + mirror.pack_section(b, n, lo, hi, row)
 
     L += ["", "## Known source gaps", "", gaps or "_resources.md records none._", ""]
 

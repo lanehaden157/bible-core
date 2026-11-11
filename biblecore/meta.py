@@ -59,6 +59,15 @@ Shape (style reference §3):
              lemma(s); "!lemma" says that lemma should be absent. Printed by the
              port in their own section (`python -m biblecore lxx --checks N`
              runs them against the LXX), consumed and dropped like questions.
+  mirror     [ {ref, to, tier, title, strength, shared?, note} ]
+             Proposed pairs for a book that declares `mirrors` in book.json
+             (biblecore/mirror.py): `ref` is a bare C:V or C:V-V in this
+             book, `to` the twin ("Exod 18:13-18"), tier chiasm|echo,
+             strength 1-3, shared [{label, ids, where:{here, other}}]. The
+             port checks the refs and shared words, writes
+             out/mirror-delta.json and raises each as a question; Lane's
+             decision writes the data file (`mirror keep`). Consumed and
+             dropped like questions.
 
 Unknown top-level keys are a hard validate() failure (learned: Matthew's
 `descriptor`/`discourse` were authored for eleven units and silently
@@ -137,6 +146,8 @@ CORE_TOP_LEVEL_KEYS = {
     "checks",
     # canon rows (G9), consumed at port like questions -- see canon.py
     "intertext", "typescenes",
+    # proposed mirror pairs, consumed at port (0.29.0) -- see mirror.py
+    "mirror",
     # core version the unit was written against (D7) -- see contract.py
     "contract",
 }
@@ -419,8 +430,9 @@ def validate(meta, threads_json=None):
                     isinstance(x, str) for x in q["options"]):
                 errs.append(f"{where}: 'options' must be a list of strings")
 
-    from biblecore import canon, contract
+    from biblecore import canon, contract, mirror
     errs += canon.validate_meta(meta)
+    errs += mirror.validate_meta(meta)
     errs += contract.check_stamp(meta.get("contract"))
 
     if threads_json is not None:

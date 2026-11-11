@@ -20,7 +20,9 @@ silently.
   map entry, the rulings its words trigger, its tracked threads with computed
   first occurrences, a lemma table (ids, transliteration, gloss, reach), the
   leads and the known source gaps. Chats copy ids and rulings from it; they
-  don't recall them.
+  don't recall them. A book that mirrors another also gets a mirror section
+  (the pair, the twin's text, shared words as leads); see the components
+  reference for the box and `mirror[]` for proposing a new pair.
 - **Notes file:** pass 2's output, appended row by row as each is judged. It is
   the state that survives a compaction, and the only thing that crosses from the
   research chat to the verse chat.

@@ -6,14 +6,16 @@ data/canon.json holds two lists, each row tagged with where it came from:
 
   intertext   {from, to, kind, unit, note?, source}
               kind: quotation | allusion | echo | type-scene | story |
-                    character | reuse
+                    character | reuse | mirror
   typescenes  {id, ref, unit, note?, label?, source}
 
 `source` is "echo" for edges harvested from the built fragments' own
 `aside.echo` lines and roots[].echo fields (re-derived on every build, so
 editing an echo updates its edges), "story" for rows harvested the same way
 from `aside.story` boxes (one intertext row per reference in the box's
-par-ref, kind = its data-kind; a type-scene row for its data-scene), or
+par-ref, kind = its data-kind; a type-scene row for its data-scene),
+"mirror" for rows from `aside.mirror` boxes (kind "mirror": the anchor verse
+to each reference in the box's par-ref, the twin in the mirrored book), or
 "meta" for rows the chat side put in
 a unit's meta block (`intertext[]`, `typescenes[]`), merged by the porter
 and kept until that unit is re-ported. bible-core's tools/canon_collect.py
@@ -29,8 +31,8 @@ import re
 
 from biblecore.book import book
 
-KINDS = ("quotation", "allusion", "echo", "type-scene", "story", "character", "reuse")
-HARVESTED = ("echo", "story")   # sources re-derived from the fragments on every build
+KINDS = ("quotation", "allusion", "echo", "type-scene", "story", "character", "reuse", "mirror")
+HARVESTED = ("echo", "story", "mirror")   # sources re-derived from the fragments on every build
 
 # Book names as fragments write them (English abbreviations, both
 # testaments). A ref needs one of these in front of it, so prose like
@@ -52,6 +54,7 @@ _MORE = re.compile(r"\s*([;,])\s*(?:(\d+):)?(\d+)(?:" + _DASH + r"(\d+(?::\d+)?)
 
 ECHO_RE = re.compile(r'<aside\s+class="echo"\s+data-anchor="(\d+):(\d+)"[^>]*>(.*?)</aside>', re.S)
 STORY_RE = re.compile(r'<aside\s+class="story"([^>]*)>(.*?)</aside>', re.S)
+MIRROR_RE = re.compile(r'<aside\s+class="mirror"([^>]*)>(.*?)</aside>', re.S)
 CV_RE = re.compile(r"^\d+:\d+$")
 ID_RE = re.compile(r"^[a-z0-9-]+$")
 
@@ -159,6 +162,23 @@ def harvest_stories(html, n, abbrev=None):
     return it, ts
 
 
+def harvest_mirrors(html, n, abbrev=None):
+    """Intertext rows from one built fragment's aside.mirror boxes (source
+    "mirror", kind "mirror"): one per reference in the box's par-ref."""
+    abbrev = abbrev or book().abbrev
+    rows = []
+    for attrs, body in MIRROR_RE.findall(html):
+        frm = _attr(attrs, "data-anchor")
+        if not frm or not CV_RE.match(frm):
+            continue    # the component check reports it; don't harvest junk
+        pair = _attr(attrs, "data-pair") or ""
+        title = _span_text(body, "par-title")
+        for to in parse_refs(_span_text(body, "par-ref")):
+            rows.append({"from": f"{abbrev} {frm}", "to": to, "kind": "mirror", "unit": n,
+                         "note": (f"pair {pair}: " if pair else "") + title, "source": "mirror"})
+    return rows
+
+
 # ------------------------------------------------------------ meta entries
 
 def validate_meta(meta):
@@ -256,7 +276,7 @@ def main(argv=None):
     b = book()
     built = {u["n"] for u in um._load("units.json")["units"] if u.get("built")}
     d = load()
-    echo_rows, story_rows, story_ts = [], [], []
+    echo_rows, story_rows, story_ts, mirror_rows = [], [], [], []
     for n in sorted(built):
         path = b.unit_path(n)
         if os.path.exists(path):
@@ -266,13 +286,15 @@ def main(argv=None):
             it, ts = harvest_stories(html, n)
             story_rows += it
             story_ts += ts
+            mirror_rows += harvest_mirrors(html, n)
     d["intertext"] = ([r for r in d["intertext"] if r["source"] not in HARVESTED]
-                      + echo_rows + story_rows)
+                      + echo_rows + story_rows + mirror_rows)
     d["typescenes"] = [r for r in d["typescenes"] if r["source"] not in HARVESTED] + story_ts
     save(d)
     meta_n = sum(1 for r in d["intertext"] if r["source"] == "meta")
     print(f"canon: {len(echo_rows)} echo edge(s), {len(story_rows)} story edge(s), "
-          f"{meta_n} meta edge(s), "
+          + (f"{len(mirror_rows)} mirror edge(s), " if mirror_rows else "")
+          + f"{meta_n} meta edge(s), "
           f"{len(d['typescenes'])} type-scene instance(s) -> "
           f"{os.path.relpath(_path(), b.root)}")
     return 0
