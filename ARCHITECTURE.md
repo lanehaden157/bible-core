@@ -59,6 +59,7 @@
 - 0.25.0: instruction-field paste tracking removed: no --mark-pasted, no PASTE BY HAND warning, no field line in book; Lane pastes when told
 - 0.26.0: Research leans open: thin-sourced links are 'possible' and flagged tentative to Lane, not dropped (workflow, story snippet, chat-side lens template)
 - 0.27.0: Research accuracy: unit-pack, checks, promote.complete, opener audit warning, handoff-check extended, three-chat workflow and ledger template
+- 0.28.0: Three chats per unit always (table of passes, which-chat-am-I rule), Asking Lane timing (judgment calls on the box list, blockers only in chat); light-form promotions completed before the port overlay; Joshua test fixtures caught up
 
 ## What this is
 
