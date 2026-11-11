@@ -617,3 +617,9 @@ def test_half_verse_letter_and_nested_pairs():
     data["pairs"][2]["strength_why"], data["pairs"][2]["unverified"] = "why", True
     errs, _n = mirror.validate_data(_book, "Exod", data, FILE)
     assert errs == [], errs
+
+
+def test_mirror_is_a_cli_command():
+    from biblecore import __main__ as cli
+    assert cli.COMMANDS["mirror"] == ("biblecore.mirror", "main") and "mirror" in cli.ARGPARSED
+    assert "mirror" in cli.__doc__

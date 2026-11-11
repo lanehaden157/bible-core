@@ -37,6 +37,10 @@ Commands:
   unit-pack N [--out FILE]
                         one unit's lookup file for the research chat (map entry, rulings,
                         threads, lemma table, leads, source gaps)
+  mirror [keep|decline ID [--pos N] [--strength N]]
+                        a book that mirrors another: check the pairs file against both
+                        corpora and write the boxes' strength dots; keep or decline a
+                        proposal from out/mirror-delta.json
   handoff-check FILE    warn if a handoff hides provisional renderings outside "Calls for Lane"
   sync-check [--mark-synced [FILE ...]]
                         which chat-side files need syncing
@@ -75,13 +79,14 @@ COMMANDS = {
     "fetch": ("biblecore.fetch", "main"),
     "checks": ("biblecore.checks", "main"),
     "unit-pack": ("biblecore.unit_pack", "main"),
+    "mirror": ("biblecore.mirror", "main"),
     "handoff-check": ("biblecore.handoff_check", "main"),
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),
 }
 # commands whose main() parses its arguments with argparse (its own --help);
 # every other one gets its module docstring for -h/--help and doesn't run
-ARGPARSED = {"checks", "unit-pack", "port", "apply-delta", "data-w", "leads", "lxx", "migrate", "units-from-map", "fetch"}
+ARGPARSED = {"checks", "unit-pack", "mirror", "port", "apply-delta", "data-w", "leads", "lxx", "migrate", "units-from-map", "fetch"}
 HELP = ("-h", "--help")
 
 
