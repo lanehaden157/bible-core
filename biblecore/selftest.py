@@ -41,12 +41,14 @@ from biblecore.book import book
 FENCE_RE = re.compile(r"```html\n(.*?)```", re.S)
 
 # Instruction files a chat or session reads whole, in KB. Each addition looks
-# reasonable alone, so nothing else notices them adding up. A book tightens or
-# loosens one with checks.doc_budget_kb.
-DOC_BUDGET_KB = {"field": 4, "claude": 2.5, "style_reference": 6,
+# reasonable alone, so nothing else notices them adding up. Set just above the
+# files' real sizes: to add a rule, cut one. A book tightens or loosens one
+# with checks.doc_budget_kb (a warning there). For the files core owns the
+# budget is a hard test (tests/test_docs.py); raising one is Lane's call.
+DOC_BUDGET_KB = {"field": 4, "claude": 2, "style_reference": 6,
                  "translation_choices": 16, "resources": 9,
-                 "card_research": 4.5, "card_verse": 5, "card_build": 2.5,
-                 "contract": 10, "book_guide": 3.5}
+                 "card_research": 4.5, "card_verse": 5, "card_build": 2,
+                 "contract": 10, "book_guide": 4.5}
 
 
 def _quiet(fn, *a):

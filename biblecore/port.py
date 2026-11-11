@@ -652,6 +652,8 @@ def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False,
           + (f"; {len(w_report)} need(s) a human:" if w_report else ""))
     for line in w_report:
         print("  needs eyes:", line)
+    if w_report:
+        print("\n" + adw.RECIPE.format(words=os.path.basename(b.path("words"))))
 
     no_write = dry or bool(src)
     with open(b.data("units.json"), encoding="utf-8", newline="") as fh:

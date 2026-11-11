@@ -19,9 +19,25 @@ read Matthew's corpus and `archive/pipeline/` read-only.
   `canon/conventions.md` → `canon-conventions.md`. All vendored + synced.
 - `biblecore/BOOK_CLAUDE.md`: shared book guide; a book's `CLAUDE.md` imports
   it and adds its differences.
-- Rule files say how it is: no dates, no history, terse wording. Exact
-  strings stay exact. Sizes are budgeted in `selftest.DOC_BUDGET_KB`.
 - Component `snippet.md` files are build-enforced: tighten wording only.
+
+Keeping them lean (`tests/test_docs.py` fails when a core-owned file passes
+its budget in `selftest.DOC_BUDGET_KB`; raising a budget is Lane's call):
+
+- One home per rule: edit it where it lives, no second copy, no pointer
+  paragraph. Each chat reads only its card, so a rule goes on the card of the
+  chat that acts on it; all three chats → the field template.
+- Over budget → cut or move something to add something.
+- A rule code can check → a check (`meta.py`, `handoff_check.py`,
+  `selftest.py`), not prose. A recipe a command can print → the command.
+- Rule files say how it is: no dates, no "learned", no version history. That
+  goes in `history/` or the commit message. A gotcha that still bites → a
+  rule or a check.
+- Book-specific → the book's file, not core. Core is a starting point.
+- Terse wording; exact strings (keys, markup, file names, commands) stay
+  exact. Output to Lane is normal prose.
+- New doc file → only when a different reader needs it. Otherwise extend an
+  existing one.
 
 ## Concurrent sessions
 

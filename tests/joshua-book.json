@@ -17,7 +17,10 @@
     "story"
   ],
   "checks": {
-    "opens_note_required": true
+    "opens_note_required": true,
+    "doc_budget_kb": {
+      "style_reference": 7
+    }
   },
   "sync": {
     "extra": [

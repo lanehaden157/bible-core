@@ -65,6 +65,23 @@ AskUserQuestion popups, recommended first + marked, four per call.
 Other sessions may be editing `../bible-core` or this repo. `git status`
 first; dirty → worktree; stage explicit paths. More: `../bible-core/CLAUDE.md`.
 
+## Keeping instruction files lean
+
+`python -m biblecore test` reports sizes against budgets (`docs`). Strong
+suggestions:
+
+- One home per rule. Changing a rule → edit it where it lives; don't add a
+  second copy or a pointer paragraph.
+- Book files hold only this book's differences from the shared ones. Same
+  rule wanted in every book → propose it for core, don't copy it here.
+- Over budget → cut or move something to add something. Raising a budget
+  (`book.json` `checks.doc_budget_kb`) is Lane's call.
+- A rule code can check → a check, not prose.
+- Rule files say how it is: no dates, no "learned", no who-decided. That goes
+  in `history/improvements_log.md`.
+- Terse wording; exact strings (keys, markup, file names, commands) stay
+  exact.
+
 ## Session files
 
 `session_index.md`: read first. Standing state + last three sessions, one line
