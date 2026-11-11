@@ -50,7 +50,7 @@ def test_numbers_resolved_sync_list():
         return []
     from biblecore import sync
     got = sync.resolve()
-    want = ["numbers_study_style_reference.md", "resources.md", "core-workflow.md",
+    want = ["numbers_study_style_reference.md", "resources.md",
             "data/roots.json", "Numbers-words.tsv", "numbers-literary-unit-map.md",
             "canon-leads/canon-leads-unit-01.md", "numbers-versification.md"]
     return [f"{w} not synced" for w in want if w not in got]

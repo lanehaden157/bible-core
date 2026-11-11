@@ -31,7 +31,7 @@
 13. **Lane**: paste `CHAT_SIDE_INSTRUCTIONS.md` into the project's instruction field, when Claude says it's ready (and again whenever Claude says it changed). Nothing tracks the paste.
 
 ## E. Unit map
-14. **Lane (chat side)**: first project conversation. Compile the resources and produce the literary unit map, using the Overview table format in style ref §9.
+14. **Lane (chat side)**: first project conversation. Compile the resources and produce the literary unit map, using the Overview table format in the style reference's "Unit map".
 15. **Lane**: hand the map to Claude Code (drop it in the book folder as `<slug>-literary-unit-map.md`; core's default sync set already covers that name).
 16. **Claude**: `python -m biblecore units-from-map --kinds <outer>,<inner>`, which writes unit 1's canon leads. Then build, `biblecore test`, commit explicit paths, and sync after your OK.
 
@@ -40,7 +40,7 @@
 18. **Claude**:
     - `port N`
     - the porter's questions go to you as popups
-    - promotions, `colour`, `data-w`; what `data-w` can't decide and the port's coverage gaps go in `retrofit/retrofit-tags.json` (the recipe is in the book's CLAUDE.md)
+    - promotions, `colour`, `data-w`; what `data-w` can't decide and the port's coverage gaps go in `retrofit/retrofit-tags.json` (`data-w` prints the recipe)
     - `build`, `audit`, `test` (its `words` check re-reads the corpus and checks the interlinear data)
     - browser check
     - commit explicit paths (never hand-edit `index.html`, `app/` or the generated css; a shell change goes into bible-core)
@@ -56,7 +56,7 @@ Learned from porting copies of Matthew's units 9–14 into a scratch Greek book 
 - **Artifacts to the template contract.** Matthew's older units tripped the porter on: a missing `threads.retro` list, Greek-script `stems` on candidates, a unit with no colour key, an aside anchored to the wrong verse, and itinerary `<sup>`s holding labels. A template-shaped artifact avoids all of these, so if the chat side drifts toward Matthew's habits, point it back at the style reference.
 - **Phrase threads.** A title like *son of David* is a phrase thread: the candidate can propose `"seq": ["huios", "dauid"]` and the thread delta previews it like `ids`.
 - **Chapter seams.** Units that cross a chapter can label the first verse `11:1`. Retrofit entries and gap stubs then name verses `"C:V"`.
-- **English phrasal verbs.** Expect `data-w` to ask for eyes where one Greek word is two English spans ("hand … over"). The retrofit recipe in the book's CLAUDE.md covers it.
+- **English phrasal verbs.** Expect `data-w` to ask for eyes where one Greek word is two English spans ("hand … over"). The recipe `data-w` prints covers it.
 - **Itineraries** in a Gospel move by scene: a stop's `<sup>` may be a range (`12:1–8`).
 - **A real port, Matthew unit 14 (2026-10-01).** Only two artifact fixes were needed (itinerary `<sup>`s, and the book's own meta key `descriptor`, which a book declares in `book.json` `meta_keys`; otherwise the port stops at "unknown top-level key"). Seven promotions tagged into earlier units by `data-w` plus `retrofit` `add` took one session; an `add` with a `w` is idempotent on that word, so a verse can add the same English twice ("the five loaves ... the loaves").
 - **A worked example of the loop.** `../greek-proof/replay.py` runs port, promotions, delta, `data-w`, retrofit, build, audit and test end to end. It's useful as a reference for the commands in order.

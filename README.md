@@ -6,10 +6,11 @@ Joshua run the core's app shell and pipeline, and so does Matthew (its first
 
 - `ARCHITECTURE.md` — the shared shape, where books differ, how the core
   changes, and how to start a book (§8).
-- `canon/conventions.md`, `canon/decisions.md`, `canon/workflow.md` —
-  shared wording defaults, settled cross-book calls, and the chat-side
-  loop. Each book gets a copy (`canon-conventions.md`, `canon-decisions.md`,
-  `core-workflow.md`) that syncs to its project side.
+- `canon/card-*.md`, `canon/contract.md`, `canon/conventions.md` — one card per
+  chat (research, verse, build), the shared fragment contract, shared wording
+  defaults. Each book gets a copy (`card-*.md`, `fragment-contract.md`,
+  `canon-conventions.md`) that syncs to its project side.
+- `biblecore/BOOK_CLAUDE.md` — the shared book guide a book's `CLAUDE.md` imports.
 - `canon/*.json` — the canon registries: arcs, canon threads, intertext
   edges, type-scenes (ARCHITECTURE.md §2). `python tools/canon_collect.py`
   refreshes them from the books.

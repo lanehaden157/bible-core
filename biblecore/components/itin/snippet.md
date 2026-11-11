@@ -9,9 +9,9 @@
 </section>
 ```
 
-- It goes inside a `section.block`, and it stays in line with the text.
-- Its direct children are only `span.stop` and `span.arr` ("→"), alternating, starting and ending with a stop.
-- A stop may carry a `data-root` span (a place name you're tracking) and a `<sup>` with its verse (`C:V`), or a range (`C:V–V`) when the stop is a whole scene.
-- `data-verses` goes on the `div.itin` when the chips replace the verses (a formulaic station list). When the prose verses are also written out, leave it off and the chips are a summary. Tracked-thread spans inside a `data-verses` block need no `data-w` (summary tags, colour only).
+- Inside a `section.block`, in line with the text.
+- Direct children: only `span.stop` and `span.arr` ("→"), alternating, starting and ending with a stop.
+- A stop may carry a `data-root` span (a tracked place name) and a `<sup>` with its verse (`C:V`), or a range (`C:V–V`) when the stop is a whole scene.
+- `data-verses` on the `div.itin` when the chips replace the verses (formulaic station list). Prose verses also written out → leave it off; chips are a summary. Tracked spans inside a `data-verses` block need no `data-w`.
 
-**What counts as verified:** the stops and their order come from the verses. A route the text doesn't give (a scholar's reconstruction) belongs in a note, not in the chips.
+**Verified =** stops and order come from the verses. A route the text doesn't give (a reconstruction) → a note, not the chips.

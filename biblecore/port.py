@@ -749,7 +749,7 @@ def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False,
         print("  1. python -m biblecore build")
         print(f"  2. apply opens/payoffs from the delta if accepted "
               f"(`apply-delta {n}`), then build again")
-    print("  last. commit (CLAUDE.md lists which generated paths to include)")
+    print("  last. commit (biblecore/BOOK_CLAUDE.md lists which generated paths to include)")
 
 
 def _promote_sequence(n, promote):
@@ -766,7 +766,7 @@ def _promote_sequence(n, promote):
     if rc:
         sys.exit(f"build failed (rc {rc}); nothing committed.")
     print("\nported, promoted and built. Review in the browser, then commit "
-          "(CLAUDE.md lists which generated paths to include).")
+          "(biblecore/BOOK_CLAUDE.md lists which generated paths to include).")
 
 
 def main(argv=None):

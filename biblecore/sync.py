@@ -13,9 +13,7 @@ doesn't linger in the project; `sync-check` reports them first.
 
 Every sync also writes `synced-index.md` into the mirror: the complete list
 of synced files, each with its role (ROLES below), generated from book.json.
-It's the ONE place the synced files are listed. The READMEs, core-workflow.md
-and resources.md point at it rather than restating the list, since hand
-lists drifted every time a file was added.
+It's the ONE place the synced files are listed; nothing else restates it.
 
 The project's instruction field can't be synced; Lane pastes it by hand from
 CHAT_SIDE_INSTRUCTIONS.md (book.json paths.chat_side) when told it changed.
@@ -40,14 +38,14 @@ INDEX_NAME = "synced-index.md"
 # book.json. A synced file with no role here is listed as "book file";
 # tests/test_tools.py fails if any file in the template's sync list lacks one.
 ROLES = [
-    ("{slug}_study_style_reference.md", "the artifact contract: every rule for a unit's fragment. Authoritative for pass 4"),
+    ("card-research.md", "research chat's card: passes 1-2 and the notes file's shape (vendored from bible-core)"),
+    ("card-verse.md", "verse chat's card: pass 3 and the handoff's shape (vendored from bible-core)"),
+    ("card-build.md", "build chat's card: pass 4, the fragment (vendored from bible-core)"),
+    ("fragment-contract.md", "shared fragment rules; build chat only (vendored from bible-core)"),
+    ("{slug}_study_style_reference.md", "this book's differences from fragment-contract.md; wins over it. Build chat only"),
     ("resources.md", "the commentary inventory: what's on hand and what each is good for. Read before pass 1"),
-    ("core-workflow.md", "the shared loop: what's on hand, the four passes across three chats, the standing moves, scope (vendored from bible-core)"),
-    ("canon-handoff-template.md", "the shape of the verse chat's handoff to the build chat (vendored from bible-core)"),
-    ("canon-ledger-template.md", "the row shape of pass 2's notes file, with statuses (vendored from bible-core)"),
     ("translation-choices.md", "this book's wording decisions, starting from canon-conventions.md. Check before rendering a lexeme"),
-    ("canon-conventions.md", "shared wording defaults across books (vendored from bible-core)"),
-    ("canon-decisions.md", "calls already settled across books; check before proposing a canon thread or type-scene (vendored)"),
+    ("canon-conventions.md", "shared wording defaults and calls settled across books (vendored from bible-core)"),
     ("components-reference.md", "markup and rules for the optional components this book enables (generated)"),
     ("threads-digest.md", "the tracked threads so far, readable (generated from data/threads.json)"),
     ("roots.json", "tracked-thread lemma id sets and the declined-candidate ledger (policy)"),
@@ -55,27 +53,27 @@ ROLES = [
     ("{slug}-versification.md", "verses whose English number differs from the corpus's (generated)"),
     ("{slug}-literary-unit-map.md", "the unit map: every unit's passage, title and grouping"),
     ("mirror-*.json", "the mirror pairs: which passages of the mirrored book each stretch of this one answers, with the shared words and Lane's strength (policy; a unit proposes new pairs in mirror[])"),
-    ("unit-pack-*.md", "one unit's lookup file for the research chat: map entry, rulings, threads with computed first occurrences, lemma table, leads, source gaps (generated; read this instead of recalling ids)"),
+    ("unit-pack-*.md", "one unit's lookup file: map entry, rulings, threads with computed first occurrences, lemma table, leads, source gaps (generated; read this instead of recalling ids)"),
     ("canon-leads-unit-*.md", "one unit's word leads and noun sweep for the research pass (generated)"),
 ]
 
 
-# The files every book syncs, in index order (structural audit P4). Keys in
-# <angle brackets> resolve through Book.path(), so a book's `paths`
-# overrides carry over; {slug}/{book} are filled from book.json. Required
-# ones are reported MISSING when absent (the template or the build makes
-# them); the others sync once they exist. A book adds to this with
-# book.json sync.extra and drops from it with sync.skip; a file every new
-# book should sync belongs here, with a role in ROLES.
+# The files every book syncs, in index order. Keys in <angle brackets> resolve
+# through Book.path(), so a book's `paths` overrides carry over; {slug}/{book}
+# are filled from book.json. Required ones are reported MISSING when absent
+# (the template, the vendor or the build makes them); the others sync once
+# they exist. A book adds to this with book.json sync.extra and drops from it
+# with sync.skip; a file every new book should sync belongs here, with a role
+# in ROLES.
 DEFAULT_SYNC = [
+    ("card-research.md", True),
+    ("card-verse.md", True),
+    ("card-build.md", True),
+    ("fragment-contract.md", True),
     ("<style_reference>", True),
     ("resources.md", True),
     ("translation-choices.md", True),
     ("canon-conventions.md", True),
-    ("canon-decisions.md", True),
-    ("core-workflow.md", True),
-    ("canon-handoff-template.md", True),
-    ("canon-ledger-template.md", True),
     ("<components_ref>", True),
     ("<digest>", True),
     ("<data>/roots.json", True),
@@ -164,11 +162,9 @@ def index_text(b=None):
     return (f"# {b.name} — synced files\n\n"
             "Generated by `python -m biblecore sync` from `book.json`; don't edit. "
             "This is the complete list of what the repo mirrors to the project. "
-            "The instruction field's \"Where things are\" says how to get these files. "
-            "They update on their own, so fetch a file again rather than trusting an "
-            "earlier read in the conversation. The instruction field is the one thing "
-            "pasted by hand.\n\n"
-            "| file | what it is |\n|---|---|\n" + "\n".join(rows) + "\n")
+            "The instruction field's \"Where things are\" says how to get these files, "
+            "and \"Which chat\" which card is yours.\n\n"
+            "| file | KB | what it is |\n|---|---|---|\n" + "\n".join(rows) + "\n")
 
 
 def _git(*args, check=True, input=None):

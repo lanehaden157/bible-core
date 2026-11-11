@@ -1,4 +1,4 @@
-"""Lint for a verse chat's handoff file (canon/handoff-template.md).
+"""Lint for a verse chat's handoff file (its shape: canon/card-verse.md).
 
     python -m biblecore handoff-check <book>_NN_handoff.md [<book>_NN_notes.md]
 

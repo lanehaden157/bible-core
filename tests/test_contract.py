@@ -255,8 +255,9 @@ def test_doc_budget():
     checks = book().cfg.setdefault("checks", {})
     try:
         open(chat, "w", encoding="utf-8").write("x" * 6000)
+        budget = selftest.DOC_BUDGET_KB["field"]
         errs, notes = selftest.check_docs()
-        if errs or not any("CHAT_SIDE_INSTRUCTIONS.md 6.0 KB, budget 5" in n for n in notes):
+        if errs or not any(f"CHAT_SIDE_INSTRUCTIONS.md 6.0 KB, budget {budget}" in n for n in notes):
             fails.append(f"an oversized field wasn't noted: {errs} {notes}")
         # a warning, never a failure, and a book can set its own budget
         checks["doc_budget_kb"] = {"field": 7}

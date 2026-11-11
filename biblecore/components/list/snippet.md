@@ -9,11 +9,9 @@
 </section>
 ```
 
-- It goes inside a `section.block`. Its first row is a header row of `<th>`, and every row has the same number of cells.
-- The last column is the number, and it's right-aligned.
-- A total the text itself gives goes in `<tfoot>`.
-- It stays in line with the text; it isn't hoisted to the top with the structure blocks.
-- Cells may carry `data-root` spans, tracked threads included. Inside a `data-verses` table these are summary tags: they colour the cell but stand for words in several verses, so they need no `data-w`, and the audit counts the declared verses as covered.
-- `data-verses` names exactly the verses the table replaces, when it condenses a repeated formula. Say so in the pericope's gloss.
+- Inside a `section.block`, in line with the text (not hoisted with the structure blocks). First row = header row of `<th>`; every row has the same number of cells.
+- Last column = the number, right-aligned. A total the text gives → `<tfoot>`.
+- Cells may carry `data-root` spans, tracked threads too. Inside a `data-verses` table these are summary tags: colour only, no `data-w`; audit counts the declared verses as covered.
+- `data-verses` = exactly the verses the table replaces, when it condenses a repeated formula. Say so in the pericope's gloss.
 
-**What counts as verified:** every number and name comes from the verses. The table condenses the text; it doesn't add to it.
+**Verified =** every number and name comes from the verses. Table condenses the text, adds nothing.

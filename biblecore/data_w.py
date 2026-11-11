@@ -21,6 +21,20 @@ from biblecore import meta as um
 from biblecore.book import book
 from biblecore.roots import load_roots
 
+# Printed whenever a verse is left for a human: the recipe lives here, not in
+# a book's CLAUDE.md.
+RECIPE = """Retrofit recipe: the verses above go in retrofit/retrofit-tags.json.
+  1. Compare the root's words for the verse in {words} with the fragment's
+     data-root="ROOT" spans, in order.
+  2. Counts differ: one span over two source words (`retag`, or split by
+     hand); one source word as two spans (`unwrap` one, or give both the same
+     `w` with `retag`'s `occ`); an untagged occurrence (`add`).
+  3. One entry per occurrence: {{"unit", "verse", "from", "to", "text", "w"}}.
+     `occ` (1-based) picks between identical spans in a verse. `verse` is
+     "C:V" in a unit that crosses a chapter.
+  4. `python -m biblecore build` replays the file and audits. Every promoted
+     root should report clean."""
+
 
 def verse_blocks(html, default_ch):
     """[(start, end, ch, v)] for each class="v" block carrying a number.
@@ -105,7 +119,7 @@ def plan(html, passage, threads_json=None, roots_json=None):
                     f"{root_slug} {ch}:{v}: {len(spans)} span(s) but "
                     f"{len(want)} source hit(s) -- left alone. One span over "
                     f"two {book().language_name} words, one word as two spans, or a real "
-                    f"mismatch; see the retrofit recipe in CLAUDE.md (step 2).")
+                    f"mismatch; recipe below (step 2).")
                 continue
 
             for (a_s, a_e, existing), wid in zip(spans, want):
@@ -164,6 +178,8 @@ def main(argv=None):
 
     for line in report:
         print("  needs eyes:", line)
+    if report:
+        print("\n" + RECIPE.format(words=os.path.basename(book().path("words"))))
     print(f"\n{len(edits)} span(s) can be assigned unambiguously; "
           f"{len(report)} need(s) a human.")
     if not edits and not report:

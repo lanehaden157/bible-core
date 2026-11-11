@@ -6,12 +6,12 @@
 </div>
 ```
 
-- Poetry stays in **ordinary verse blocks** (`div.v`, one per verse), so tagging, `data-w`, the audit and verse links work exactly as in prose. The poem only sets the text in lines.
-- Every word of a poem verse sits inside a `span.l` line; only the verse number and whitespace sit outside. Put the endnote marker at the end of the last line.
-- Add `class="l in"` for an indented, continuing line (a second or third colon).
-- Glosses and asides go between verses inside the `div.poem`, as they do in prose.
-- `data-pair="A"` / `"B"` on lines is optional. Use it only when the parallelism is the point of a note.
-- A `div.poem` never sits inside a `section.block`, and poems don't nest.
-- A short poetic inset inside prose (a song, an oracle, a blessing) gets its own `div.poem` between the prose verses.
+- Poetry stays in **ordinary verse blocks** (`div.v`, one per verse): tagging, `data-w`, audit and verse links work as in prose. The poem only sets lines.
+- Every word of a poem verse sits inside a `span.l`; only verse number and whitespace outside. Endnote marker at the end of the last line.
+- `class="l in"` = indented, continuing line (second or third colon).
+- Glosses and asides go between verses inside the `div.poem`, as in prose.
+- `data-pair="A"` / `"B"` on lines: optional, only when the parallelism is the point of a note.
+- A `div.poem` never sits inside a `section.block`; poems don't nest.
+- Short poetic inset in prose (song, oracle, blessing) → its own `div.poem` between the prose verses.
 
-**What counts as verified:** line breaks follow the Masoretic accents (the major disjunctives, ʾatnaḥ first) or an established critical layout, not the English rhythm. Say which in a note when a break is debatable.
+**Verified =** line breaks follow the Masoretic accents (major disjunctives, ʾatnaḥ first) or an established critical layout, not English rhythm. Debatable break → say which in a note.

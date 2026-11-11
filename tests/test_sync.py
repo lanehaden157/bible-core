@@ -50,7 +50,7 @@ def test_defaults_required_and_optional():
         fails = []
         # required defaults are listed even when absent (sync-check says MISSING)
         for rel in ("leviticus_study_style_reference.md", "resources.md",
-                    "data/roots.json", "Leviticus-words.tsv", "core-workflow.md"):
+                    "data/roots.json", "Leviticus-words.tsv", "card-research.md"):
             if rel not in got:
                 fails.append(f"required default {rel} not listed")
         # optional defaults only once they exist
@@ -120,8 +120,8 @@ def test_every_default_has_a_role_and_exists_in_a_fresh_book():
             if required and rel not in generated and not os.path.exists(os.path.join(d, rel)):
                 fails.append(f"{rel}: missing from a fresh book")
         text = sync.index_text(b)
-        if "resources.md" not in text or "core-workflow.md" not in text:
-            fails.append("index misses resources.md or core-workflow.md")
+        if "resources.md" not in text or "card-build.md" not in text:
+            fails.append("index misses resources.md or card-build.md")
         return fails
     finally:
         shutil.rmtree(d, ignore_errors=True)

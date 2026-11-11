@@ -1,12 +1,11 @@
 ## mirror — the mirrored book's twin beside a verse
 
-For a book that declares a mirror in `book.json` (`mirrors`): a verse sibling
-that sets the unit's passage beside its twin in the other book (Numbers 11
-beside Exodus 18), with the words the two share. The pairing is a scholar's
-reading, never a fact; say "one reading" in the prose if the box needs
-qualifying. A link one sentence can carry is an `aside.echo`; the same event
-told twice in the same book family is a `synoptic`; an unrelated earlier story
-is a `story`.
+For a book with `mirrors` in `book.json`: verse sibling setting the unit's
+passage beside its twin in the other book (Numbers 11 beside Exodus 18), with
+the words the two share. The pairing is a scholar's reading, never a fact; say
+"one reading" if the box needs qualifying. Link one sentence can carry =
+`aside.echo`; same event told twice in one book family = `synoptic`;
+unrelated earlier story = `story`.
 
 ```html
 <aside class="mirror" data-anchor="11:14" data-pair="H" data-span="11:10–17">
@@ -18,28 +17,26 @@ is a `story`.
 </aside>
 ```
 
-- It follows the verse it bears on; `data-anchor` must match that verse and
-  sit inside the pair's side of this book. `data-span` is optional.
-- `data-pair` names a pair in the book's mirror data file (status `seed` or
-  `kept`). **Boxes make no claim the data file doesn't hold:** the
-  `par-ref` must lie inside the pair's twin passage, and every `span.sh`
-  carries `data-ids` (Strong's, comma-separated) that the pair lists under
-  `shared`. A word the pair doesn't list is not highlighted.
-- Leave `span.strength` empty. The build writes the dots (and `data-n`) from
-  the data file, so changing a strength there changes every box. An echo-tier
-  pair has no strength span.
+- Follows the verse it bears on; `data-anchor` = that verse, inside the pair's
+  side of this book. `data-span` optional.
+- `data-pair` names a pair in the mirror data file (status `seed` or `kept`).
+  **Boxes make no claim the data file doesn't hold:** `par-ref` lies inside
+  the pair's twin passage, and every `span.sh` carries `data-ids` (Strong's,
+  comma-separated) the pair lists under `shared`. Word the pair doesn't list
+  → not highlighted.
+- Leave `span.strength` empty: build writes the dots (and `data-n`) from the
+  data file. Echo-tier pair has no strength span.
 - One box per beat. A wide pair (several beats, several units) gets a box in
-  each unit it touches, all with the same `data-pair`, each with its own
-  `par-ref` inside the pair's twin passage.
+  each unit it touches: same `data-pair`, own `par-ref` inside the twin
+  passage.
 - Translate the twin in the unit's own voice: the unit pack's mirror section
   has the Hebrew word order, transliteration and Strong's numbers, with a
   gloss only where the book already has one. **Never raise a strength above
-  what the shared words support**, and don't ship a box for a link the data
-  file does not hold; propose it in the meta block's `mirror[]` instead.
-- A poetry twin (`poetry` in the pair) gets the header only: `par-title`,
-  `par-ref`, `take`, no rows.
-- `take` is required: one or two sentences on what the mirror shows here.
-- Transliteration only, and no `data-root`, `class="r"` or `class="rl"`
-  inside (the occurrence scanner counts every `data-root`).
-- Mirror boxes are harvested into `data/canon.json` (an intertext row of kind
-  `mirror` per reference in `par-ref`), so don't repeat them in `intertext[]`.
+  what the shared words support.** Link the data file doesn't hold → no box;
+  propose it in the meta block's `mirror[]`.
+- Poetry twin (`poetry` in the pair) → header only: `par-title`, `par-ref`,
+  `take`, no rows.
+- `take` required: one or two sentences on what the mirror shows here.
+- Transliteration only. No `data-root`, `class="r"` or `class="rl"` inside.
+- Harvested into `data/canon.json` (an intertext row of kind `mirror` per
+  reference in `par-ref`): don't repeat in `intertext[]`.

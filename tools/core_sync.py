@@ -44,16 +44,23 @@ BOOKS_JSON = os.path.join(CORE, "canon", "books.json")
 # project side; the book never edits them)
 CANON_FILES = {
     "conventions.md": "canon-conventions.md",
-    "decisions.md": "canon-decisions.md",
-    "workflow.md": "core-workflow.md",
-    "handoff-template.md": "canon-handoff-template.md",
-    "ledger-template.md": "canon-ledger-template.md",
+    "card-research.md": "card-research.md",
+    "card-verse.md": "card-verse.md",
+    "card-build.md": "card-build.md",
+    "contract.md": "fragment-contract.md",
 }
+# Vendored once, since folded into the files above: removed from a book the
+# next time it vendors (the next `sync` drops them from its mirror).
+RETIRED_FILES = ["core-workflow.md", "canon-handoff-template.md",
+                 "canon-ledger-template.md", "canon-decisions.md"]
 
 
 def copy_canon_files(book_root):
     for src, dst in CANON_FILES.items():
         shutil.copyfile(os.path.join(CORE, "canon", src), os.path.join(book_root, dst))
+    for name in RETIRED_FILES:
+        if os.path.exists(os.path.join(book_root, name)):
+            os.remove(os.path.join(book_root, name))
 
 
 def core_commit():
@@ -94,6 +101,9 @@ def plan(book_root):
         s, d = os.path.join(CORE, "canon", src), os.path.join(book_root, dst)
         if not os.path.exists(d) or not filecmp.cmp(s, d, shallow=False):
             acts.append(("update" if os.path.exists(d) else "add", f"../{dst}"))
+    for name in RETIRED_FILES:
+        if os.path.exists(os.path.join(book_root, name)):
+            acts.append(("remove", f"../{name}"))
     return acts
 
 
