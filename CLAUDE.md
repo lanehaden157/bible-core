@@ -1,11 +1,11 @@
 # bible-core
 
 `README.md` maps the files. `ARCHITECTURE.md`: shared shape, where books
-differ, how core changes, how to start a book (§8).
+differ, how core changes. `docs/using.md`: how to start a book.
 
 State isn't written here. Version: `biblecore/__init__.py`. Test count:
 `python tests/run.py`. A book's state: `python -m biblecore book` in the book.
-Platform history: `../session_index.md`.
+Platform state: `../session_index.md`; history: `../history/`.
 
 Core is for future books; it's a starting point, not gospel, and a book's own
 file always wins. Numbers, Joshua, Matthew are on it. Matthew units 1-13 are
@@ -59,7 +59,7 @@ after green locally usually = something unpushed.
 1. Commit the change.
 2. `python tools/release.py X.Y.Z --note "what changed"`: refuses a dirty
    tree, runs tests (`--skip-tests` if just run), sets the version, adds the
-   ARCHITECTURE.md version line, commits, tags. `--dry-run` only checks.
+   `history/versions.md` line, commits, tags. `--dry-run` only checks.
 3. `python tools/core_sync.py --all` (`--check` previews): vendors into each
    core book, builds, tests, commits changed files by name. Dirty book =
    skipped and named; rerun once clean. Failed build or test leaves that

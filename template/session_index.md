@@ -1,4 +1,3 @@
 # Session Index
 
-Read this first. 3 lines max per session.
-
+Read this first. Standing state, then the last three sessions, one line each. Older lines → `history/session_index_archive.md`.

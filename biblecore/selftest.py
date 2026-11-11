@@ -20,7 +20,7 @@ acceptance checks a book can run on itself:
                order are reported, not failed)
   audit        tracked-thread coverage (reported, not a failure)
   docs         instruction files against their size budgets (reported, not a failure)
-  logs         session_index.md / improvements_log.md whose newest core version
+  logs         session_index.md / history/improvements_log.md whose newest core version
                is older than book.json's pin (reported, not a failure)
   idempotent   re-running the build's hard steps changes no file (data,
                units, digest, css/, app/, index.html); anything it would
@@ -228,7 +228,7 @@ def check_logs():
     if not pin or not re.match(r"^\d+\.\d+\.\d+$", str(pin)):
         return [], []
     stale = []
-    for name in ("session_index.md", "improvements_log.md"):
+    for name in ("session_index.md", "history/improvements_log.md", "improvements_log.md"):
         path = os.path.join(b.root, name)
         if not os.path.exists(path):
             continue

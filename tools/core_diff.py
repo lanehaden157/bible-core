@@ -104,7 +104,7 @@ def local_edits(book_root):
 # Seeded once, then the book's own data or record: template changes to
 # these starters don't apply to a book that has filled them.
 BOOK_OWNED = ("data/", "units/", "canon-leads/", "source-artifacts/", "retrofit/",
-              "session_index.md", "improvements_log.md")
+              "session_index.md", "improvements_log.md", "history/")
 # Once in the template, now written by `assets` from biblecore/web/ (0.11.0):
 # the plain core_diff above covers them as vendored code.
 GENERATED = ("index.html", "app/", "css/core.css", "css/components.css",

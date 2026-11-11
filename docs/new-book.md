@@ -1,6 +1,6 @@
 # Starting a new book: checklist
 
-**Lane** = you; **Claude** = Claude Code. The steps around `tools/new_book.py` (ARCHITECTURE.md §8), from picking the book to the unit loop. Written by the 2026-09 structural audit; keep it current when the tools change. `python -m biblecore book` in the book shows where it stands at any point.
+**Lane** = you; **Claude** = Claude Code. The steps around `tools/new_book.py` (docs/using.md), from picking the book to the unit loop. Written by the 2026-09 structural audit; keep it current when the tools change. `python -m biblecore book` in the book shows where it stands at any point.
 
 ## A. Before you start
 1. **Lane**: pick the book. Check that `bible-core/biblecore/web/themes.json` has its accent and emblem (21 books do). If not, tell Claude the colours you want.
@@ -47,7 +47,7 @@
     - after your OK: push and `sync`
     - the push runs the book's Tests workflow; a failure emails you
 19. **Lane**: optional. Press "Run workflow" on the hub repo's Actions tab, or wait for the daily rebuild.
-20. **Claude**: session files (`session_index.md`, `improvements_log.md`, summary). Record anything the unit taught about core as a proposed core change, not a book-only patch.
+20. **Claude**: session files (`session_index.md`, `history/improvements_log.md`, summary). Record anything the unit taught about core as a proposed core change, not a book-only patch.
 
 ## NT books: things worth knowing first
 Learned from porting copies of Matthew's units 9–14 into a scratch Greek book (Greek-in-core pass 2, 2026-10-01; `../greek-proof/README.md`). Strong suggestions, not rules; revise them once a real NT book has shipped a few units.

@@ -67,5 +67,8 @@ first; dirty → worktree; stage explicit paths. More: `../bible-core/CLAUDE.md`
 
 ## Session files
 
-`session_index.md` (read first), `improvements_log.md` (only what git can't
-show), `session_summary_<date>.md` (substantial sessions with open questions).
+`session_index.md`: read first. Standing state + last three sessions, one line
+each; older lines → `history/session_index_archive.md`. `history/` = was, not
+is: `improvements_log.md` (only what git can't show), `session_summary_<date>.md`
+(substantial sessions with open questions), old prompts, audits, reviews. Read
+only if needed. A gotcha that still bites goes in a rule file or a code check.

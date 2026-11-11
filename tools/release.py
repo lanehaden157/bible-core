@@ -13,7 +13,7 @@ order:
   3. set `__version__` in biblecore/__init__.py, the one place the version
      is written (book.json "core" is set by core_sync.py, the template's by
      new_book.py)
-  4. add `- X.Y.Z: <note>` to the end of ARCHITECTURE.md's version list
+  4. add `- X.Y.Z: <note>` to the end of history/versions.md
   5. commit those two files ("Core X.Y.Z: <note>") and tag vX.Y.Z
 
 It never pushes. It prints the push commands and the second half of the
@@ -29,7 +29,7 @@ import textwrap
 
 CORE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INIT = "biblecore/__init__.py"  # forward slashes: also a git pathspec
-ARCH = "ARCHITECTURE.md"
+ARCH = "history/versions.md"
 _VER = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 _LIST_LINE = re.compile(r"^- \d+\.\d+\.\d+")
 
@@ -66,8 +66,8 @@ def bump_version(version, root=CORE):
 
 
 def add_version_line(version, note, root=CORE):
-    """Append `- X.Y.Z: note` after the last line of ARCHITECTURE.md's
-    version list (the first list of `- N.N.N` lines; a list item may wrap
+    """Append `- X.Y.Z: note` after the last line of history/versions.md's
+    list (the first list of `- N.N.N` lines; a list item may wrap
     onto indented lines)."""
     p = os.path.join(root, ARCH)
     lines = open(p, encoding="utf-8").read().split("\n")
@@ -107,7 +107,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="release.py")
     ap.add_argument("version", help="the new version, X.Y.Z")
     ap.add_argument("--note", required=True,
-                    help="the ARCHITECTURE.md version-list line (what changed)")
+                    help="the history/versions.md line (what changed)")
     ap.add_argument("--skip-tests", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="check and report; change nothing")
     ap.add_argument("--trailer", action="append", default=[],

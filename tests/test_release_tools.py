@@ -138,7 +138,8 @@ def test_release_bumps_and_adds_the_version_line():
             '"""doc"""\n\n__version__ = "0.4.2"\n')
         arch = ("# A\n\n**Status:** x\n\n- 0.4.0: one\n  wrapped.\n- 0.4.2: two\n\n"
                 "## Next\n\n- 1.0.0: not the list\n")
-        open(os.path.join(d, "ARCHITECTURE.md"), "w").write(arch)
+        os.makedirs(os.path.join(d, "history"), exist_ok=True)
+        open(os.path.join(d, release.ARCH), "w").write(arch)
         fails = []
         if release.current_version(d) != "0.4.2":
             fails.append("current_version")
@@ -146,7 +147,7 @@ def test_release_bumps_and_adds_the_version_line():
         if release.current_version(d) != "0.4.3":
             fails.append("bump_version")
         release.add_version_line("0.4.3", "three ", d)
-        got = open(os.path.join(d, "ARCHITECTURE.md")).read()
+        got = open(os.path.join(d, release.ARCH)).read()
         if got != arch.replace("- 0.4.2: two\n", "- 0.4.2: two\n- 0.4.3: three\n"):
             fails.append(f"version line misplaced: {got!r}")
         try:

@@ -1,4 +1,4 @@
-"""Start a new book from the template (stage one; ARCHITECTURE.md §8).
+"""Start a new book from the template (stage one; docs/using.md).
 
     python tools/new_book.py ../Leviticus --book Leviticus --osis Lev
     python tools/new_book.py ../Leviticus --book Leviticus --osis Lev --github
@@ -341,7 +341,7 @@ def main(argv=None):
         print("[6] git init + first commit")
         git = tool("git")
         commit = core_sync.core_commit() or "unknown"
-        with open(os.path.join(dest, "improvements_log.md"), "a", encoding="utf-8",
+        with open(os.path.join(dest, "history", "improvements_log.md"), "a", encoding="utf-8",
                   newline="\n") as fh:
             fh.write(f"\n- Bootstrapped with `tools/new_book.py` from bible-core "
                      f"{__version__} (`{commit[:7]}`): template, vendored core, "

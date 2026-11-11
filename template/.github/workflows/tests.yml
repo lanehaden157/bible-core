@@ -11,14 +11,12 @@ on:
     paths-ignore:
       - "project-side/**"
       - "session_index.md"
-      - "session_summary_*.md"
-      - "improvements_log.md"
+      - "history/**"
   pull_request:
     paths-ignore:
       - "project-side/**"
       - "session_index.md"
-      - "session_summary_*.md"
-      - "improvements_log.md"
+      - "history/**"
   workflow_dispatch:
 
 permissions:
