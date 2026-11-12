@@ -123,7 +123,7 @@ export function applyView(content, unit, anchor) {
   art.classList.add("tier-collapsed");
   const card = document.createElement("div");
   card.className = "digest-card";
-  card.innerHTML = `<span class="tier-tag">${esc(TIER_LABEL[unit.tier || "full"])} · digest of this unit</span>` +
+  card.innerHTML = `<span class="tier-tag">Digest of this unit${unit.tier && unit.tier !== "full" ? ` · ${esc(TIER_LABEL[unit.tier].toLowerCase())}` : ""}</span>` +
     `<p>${esc(unit.digest)}</p>` +
     `<button type="button" class="open-full">Open the full unit</button>`;
   strip.after(card);
