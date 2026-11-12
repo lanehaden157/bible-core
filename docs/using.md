@@ -64,17 +64,17 @@ Contents drawer's outline shades each unit by tier and stars the peaks.
   one). A stretch the map marks digest is covered by `section.block.digest`
   blocks with exact `data-verses` (component `digest`).
 - **World English Bible:** an expand button under any `data-verses` block
-  shows WEB text, labelled as not the study's translation. `fetch` copies the
-  book's USFM from ebible.org into `corpus/web/`, sha1-pinned in `fetch.py`
-  `WEB_FILES` (add the book's row first); the file is tracked, so CI needs no
-  network. `emit` writes `data/web/<ch>.json`.
+  shows WEB text, labelled as not the study's translation. The pinned USFM is
+  tracked in `corpus/web/` (`corpus/README.md`); `emit` writes
+  `data/web/<ch>.json` in the book's numbering and fails if a chapter's verses
+  differ from the corpus's.
 - **Thread counts:** `occurrences.json` gives each root an `untr` entry for
   occurrences in the unit's verses that are not written out, counted from the
   corpus; popovers show them as "not translated here" and a timeline still
   lists the unit.
 - **Chat side:** `card-condensed.md` (vendored only into a tiered book) is the
-  one-chat card; every card fetches the synced `lens.md`, the book's reading
-  lens, which is no longer in the pasted field.
+  one-chat card. New books' pasted field sends every chat to the synced
+  `lens.md`, the book's reading lens.
 - **Shell:** tier code lives in `app/tiers.js` and between `//tiers:begin`
   / `//tiers:end` marker lines in `main.js` and `threads.js`. `assets` strips
   the markers (and omits `tiers.js`) for a tierless book, so its generated

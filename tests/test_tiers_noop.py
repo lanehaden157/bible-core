@@ -79,6 +79,19 @@ def _build(root):
     return r.returncode, (r.stdout + r.stderr)[-1500:]
 
 
+CODE = ("import json; from biblecore import selftest, sync; "
+        "print(json.dumps({'sync': sync.resolve(), 'docs': selftest.check_docs()}))")
+
+
+def _facts(root):
+    """What the book would sync and what its doc-budget check says, under the
+    vendored core."""
+    env = dict(os.environ, PYTHONIOENCODING="utf-8")
+    r = subprocess.run([sys.executable, "-c", CODE], cwd=root, env=env, capture_output=True,
+                       text=True, encoding="utf-8", errors="replace")
+    return r.stdout.strip() or r.stderr[-300:]
+
+
 def _tree(root):
     out = {}
     for d, dirs, files in os.walk(root):
@@ -104,6 +117,9 @@ def test_tierless_books_build_identically():
                 rc, tail = _build(root)
                 if rc:
                     fails.append(f"{name}: build with the {label} core failed:\n{tail}")
+            if _facts(a) != _facts(b):
+                fails.append(f"{name}: the sync list or the doc-budget check changed:\n"
+                             f"  base {_facts(a)}\n  work {_facts(b)}")
             ta, tb = _tree(a), _tree(b)
             for rel in sorted(set(ta) | set(tb)):
                 if ta.get(rel) != tb.get(rel):
@@ -111,6 +127,29 @@ def test_tierless_books_build_identically():
                     fails.append(f"{name}: {rel} {how}")
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+    return fails
+
+
+def test_vendored_canon_files_are_unchanged_for_a_tierless_book():
+    """What core_sync would copy into a tierless book: the same files, with the
+    same bytes, as at BASE (the cards, the contract, the conventions) and the
+    same BOOK_CLAUDE.md. Only the tier-gated files may be new."""
+    if not BASE:
+        return []
+    sys.path.insert(0, os.path.join(support.CORE, "tools"))
+    import core_sync
+    fails = []
+    for name in ("Joshua", "Numbers", "Matthew"):
+        root = support.copy_of(name)
+        got = core_sync.canon_files(root)
+        if got != core_sync.CANON_FILES:
+            fails.append(f"{name}: core_sync would vendor {sorted(got)}, not {sorted(core_sync.CANON_FILES)}")
+    rels = [f"canon/{k}" for k in core_sync.CANON_FILES] + ["biblecore/BOOK_CLAUDE.md"]
+    for rel in rels:
+        old = subprocess.run(["git", "show", f"{BASE}:{rel}"], cwd=support.CORE, capture_output=True)
+        new = open(os.path.join(support.CORE, rel), "rb").read()
+        if old.returncode or old.stdout.replace(b"\r\n", b"\n") != new.replace(b"\r\n", b"\n"):
+            fails.append(f"{rel} differs from {BASE}")
     return fails
 
 

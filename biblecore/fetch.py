@@ -95,14 +95,9 @@ SOURCES = {
 # which sources each language's books fetch
 BY_LANGUAGE = {"greek": ("morphgnt", "lxx")}
 
-# World English Bible (public domain), for a tiered book's expand-to-read
-# (webtext.py). ebible.org serves one zip of every book; a tiered book keeps
-# its own book's USFM in `paths.web`, tracked in its repo, so a build and CI
-# need no network. osis -> (file in the zip, sha1 of that file). The sha1s
-# were taken from the zip on 2026-11-12; ebible.org edits the zip in place
-# (Strong's tags have already moved), so a download that no longer matches is
-# discarded and the tracked copy stays the authority. A new tiered book adds
-# its row: take the sha1 from the zip, then commit the file.
+# World English Bible (public domain), for a tiered book (webtext.py).
+# osis -> (file in ebible.org's zip, sha1 of that file). Pins, the tracked
+# copy and how to add a book: corpus/README.md.
 WEB_ZIP = "https://ebible.org/Scriptures/eng-web_usfm.zip"
 WEB_FILES = {
     "Lev": ("04-LEVeng-web.usfm", "dfeb4cf62cbf1ee14ada6591f00afc724a095b3d"),
