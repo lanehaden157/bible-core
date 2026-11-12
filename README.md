@@ -7,8 +7,8 @@ Joshua run the core's app shell and pipeline, and so does Matthew (its first
 - `ARCHITECTURE.md` — the shared shape, where books differ, how the core
   changes. `docs/using.md` — how to start a book, the reader features, the hub.
 - `canon/card-*.md`, `canon/contract.md`, `canon/conventions.md` — one card per
-  chat (research, verse, build), the shared fragment contract, shared wording
-  defaults. Each book gets a copy (`card-*.md`, `fragment-contract.md`,
+  chat (research, verse, build; condensed for a tiered book's one-chat units),
+  the shared fragment contract, shared wording defaults. Each book gets a copy (`card-*.md`, `fragment-contract.md`,
   `canon-conventions.md`) that syncs to its project side.
 - `biblecore/BOOK_CLAUDE.md` — the shared book guide a book's `CLAUDE.md` imports.
 - `canon/*.json` — the canon registries: arcs, canon threads, intertext
@@ -18,7 +18,8 @@ Joshua run the core's app shell and pipeline, and so does Matthew (its first
   book's root as `python -m biblecore <command>`. `biblecore/web/` holds the
   site's shared parts (core.css, themes, and the app shell: `index.html`,
   `app/*.js`), which the build writes into each book.
-- `template/` — the starter a new book copies once and then owns.
+- `template/` — the starter a new book copies once and then owns (the pasted
+  field, `lens.md` the synced reading lens, the style reference, …).
 - `tools/new_book.py` — start a new book (`docs/using.md`). `tools/core_sync.py`,
   `tools/core_diff.py` — vendor the package into a book (`--all`: every
   core book, built, tested and committed); report local edits to a book's

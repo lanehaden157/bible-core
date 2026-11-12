@@ -40,6 +40,47 @@ unit loop):
    groupings are kept), fills `book.json` groupings, and writes the next
    unit's canon leads. Rename the generated grouping names freely.
 
+**Tiers (a book opts in with `"tiers": true`).** A tiered book marks each
+unit full (every verse translated), condensed (key verses translated; the
+rest as tables and strips) or digest (a stretch as one short summary), and
+marks some units peaks. The site opens on the peaks path: a peak in full, any
+other unit as a short digest card with "Open the full unit". A device
+remembers its Peaks/Full choice (`localStorage`); `?view=peaks|full` in a link
+overrides it for that load; a link to one verse opens its unit in full. The
+Contents drawer's outline shades each unit by tier and stars the peaks.
+- **Opt in:** `new_book.py --tiers` (book.json `tiers`, the `digest`
+  component, the tier route in the field, `fetch` for WEB), or add the key and
+  component to an existing book. A book without the key has none of this: no
+  extra build output, and a shell with no tier code.
+- **Unit map:** the Overview table may add `| Tier | Peak |` columns; Tier is
+  `full` (default), `condensed` or `digest`, then `;`-separated stretches
+  inside the unit (`24:10–16 digest`); Peak is any mark (★). A `## Digests`
+  section adds `- NN: text` lines. `units-from-map` writes `tier`, `peak`,
+  `stretches` and `digest` into `units.json`, including onto built rows, so a
+  shipped unit gets a peak mark or a digest from the map alone. A unit's own
+  meta `digest` fills its row at port and wins over the map's.
+- **Digests:** every built unit carries two to four sentences, at most 80
+  words (`python -m biblecore tiers` and `validate` fail a missing or long
+  one). A stretch the map marks digest is covered by `section.block.digest`
+  blocks with exact `data-verses` (component `digest`).
+- **World English Bible:** an expand button under any `data-verses` block
+  shows WEB text, labelled as not the study's translation. `fetch` copies the
+  book's USFM from ebible.org into `corpus/web/`, sha1-pinned in `fetch.py`
+  `WEB_FILES` (add the book's row first); the file is tracked, so CI needs no
+  network. `emit` writes `data/web/<ch>.json`.
+- **Thread counts:** `occurrences.json` gives each root an `untr` entry for
+  occurrences in the unit's verses that are not written out, counted from the
+  corpus; popovers show them as "not translated here" and a timeline still
+  lists the unit.
+- **Chat side:** `card-condensed.md` (vendored only into a tiered book) is the
+  one-chat card; every card fetches the synced `lens.md`, the book's reading
+  lens, which is no longer in the pasted field.
+- **Shell:** tier code lives in `app/tiers.js` and between `//tiers:begin`
+  / `//tiers:end` marker lines in `main.js` and `threads.js`. `assets` strips
+  the markers (and omits `tiers.js`) for a tierless book, so its generated
+  shell is byte-identical to before. `tests/test_tiers_noop.py` holds that
+  against a base commit (`BIBLECORE_NOOP_BASE=<commit>`, Joshua/Numbers/Matthew).
+
 **Reader features (0.5.0).** The build's `emit` step writes the reading
 data layer (`data/words/<ch>.json`, `lemmas.json`, `text.json`;
 `docs/data-shapes.md`), and the shell's `app/reader.js` uses it:

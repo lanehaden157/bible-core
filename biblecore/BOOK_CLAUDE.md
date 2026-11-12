@@ -14,6 +14,7 @@ State isn't written down: `python -m biblecore book` prints it. Core version:
                                          # (--force re-ports; --answers FILE carries a dry run's answers)
     python -m biblecore build            # everything downstream of units/*.html
     python -m biblecore audit            # thread coverage; gaps end with ready `add` JSON
+    python -m biblecore tiers            # tiered books: tier rows, digests, digest blocks
     python -m biblecore test [--quick]   # pin, units, contracts, build idempotence
     python -m biblecore sync             # mirror chat-side files, commit, push (after Lane's OK)
 

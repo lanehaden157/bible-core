@@ -17,6 +17,7 @@
     - first commit, the public GitHub repo, Pages and the first sync (core's default sync set; no list to write)
     - the book's `canon/books.json` row (site, repo, kind `core`)
     - the CI workflow (`.github/workflows/tests.yml`, runs `biblecore test` on every push)
+    - a tiered book (`--tiers`; `docs/using.md` "Tiers"): `book.json` `"tiers": true` and the `digest` component, the tier route in the field, and `fetch` for the World English Bible USFM (its row must be in `biblecore/fetch.py` `WEB_FILES` first; commit the file)
 6. **Claude**: check the first push's Tests run is green (`gh run list -R <owner>/<slug>`).
 7. **Claude**: record the corpus counts in the book's CLAUDE.md "Corpus" section, and flag anything to check against a printed edition (BHS for Hebrew, SBLGNT for Greek). For Greek, also record the MorphGNT pin and the `lexicon: N of N lemmas have a gloss` line `corpus` prints, and flag any lemma without one. A `fetch` sha1 failure is a stop, not a warning.
 8. **Claude**: commit the `canon/books.json` row in bible-core; push when you OK it. The hub's daily rebuild clones the book from that row (no workflow edit).

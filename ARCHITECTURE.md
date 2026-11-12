@@ -188,6 +188,13 @@ table condensing a repeated formula) names the verses it replaces with
 out as a verse, or falls outside the unit (Lane, 2026-09-23, from Numbers
 1:22–43).
 
+**Tiers.** A book opts in with `"tiers": true`; units are then full,
+condensed or digest, some are peaks, and the site opens on the peaks path
+(`docs/using.md`, "Tiers"). Every tier code path is gated on that key, and the
+shell carries its part between `//tiers:` marker lines that `assets` strips
+for any other book, so a tierless book's output is byte-identical to before
+(`tests/test_tiers_noop.py`).
+
 **Optional components are enabled per book** in `book.json`. Each ships as
 one piece: CSS, a check, a JS handler and a style-reference snippet, in the
 same commit, and only when a unit actually wants it. **(learned:** Matthew
