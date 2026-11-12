@@ -62,3 +62,4 @@ One line per release; `tools/release.py` appends. History, not instructions.
 - 0.29.1: python -m biblecore mirror (the command was missing from the 0.29.0 registry)
 - 0.30.0: Lean instructions: one card per chat (card-research, card-verse, card-build), shared fragment-contract.md and biblecore/BOOK_CLAUDE.md with the book keeping only its differences, retrofit recipe printed by data-w, history/ folder, ARCHITECTURE split (history/versions.md, docs/using.md), lower doc budgets
 - 0.30.1: Doc budgets set to the files' real sizes and enforced for core-owned docs (tests/test_docs.py); keep-it-lean conventions in CLAUDE.md and BOOK_CLAUDE.md; port prints the retrofit recipe
+- 0.31.0: Tiers: opt-in tier/peak unit map, digest block, WEB expand, peaks/full toggle, tier outline, untr thread counts, card-condensed, field split with lens.md
