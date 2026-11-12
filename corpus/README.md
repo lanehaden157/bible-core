@@ -25,6 +25,16 @@ book's larger corpora are fetched instead (below).
   since they are separate works shown alongside it, not built from it. The
   site credits both MorphGNT projects (main.js `SOURCES`, `.site-foot`).
 
+## World English Bible, for a tiered book (`python -m biblecore fetch`)
+
+`biblecore/fetch.py` `WEB_FILES` pins one USFM file per book from ebible.org's
+`eng-web_usfm.zip` (the "eng-web" edition, with Strong's tags). WEB is public
+domain. The file goes in the book's `corpus/web/` and is committed, so a
+build and CI need no network; ebible.org edits the zip in place, so a download
+that no longer matches its sha1 is discarded. Joshua's older
+`07-JOSeng-web.usfm` has the same text with earlier Strong's tags. A book
+adds its row (file name, sha1 of the file in the zip) before it is tiered.
+
 ## Fetched for a Greek book (`python -m biblecore fetch`)
 
 Not kept here: `biblecore/fetch.py` pins them and downloads them into the book

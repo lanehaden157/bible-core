@@ -25,15 +25,19 @@ What's fetched, and why all of it:
     corpus/lxx.py reads (~15.5 MB): canon leads in the Greek Old Testament.
 The morphological lexicon (lexemes.yaml, the interlinear's glosses) is not
 fetched: tools/new_book.py copies core's sha1-checked copy into the book.
+A tiered book (book.json "tiers") also gets its World English Bible USFM
+(WEB_FILES, `paths.web`), whatever its language.
 Pins, sizes and licences: bible-core/corpus/README.md. The pins are
 Matthew's pipeline/fetch_corpus.py's; the sha1s were taken 2026-10-01 from
 those commits and match Matthew's copies.
 """
 import argparse
 import hashlib
+import io
 import os
 import sys
 import urllib.request
+import zipfile
 
 RAW = "https://raw.githubusercontent.com"
 
@@ -91,6 +95,23 @@ SOURCES = {
 # which sources each language's books fetch
 BY_LANGUAGE = {"greek": ("morphgnt", "lxx")}
 
+# World English Bible (public domain), for a tiered book's expand-to-read
+# (webtext.py). ebible.org serves one zip of every book; a tiered book keeps
+# its own book's USFM in `paths.web`, tracked in its repo, so a build and CI
+# need no network. osis -> (file in the zip, sha1 of that file). The sha1s
+# were taken from the zip on 2026-11-12; ebible.org edits the zip in place
+# (Strong's tags have already moved), so a download that no longer matches is
+# discarded and the tracked copy stays the authority. A new tiered book adds
+# its row: take the sha1 from the zip, then commit the file.
+WEB_ZIP = "https://ebible.org/Scriptures/eng-web_usfm.zip"
+WEB_FILES = {
+    "Lev": ("04-LEVeng-web.usfm", "dfeb4cf62cbf1ee14ada6591f00afc724a095b3d"),
+    "Num": ("05-NUMeng-web.usfm", "07ff6e380403b571cb15623f2a093601b134c2e6"),
+    "Deut": ("06-DEUeng-web.usfm", "00bc649747987d4b1c53acc85d390fad5a6532c5"),
+    "Josh": ("07-JOSeng-web.usfm", "debf9239ee093e67ade924d301556e1010e9fcf9"),
+    "Matt": ("70-MATeng-web.usfm", "21f9124d4e2d47ca31326f1bb3d267de80801025"),
+}
+
 
 def corpus_pin():
     """book.json's corpus "pin" for a Greek book (new_book.py writes it)."""
@@ -130,6 +151,8 @@ def fetch(b, force=False, check_only=False, base=None, log=print):
     if not names:
         log(f"nothing to fetch for a {b.language} book"
             + (" (morphhb comes from npm: package.json pins it)" if b.language == "hebrew" else ""))
+        if b.tiers:
+            problems += fetch_web(b, force, check_only, base, log)
         return problems
     got = ok = 0
     for name in names:
@@ -177,6 +200,45 @@ def fetch(b, force=False, check_only=False, base=None, log=print):
     pin = (b.cfg.get("corpus") or {}).get("pin")
     if b.language == "greek" and pin and pin != corpus_pin():
         log(f"note: book.json corpus.pin is {pin!r}; this core fetches {corpus_pin()!r}")
+    if b.tiers:
+        problems += fetch_web(b, force, check_only, base, log)
+    return problems
+
+
+def fetch_web(b, force=False, check_only=False, base=None, log=print):
+    """A tiered book's World English Bible USFM, sha1-checked."""
+    problems = []
+    if b.osis not in WEB_FILES:
+        return [f"no World English Bible pin for {b.osis}: add its file name and "
+                f"sha1 to fetch.WEB_FILES"]
+    name, want = WEB_FILES[b.osis]
+    dest = os.path.join(b.path("web"), name)
+    rel = os.path.relpath(dest, b.root).replace(os.sep, "/")
+    if os.path.exists(dest) and not force:
+        have = sha1_of(dest)
+        if have == want:
+            log(f"web: {rel} already in place")
+            return problems
+        return [f"{rel}: sha1 {have} != pinned {want} -- the file on disk isn't the "
+                f"pinned one; `python -m biblecore fetch --force` replaces it"]
+    if check_only:
+        return [f"{rel}: missing -- run `python -m biblecore fetch`"]
+    url = f"{base.rstrip('/')}/eng-web_usfm.zip" if base else WEB_ZIP
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "bible-core-fetch"})
+        with urllib.request.urlopen(req) as r:
+            data = zipfile.ZipFile(io.BytesIO(r.read())).read(name)
+    except (OSError, KeyError, zipfile.BadZipFile) as exc:
+        return [f"{rel}: download failed ({url}): {exc}"]
+    have = hashlib.sha1(data).hexdigest()
+    if have != want:
+        return [f"{rel}: downloaded sha1 {have} != pinned {want} ({url}); discarded "
+                f"(ebible.org edits the zip in place -- keep the tracked copy, or "
+                f"re-pin deliberately)"]
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    with open(dest, "wb") as fh:
+        fh.write(data)
+    log(f"fetched {rel}")
     return problems
 
 

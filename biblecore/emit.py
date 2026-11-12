@@ -194,6 +194,14 @@ def main(argv=None):
     wrote += _write_json(b.data("lemmas.json"), {"lemmas": lem})
     text = verse_text(b)
     wrote += _write_json(b.data("text.json"), {"verses": text})
+    if b.tiers:
+        # World English Bible chapters for the expand button (webtext.py)
+        from biblecore import webtext
+        n, problem = webtext.emit(b)
+        if problem:
+            print("FAIL", problem)
+            return 1
+        wrote += n
     print(f"emit: {len(by_ch)} chapter word files, {len(lem)} lemmas, "
           f"{len(text)} built verses ({wrote} file(s) changed)")
     return 0
