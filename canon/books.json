@@ -3,7 +3,7 @@
   "books": [
     {"osis": "Gen", "name": "Genesis", "t": "ot"},
     {"osis": "Exod", "name": "Exodus", "t": "ot"},
-    {"osis": "Lev", "name": "Leviticus", "t": "ot"},
+    {"osis": "Lev", "name": "Leviticus", "t": "ot", "slug": "leviticus", "site": "https://lanehaden157.github.io/leviticus/", "repo": "Leviticus", "kind": "core"},
     {"osis": "Num", "name": "Numbers", "t": "ot", "slug": "numbers", "site": "https://lanehaden157.github.io/numbers/", "repo": "Numbers", "kind": "core"},
     {"osis": "Deut", "name": "Deuteronomy", "t": "ot"},
     {"osis": "Josh", "name": "Joshua", "t": "ot", "slug": "joshua", "site": "https://lanehaden157.github.io/joshua/", "repo": "Joshua", "kind": "core"},
