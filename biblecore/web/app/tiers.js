@@ -156,15 +156,19 @@ export function credit(foot) {
 async function webHtml(range) {
   const m = WEB_RANGE.exec(range);
   if (!m) return `<p class="not-translated">No World English Bible text for this range.</p>`;
-  const lo = [+m[1], +m[2]];
-  const hi = [+(m[3] || m[1]), +(m[4] || m[2])];
+  const lo_ = [+m[1], +m[2]];
+  const hi_ = [+(m[3] || m[1]), +(m[4] || m[2])];
   const parts = [];
-  for (let c = lo[0]; c <= hi[0]; c++) {
+  for (let c = lo_[0]; c <= hi_[0]; c++) {
     const d = await webChapter(c);
-    const verses = d?.verses || {};
-    for (const v of Object.keys(verses).map(Number).sort((a, b) => a - b)) {
-      if ((c === lo[0] && v < lo[1]) || (c === hi[0] && v > hi[1])) continue;
-      parts.push(`<sup>${c}:${v}</sup>${esc(verses[v])}`);
+    // keys are "5" or a bridge "3-4"; a range that touches the verses shown is kept
+    const ents = Object.entries(d?.verses || {}).map(([k, t]) => {
+      const [lo, hi] = k.split("-").map(Number);
+      return [lo, hi || lo, t];
+    }).sort((x, y) => x[0] - y[0]);
+    for (const [lo, hi, t] of ents) {
+      if ((c === lo_[0] && hi < lo_[1]) || (c === hi_[0] && lo > hi_[1])) continue;
+      parts.push(`<sup>${c}:${lo}${hi > lo ? "–" + hi : ""}</sup>${esc(t)}`);
     }
   }
   return parts.length

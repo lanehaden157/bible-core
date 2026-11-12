@@ -261,6 +261,8 @@ USFM = r"""\id LEV World English Bible (WEB)
 \v 2 Speak to the children of Israel.
 \q1 A line of poetry
 \q2 and its answer.
+\q1 \v 3 A verse that opens a poetry line.
+\p \v 4 first \v 5 second
 \c 2
 \p
 \v 1 \add When\add* anyone offers an offering.
@@ -270,10 +272,84 @@ USFM = r"""\id LEV World English Bible (WEB)
 
 def test_usfm_parse():
     got = webtext.parse(USFM)
-    want = {1: {1: "Yahweh called to Moses.",
-                2: "Speak to the children of Israel. A line of poetry and its answer."},
-            2: {1: "When anyone offers an offering.", 3: "A bridged pair."}}
-    return [] if {c: dict(v) for c, v in got.items()} == want else [f"{dict(got)}"]
+    want = {1: [(1, 1, "Yahweh called to Moses."),
+                (2, 2, "Speak to the children of Israel. A line of poetry and its answer."),
+                (3, 3, "A verse that opens a poetry line."),
+                (4, 4, "first"), (5, 5, "second")],
+            2: [(1, 1, "When anyone offers an offering."), (3, 4, "A bridged pair.")]}
+    fails = [] if {c: list(v) for c, v in got.items()} == want else [f"{dict(got)}"]
+    if webtext.verse_sets(got)[2] != {1, 3, 4}:
+        fails.append(f"a bridge isn't counted verse by verse: {webtext.verse_sets(got)}")
+    return fails
+
+
+def test_every_pinned_web_file_parses_to_the_known_verse_counts():
+    """Lev 859, Num 1288, Deut 959, Josh 658, Matt 1071: KJV-numbered totals,
+    which WEB follows. Reads whichever pinned files are to hand: a sibling's
+    corpus/web/, or the ebible.org zip named by BIBLECORE_WEB_ZIP (sha1-checked
+    against the pins)."""
+    known = {"Lev": 859, "Num": 1288, "Deut": 959, "Josh": 658, "Matt": 1071}
+    texts = {}
+    for name in ("Joshua", "Numbers", "Matthew"):
+        d = os.path.join(support.SOURCES[name], "corpus", "web")
+        for osis, (fname, _sha) in fetch.WEB_FILES.items():
+            if os.path.exists(os.path.join(d, fname)):
+                texts[osis] = open(os.path.join(d, fname), encoding="utf-8").read()
+    zp = os.environ.get("BIBLECORE_WEB_ZIP")
+    fails = []
+    if zp and os.path.exists(zp):
+        z = zipfile.ZipFile(zp)
+        for osis, (fname, sha) in fetch.WEB_FILES.items():
+            data = z.read(fname)
+            if hashlib.sha1(data).hexdigest() != sha:
+                fails.append(f"{fname} in the zip isn't the pinned file")
+            texts[osis] = data.decode("utf-8")
+    for osis, text in texts.items():
+        ch = webtext.parse(text)
+        n = sum(len(v) for v in webtext.verse_sets(ch).values())
+        if n != known[osis]:
+            fails.append(f"{osis}: parsed {n} verses, expected {known[osis]}")
+    return fails
+
+
+def test_web_follows_the_books_numbering():
+    """A source-numbered Hebrew book: English Lev 6:1-7 is Hebrew 5:20-26."""
+    if not support.have_numbers():
+        return []
+    src = support.copy_of("Numbers")
+    cfg = json.load(open(os.path.join(src, "book.json"), encoding="utf-8"))
+    cfg["paths"] = dict(cfg.get("paths", {}), **support.read_only_paths(support.NUMBERS_SRC))
+    b = bookmod.Book(dict(cfg, osis="Lev", versification="source"), src)
+    corpus = {5: set(range(1, 27)), 6: set(range(1, 24))}
+    web = {5: [(v, v, f"e5:{v}") for v in range(1, 20)],
+           6: [(v, v, f"e6:{v}") for v in range(1, 31)]}
+    got = webtext.to_source(b, web, corpus)
+    fails = []
+    flat = {(c, lo): t for c, vs in got.items() for lo, _hi, t in vs}
+    if flat.get((5, 20)) != "e6:1" or flat.get((5, 26)) != "e6:7" or flat.get((6, 1)) != "e6:8":
+        fails.append(f"English 6:1-7 isn't under Hebrew 5:20-26: {sorted(flat)[:30]}")
+    bad, notes = webtext.mismatches(got, corpus)
+    if bad:
+        fails.append(f"a mapped chapter still mismatches: {bad}")
+    bad, notes = webtext.mismatches(web, corpus)
+    if not bad:
+        fails.append("an unmapped English numbering against Hebrew verses should mismatch")
+    return fails
+
+
+def test_mismatches_fail_missing_verses_and_note_extra_ones():
+    web = {1: [(1, 1, "a"), (2, 2, "b")], 2: [(1, 1, "c")]}
+    bad, notes = webtext.mismatches(web, {1: {1, 2, 3}, 2: {1}})
+    fails = []
+    if not (len(bad) == 1 and "only corpus: [3]" in bad[0]):
+        fails.append(f"a verse the corpus has and WEB lacks passed: {bad}")
+    bad, notes = webtext.mismatches(web, {1: {1}, 2: {1}})
+    if bad or not notes:
+        fails.append(f"a verse only WEB has should be a note, not a failure: {bad} {notes}")
+    bad, _ = webtext.mismatches(web, {1: {1, 2}})
+    if not bad:
+        fails.append("a chapter only WEB has passed")
+    return fails
 
 
 def _zip_with(tmp, name, data):
@@ -310,12 +386,27 @@ def test_web_fetch_is_pinned_and_emit_writes_chapters():
             fails.append("an edited file wasn't reported")
         with open(dest, "wb") as fh:
             fh.write(data)
-        n, problem = webtext.emit(b, log=lambda *_: None)
-        c1 = json.load(open(b.data("web/1.json"), encoding="utf-8"))
-        if problem or n != 2 or c1["verses"]["1"] != "Yahweh called to Moses.":
-            fails.append(f"emit: {n} {problem} {c1}")
-        if webtext.emit(b, log=lambda *_: None)[0] != 0:
-            fails.append("emit isn't idempotent")
+        real = webtext.corpus_verses
+        webtext.corpus_verses = lambda _b: {1: {1, 2, 3, 4, 5}, 2: {1, 3, 4}}
+        try:
+            n, problem = webtext.emit(b, log=lambda *_: None)
+            c1 = json.load(open(b.data("web/1.json"), encoding="utf-8"))
+            c2 = json.load(open(b.data("web/2.json"), encoding="utf-8"))
+            if problem or n != 2 or c1["verses"]["1"] != "Yahweh called to Moses.":
+                fails.append(f"emit: {n} {problem} {c1}")
+            if c2["verses"].get("3-4") != "A bridged pair.":
+                fails.append(f"a bridge isn't one '3-4' entry: {c2}")
+            webtext.corpus_verses = lambda _b: {1: {1, 2, 3, 4, 5, 6}, 2: {1, 3, 4}}
+            if not webtext.emit(b, log=lambda *_: None)[1]:
+                fails.append("emit passed a chapter with a corpus verse WEB lacks")
+        finally:
+            webtext.corpus_verses = real
+        webtext.corpus_verses, saved_cv = (lambda _b: {1: {1, 2, 3, 4, 5}, 2: {1, 3, 4}}), real
+        try:
+            if webtext.emit(b, log=lambda *_: None)[0] != 0:
+                fails.append("emit isn't idempotent")
+        finally:
+            webtext.corpus_verses = saved_cv
         del fetch.WEB_FILES["Lev"]
         if not fetch.fetch_web(b, log=lambda *_: None):
             fails.append("a book with no pin wasn't reported")
@@ -350,10 +441,14 @@ def _tiered_numbers(tmp, tiered=True):
         uj["units"][0].update(tier="condensed", stretches=[{"tier": "condensed", "verses": "1:20–43"}])
         uj["units"][1]["peak"] = True
     json.dump(uj, open(up, "w", encoding="utf-8", newline="\n"), indent=2, ensure_ascii=False)
-    os.makedirs(os.path.join(dest, "corpus", "web"), exist_ok=True)
-    with open(os.path.join(dest, "corpus", "web", "05-NUMeng-web.usfm"), "w", encoding="utf-8") as fh:
-        fh.write("\\id NUM\n\\c 1\n\\p\n\\v 22 Of the children of Simeon.\n\\v 23 Those counted.\n")
     bookmod.use(bookmod.Book(cfg, dest))
+    # a stand-in USFM with every verse the corpus has (the real one is pinned)
+    os.makedirs(os.path.join(dest, "corpus", "web"), exist_ok=True)
+    lines = ["\\id NUM"]
+    for c, vs in sorted(webtext.corpus_verses(bookmod.book()).items()):
+        lines += [f"\\c {c}", "\\p"] + [f"\\v {v} web {c}:{v}" for v in sorted(vs)]
+    with open(os.path.join(dest, "corpus", "web", "05-NUMeng-web.usfm"), "w", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
     return dest
 
 
@@ -496,3 +591,61 @@ def test_new_book_routing_and_cards_follow_tiers():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     return fails
+
+
+# ------------------------------------------------------------- unit map: edge cases
+
+def test_an_unknown_column_does_not_turn_tiers_on_or_reset_rows():
+    md = WIDE.replace("| Tier | Peak |", "| Notes | Extra |")
+    have = {"book": "Test", "unit_count": 1, "groupings": [],
+            "units": [{"n": 1, "slug": "unit-01", "passage": "Test 1:1–54", "title": "One",
+                       "built": True, "tier": "condensed", "peak": True}]}
+    # such a table was never read (only a 3-column or Tier/Peak table is), and
+    # it still isn't: nothing is guessed, no row is touched, and it is said
+    uj, report = um.plan(md, ["part"], "Test", have, tiers=True)
+    fails = []
+    if uj is not None:
+        fails.append(f"a table with only unknown extra columns was read: {uj}")
+    if not any("no Tier or Peak" in r for r in report):
+        fails.append(f"the ignored columns weren't reported: {report}")
+    if have["units"][0]["tier"] != "condensed":
+        fails.append("the stored row was touched")
+    return fails
+
+
+def test_a_map_digest_that_differs_is_reported_and_refresh_overwrites():
+    have = {"book": "Test", "unit_count": 1, "groupings": [],
+            "units": [{"n": 1, "slug": "unit-01", "passage": "Test 1:1–54", "title": "One",
+                       "built": True, "digest": "the stored one"}]}
+    uj, report = um.plan(WIDE, ["part"], "Test", have, tiers=True)
+    fails = []
+    if uj["units"][0]["digest"] != "the stored one":
+        fails.append("a differing map digest overwrote the stored one")
+    if not any("unit 1: the map's digest differs" in r for r in report):
+        fails.append(f"the difference wasn't reported: {report}")
+    uj, report = um.plan(WIDE, ["part"], "Test", have, tiers=True, refresh_digests=True)
+    if uj["units"][0]["digest"] != "First unit, in a sentence or two.":
+        fails.append("--refresh-digests didn't overwrite")
+    if any("differs" in r for r in report):
+        fails.append("a refreshed digest was still reported as differing")
+    same = {**have, "units": [{**have["units"][0], "digest": "First unit, in a sentence or two."}]}
+    _, report = um.plan(WIDE, ["part"], "Test", same, tiers=True)
+    if any("differs" in r for r in report):
+        fails.append("an equal digest was reported as differing")
+    return fails
+
+
+def test_a_wrapped_digest_bullet_keeps_its_continuation_lines():
+    md = ("## Digests\n\n- 01: First part,\n  carried on here,\n  and here.\n"
+          "- 02: Second.\n\nProse after a blank line is not a digest.\n- 03: Third\n"
+          "## Other\n- 04: not a digest\n")
+    got = um.parse_digests(md)
+    want = {1: "First part, carried on here, and here.", 2: "Second.", 3: "Third"}
+    return [] if got == want else [f"{got}"]
+
+
+def test_a_spaced_en_dash_stretch_is_normalised():
+    md = WIDE.replace("2:10 - 12 condensed", "2:10 \u2013 12 condensed")
+    uj, _ = um.plan(md, ["part"], "Test", EMPTY, tiers=True)
+    st = {r["n"]: r.get("stretches") for r in uj["units"]}[2]
+    return [] if st[1] == {"tier": "condensed", "verses": "2:10\u201312"} else [f"{st}"]
