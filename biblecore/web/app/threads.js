@@ -237,6 +237,12 @@ function openPop(el, resolved, unit, builtByN) {
       : "";
     rows.push(`<p class="rp-count">${occ.count}× in this unit${vv}</p>`);
   }
+//tiers:begin
+  if (occ.untr) {
+    rows.push(`<p class="rp-count">${occ.count ? "+ " : ""}${occ.untr.count}× in verses not translated here` +
+      `${occ.untr.verses.length > 6 ? "" : " · vv. " + occ.untr.verses.join(", ")}</p>`);
+  }
+//tiers:end
 
   if (th) {
     const leg = [];
@@ -250,6 +256,17 @@ function openPop(el, resolved, unit, builtByN) {
     }
     if (leg.length) rows.push(`<p class="rp-traj">${leg.join(" → ")}</p>`);
 
+//tiers:begin
+    // a unit that only condenses or digests the word still counts, marked so
+    const elsewhere = Object.keys(_occ)
+      .filter((s) => s !== unit.slug && (_occ[s][root]?.count || _occ[s][root]?.untr))
+      .map((s) => [builtByN.get(Number(s.split("-")[1])), _occ[s][root]]).filter(([u]) => u);
+    if (elsewhere.length) {
+      rows.push(`<p class="rp-also">also in ${elsewhere
+        .map(([u, o]) => `<a href="#/${u.slug}">Unit ${u.n}</a>` +
+          (o.count ? "" : ` <span class="rp-soon">(not translated here)</span>`)).join(", ")}</p>`);
+    }
+//tiers:else
     const elsewhere = Object.keys(_occ)
       .filter((s) => s !== unit.slug && (_occ[s][root]?.count))
       .map((s) => builtByN.get(Number(s.split("-")[1]))).filter(Boolean);
@@ -257,6 +274,7 @@ function openPop(el, resolved, unit, builtByN) {
       rows.push(`<p class="rp-also">also in ${elsewhere
         .map((u) => `<a href="#/${u.slug}">Unit ${u.n}</a>`).join(", ")}</p>`);
     }
+//tiers:end
     const cr = canonRow(th.id);
     if (cr) rows.push(cr);
     if (th.note) rows.push(`<p class="rp-note">${esc(th.note)}</p>`);

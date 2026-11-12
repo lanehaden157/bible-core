@@ -20,6 +20,9 @@ import { enhanceSpotlights, openAll } from "./spotlight.js";
 import { renderSearch } from "./search.js";
 import { MODES, modeLabel, applyMode, indexVerses, findVerse, mountInterlinear, unmountInterlinear,
          prepVerseNumbers, wireVerseNumbers, parseRef, unitForRef, rememberPosition, lastPosition, renderPrint } from "./reader.js";
+//tiers:begin
+import * as tiers from "./tiers.js";
+//tiers:end
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
@@ -92,6 +95,10 @@ async function init() {
       addHubLink(bookInfo.hub);
     }
     renderSources(bookInfo.language || manifest.language);
+//tiers:begin
+    tiers.init({ info: bookInfo, units: manifest, prefix: storagePrefix(), reload: () => route() });
+    tiers.credit(document.getElementById("site-foot"));
+//tiers:end
   } catch (e) {
     content.innerHTML = `<p class="missing">Could not load site data (<code>data/*.json</code>).</p>`;
     return;
@@ -104,6 +111,9 @@ async function init() {
   buildUnitNav();
   wireNavToggle();
   wireSettingsToggle();
+//tiers:begin
+  tiers.mountSettings(document.getElementById("settings-panel"));
+//tiers:end
   wireModes();
   wireAppearance();
   wireVerseNumbers(content, ilOpts);
@@ -384,6 +394,9 @@ function buildUnitNav() {
   }
   unitNav.innerHTML = "";
   unitNav.appendChild(frag);
+//tiers:begin
+  tiers.decorateNav(unitNav, manifest.units);
+//tiers:end
 }
 
 /* ------------------------------------------------------------------- router */
@@ -499,6 +512,10 @@ async function loadUnit(unit, anchor) {
   wireRoots(content, unit, manifest.units);
   wireFootnotes();
   buildPager(unit);
+//tiers:begin
+  tiers.applyView(content, unit, anchor);
+  tiers.wireWeb(content);
+//tiers:end
   document.title = `Unit ${unit.n} · ${unit.title} — ${siteTitle()}`;
 
   rememberPosition(storagePrefix(), unit.slug, anchor && /^\d+:\d+$/.test(anchor) ? anchor : null);
