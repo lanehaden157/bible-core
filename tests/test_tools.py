@@ -75,10 +75,10 @@ def test_new_book_registers_the_hub_row():
         owner = new_book.pages_owner(path)
         if owner != "lanehaden157":
             fails.append(f"pages_owner: {owner}")
-        row = new_book.register_book("Lev", "leviticus", "Leviticus", "LaneHaden157", path)
-        want = {"osis": "Lev", "name": "Leviticus", "t": "ot", "slug": "leviticus",
-                "site": "https://lanehaden157.github.io/leviticus/",
-                "repo": "Leviticus", "kind": "core"}
+        row = new_book.register_book("Ruth", "ruth", "Ruth", "LaneHaden157", path)
+        want = {"osis": "Ruth", "name": "Ruth", "t": "ot", "slug": "ruth",
+                "site": "https://lanehaden157.github.io/ruth/",
+                "repo": "Ruth", "kind": "core"}
         if row != want:
             fails.append(f"row: {row}")
         raw = open(path, "rb").read()
@@ -86,9 +86,9 @@ def test_new_book_registers_the_hub_row():
             fails.append("CRLF written")
         after = raw.decode("utf-8").split("\n")
         changed = [i for i, (x, y) in enumerate(zip(before, after)) if x != y]
-        if len(after) != len(before) or len(changed) != 1 or '"Lev"' not in after[changed[0]]:
-            fails.append(f"expected only Leviticus's line to change: {changed}")
-        if json.loads(raw)["books"][2] != want:
+        if len(after) != len(before) or len(changed) != 1 or '"Ruth"' not in after[changed[0]]:
+            fails.append(f"expected only Ruth's line to change: {changed}")
+        if json.loads(raw)["books"][[b["osis"] for b in json.loads(raw)["books"]].index("Ruth")] != want:
             fails.append("the file doesn't parse to the new row")
         try:
             new_book.register_book("Nope", "x", "X", "o", path)
