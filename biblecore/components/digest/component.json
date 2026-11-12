@@ -1,0 +1,8 @@
+{
+  "name": "digest",
+  "summary": "a stretch of verses as one short summary (tiered books)",
+  "classes": ["digest"],
+  "role": "inline-block",
+  "selector": "section.digest",
+  "since": "0.1.0"
+}

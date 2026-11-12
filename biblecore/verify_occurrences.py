@@ -47,7 +47,8 @@ def check():
     for path in sorted(glob.glob(os.path.join(units_dir, "unit-*.html"))):
         slug = os.path.splitext(os.path.basename(path))[0]
         mine = recount(_read(path))
-        theirs = {r: v["total"] for r, v in occ.get(slug, {}).items()}
+        # a root with total 0 is an `untr`-only entry (tiers.py): not in the fragment
+        theirs = {r: v["total"] for r, v in occ.get(slug, {}).items() if v["total"]}
         if mine != theirs:
             fail.append(f"{slug}: count mismatch\n   verify={mine}\n   json  ={theirs}")
 

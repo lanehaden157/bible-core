@@ -139,6 +139,8 @@ def merge_units_json(meta, dry, fragment_html=None):
     for g in book().groupings + book().meta_keys:
         if meta.get(g) is not None:
             row[g] = meta[g]
+    if book().tiers and meta.get("digest"):
+        row["digest"] = meta["digest"].strip()   # the unit's own words win over the map's
 
     if not dry:
         with open(book().data("units.json"), "w", encoding="utf-8", newline="\n") as fh:

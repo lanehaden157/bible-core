@@ -89,12 +89,19 @@ def main(argv=None):
     for w in book_warns:
         print("  warn  (book-wide)", w)
 
+    tier_errs = []
+    if book().tiers:
+        from biblecore import tiers
+        tier_errs = tiers.validate(units_json)
+        for e in tier_errs:
+            print("  ERROR (tiers)", e)
+
     paths = sorted(glob.glob(os.path.join(book().path("units"), "unit-*.html")))
     if not paths:
         print("no built units to validate")
-        return 0
+        return 1 if tier_errs else 0
 
-    total_err, total_warn = 0, len(book_warns)
+    total_err, total_warn = len(tier_errs), len(book_warns)
     for path in paths:
         name = os.path.basename(path)
         with open(path, encoding="utf-8") as fh:

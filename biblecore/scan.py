@@ -92,7 +92,34 @@ def scan_all():
         slug = os.path.splitext(os.path.basename(path))[0]
         with open(path, encoding="utf-8") as fh:
             data[slug] = scan_unit(fh.read())
+    if book().tiers:
+        _add_untranslated(data)
     return data
+
+
+def _add_untranslated(data):
+    """Tiered books: each root's `untr` -- occurrences in verses the unit
+    doesn't translate, from the corpus (tiers.untranslated)."""
+    from biblecore import audit, data_w, tiers
+    from biblecore import meta as um
+    from biblecore.roots import load_roots
+    b = book()
+    with open(b.data("units.json"), encoding="utf-8") as fh:
+        rows = {u["slug"]: u for u in json.load(fh)["units"] if u.get("built")}
+    words = audit.load_words()
+    roots_json = load_roots()
+    for slug, row in rows.items():
+        path = os.path.join(b.path("units"), slug + ".html")
+        if slug not in data or not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            html = fh.read()
+        m = um.PASSAGE_FIRST_CH_RE.search(row["passage"])
+        written = {(ch, v) for _, _, ch, v in
+                   data_w.verse_blocks(html, int(m.group(1)) if m else 1)}
+        for root, u in tiers.untranslated(row, html, words, roots_json, written).items():
+            data[slug].setdefault(root, blank())["untr"] = u
+        data[slug] = dict(sorted(data[slug].items()))
 
 
 def main(argv=None):

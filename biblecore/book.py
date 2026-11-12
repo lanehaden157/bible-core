@@ -33,6 +33,10 @@ ALLOWED_KEYS = {
     # books this one mirrors: [{"with": "<OSIS id>", "file": "<name>.json"}];
     # the file sits in data/ (policy, like threads.json). See mirror.py.
     "mirrors",
+    # true = a tiered book (units marked full | condensed | digest, a peaks
+    # path, WEB text on expand). Absent = none of that exists in the build
+    # or the shell (tiers.py)
+    "tiers",
 }
 MIRROR_ENTRY_KEYS = {"with", "file"}
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
@@ -80,6 +84,8 @@ PATH_DEFAULTS = {
     "wlc": "node_modules/morphhb/wlc",
     "morphgnt": "corpus/morphgnt",
     "lxx": "corpus/lxx",
+    # World English Bible USFM, one file per book (tiered books; fetch.py)
+    "web": "corpus/web",
     "lexicon": "corpus/lexicon/HebrewStrong.xml",
     "greek_lexicon": "corpus/lexicon/lexemes.yaml",
     "synced": "project-side/synced",
@@ -120,6 +126,8 @@ def validate_config(cfg):
                 errs.append(f"corpus: unknown key '{k}'")
             if "kind" not in corpus:
                 errs.append("corpus: missing 'kind'")
+    if "tiers" in cfg and not isinstance(cfg["tiers"], bool):
+        errs.append("'tiers' must be true or false")
     for k in ("groupings", "components", "meta_keys"):
         if k in cfg and not (isinstance(cfg[k], list)
                              and all(isinstance(x, str) for x in cfg[k])):
@@ -275,6 +283,11 @@ class Book:
     @property
     def meta_keys(self):
         return list(self.cfg.get("meta_keys", []))
+
+    @property
+    def tiers(self):
+        """True for a tiered book; every tier code path is gated on this."""
+        return self.cfg.get("tiers") is True
 
     @property
     def mirrors(self):

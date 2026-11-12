@@ -41,7 +41,7 @@ def _quiet(fn, *a):
 def test_registry_shape():
     reg = components.registry()
     fails = []
-    if set(reg) != {"echo", "list", "poem", "itin", "textform", "compare", "synoptic", "story", "mirror"}:
+    if set(reg) != {"echo", "list", "poem", "itin", "textform", "compare", "synoptic", "story", "mirror", "digest"}:
         fails.append(f"registry has {sorted(reg)}")
     for c in reg.values():
         for f in ("style.css", "snippet.md", "__init__.py"):

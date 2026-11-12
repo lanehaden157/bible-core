@@ -44,6 +44,9 @@ Shape (style reference §3):
              ready. Claude decides what to promote; a close call reaches Lane
              through the handoff's "Calls for Lane" before it is written here. Consumed at port like candidates. root defaults to id
              (ASCII [a-z0-9-]); this unit's retro[] may tag a promoted id.
+  digest     str      (tiered books) the unit's own two-to-four-sentence digest,
+                        consumed at port into its units.json row, dropped like
+                        questions (tiers.py)
   contract   str      core version the unit was ported under ("0.3.0");
                         stamped by the porter, moved only by migrations
                         (contract.py). Absent on units ported before 0.3.0.
@@ -150,6 +153,9 @@ CORE_TOP_LEVEL_KEYS = {
     "mirror",
     # core version the unit was written against (D7) -- see contract.py
     "contract",
+    # the unit's own short digest, consumed at port into its units.json row
+    # (a tiered book only; tiers.py)
+    "digest",
 }
 
 
@@ -414,6 +420,12 @@ def validate(meta, threads_json=None):
             errs.append(f"threads.{key} must be a list")
     errs += _validate_promote(th.get("promote"), threads_json)
     errs += _validate_checks(meta.get("checks"))
+    if "digest" in meta:
+        if not book().tiers:
+            errs.append("digest: only a tiered book (book.json \"tiers\": true) "
+                        "carries a digest")
+        elif not (isinstance(meta["digest"], str) and meta["digest"].strip()):
+            errs.append("digest must be a non-empty string")
 
     for i, q in enumerate(meta.get("questions", []) or []):
         where = f"questions[{i}]"

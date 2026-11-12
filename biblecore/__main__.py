@@ -80,6 +80,7 @@ COMMANDS = {
     "checks": ("biblecore.checks", "main"),
     "unit-pack": ("biblecore.unit_pack", "main"),
     "mirror": ("biblecore.mirror", "main"),
+    "tiers": ("biblecore.tiers", "main"),
     "handoff-check": ("biblecore.handoff_check", "main"),
     "sync-check": ("biblecore.sync", "check_main"),
     "sync": ("biblecore.sync", "push_main"),

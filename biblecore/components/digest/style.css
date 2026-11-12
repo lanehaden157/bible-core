@@ -1,0 +1,37 @@
+/* section.block.digest -- a stretch of verses summed up in a paragraph.
+   Also the tiers shell (app/tiers.js): peaks/full strip, digest card, tier
+   shading on the book map, the WEB text under an expandable block. Tiered
+   books only: this component ships only where book.json enables it. */
+.unit .digest { border-left: 3px solid var(--rule); background: var(--panel-2); padding: 10px 16px; margin: 18px 0; border-radius: 4px; }
+.unit .digest h2 { font-size: 16px; margin: 0 0 4px; }
+.unit .digest p { margin: 0; font-size: 17px; }
+
+.view-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 14px; font-family: var(--display); font-size: 14px; color: var(--ink-soft); }
+.view-strip .seg button { font-size: 13px; padding: 3px 10px; }
+.digest-card { border: 1px solid var(--rule); background: var(--panel-2); border-radius: 8px; padding: 14px 18px; margin: 12px 0 22px; }
+.digest-card p { margin: 0 0 12px; font-size: 18px; }
+.digest-card .open-full { font: inherit; font-family: var(--display); font-size: 15px; padding: 6px 14px; border: 1px solid var(--rule); border-radius: 18px; background: transparent; color: inherit; cursor: pointer; }
+.digest-card .open-full:hover { border-color: var(--ink-soft); }
+.digest-card .tier-tag { font-family: var(--display); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); display: block; margin-bottom: 4px; }
+.view-switch { margin: 0 0 14px; }
+
+.bm-tick.tier-full { background: var(--panel-2); font-weight: 700; }
+.bm-tick.tier-condensed { background: color-mix(in srgb, var(--panel-2) 45%, transparent); }
+.bm-tick.tier-digest { background: transparent; border-style: dashed; opacity: .75; }
+.bm-tick.peak::after { content: "\2605"; font-size: 9px; position: absolute; top: -2px; right: 1px; line-height: 1; }
+.bm-tick.has-stretch { box-shadow: inset 0 -3px 0 var(--rule); }
+.bm-tick { position: relative; }
+.bm-key-tier { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; }
+.bm-key-tier i { width: 12px; height: 12px; border: 1px solid var(--rule); border-radius: 2px; display: inline-block; }
+.bm-key-tier i.tier-full { background: var(--panel-2); }
+.bm-key-tier i.tier-condensed { background: color-mix(in srgb, var(--panel-2) 45%, transparent); }
+.bm-key-tier i.tier-digest { border-style: dashed; }
+
+.web-open { font: inherit; font-family: var(--display); font-size: 13px; margin: 4px 0 0; padding: 2px 10px; border: 1px solid var(--rule); border-radius: 14px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.web-text { margin: 8px 0 0; padding: 8px 12px; border-left: 3px dotted var(--ink-soft); font-size: 16px; }
+.web-text .web-label { font-family: var(--display); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); margin: 0 0 4px; }
+.web-text p { margin: 0 0 6px; }
+.web-text sup { font-size: 10px; color: var(--ink-soft); margin-right: 2px; }
+.web-text .not-translated { color: var(--ink-soft); font-style: italic; }
+.unit.tier-collapsed > :not(header.mast):not(.view-strip):not(.digest-card) { display: none; }
+.view-switch .seg { vertical-align: middle; }
