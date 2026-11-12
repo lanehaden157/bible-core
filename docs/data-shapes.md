@@ -205,7 +205,9 @@ stripped. Verses a component condenses (`data-verses`) have no entry.
 {"c": 24, "verses": {"10": "The son of an Israelite woman …"}}
 ```
 
-World English Bible text (public domain) for the whole book, English
-numbering, from the USFM in `corpus/web/` (footnotes and Strong's tags
-dropped; a verse bridge is under its first number). The site shows it only on
+World English Bible text (public domain) for the whole book, in the book's own
+numbering (a source-numbered Hebrew book gets WEB moved onto the corpus's
+verses), from the USFM in `corpus/web/` (footnotes and Strong's tags dropped).
+A verse bridge is one key, `"3-4"`. `emit` fails when a chapter lacks a verse
+the corpus has. The site shows it only on
 request, labelled as not the study's translation.
