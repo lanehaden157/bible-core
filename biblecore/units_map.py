@@ -28,8 +28,11 @@ inside the unit (`<verses> <tier>`); `Peak` is any mark (★, peak, yes).
 A `## Digests` section after the table carries one `- NN: text` line per
 unit. All of it is applied only to a book with `"tiers": true` (book.json);
 for any other book the extra columns and section are ignored, and a map
-without them reads exactly as before. A built row's tier, peak, stretches and
-digest keys are the one thing this command updates on an existing row.
+without a Tier or Peak column reads exactly as before (an unknown extra
+column, say Notes, is ignored). On an existing row this command updates
+only tier, peak and stretches, and fills `digest` when the row has none; a
+map digest that differs from the stored one is reported and kept, and
+`--refresh-digests` overwrites it.
 
 A bold row opens an outer grouping, an italic row an inner one. `--kinds`
 names them outer to inner; without it, book.json's `groupings` read
@@ -118,7 +121,13 @@ def parse(md):
             continue
         cells = [c.strip() for c in s.strip("|").split("|")]
         if cells and cells[0] == "#" and len(cells) > 3:
-            cols = {c.lower(): i for i, c in enumerate(cells) if i > 2}
+            extra_cols = {c.lower(): i for i, c in enumerate(cells) if i > 2}
+            # tier parsing starts only with a Tier or Peak column: a Notes
+            # column (or a misspelt Tiers) must not reset rows to full
+            cols = extra_cols if {"tier", "peak"} & set(extra_cols) else {}
+            if extra_cols and not cols:
+                notes.append("the table has columns past the title "
+                             f"({', '.join(extra_cols)}) but no Tier or Peak: ignored")
             continue
         h = HEAD_RE.match(s)
         if h:
@@ -178,7 +187,7 @@ def _tier_cells(n, extra, notes):
             notes.append(f"unit {n}: stretch {sp!r} is not '<verses> condensed|digest'")
             continue
         stretches.append({"tier": m.group(2).lower(),
-                          "verses": re.sub(r"\s*-\s*", "\u2013", m.group(1).strip())})
+                          "verses": re.sub(r"\s*[\u2013-]\s*", "\u2013", m.group(1).strip())})
     if stretches:
         out["stretches"] = stretches
     if extra.get("peak", "").strip().lower() not in NO_MARK:
@@ -187,22 +196,33 @@ def _tier_cells(n, extra, notes):
 
 
 def parse_digests(md):
-    """{unit n: text} from the lines of a '## Digests' section."""
-    out, on = {}, False
+    """{unit n: text} from the lines of a '## Digests' section. A bullet may
+    wrap: the lines right after it (until a blank line, the next bullet or a
+    heading) are its continuation."""
+    out, on, cur = {}, False, None
     for line in md.splitlines():
         if line.lstrip().startswith("#"):
-            on = "digest" in line.lower()
+            on, cur = "digest" in line.lower(), None
             continue
-        m = on and DIGEST_RE.match(line)
-        if m and int(m.group(1)) not in out:
-            out[int(m.group(1))] = m.group(2)
+        if not on:
+            continue
+        m = DIGEST_RE.match(line)
+        if m:
+            n = int(m.group(1))
+            cur = n if n not in out else None
+            if cur is not None:
+                out[n] = m.group(2)
+        elif cur is not None and line.strip() and not line.lstrip().startswith(("-", "*", "|")):
+            out[cur] += " " + line.strip()
+        else:
+            cur = None
     return out
 
 
 TIER_KEYS = ("tier", "peak", "stretches")
 
 
-def plan(md, kinds, book_name, units_json, tiers=False):
+def plan(md, kinds, book_name, units_json, tiers=False, refresh_digests=False):
     """Work out the merged units.json without writing. -> (new_json, report)."""
     units, headings, notes = parse(md)
     report = list(notes)
@@ -258,9 +278,12 @@ def plan(md, kinds, book_name, units_json, tiers=False):
             row = by_n.get(n)
             if row is None:
                 report.append(f"digests: unit {n} has no row -- skipped")
-            elif not row.get("digest"):
+            elif not row.get("digest") or (refresh_digests and row["digest"] != text):
                 row["digest"] = text
                 dig.append(n)
+            elif row["digest"] != text:
+                report.append(f"digests: unit {n}: the map's digest differs from the "
+                              f"stored one -- kept (--refresh-digests overwrites)")
         if dig:
             report.append(f"units: digest set on {len(dig)} row(s) ({dig[0]}–{dig[-1]})")
     elif any("tier" in u for u in first.values()) or parse_digests(md):
@@ -344,6 +367,8 @@ def main(argv=None):
     ap.add_argument("--kinds", help="grouping kinds, outer to inner (bold, italic); "
                                     "default: book.json groupings, reversed")
     ap.add_argument("--dry", action="store_true", help="report, write nothing")
+    ap.add_argument("--refresh-digests", action="store_true",
+                    help="tiered books: overwrite stored digests with the map's")
     ap.add_argument("--no-leads", action="store_true",
                     help="skip canon leads for the next unit")
     a = ap.parse_args(argv)
@@ -360,7 +385,8 @@ def main(argv=None):
         units_json = json.load(fh)
 
     kinds = _kinds(a.kinds)
-    new, report = plan(md, kinds, b.name, units_json, tiers=b.tiers)
+    new, report = plan(md, kinds, b.name, units_json, tiers=b.tiers,
+                       refresh_digests=a.refresh_digests)
     for line in report:
         print(" ", line)
     if new is None:
