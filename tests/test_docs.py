@@ -11,6 +11,8 @@ OWNED = {
     "card_research": "canon/card-research.md",
     "card_verse": "canon/card-verse.md",
     "card_build": "canon/card-build.md",
+    "card_condensed": "canon/card-condensed.md",
+    "lens": "template/lens.md",
     "contract": "canon/contract.md",
     "book_guide": "biblecore/BOOK_CLAUDE.md",
     "field": "template/CHAT_SIDE_INSTRUCTIONS.md",

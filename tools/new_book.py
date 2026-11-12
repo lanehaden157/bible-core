@@ -118,6 +118,33 @@ def keep_language(text, language="hebrew"):
     return "".join(out)
 
 
+_TIERS_OPEN = re.compile(r"^\s*<!--\s*tiers\s*-->\s*$")
+_TIERS_CLOSE = re.compile(r"^\s*<!--\s*/tiers\s*-->\s*$")
+
+
+def keep_tiers(text, tiers=False):
+    """A template file as a tiered or tierless book gets it: lines between
+    `<!-- tiers -->` and `<!-- /tiers -->` kept (markers removed) for a
+    tiered book, dropped otherwise."""
+    out, inside = [], False
+    for line in text.splitlines(True):
+        if _TIERS_OPEN.match(line):
+            inside = True
+        elif _TIERS_CLOSE.match(line):
+            inside = False
+        elif tiers or not inside:
+            out.append(line)
+    return "".join(out)
+
+
+def tiered_config(cfg):
+    """book.json for a tiered book: "tiers": true and the digest component."""
+    out = dict(cfg)
+    out["components"] = list(cfg.get("components", [])) + ["digest"]
+    out["tiers"] = True
+    return out
+
+
 def for_language(rel, language="hebrew"):
     """Whether a template file (path relative to template/) goes to a
     `language` book."""
@@ -158,9 +185,10 @@ def template_commit(rev="HEAD"):
     return r.stdout.strip() if r.returncode == 0 else None
 
 
-def instantiate(dest, name, osis, slug, abbrev=None, language="hebrew"):
+def instantiate(dest, name, osis, slug, abbrev=None, language="hebrew", tiers=False):
     """Copy template/ to dest with the placeholders filled (names too) and
-    the language blocks resolved for `language`."""
+    the language blocks resolved for `language`. `tiers` makes a tiered book
+    (book.json "tiers", the digest component, the tier routing in the field)."""
     if language not in LANGUAGES:
         raise ValueError(f"unknown language {language!r} (known: {', '.join(LANGUAGES)})")
     subs = placeholders(name, osis, slug, abbrev)
@@ -177,15 +205,19 @@ def instantiate(dest, name, osis, slug, abbrev=None, language="hebrew"):
             dst = os.path.join(out_dir, fill(f, subs))
             if f.endswith(TEXT_EXT) or f == ".gitignore":
                 with open(src, encoding="utf-8") as fh:
-                    text = keep_language(fh.read(), language)
+                    text = keep_tiers(keep_language(fh.read(), language), tiers)
                 if subs["{{TEMPLATE}}"] is None and "{{TEMPLATE}}" in text:
                     # no git: leave the base unrecorded rather than write a bad one
                     text = "".join(ln for ln in text.splitlines(True)
                                    if "{{TEMPLATE}}" not in ln).replace('",\n}', '"\n}')
                 text = fill(text, subs)
-                if language == "greek" and rel_dir == "." and f == "book.json":
-                    text = json.dumps(greek_config(json.loads(text)), indent=2,
-                                      ensure_ascii=False) + "\n"
+                if rel_dir == "." and f == "book.json" and (language == "greek" or tiers):
+                    cfg = json.loads(text)
+                    if language == "greek":
+                        cfg = greek_config(cfg)
+                    if tiers:
+                        cfg = tiered_config(cfg)
+                    text = json.dumps(cfg, indent=2, ensure_ascii=False) + "\n"
                 with open(dst, "w", encoding="utf-8", newline="\n") as fh:
                     fh.write(text)
             else:
@@ -278,6 +310,10 @@ def main(argv=None):
     ap.add_argument("--language", choices=LANGUAGES, default="hebrew",
                     help="the book's language (default hebrew); greek fetches "
                          "MorphGNT + LXX instead of npm's morphhb")
+    ap.add_argument("--tiers", action="store_true",
+                    help="a tiered book: units marked full/condensed/digest, a peaks "
+                         "path, World English Bible text on expand (book.json "
+                         '"tiers"); its WEB USFM is fetched with the corpus')
     ap.add_argument("--skip-corpus", "--skip-npm", dest="skip_npm", action="store_true",
                     help="skip the corpus step (npm install or fetch, then corpus; "
                          "e.g. offline); run them later")
@@ -302,7 +338,7 @@ def main(argv=None):
     try:
         step = "template"
         print(f"[1] template -> {dest}")
-        instantiate(dest, a.book, a.osis, slug, a.abbrev, a.language)
+        instantiate(dest, a.book, a.osis, slug, a.abbrev, a.language, a.tiers)
 
         step = "vendor"
         print("[2] vendor bible-core")
@@ -330,6 +366,9 @@ def main(argv=None):
             step = "npm"
             print("[4] npm install + corpus")
             run([tool("npm"), "install", "--no-fund", "--no-audit"], dest)
+            if a.tiers:
+                step = "fetch"
+                run([sys.executable, "-m", "biblecore", "fetch"], dest)
             step = "corpus"
             run([sys.executable, "-m", "biblecore", "corpus"], dest)
 

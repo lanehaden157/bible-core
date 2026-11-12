@@ -49,14 +49,29 @@ CANON_FILES = {
     "card-build.md": "card-build.md",
     "contract.md": "fragment-contract.md",
 }
+# Vendored only into a tiered book (book.json "tiers": true)
+TIER_CANON_FILES = {"card-condensed.md": "card-condensed.md"}
 # Vendored once, since folded into the files above: removed from a book the
 # next time it vendors (the next `sync` drops them from its mirror).
 RETIRED_FILES = ["core-workflow.md", "canon-handoff-template.md",
                  "canon-ledger-template.md", "canon-decisions.md"]
 
 
+def canon_files(book_root):
+    """The canon files this book takes: the shared ones, plus the tier
+    cards when its book.json opts in."""
+    files = dict(CANON_FILES)
+    try:
+        with open(os.path.join(book_root, "book.json"), encoding="utf-8") as fh:
+            if json.load(fh).get("tiers") is True:
+                files.update(TIER_CANON_FILES)
+    except (OSError, ValueError):
+        pass
+    return files
+
+
 def copy_canon_files(book_root):
-    for src, dst in CANON_FILES.items():
+    for src, dst in canon_files(book_root).items():
         shutil.copyfile(os.path.join(CORE, "canon", src), os.path.join(book_root, dst))
     for name in RETIRED_FILES:
         if os.path.exists(os.path.join(book_root, name)):
@@ -97,7 +112,7 @@ def plan(book_root):
             acts.append(("update", rel))
     for rel in sorted(have - want):
         acts.append(("remove", rel))
-    for src, dst in CANON_FILES.items():
+    for src, dst in canon_files(book_root).items():
         s, d = os.path.join(CORE, "canon", src), os.path.join(book_root, dst)
         if not os.path.exists(d) or not filecmp.cmp(s, d, shallow=False):
             acts.append(("update" if os.path.exists(d) else "add", f"../{dst}"))
