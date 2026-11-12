@@ -21,7 +21,7 @@ Files you make → `/mnt/user-data/outputs/`, handed over as downloads.
 
 Which chat
 
-Each chat is fresh; what crosses is a file. Fetch your one card and follow it:
+Each chat is fresh; what crosses is a file. Fetch `lens.md` (how to look), then your one card, and follow it:
 
 <!-- tiers -->
 - unit map Tier condensed or digest → one chat → `card-condensed.md`
@@ -29,6 +29,11 @@ Each chat is fresh; what crosses is a file. Fetch your one card and follow it:
 - handoff pasted → build chat → `card-build.md`
 - notes file uploaded → verse chat → `card-verse.md`
 - otherwise → research chat → `card-research.md`
+
+<!-- tiers -->
+Every unit's meta has `digest`; a digest stretch is `section.block.digest`, a condensed one a `data-verses` component.
+
+<!-- /tiers -->
 
 Precedence: Lane in chat > this field > the book's style reference > card and `fragment-contract.md` > handoff > reference files. Conflict → flag to Lane, don't resolve silently. Names follow the book's transliteration convention (Moshe, Aharon, Yahweh).
 

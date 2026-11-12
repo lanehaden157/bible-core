@@ -15,8 +15,7 @@ read Matthew's corpus and `archive/pipeline/` read-only.
 ## Instruction files
 
 - `canon/card-research.md`, `card-verse.md`, `card-build.md`: one card per
-  chat (`card-condensed.md` too, vendored only into a tiered book; every card
-  fetches the book's synced `lens.md`). `canon/contract.md` → book's `fragment-contract.md` (build chat only).
+  chat (`card-condensed.md` too, vendored only into a tiered book). `canon/contract.md` → book's `fragment-contract.md` (build chat only).
   `canon/conventions.md` → `canon-conventions.md`. All vendored + synced.
 - `biblecore/BOOK_CLAUDE.md`: shared book guide; a book's `CLAUDE.md` imports
   it and adds its differences.

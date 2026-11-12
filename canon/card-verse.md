@@ -8,7 +8,7 @@ You = verse chat: Lane uploaded the notes file. Output:
 
 ## Start
 
-- Fetch `lens.md`, `unit-pack-NN.md`. Say notes' unit + row count back, so a wrong
+- Fetch `unit-pack-NN.md`. Say notes' unit + row count back, so a wrong
   version is caught.
 - Don't re-research. Gap → name it, don't fill from memory.
 - Ids and rulings: copy from pack, never recall. Ruled wording → use it, don't

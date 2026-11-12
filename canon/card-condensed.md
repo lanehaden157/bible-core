@@ -10,21 +10,26 @@ fetch it and follow it, with the changes below.
 
 ## Start
 
-Fetch what `card-build.md` lists, plus `lens.md`, `unit-pack-NN.md`,
-`resources.md` and the unit's map row (Tier, Peak, stretches, Digests). No
-handoff exists: you are all three chats, shortened. Say the unit, passage,
-tier and stretches back to Lane before drafting.
+Fetch what `card-build.md` lists, plus `unit-pack-NN.md`, `resources.md` and
+the unit's map row (Tier, Peak, stretches, Digests). No handoff exists: you
+are all three chats, shortened, and your own findings stand in for it. Say the
+unit, passage, tier and stretches back to Lane before drafting.
 
 ## Research, short
 
-- One pass over the passage and the pack's leads. Search the web for
-  what the passage leans on. Keep only links the text bears out; the rest are
-  tentative or dropped. Quotation marks only for wording read this chat.
-- No spoken briefing, no verse-by-verse pass. Lane gets the open calls
-  (`card-build.md`) and then the fragment.
+- One pass over the passage and the pack's leads. Search the web for what the
+  passage leans on. Keep only links the text bears out; the rest are tentative
+  or dropped. Quotation marks only for wording read this chat.
+- No spoken briefing, no verse-by-verse pass. What a handoff would carry (calls
+  for Lane, checks for code, thread notes, wording decisions) goes straight
+  where `card-build.md` says: popups first, then `checks[]`, `threads`,
+  `questions[]`.
 
 ## Build
 
+- Meta keys: `unit`, `passage`, `title`, `roots`, `threads` (all four
+  sub-keys), `digest`; `checks`, `questions` when needed
+  (see `fragment-contract.md`; `digest` is in components-reference.md).
 - Tier condensed: translate the key verses as `p.v` blocks. The rest go in
   components (`table.list`, `div.itin`, others the book enables) with exact
   `data-verses`. Tier digest: `section.block.digest` blocks with exact
@@ -35,7 +40,7 @@ tier and stretches back to Lane before drafting.
   Tracked-thread spans inside a summary are colour-only.
 - Summaries say only what the verses say. Add no echo, structure or link the
   text doesn't show; the lens's "tentative" rule applies.
-- Meta block `digest`: two to four sentences, 80 words at most, the unit
-  whole, for a reader on the peaks path. Required, every tier.
+- `digest`: two to four sentences, 80 words at most, the unit whole, for a
+  reader on the peaks path. Required, every tier.
 
 Revision → surgical edits, not a rebuild.

@@ -19,6 +19,9 @@ OWNED = {
     "claude": "template/CLAUDE.md",
     "style_reference": "template/{{SLUG}}_study_style_reference.md",
 }
+# the template's field is held tighter than the book default (4): a book's
+# field grows with its own notes
+TEMPLATE_KB = {"field": 2.5}
 # core's own CLAUDE.md, read by every core session
 CORE_CLAUDE_KB = 5.5
 
@@ -31,8 +34,9 @@ def test_core_owned_docs_are_within_budget():
     fails = []
     for key, rel in OWNED.items():
         kb = _kb(rel)
-        if kb > DOC_BUDGET_KB[key]:
-            fails.append(f"{rel} is {kb:.1f} KB, budget {DOC_BUDGET_KB[key]}: "
+        budget = TEMPLATE_KB.get(key, DOC_BUDGET_KB[key])
+        if kb > budget:
+            fails.append(f"{rel} is {kb:.1f} KB, budget {budget}: "
                          f"cut or move something (CLAUDE.md, 'Keeping them lean')")
     kb = _kb("CLAUDE.md")
     if kb > CORE_CLAUDE_KB:

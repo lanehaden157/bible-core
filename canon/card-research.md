@@ -8,7 +8,7 @@ You = research chat, fresh for this unit. Output: notes file
 
 ## Start
 
-- Fetch `lens.md`, `unit-pack-NN.md`, `resources.md`, the unit's entry in the unit map.
+- Fetch `unit-pack-NN.md`, `resources.md`, the unit's entry in the unit map.
   Not the fragment contract: build chat only.
 - State unit + passage from the map. Flag where it leaves the chapter grid.
   Raise scope questions now.

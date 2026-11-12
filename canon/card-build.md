@@ -15,7 +15,7 @@ Fetch and read whole:
   contract;
 - `components-reference.md`: markup for boxes;
 - `unit-pack-NN.md`: ids and rulings. Copy from it; never recall;
-- `translation-choices.md`, `threads-digest.md`, `lens.md`.
+- `translation-choices.md`, `threads-digest.md`.
 
 Build from the handoff. Don't redo research. Handoff missing something, or
 contradicts itself or a synced file → ask Lane.
