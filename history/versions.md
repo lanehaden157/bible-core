@@ -69,3 +69,4 @@ One line per release; `tools/release.py` appends. History, not instructions.
 - 0.35.0: Side by side (book.json component_labels relabels the synoptic chip), calendar (biblecore/calendar.json + validator, aside.calendar copied from the file), overlay grouping with verse ranges (overlay_note: per-unit verses, non-contiguous members, a unit in several elements; Deuteronomy's treaty).
 - 0.36.0: calendar.json seeded: the appointed times of Lev 23, Num 28-29 and Deut 16 (11 feasts), in Leviticus' decided terms.
 - 0.36.1: calendar.json: aroma of rest (rêaḥ niḥoaḥ, Lane's term).
+- 0.37.0: unit-pack ties bare transliteration and lists Masoretic breaks; candidate-boundaries.md syncs; sync warns on a missing pack; leads any-order pairs; words.tsv eng_ref column; contract/card doc gaps (digest, mirror, lawbriefs, promote ids, ENGLISH)
