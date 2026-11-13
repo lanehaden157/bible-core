@@ -1,5 +1,576 @@
 {
-  "_note": "Laws restated across books (biblecore/laws.py). Policy: a human adds a law; the validator checks it. Book-side law seeds are added here, then core is released and vendored.",
+  "_note": "Laws restated across books (biblecore/laws.py). Policy: a human adds a law; the validator checks it. Book-side law seeds are added here, then core is released and vendored. Seeded 2026-11-12: Tigay Excursus 16 (Deut 15 / Exod 21-23 / Lev 25) and Lev 18 vs 20.",
   "version": 1,
-  "laws": []
+  "laws": [
+    {
+      "id": "release-of-slaves",
+      "title": "Release of a bound Hebrew",
+      "note": "A kinsman who has to serve another, and when he goes free.",
+      "passages": [
+        {
+          "ref": "Exod 21:2–6",
+          "summary": "A Hebrew slave serves six years and goes out free in the seventh, for nothing. A man who will not go out has his ear pierced at the door and serves for life.",
+          "differences": [
+            "Speaks of a male slave; a daughter sold as a slave (21:7–11) does not go out as the male slaves do.",
+            "If he came in with a wife she goes out with him; if the master gave him a wife, she and her children stay.",
+            "No gift is required when he goes out."
+          ],
+          "reasons": [
+            {
+              "at": "Exod 21:5",
+              "why": "The slave says: I love my master, my wife and my children; I will not go out free."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 25:39–46",
+          "summary": "A kinsman who sells himself because of poverty is not made to serve as a slave. He serves as a hired worker and a resident until the jubilee, then goes out with his children to his own family.",
+          "differences": [
+            "Release comes at the jubilee, not after six years, so the time served can be long or short.",
+            "He serves as a hired worker, not as a slave; the awl and service for life are not mentioned.",
+            "Slaves bought from the surrounding nations may be held as property and passed to one's children (25:44–46)."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 25:42",
+              "why": "They are my servants, whom I brought out of the land of Egypt; they shall not be sold as slaves."
+            },
+            {
+              "at": "Lev 25:43",
+              "why": "You shall not rule over him with harshness, but shall fear your God."
+            }
+          ],
+          "footnote": "Whether the jubilee release stands beside or in place of the six-year release is argued; Tigay (Excursus 16) reads Lev 25 as a separate system, not derived from Exod 21–23."
+        },
+        {
+          "ref": "Deut 15:12–18",
+          "summary": "A Hebrew man or woman who is sold serves six years and is let go free in the seventh. One who says he loves the house and will not go out has his ear pierced at the door and serves forever.",
+          "differences": [
+            "Names a Hebrew woman beside the man, and the awl rule applies to the female servant too (15:17).",
+            "Requires a gift from the flock, threshing floor and winepress when he is let go (15:13–14).",
+            "Says nothing about the wife and children kept by the master."
+          ],
+          "reasons": [
+            {
+              "at": "Deut 15:15",
+              "why": "You shall remember that you were a slave in the land of Egypt, and Yahweh your God redeemed you."
+            },
+            {
+              "at": "Deut 15:18",
+              "why": "It shall not seem hard to you, for he has been double the value of a hired hand as he served you six years."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seventh-year-release",
+      "title": "The seventh year: rest for the land and release of debts",
+      "note": "What each text does in the seventh year. They do not all say the same thing.",
+      "passages": [
+        {
+          "ref": "Exod 23:10–11",
+          "summary": "Sow and gather the land for six years, but in the seventh let it rest and lie fallow. The same for the vineyard and olive grove.",
+          "differences": [
+            "The land is left alone; the poor and the wild animals eat what grows of itself.",
+            "Says nothing of debts or of a servant's release."
+          ],
+          "reasons": [
+            {
+              "at": "Exod 23:11",
+              "why": "That the poor of your people may eat; and what they leave, the animals of the field may eat."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 25:1–7",
+          "summary": "When Israel enters the land, the land keeps a Sabbath to Yahweh in the seventh year: no sowing or pruning, and no reaping of what grows by itself.",
+          "differences": [
+            "Calls the year a Sabbath of solemn rest for the land, to Yahweh.",
+            "What the land yields is food for the owner, his servants and hired workers, the resident foreigner, and the livestock and wild animals.",
+            "Says nothing of debts."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 25:4",
+              "why": "In the seventh year there shall be a Sabbath of solemn rest for the land, a Sabbath to Yahweh."
+            }
+          ]
+        },
+        {
+          "ref": "Deut 15:1–11",
+          "summary": "At the end of every seven years, every creditor releases what he has lent to his neighbor. A foreigner may still be pressed. Lend freely to the poor even as the seventh year draws near.",
+          "differences": [
+            "Concerns debts, not the land: says nothing of fallow ground.",
+            "A foreigner's debt may be collected; a brother's is released.",
+            "Adds a command to lend generously and warns against refusing a loan because the year is near (15:7–11)."
+          ],
+          "reasons": [
+            {
+              "at": "Deut 15:2",
+              "why": "Because Yahweh's release has been proclaimed."
+            },
+            {
+              "at": "Deut 15:10",
+              "why": "Because for this thing Yahweh your God will bless you in all your work."
+            }
+          ],
+          "footnote": "Deut 15:1 names a year of release for debts and 15:12 a servant's own seventh year; whether they fall in the same year is argued. Jer 34 reads them together, and the prosbul of the first century BCE was a way around the release."
+        }
+      ]
+    },
+    {
+      "id": "molech-offspring",
+      "title": "Giving offspring to Molech",
+      "passages": [
+        {
+          "ref": "Lev 18:21",
+          "summary": "You shall not give any of your children as a sacrifice to Molech, nor profane the name of your God.",
+          "differences": [
+            "Bare prohibition addressed to 'you', with no penalty.",
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations.",
+            "Sits between the sexual prohibitions (vv. 20, 22) with no break in the list."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:21",
+              "why": "You shall not profane the name of your God."
+            }
+          ],
+          "footnote": "Milgrom reads chapters 18 and 20 as two independent lists set either side of chapter 19, not one law continued (Leviticus 17-22, pp. 1766-68)."
+        },
+        {
+          "ref": "Lev 20:2–5",
+          "summary": "Anyone in Israel, native or stranger, who gives offspring to Molech shall surely be put to death, stoned by the people of the land; if they hide their eyes, Yahweh cuts off the man and his family.",
+          "differences": [
+            "Adds the penalty: death by stoning, by 'the people of the land'.",
+            "Adds that if the people do not act, Yahweh himself sets his face against the man and his family and cuts them off, with all who prostitute themselves after Molech.",
+            "Names the stranger as well as the Israelite."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:3",
+              "why": "He gave of his offspring to Molech 'to defile my sanctuary, and to profane my holy name'."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "adultery-neighbors-wife",
+      "title": "Lying with a neighbor's wife",
+      "passages": [
+        {
+          "ref": "Lev 18:20",
+          "summary": "You shall not lie carnally with your neighbor's wife and defile yourself with her.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:20",
+              "why": "You would defile yourself with her."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:10",
+          "summary": "The man who commits adultery with another man's wife, with his neighbor's wife, and the woman, shall surely be put to death.",
+          "differences": [
+            "Adds the penalty: death for both the adulterer and the adulteress.",
+            "Speaks of both parties; 18:20 addresses only the man."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fathers-wife",
+      "title": "Lying with your father's wife",
+      "passages": [
+        {
+          "ref": "Lev 18:8",
+          "summary": "You shall not uncover the nakedness of your father's wife; it is your father's nakedness.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:8",
+              "why": "It is your father's nakedness."
+            }
+          ],
+          "footnote": "Milgrom reads chapters 18 and 20 as two independent lists set either side of chapter 19, not one law continued (Leviticus 17-22, pp. 1766-68)."
+        },
+        {
+          "ref": "Lev 20:11",
+          "summary": "The man who lies with his father's wife has uncovered his father's nakedness; both shall surely be put to death.",
+          "differences": [
+            "Adds the penalty: death for both, their blood on themselves.",
+            "Gives the same reason as 18:8, now as a statement of what he has done."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:11",
+              "why": "He has uncovered his father's nakedness."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "daughter-in-law",
+      "title": "Lying with your daughter-in-law",
+      "passages": [
+        {
+          "ref": "Lev 18:15",
+          "summary": "You shall not uncover the nakedness of your daughter-in-law; she is your son's wife.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:15",
+              "why": "She is your son's wife."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:12",
+          "summary": "If a man lies with his daughter-in-law, both shall surely be put to death; they have committed a perversion.",
+          "differences": [
+            "Adds the penalty: death for both, their blood on themselves.",
+            "Gives a different reason: 'a perversion', where 18:15 says she is the son's wife."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:12",
+              "why": "They have committed a perversion."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "man-with-man",
+      "title": "Lying with a male as with a woman",
+      "passages": [
+        {
+          "ref": "Lev 18:22",
+          "summary": "You shall not lie with a man as with a woman; that is detestable.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:22",
+              "why": "It is detestable."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:13",
+          "summary": "If a man lies with a male as with a woman, both have committed an abomination; they shall surely be put to death.",
+          "differences": [
+            "Adds the penalty: death for both, their blood on themselves.",
+            "States that both have committed it; 18:22 addresses the man only.",
+            "Uses the same 'detestable' word as 18:22 for the act."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:13",
+              "why": "Both of them have committed an abomination."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "woman-and-her-mother-or-daughter",
+      "title": "A woman and her mother or daughter",
+      "passages": [
+        {
+          "ref": "Lev 18:17",
+          "summary": "You shall not uncover the nakedness of a woman and her daughter, nor take her son's daughter or her daughter's daughter; they are near kinswomen, it is wickedness.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations.",
+            "Names a woman with her daughter, and with her granddaughters; 20:14 names a wife with her mother."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:17",
+              "why": "They are near kinswomen; it is wickedness."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:14",
+          "summary": "If a man takes a wife and her mother, it is wickedness; he and they shall be burned with fire, that there be no wickedness among you.",
+          "differences": [
+            "Adds the penalty: burning with fire for the man and both women.",
+            "Names a wife and her mother, not her daughter or granddaughters.",
+            "Uses the same 'wickedness' word as 18:17 and states its purpose: that none be among you."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:14",
+              "why": "It is wickedness; they shall be burned 'that there may be no wickedness among you'."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lying-with-an-animal",
+      "title": "Lying with an animal",
+      "passages": [
+        {
+          "ref": "Lev 18:23",
+          "summary": "You shall not lie with any animal to defile yourself with it; no woman may give herself to an animal; it is a perversion.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations.",
+            "Addresses the man and the woman in one verse."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:23",
+              "why": "You would defile yourself with it; it is a perversion."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:15–16",
+          "summary": "A man who lies with an animal shall surely be put to death and the animal killed; a woman who approaches an animal, the woman and the animal shall be killed.",
+          "differences": [
+            "Adds the penalty: death for the person and for the animal, in separate verses for man and woman.",
+            "The animal is put to death; 18:23 does not mention it."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:16",
+              "why": "Their blood shall be upon them."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "your-sister",
+      "title": "Lying with your sister",
+      "passages": [
+        {
+          "ref": "Lev 18:9–11",
+          "summary": "You shall not uncover the nakedness of your sister, your father's daughter or your mother's, born at home or abroad; nor your father's wife's daughter, since she is your sister.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations.",
+            "Covers a full sister, a half-sister, and a sister born abroad (vv. 9, 11)."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:11",
+              "why": "She is your sister."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:17",
+          "summary": "If a man takes his sister, his father's daughter or his mother's daughter, and they see each other's nakedness, it is a shameful thing; they shall be cut off in the sight of their people and bear their iniquity.",
+          "differences": [
+            "Adds the penalty: cut off in the sight of the children of their people, and bearing iniquity; not death.",
+            "Names the father's daughter and the mother's daughter; does not mention the sister born abroad."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:17",
+              "why": "It is a shameful thing."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "woman-in-her-period",
+      "title": "Lying with a woman during her period",
+      "passages": [
+        {
+          "ref": "Lev 18:19",
+          "summary": "You shall not approach a woman to uncover her nakedness as long as she is unclean by her uncleanness.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations.",
+            "Speaks of 'approach' and her uncleanness; 20:18 speaks of lying and uncovering her fountain."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:19",
+              "why": "She is unclean."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:18",
+          "summary": "If a man lies with a woman during her period and uncovers her nakedness, he has made her fountain naked and she has uncovered the fountain of her blood; both shall be cut off from among their people.",
+          "differences": [
+            "Adds the penalty: both are cut off from among their people.",
+            "Names the woman as an agent: she has uncovered the fountain of her blood."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:18",
+              "why": "He has made her fountain naked, and she has uncovered the fountain of her blood."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "your-aunts",
+      "title": "Your mother's sister and your father's sister",
+      "passages": [
+        {
+          "ref": "Lev 18:12–13",
+          "summary": "You shall not uncover the nakedness of your father's sister or your mother's sister; each is a near kinswoman.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations.",
+            "Gives the father's sister first (v. 12), then the mother's sister (v. 13), each with its own reason."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:12",
+              "why": "She is your father's near kinswoman."
+            },
+            {
+              "at": "Lev 18:13",
+              "why": "She is your mother's near kinswoman."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:19",
+          "summary": "You shall not uncover the nakedness of your mother's sister or your father's sister, for he has made his close relative naked; they shall bear their iniquity.",
+          "differences": [
+            "Adds a penalty only as 'bear their iniquity'; no death and no cut-off is named.",
+            "Keeps the prohibition form ('you shall not'), unlike the 'if a man' cases around it, and gives the mother's sister first."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:19",
+              "why": "He has made his close relative naked."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "uncles-wife",
+      "title": "Your uncle's wife",
+      "passages": [
+        {
+          "ref": "Lev 18:14",
+          "summary": "You shall not uncover the nakedness of your father's brother; you shall not approach his wife, she is your aunt.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations.",
+            "Phrased as the uncle's nakedness and 'approach his wife'."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:14",
+              "why": "She is your aunt."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:20",
+          "summary": "If a man lies with his uncle's wife, he has uncovered his uncle's nakedness; they shall bear their sin and die childless.",
+          "differences": [
+            "Adds the penalty: bearing their sin and dying childless.",
+            "Says 'uncle' where 18:14 says 'father's brother'."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:20",
+              "why": "He has uncovered his uncle's nakedness."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "brothers-wife",
+      "title": "Your brother's wife",
+      "passages": [
+        {
+          "ref": "Lev 18:16",
+          "summary": "You shall not uncover the nakedness of your brother's wife; it is your brother's nakedness.",
+          "differences": [
+            "No penalty is stated in this verse; 18:29 sets 'cut off from among their people' over all the listed abominations."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:16",
+              "why": "It is your brother's nakedness."
+            }
+          ]
+        },
+        {
+          "ref": "Lev 20:21",
+          "summary": "If a man takes his brother's wife, it is an impurity; he has uncovered his brother's nakedness, and they shall be childless.",
+          "differences": [
+            "Adds the penalty: they shall be childless.",
+            "Adds a second reason: 'an impurity'.",
+            "Says 'takes' where 18:16 says 'uncover the nakedness'."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:21",
+              "why": "It is an impurity; he has uncovered his brother's nakedness."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customs-of-the-nations",
+      "title": "Not walking in the nations' customs, or the land vomits you out",
+      "passages": [
+        {
+          "ref": "Lev 18:24–30",
+          "summary": "Do not defile yourselves as the nations did; the land was defiled and vomited out its people; keep my statutes, lest the land vomit you out; whoever does these abominations is cut off.",
+          "differences": [
+            "Says the nations were defiled by 'all these', and that the land has already vomited them out.",
+            "Sets 'cut off from among their people' over everyone who does any of these abominations.",
+            "Addresses the native-born and the stranger alike (v. 26)."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 18:24",
+              "why": "In all these the nations which I am casting out were defiled."
+            },
+            {
+              "at": "Lev 18:28",
+              "why": "That the land not vomit you out also."
+            }
+          ],
+          "footnote": "Milgrom reads chapters 18 and 20 as two independent lists set either side of chapter 19, not one law continued (Leviticus 17-22, pp. 1766-68)."
+        },
+        {
+          "ref": "Lev 20:22–26",
+          "summary": "Keep all my statutes lest the land vomit you out; do not walk in the customs of the nation I am casting out, for I abhorred them; you shall be holy, set apart from the peoples.",
+          "differences": [
+            "Gives a different reason: Yahweh abhorred the nations for doing these things.",
+            "Adds the call to be holy because Yahweh is holy and has separated Israel, and to distinguish clean from unclean animals.",
+            "Says nothing of the land being defiled."
+          ],
+          "reasons": [
+            {
+              "at": "Lev 20:23",
+              "why": "They did all these things, and therefore I abhorred them."
+            },
+            {
+              "at": "Lev 20:26",
+              "why": "I, Yahweh, am holy, and have set you apart from the peoples."
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
