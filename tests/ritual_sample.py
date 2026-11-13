@@ -13,7 +13,7 @@ LEV1 = [
     ("1:7", "priest", "altar", "The sons of Aaron put fire on the altar and lay wood in order on the fire."),
     ("1:8", "priest", "altar", "They lay the pieces, the head and the suet in order on the wood."),
     ("1:9", "offerer", "court", "Washes its entrails and its legs with water."),
-    ("1:9", "priest", "altar", "The priest turns all of it into smoke on the altar: a going up offering, a fire offering, a soothing aroma for the Lord."),
+    ("1:9", "priest", "altar", "The priest turns all of it into smoke on the altar: a going up offering, a fire offering, an aroma of rest for the Lord."),
 ]
 
 LEV16 = [
