@@ -318,6 +318,16 @@ shell onto the template's in 0.8.5. Since 0.11.0 the shell is core-owned
   express. `assets` never deletes files it didn't write, so a book's own
   file in `app/` is safe.
 
+**Tabernacle map and rituals (a book opts in with `"ritual"` in `components`).**
+A unit with a `section.block.ritual` strip (steps in verse order, each with
+`data-who`, `data-at` and a verse `<sup>`) or an empty `div.tabmap` gets a
+map thumbnail in its header (tap: the full sheet with layers Holiness, Who may
+enter, The camp) and an inset beside each strip. Tapping a step lights its
+zone; a camp zone switches to the camp view. The plan is to scale from Exod
+25-27 with positions the text omits marked schematic, and the sheet lists
+every measurement with its verse. A book without `ritual` gets no map code,
+CSS or data file. Markup and zone ids: `components-reference.md`.
+
 Two things came across from Matthew's time on it (0.9.0):
 - **Overlay grouping.** book.json `"overlay"` names a secondary grouping kind
   (Matthew: `"discourse"`). The shell draws it over the primary one: a

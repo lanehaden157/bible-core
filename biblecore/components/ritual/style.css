@@ -1,0 +1,79 @@
+/* section.ritual (a strip of steps) and the tabernacle map (the sheet, the
+   header thumbnail, the insets). Tokens only; dark mode follows them. */
+.unit section.ritual { display: block; }
+.unit section.ritual.has-map { display: grid; grid-template-columns: 1fr 150px; gap: 0 18px; }
+.unit section.ritual.has-map > *:not(.tm-inset) { grid-column: 1; }
+.unit section.ritual .tm-inset { grid-column: 2; grid-row: 1 / span 20; }
+.unit .ritual ol.steps { list-style: none; counter-reset: st; margin: 10px 0 0; padding: 0; }
+.unit .ritual ol.steps > li { counter-increment: st; position: relative; margin: 0; padding: 7px 8px 7px 44px; border-top: 1px solid var(--rule-soft); border-left: 3px solid var(--rule); line-height: 1.45; cursor: pointer; }
+.unit .ritual ol.steps > li::before { content: counter(st); position: absolute; left: 12px; top: 7px; font-family: var(--display); font-weight: 600; color: var(--ink-soft); }
+.unit .ritual ol.steps > li:first-child { border-top: none; }
+.unit .ritual ol.steps > li[data-who="offerer"] { border-left-color: var(--accent-jordan); }
+.unit .ritual ol.steps > li[data-who="priest"] { border-left-color: var(--accent-olive); }
+.unit .ritual ol.steps > li[data-who="high-priest"] { border-left-color: var(--accent-clay); }
+.unit .ritual ol.steps > li[data-who="people"] { border-left-color: var(--accent-wine); }
+.unit .ritual ol.steps > li::after { content: attr(data-who) " · " attr(data-at); display: block; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.unit .ritual ol.steps > li[aria-pressed="true"] { background: color-mix(in srgb, var(--accent-clay) 14%, var(--panel)); }
+.unit .ritual ol.steps > li:focus-visible { outline: 2px solid var(--accent-clay); outline-offset: -2px; }
+.unit .ritual ol.steps > li sup { font-size: 11.5px; color: var(--accent-clay); font-variant: small-caps; margin-left: 4px; }
+.unit .tabmap { display: block; margin: 18px 0; }
+.unit .tabmap .tm-inset { max-width: 220px; margin: 0 auto; }
+
+/* the map itself */
+.tm svg { display: block; width: 100%; height: auto; font-family: var(--serif); }
+.tm .tm-plan, .tm .tm-camp { height: 72vh; }
+.tm [data-zone], .tm-thumb [data-zone], .tm-inset [data-zone] { stroke: var(--ink-soft); stroke-width: .35; vector-effect: non-scaling-stroke; cursor: default; }
+.tm-plan [data-zone="outside-camp"], .tm-camp [data-zone="outside-camp"] { fill: var(--bg); }
+[data-zone="camp"] { fill: color-mix(in srgb, var(--accent-bronze) 7%, var(--panel)); }
+[data-zone="court"] { fill: color-mix(in srgb, var(--accent-bronze) 12%, var(--panel)); }
+[data-zone="entrance"] { fill: color-mix(in srgb, var(--accent-bronze) 26%, var(--panel)); }
+[data-zone="basin"] { fill: color-mix(in srgb, var(--accent-bronze) 24%, var(--panel)); }
+[data-zone="altar"] { fill: color-mix(in srgb, var(--accent-bronze) 36%, var(--panel)); }
+[data-zone="holy-place"] { fill: color-mix(in srgb, var(--accent-bronze) 52%, var(--panel)); }
+[data-zone="veil"] { fill: color-mix(in srgb, var(--accent-bronze) 95%, var(--panel)); }
+[data-zone="most-holy"] { fill: color-mix(in srgb, var(--accent-bronze) 74%, var(--panel)); }
+.tm[data-layer="enter"] [data-zone="court"], .tm[data-layer="enter"] [data-zone="entrance"], .tm[data-layer="enter"] [data-zone="altar"], .tm[data-layer="enter"] [data-zone="basin"] { fill: color-mix(in srgb, var(--accent-jordan) 28%, var(--panel)); }
+.tm[data-layer="enter"] [data-zone="holy-place"] { fill: color-mix(in srgb, var(--accent-olive) 38%, var(--panel)); }
+.tm[data-layer="enter"] [data-zone="most-holy"], .tm[data-layer="enter"] [data-zone="veil"] { fill: color-mix(in srgb, var(--accent-clay) 40%, var(--panel)); }
+.tm .lit, .tm-thumb .lit, .tm-inset .lit { fill: color-mix(in srgb, var(--accent-clay) 78%, var(--panel)) !important; stroke: var(--ink); stroke-width: 2.4; }
+.tm .wall, .tm-thumb .wall, .tm-inset .wall { fill: none; stroke: var(--ink); stroke-width: .5; vector-effect: non-scaling-stroke; }
+.tm .post, .tm-thumb .post, .tm-inset .post { fill: var(--ink); }
+.tm .f, .tm-thumb .f, .tm-inset .f { fill: var(--panel); stroke: var(--ink); stroke-width: .25; vector-effect: non-scaling-stroke; }
+.tm .cb, .tm-thumb .cb, .tm-inset .cb { fill: color-mix(in srgb, var(--accent-bronze) 14%, var(--panel)); stroke: var(--ink-soft); stroke-width: .3; vector-effect: non-scaling-stroke; }
+.tm text, .tm-thumb text, .tm-inset text { fill: var(--ink); pointer-events: none; }
+.tm-plan .zl { font-size: 2.6px; }
+.tm-plan .zl.sm { font-size: 2.2px; fill: var(--ink-soft); }
+.tm-camp .zl { font-size: 3.4px; }
+.tm-camp .zl.sm { font-size: 3px; }
+.tm-thumb text, .tm-inset text { display: none; }
+.tm[data-layer="camp"] .tm-plan, .tm:not([data-layer="camp"]) .tm-camp { display: none; }
+.tm[data-layer="camp"] .tm-cap-holy, .tm:not([data-layer="camp"]) .tm-cap-camp { display: none; }
+.tm .tm-key { display: none; }
+.tm[data-layer="enter"] .tm-key-enter, .tm[data-layer="camp"] .tm-key-camp { display: block; }
+.tm-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.tm-tabs button { font: inherit; font-family: var(--display); font-size: 13px; padding: 4px 12px; border: 1px solid var(--rule); border-radius: 16px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.tm-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.tm-cap, .tm-key { font-size: 14.5px; color: var(--ink-soft); margin: 8px 0; line-height: 1.45; }
+.tm-key { padding-left: 18px; }
+.tm-key small { color: var(--ink-soft); }
+.tm-src { margin-top: 12px; font-size: 13.5px; }
+.tm-src summary { cursor: pointer; font-family: var(--display); }
+.tm-src table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+.tm-src th, .tm-src td { text-align: left; vertical-align: top; padding: 4px 8px 4px 0; border-bottom: 1px solid var(--rule-soft); }
+
+/* header thumbnail, inset, dialog */
+.tm-thumb { display: block; width: 74px; margin: 12px auto 0; padding: 4px; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); color: var(--ink-soft); font: inherit; font-family: var(--display); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+.tm-thumb svg { width: 100%; height: auto; display: block; }
+.tm-thumb .tm-camp { display: none; }
+.tm-inset { position: sticky; top: 64px; align-self: start; }
+.tm-inset svg { width: 100%; height: auto; display: block; }
+.tm-inset[data-view="plan"] .tm-camp, .tm-inset[data-view="camp"] .tm-plan { display: none; }
+.tm-inset .tm-lit { display: block; text-align: center; font-size: 12px; font-family: var(--display); color: var(--ink-soft); min-height: 1.3em; }
+.tm-dialog { max-width: min(560px, 94vw); max-height: 92vh; overflow: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); color: var(--ink); padding: 18px 18px 22px; }
+.tm-dialog::backdrop { background: rgba(0, 0, 0, .45); }
+.tm-dialog .tm-close { position: absolute; top: 6px; right: 10px; font-size: 24px; border: none; background: transparent; color: var(--ink-soft); cursor: pointer; }
+@media (max-width: 560px) {
+  .unit section.ritual.has-map { grid-template-columns: 1fr 84px; gap: 0 10px; }
+  .unit .ritual ol.steps > li { padding-left: 36px; }
+  .unit .ritual ol.steps > li::before { left: 8px; }
+}

@@ -195,13 +195,23 @@ shell carries its part between `//tiers:` marker lines that `assets` strips
 for any other book, so a tierless book's output is byte-identical to before
 (`tests/test_tiers_noop.py`).
 
+**Tabernacle map and `ritual` (opt-in).** A book that lists `ritual` in
+`components` gets the shared map: `biblecore/tabmap.py` draws it as SVG from
+one cited dimension table (Exod 26-27, 40; Milgrom's Fig. 1 only for positions
+the text leaves open, marked schematic), `assets` writes `data/tabmap.html` and
+`app/tabmap.js`, and `main.js` calls it between `//ritual:` marker lines that
+`assets` strips for any other book (shell text unchanged; no CSS either). It
+lives in core, not the `web/` shell, so the dimensions, zone ids (`veil` is
+drawn "curtain") and the strip check share one module. `ritual` steps name a
+zone with `data-at`; tapping one lights it on the unit's map inset and sheet.
+
 **Optional components are enabled per book** in `book.json`. Each ships as
 one piece: CSS, a check, a JS handler and a style-reference snippet, in the
 same commit, and only when a unit actually wants it. **(learned:** Matthew
 `67b2712`: asides spliced inside unclosed glosses silently collapsed. And the
 port analysis found seven classes that had never been registered.**)** The
 known ones so far are `aside.echo` (Joshua); ring, correspondence table,
-itinerary, compare and `aside.synoptic` (Matthew).
+itinerary, compare and `aside.synoptic` (Matthew); `digest` (tiers); `ritual` (Leviticus).
 
 ### Voice and balance (defaults)
 

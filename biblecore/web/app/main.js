@@ -23,6 +23,9 @@ import { MODES, modeLabel, applyMode, indexVerses, findVerse, mountInterlinear, 
 //tiers:begin
 import * as tiers from "./tiers.js";
 //tiers:end
+//ritual:begin
+import * as tabmap from "./tabmap.js";
+//ritual:end
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
@@ -516,6 +519,9 @@ async function loadUnit(unit, anchor) {
   tiers.applyView(content, unit, anchor);
   tiers.wireWeb(content);
 //tiers:end
+//ritual:begin
+  tabmap.mount(content);
+//ritual:end
   document.title = `Unit ${unit.n} · ${unit.title} — ${siteTitle()}`;
 
   rememberPosition(storagePrefix(), unit.slug, anchor && /^\d+:\d+$/.test(anchor) ? anchor : null);

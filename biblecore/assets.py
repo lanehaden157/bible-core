@@ -5,6 +5,7 @@
   css/core.css             shared structure, from biblecore/web/core.css
   css/components.css       each enabled component's style.css
   data/components.json     [{name, role, selector}] for app/main.js + spotlight.js
+  data/tabmap.html         the tabernacle map sheet (only a book enabling `ritual`)
   components-reference.md  each enabled component's snippet (synced)
   css/division.css         the book's division theme: tokens, dark mode,
                            banner masthead + emblem, ornament (theme.py)
@@ -62,6 +63,16 @@ def tier_text(text, on):
     return TIER_RE.sub(lambda m: m.group(1) if on else (m.group(2) or ""), text)
 
 
+# The same marker lines for the tabernacle map (//ritual:begin ... //ritual:end),
+# kept only by a book that enables the `ritual` component; app/tabmap.js and
+# data/tabmap.html are written only for such a book.
+RITUAL_RE = re.compile(r"^[ \t]*//ritual:begin\n(.*?)^[ \t]*//ritual:end\n", re.S | re.M)
+
+
+def ritual_text(text, on):
+    return RITUAL_RE.sub(lambda m: m.group(1) if on else "", text)
+
+
 def _write(path, text):
     old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
     if old != text:
@@ -90,9 +101,10 @@ def shell(b, css=None):
     css = css or {}
     css_dir = b.path("css")
     app = os.path.join(WEB, "app")
-    src = {f: tier_text(_read(os.path.join(app, f)), b.tiers)
+    ritual = "ritual" in b.components
+    src = {f: ritual_text(tier_text(_read(os.path.join(app, f)), b.tiers), ritual)
            for f in sorted(os.listdir(app))
-           if f.endswith(".js") and (b.tiers or f != "tiers.js")}
+           if f.endswith(".js") and (b.tiers or f != "tiers.js") and (ritual or f != "tabmap.js")}
     out, hashes = {}, {}
 
     def render(name, stack):
@@ -169,6 +181,10 @@ def main(argv=None):
     data = json.dumps(components.app_manifest(comps), indent=2, ensure_ascii=False) + "\n"
     if _write(b.data("components.json"), data):
         wrote.append("data/components.json")
+    if "ritual" in b.components:
+        from biblecore import tabmap
+        if _write(b.data("tabmap.html"), tabmap.sheet()):
+            wrote.append("data/tabmap.html")
     if _write(b.path("components_ref"), components.reference(comps, b.name)):
         wrote.append(os.path.basename(b.path("components_ref")))
     print(f"assets: components {[c.name for c in comps]}"

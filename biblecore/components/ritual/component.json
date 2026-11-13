@@ -1,0 +1,8 @@
+{
+  "name": "ritual",
+  "summary": "a rite as an ordered strip of steps, each tied to a zone of the tabernacle map (also turns the map on)",
+  "classes": ["ritual", "steps", "tabmap"],
+  "role": "inline-block",
+  "selector": "section.ritual",
+  "since": "0.1.0"
+}
