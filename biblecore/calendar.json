@@ -1,5 +1,396 @@
 {
-  "_note": "The appointed times, passage by passage (biblecore/calendar.py). Policy: a human adds a feast; the validator checks it. Book sessions fill it from Lev 23, Num 28-29 and Deut 16, then core is released and vendored.",
+  "_note": "The appointed times, passage by passage (biblecore/calendar.py). Policy: a human adds a feast; the validator checks it. Book sessions fill it from Lev 23, Num 28-29 and Deut 16, then core is released and vendored. Seeded 2026-11-13 from Lev 23, Num 28-29 and Deut 16 (Wave 2), in Leviticus' decided terms.",
   "version": 1,
-  "feasts": []
+  "feasts": [
+    {
+      "id": "daily-offering",
+      "title": "Daily offering",
+      "note": "Num 28–29 counts everything else as 'in addition to' this offering. Only Num 28 lists it; Lev 23 and Deut 16 do not.",
+      "passages": [
+        {
+          "ref": "Num 28:1–8",
+          "date": "every day, one lamb in the morning and one at twilight",
+          "requires": [
+            "Two male lambs a year old, without defect, each day as a regular going up offering, one in the morning and one at twilight.",
+            "Gift offering with each lamb: a tenth of an ephah of fine flour mixed with a quarter hin of beaten oil.",
+            "Drink offering with each lamb: a quarter hin of strong drink, poured out in the holy place to Yahweh.",
+            "Brought at its appointed time, a fire offering of soothing aroma to Yahweh; the one ordained at Mount Sinai."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sabbath",
+      "title": "Sabbath",
+      "note": "Deut 16 has no Sabbath row.",
+      "passages": [
+        {
+          "ref": "Lev 23:3",
+          "date": "seventh day",
+          "requires": [
+            "Six days work is done; the seventh day is a Sabbath of solemn rest, a holy gathering.",
+            "No work of any kind; a Sabbath to Yahweh in all your dwellings."
+          ]
+        },
+        {
+          "ref": "Num 28:9–10",
+          "date": "each Sabbath day",
+          "requires": [
+            "Two male lambs a year old, without defect, with a gift offering of two tenths of fine flour mixed with oil, and its drink offering.",
+            "This is each Sabbath's going up offering, in addition to the regular going up offering and its drink offering."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "new-moon",
+      "title": "New moon",
+      "note": "Only Num 28 gives the new moon an offering; Lev 23 and Deut 16 do not list it.",
+      "passages": [
+        {
+          "ref": "Num 28:11–15",
+          "date": "the beginnings of your months",
+          "requires": [
+            "Going up offering to Yahweh: two young bulls, one ram, seven male lambs a year old, all without defect.",
+            "Gift offering of fine flour mixed with oil: three tenths for each bull, two tenths for the ram, one tenth for each lamb.",
+            "Drink offering: half a hin of wine for each bull, a third of a hin for the ram, a quarter of a hin for each lamb.",
+            "One male goat as a sin offering to Yahweh, in addition to the regular going up offering with its gift offering and drink offering.",
+            "This is the going up offering of each new moon through the months of the year."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "passover",
+      "title": "Passover",
+      "note": "Deut 16:1 gives only the month of Abib, not the day.",
+      "passages": [
+        {
+          "ref": "Lev 23:5",
+          "date": "first month, fourteenth day, at twilight",
+          "requires": [
+            "Named as Yahweh's Passover; no offering or other requirement is given in this verse."
+          ]
+        },
+        {
+          "ref": "Num 28:16",
+          "date": "first month, fourteenth day",
+          "requires": [
+            "Named as Yahweh's Passover; no offering is listed for it here (the offerings begin on the fifteenth)."
+          ]
+        },
+        {
+          "ref": "Deut 16:1–2",
+          "date": "in the month of Abib, when Yahweh brought you out of Egypt by night",
+          "requires": [
+            "Keep the month of Abib, and keep the Passover to Yahweh your God.",
+            "Sacrifice the Passover, of the flock and the herd, at the place Yahweh chooses to make his name dwell."
+          ]
+        },
+        {
+          "ref": "Deut 16:5–7",
+          "date": "at evening, at sunset",
+          "requires": [
+            "Not to be sacrificed within any of your gates, but only at the place Yahweh chooses.",
+            "Sacrifice it there at evening, at sunset, at the season you came out of Egypt; roast and eat it there.",
+            "In the morning return to your tents."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unleavened-bread",
+      "title": "Unleavened Bread",
+      "note": "Deut 16:3–4 gives seven days and 16:8 gives six; the table lists each as the verse has it. Deut 16:16–17 covers all three pilgrimage festivals and is repeated under Weeks and Shelters.",
+      "passages": [
+        {
+          "ref": "Lev 23:6–8",
+          "date": "first month, fifteenth day, for seven days",
+          "requires": [
+            "Eat unleavened bread seven days.",
+            "First day: a holy gathering; no regular work.",
+            "Seven days: a fire offering to Yahweh.",
+            "Seventh day: a holy gathering; no regular work."
+          ]
+        },
+        {
+          "ref": "Num 28:17–25",
+          "date": "first month, fifteenth day, for seven days",
+          "requires": [
+            "Eat unleavened bread seven days; first day a holy gathering, no regular work.",
+            "Each of the seven days: a going up offering to Yahweh of two young bulls, one ram and seven male lambs a year old, all without defect.",
+            "Gift offering of fine flour mixed with oil: three tenths for each bull, two tenths for the ram, one tenth for each lamb.",
+            "Each day one male goat as a sin offering to cover for you, in addition to the morning's regular going up offering.",
+            "Seventh day: a holy gathering; no regular work."
+          ]
+        },
+        {
+          "ref": "Deut 16:3–4",
+          "date": "seven days",
+          "requires": [
+            "Eat no leavened bread with the Passover; eat unleavened bread seven days, the bread of affliction, to remember the day you came out of Egypt.",
+            "No yeast seen in all your borders seven days.",
+            "None of the meat sacrificed on the first day at evening is left until morning."
+          ]
+        },
+        {
+          "ref": "Deut 16:8",
+          "date": "six days, then the seventh day",
+          "requires": [
+            "Eat unleavened bread six days.",
+            "Seventh day: a closing gathering to Yahweh your God; no work."
+          ]
+        },
+        {
+          "ref": "Deut 16:16–17",
+          "requires": [
+            "All your males appear before Yahweh your God three times a year at the place he chooses: at the Festival of Unleavened Bread, the Festival of Weeks and the Festival of Shelters.",
+            "None appears empty; each gives as able, by the blessing Yahweh has given."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "first-sheaf",
+      "title": "First sheaf",
+      "note": "Num 28–29 and Deut 16 have no row for it; Deut 16:9 starts the count of weeks when the sickle is first put to the standing grain.",
+      "passages": [
+        {
+          "ref": "Lev 23:9–14",
+          "date": "the day after the Sabbath, once the harvest is reaped",
+          "requires": [
+            "After entering the land and reaping its harvest, bring the sheaf of the first of your harvest to the priest, who waves it before Yahweh the day after the Sabbath.",
+            "On that day, a male lamb a year old, without defect, as a going up offering to Yahweh.",
+            "Gift offering of two tenths of an ephah of fine flour mixed with oil, a fire offering of soothing aroma; drink offering of a quarter hin of wine.",
+            "No bread, roasted grain or fresh grain is eaten until that day; a statute forever."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "weeks",
+      "title": "Weeks",
+      "passages": [
+        {
+          "ref": "Lev 23:15–21",
+          "date": "fifty days after the seventh Sabbath",
+          "requires": [
+            "Count seven full Sabbaths from the day after the Sabbath on which the sheaf was brought; fifty days to the day after the seventh Sabbath, then a new gift offering to Yahweh.",
+            "Bring from your dwellings two loaves for waving: two tenths of an ephah of fine flour, baked with yeast, firstfruits to Yahweh.",
+            "With the bread: seven male lambs a year old without defect, one young bull and two rams as a going up offering, with their gift and drink offerings.",
+            "One male goat as a sin offering, and two male lambs a year old as a well-being offering sacrifice; the priest waves them with the bread.",
+            "That same day, a holy gathering; no regular work; a statute forever."
+          ]
+        },
+        {
+          "ref": "Num 28:26–31",
+          "date": "the day of the firstfruits, at your Weeks",
+          "requires": [
+            "On the day of the firstfruits, when you offer a new gift offering to Yahweh at your Weeks, a holy gathering; no regular work.",
+            "Going up offering of soothing aroma to Yahweh: two young bulls, one ram, seven male lambs a year old.",
+            "Gift offering of fine flour mixed with oil: three tenths for each bull, two tenths for the ram, one tenth for each lamb.",
+            "One male goat to cover for you, in addition to the regular going up offering and its gift offering; all without defect, with their drink offerings."
+          ]
+        },
+        {
+          "ref": "Deut 16:9–12",
+          "date": "seven weeks from the first sickle in the standing grain",
+          "requires": [
+            "Count seven weeks, beginning when the sickle is first put to the standing grain.",
+            "Keep the Festival of Weeks to Yahweh with a freewill gift from your hand, given as Yahweh blesses you.",
+            "Rejoice before Yahweh at the place he chooses, with your son, daughter, servants, the Levite, the foreigner, the fatherless and the widow.",
+            "Remember that you were a slave in Egypt."
+          ]
+        },
+        {
+          "ref": "Deut 16:16–17",
+          "requires": [
+            "All your males appear before Yahweh your God three times a year at the place he chooses: at the Festival of Unleavened Bread, the Festival of Weeks and the Festival of Shelters.",
+            "None appears empty; each gives as able, by the blessing Yahweh has given."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "day-of-shouting",
+      "title": "Day of shouting",
+      "passages": [
+        {
+          "ref": "Lev 23:23–25",
+          "date": "seventh month, first day",
+          "requires": [
+            "A solemn rest, a remembrance of shouting, a holy gathering.",
+            "No regular work; a fire offering to Yahweh."
+          ]
+        },
+        {
+          "ref": "Num 29:1–6",
+          "date": "seventh month, first day",
+          "requires": [
+            "A holy gathering; no regular work; it is a day of shouting for you.",
+            "Going up offering of soothing aroma to Yahweh: one young bull, one ram, seven male lambs a year old, all without defect.",
+            "Gift offering of fine flour mixed with oil: three tenths for the bull, two tenths for the ram, one tenth for each lamb.",
+            "One male goat as a sin offering to cover for you.",
+            "All in addition to the new moon's going up offering and gift offering, and the regular going up offering and gift offering, with their drink offerings."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "day-of-coverings",
+      "title": "Day of Coverings",
+      "note": "Lev 16 gives the rite itself; Lev 23 and Num 29 give the day's date and requirements. Deut 16 has no row.",
+      "passages": [
+        {
+          "ref": "Lev 23:26–32",
+          "date": "seventh month, tenth day; from evening to evening, beginning at evening of the ninth",
+          "requires": [
+            "A holy gathering; afflict yourselves; a fire offering to Yahweh.",
+            "No work of any kind that day, for it is a Day of Coverings, to cover for you before Yahweh your God.",
+            "Whoever does not afflict himself that day is cut off from his people; whoever does any work, Yahweh will destroy from among his people.",
+            "A Sabbath of solemn rest; a statute forever."
+          ]
+        },
+        {
+          "ref": "Num 29:7–11",
+          "date": "seventh month, tenth day",
+          "requires": [
+            "A holy gathering; afflict yourselves; no work.",
+            "Going up offering of soothing aroma to Yahweh: one young bull, one ram, seven male lambs a year old, all without defect.",
+            "Gift offering of fine flour mixed with oil: three tenths for the bull, two tenths for the ram, one tenth for each lamb.",
+            "One male goat as a sin offering, in addition to the Day of Coverings' sin offering and the regular going up offering with its gift offering and drink offerings."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "festival-of-shelters",
+      "title": "Festival of Shelters",
+      "note": "Num 29 gives one passage per day, the bulls falling from thirteen to seven. The eighth day is its own feast. Deut 16:16–17 is repeated from Unleavened Bread and Weeks.",
+      "passages": [
+        {
+          "ref": "Lev 23:34–36",
+          "date": "seventh month, fifteenth day, for seven days",
+          "requires": [
+            "First day: a holy gathering; no regular work.",
+            "Seven days: a fire offering to Yahweh."
+          ]
+        },
+        {
+          "ref": "Lev 23:39–43",
+          "date": "seventh month, fifteenth day, after the produce is gathered in; seven days",
+          "requires": [
+            "Keep the festival to Yahweh seven days, when the produce of the land is gathered in; first day a solemn rest, eighth day a solemn rest.",
+            "On the first day take the fruit of majestic trees, palm branches, boughs of leafy trees and willows of the brook, and rejoice before Yahweh your God seven days.",
+            "A statute forever, kept in the seventh month.",
+            "Dwell in shelters seven days (all native-born in Israel), so your generations know Yahweh made Israel dwell in shelters when he brought them out of Egypt."
+          ]
+        },
+        {
+          "ref": "Num 29:12–16",
+          "date": "seventh month, fifteenth day",
+          "requires": [
+            "A holy gathering; no regular work; keep a festival to Yahweh seven days.",
+            "Going up offering of soothing aroma to Yahweh: thirteen young bulls, two rams, fourteen male lambs a year old, all without defect.",
+            "Gift offering of fine flour mixed with oil: three tenths for each bull, two tenths for each ram, one tenth for each lamb.",
+            "Each day, one male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        },
+        {
+          "ref": "Num 29:17–19",
+          "date": "second day",
+          "requires": [
+            "Going up offering: twelve young bulls, two rams, fourteen male lambs a year old, all without defect.",
+            "Gift and drink offerings for the bulls, rams and lambs, by their number, as the ordinance says.",
+            "Each day, one male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        },
+        {
+          "ref": "Num 29:20–22",
+          "date": "third day",
+          "requires": [
+            "Going up offering: eleven young bulls, two rams, fourteen male lambs a year old, all without defect.",
+            "Gift and drink offerings for the bulls, rams and lambs, by their number, as the ordinance says.",
+            "Each day, one male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        },
+        {
+          "ref": "Num 29:23–25",
+          "date": "fourth day",
+          "requires": [
+            "Going up offering: ten young bulls, two rams, fourteen male lambs a year old, all without defect.",
+            "Gift and drink offerings for the bulls, rams and lambs, by their number, as the ordinance says.",
+            "Each day, one male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        },
+        {
+          "ref": "Num 29:26–28",
+          "date": "fifth day",
+          "requires": [
+            "Going up offering: nine young bulls, two rams, fourteen male lambs a year old, all without defect.",
+            "Gift and drink offerings for the bulls, rams and lambs, by their number, as the ordinance says.",
+            "Each day, one male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        },
+        {
+          "ref": "Num 29:29–31",
+          "date": "sixth day",
+          "requires": [
+            "Going up offering: eight young bulls, two rams, fourteen male lambs a year old, all without defect.",
+            "Gift and drink offerings for the bulls, rams and lambs, by their number, as the ordinance says.",
+            "Each day, one male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        },
+        {
+          "ref": "Num 29:32–34",
+          "date": "seventh day",
+          "requires": [
+            "Going up offering: seven young bulls, two rams, fourteen male lambs a year old, all without defect.",
+            "Gift and drink offerings for the bulls, rams and lambs, by their number, as the ordinance says.",
+            "Each day, one male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        },
+        {
+          "ref": "Deut 16:13–15",
+          "date": "seven days, after the threshing floor and winepress",
+          "requires": [
+            "Keep the Festival of Shelters seven days, after you gather in from your threshing floor and winepress.",
+            "Rejoice in your festival, with your son, daughter, servants, the Levite, the foreigner, the fatherless and the widow.",
+            "Keep the festival to Yahweh at the place he chooses, because he blesses all your increase; be altogether joyful."
+          ]
+        },
+        {
+          "ref": "Deut 16:16–17",
+          "requires": [
+            "All your males appear before Yahweh your God three times a year at the place he chooses: at the Festival of Unleavened Bread, the Festival of Weeks and the Festival of Shelters.",
+            "None appears empty; each gives as able, by the blessing Yahweh has given."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eighth-day",
+      "title": "Eighth day",
+      "note": "Deut 16 has no eighth day.",
+      "passages": [
+        {
+          "ref": "Lev 23:36",
+          "date": "seventh month, the eighth day",
+          "requires": [
+            "A holy gathering; a fire offering to Yahweh; a closing gathering; no regular work."
+          ]
+        },
+        {
+          "ref": "Num 29:35–38",
+          "date": "the eighth day",
+          "requires": [
+            "A closing gathering; no regular work.",
+            "Going up offering of soothing aroma to Yahweh: one bull, one ram, seven male lambs a year old, all without defect.",
+            "Gift and drink offerings for the bull, ram and lambs, by their number, as the ordinance says.",
+            "One male goat as a sin offering, in addition to the regular going up offering with its gift offering and drink offering."
+          ]
+        }
+      ]
+    }
+  ]
 }
