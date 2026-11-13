@@ -126,4 +126,23 @@ def test_masoretic_breaks_in_range_and_skipped_without_the_file():
     with open(os.path.join(d, "candidate-boundaries.md"), "w", encoding="utf-8", newline="\n") as fh:
         fh.write("| # | Ref | Type |\n|---|---|---|\n| 1 | Lev 1:9 | setumah (ס) |\n"
                  "| 2 | Lev 1:13 | petuhah (פ) |\n| 3 | Lev 2:3 | setumah (ס) |\n")
-    assert unit_pack.masoretic_breaks(b, (1, 1), (1, 17)) == [("1:9", "setumah"), ("1:13", "petuhah")]
+    assert unit_pack.masoretic_breaks(b, (1, 1), (1, 17)) == [("1:9", "setumah", None), ("1:13", "petuhah", None)]
+
+
+def test_masoretic_breaks_map_hebrew_refs_to_english():
+    import os, tempfile
+    from biblecore import book as bookmod
+    d = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d, "wlc"))
+    rows = [(f"Lev.5.{v}", f"Lev.6.{v - 19}") for v in range(20, 27)] + \
+           [(f"Lev.6.{v}", f"Lev.6.{v + 7}") for v in range(1, 24)]
+    with open(os.path.join(d, "wlc", "VerseMap.xml"), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("<map>" + "".join(f'<verse wlc="{a}" kjv="{k}" type="move"/>' for a, k in rows) + "</map>")
+    b = bookmod.Book({"book": "Leviticus", "osis": "Lev", "slug": "leviticus", "language": "hebrew",
+                      "corpus": {"kind": "oshb", "pin": "morphhb@2.0.2", "word_ids": True},
+                      "paths": {"wlc": os.path.join(d, "wlc")}}, d)
+    with open(os.path.join(d, "candidate-boundaries.md"), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("| # | Ref | Type |\n|---|---|---|\n| 1 | Lev 5:26 | petuhah (x) |\n"
+                 "| 2 | Lev 6:6 | setumah (x) |\n| 3 | Lev 6:11 | petuhah (x) |\n")
+    assert unit_pack.masoretic_breaks(b, (6, 1), (6, 7)) == [("6:7", "petuhah", "5:26")]
+    assert unit_pack.masoretic_breaks(b, (6, 8), (6, 13)) == [("6:13", "setumah", "6:6")]

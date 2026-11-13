@@ -182,17 +182,25 @@ def ruling_rows(path):
 
 
 def masoretic_breaks(b, lo, hi):
-    """[(ref, kind)] from candidate-boundaries.md for verses in lo..hi
-    ((ch, v) pairs); [] when the book has no such file."""
+    """[(ref, kind, heb)] from candidate-boundaries.md for verses in lo..hi
+    ((ch, v) pairs, the book's displayed numbering). The file uses the
+    corpus's numbering, so each ref is mapped to display first; `heb` is the
+    corpus "C:V" when it differs, else None. [] when the book has no file."""
     path = b.path("boundaries")
     if not os.path.exists(path):
         return []
+    from biblecore import versify
+    vmap = versify.book_map(b)
     out = []
     with open(path, encoding="utf-8") as fh:
         for ln in fh:
             m = re.match(r"\|\s*\d+\s*\|\s*(?:[\w. ]*?)\s*(\d+):(\d+)\s*\|\s*(petuhah|setumah)", ln)
-            if m and lo <= (int(m.group(1)), int(m.group(2))) <= hi:
-                out.append((f"{m.group(1)}:{m.group(2)}", m.group(3)))
+            if not m:
+                continue
+            src = (int(m.group(1)), int(m.group(2)))
+            ch, v = versify.to_display(*src, vmap)
+            if lo <= (ch, v) <= hi:
+                out.append((f"{ch}:{v}", m.group(3), f"{src[0]}:{src[1]}" if (ch, v) != src else None))
     return out
 
 
@@ -404,7 +412,7 @@ def build_pack(b, n, min_count=MIN_COUNT):
         L += ["", "## Masoretic breaks", "",
               "Paragraph breaks in the Hebrew text inside this unit (a break falls after the "
               "verse named; petuhah = open, setumah = closed; from candidate-boundaries.md).", ""]
-        L += ([f"- {r}: {k}" for r, k in brk] if brk else ["_None inside this unit._"])
+        L += ([f"- {r}{f' [Heb {h}]' if h else ''}: {k}" for r, k, h in brk] if brk else ["_None inside this unit._"])
 
     if b.mirrors:
         from biblecore import mirror

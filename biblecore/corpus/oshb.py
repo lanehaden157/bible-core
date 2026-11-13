@@ -19,8 +19,8 @@ of its morph code, H for Hebrew and A for Aramaic (Dan 2:4b-7:28, Ezra
 number space, so roots and the audit need nothing new. load_words() gives
 every row a `lang` from language_of(), and the word table stays as it is.
 
-The word table's last column, eng_ref, is the English-numbered ref ("Num.17.1"
-for Hebrew Num 16:36), from wlc/VerseMap.xml; equal to `ref` where numbering
+The word table's last column, eng_ref, is the English-numbered ref ("Num.16.36"
+for Hebrew Num 17:1), from wlc/VerseMap.xml; equal to `ref` where numbering
 matches. Books regenerated before 0.37.0 lack it.
 """
 import csv
@@ -139,8 +139,8 @@ def parse(b, osis=None):
 
 
 def _eng_ref(ref, emap):
-    """The English-numbered ref for a corpus ref ('Num.17.1' -> 'Num.17.1'
-    unless the verse map moves it), the word table's eng_ref column."""
+    """The English-numbered ref for a corpus ref ('Num.17.1' -> 'Num.16.36'
+    where the verse map moves it), the word table's eng_ref column."""
     bk, c, v = ref.split(".")
     ec, ev = emap.get((int(c), int(v)), (int(c), int(v)))
     return f"{bk}.{ec}.{ev}"
