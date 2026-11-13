@@ -227,6 +227,28 @@ chips each `aside.echo` whose target overlaps a brief's range. An unreachable
 hub or an empty file means no chip. The hub's `#/laws` page lists every law.
 A book without these gets no changed byte (tests/test_laws.py).
 
+**Side by side, `calendar`, and the overlay with verse ranges (group 4).**
+*Side by side* is `aside.synoptic` under a per-book chip word: book.json
+`"component_labels": {"synoptic": "Side by side"}` is merged into that
+component's `toggle.labels` in `data/components.json` (Hebrew-OT pairs need
+nothing else; Matthew has no label and no changed byte). *Calendar*:
+`biblecore/calendar.json` (feasts → passages in Bible order, each with an
+optional `date` and `requires` statements; `biblecore/calendar.py` validates)
+sits in the package for the same reason as `laws.json`: Lev 23, Num 28–29 and
+Deut 16 cross books, and the box check must read one file in every vendored
+book; a new feast is a core release. `aside.calendar` names one feast
+(`data-feast`) or `all`, and every row's date and requirement is copied from
+the file. The file ships empty; book sessions fill it. *Treaty overlay*: not a
+new component but the existing overlay grouping, extended. A book that sets
+`"overlay_note"` (shown in the book map's key) gets, in `units.json`
+`groupings[]`, optional `verses` per member (`{"4": "4:26"}`, inside that
+unit's passage), elements with non-contiguous members, and a unit in several
+elements; the map brackets each run of neighbours (overlapping brackets take
+their own rows), the placement line names every element with its verses
+(`biblecore/overlay.py` validates, `app/main.js` between `//overlayx:` marker
+lines, `web/overlay.css` appended to core.css). No marks go in the text. A
+book without `overlay_note` gets no changed byte (tests/test_sbs_calendar_treaty.py).
+
 **Inbound leads.** The unit pack's "Already cited from" section
 (`biblecore/inbound.py`) is the reverse of the outward word leads: every canon
 row (echo, story, mirror, law, intertext) whose *target* overlaps the unit,
@@ -245,7 +267,7 @@ same commit, and only when a unit actually wants it. **(learned:** Matthew
 `67b2712`: asides spliced inside unclosed glosses silently collapsed. And the
 port analysis found seven classes that had never been registered.**)** The
 known ones so far are `aside.echo` (Joshua); ring, correspondence table,
-itinerary, compare and `aside.synoptic` (Matthew); `digest` (tiers); `ritual` (Leviticus); `lawparallel` (Leviticus, Deuteronomy).
+itinerary, compare and `aside.synoptic` (Matthew); `digest` (tiers); `ritual` (Leviticus); `lawparallel` (Leviticus, Deuteronomy); `calendar` (Leviticus, Deuteronomy).
 
 ### Voice and balance (defaults)
 

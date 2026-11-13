@@ -1,0 +1,24 @@
+/* aside.calendar -- the appointed times side by side; app/spotlight.js hides
+   each behind its own ◷ chip (component.json "toggle", each: true). */
+.unit .calendar {
+  display: block; text-indent: 0; margin: 6px 0 18px; padding: 12px 16px 14px;
+  background: color-mix(in srgb, var(--panel) 78%, var(--bg));
+  border: 1px solid var(--rule-soft); border-left: 3px solid var(--accent-cal, var(--accent-bronze)); border-radius: 4px;
+  font-size: 15.5px; line-height: 1.55; page-break-inside: avoid; break-inside: avoid;
+}
+.unit .calendar > h4 { margin: 0 0 8px; font-family: var(--display); font-weight: 600; }
+.unit .calendar .cal-title { font-size: 16px; color: var(--ink); }
+.unit .calendar .row { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0 0 10px; text-indent: 0; }
+.unit .calendar .row .src { grid-column: 1; grid-row: 1; font-variant: small-caps; letter-spacing: .05em; font-size: 13px; color: var(--ink-soft); padding-top: 2px; }
+.unit .calendar .row .date { grid-column: 2; font-style: italic; }
+.unit .calendar .row .req { grid-column: 2; }
+.unit .calendar .take { margin: 8px 0 0; text-indent: 0; }
+.unit .calendar > :last-child { margin-bottom: 0; }
+.unit .cal-toggle { color: var(--accent-cal, var(--accent-bronze)); border-color: var(--accent-cal, var(--accent-bronze)); }
+.unit .cal-toggle:hover { color: var(--panel); background: color-mix(in srgb, var(--accent-cal, var(--accent-bronze)) 55%, transparent); }
+.unit .cal-toggle.is-open { color: var(--panel); background: var(--accent-cal, var(--accent-bronze)); border-color: var(--accent-cal, var(--accent-bronze)); }
+@media (max-width: 720px) {
+  .unit .calendar { padding: 10px 12px 12px; }
+  .unit .calendar .row { grid-template-columns: 1fr; }
+  .unit .calendar .row > * { grid-column: 1 !important; grid-row: auto !important; }
+}

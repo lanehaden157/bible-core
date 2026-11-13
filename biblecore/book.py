@@ -26,6 +26,12 @@ ALLOWED_KEYS = {
     # primary one: marks on unit chips, brackets on the book map, a line in
     # the placement (Matthew's discourses)
     "overlay",
+    # a note shown in the book map's key; setting it turns on the overlay's
+    # verse ranges and multi-membership (Deuteronomy's treaty; overlay.py)
+    "overlay_note",
+    # {component: label} for a toggle component's chip word, e.g.
+    # {"synoptic": "Side by side"}; absent = the component's own chip
+    "component_labels",
     # the bible-core commit whose template/ the book last took changes from
     # (its template base; structural audit D3). Read by
     # `tools/core_diff.py <book> --template`, moved by its `--set-base`.
@@ -181,6 +187,22 @@ def validate_config(cfg):
         errs.append(f"'versification' must be one of {list(VERSIFICATIONS)}")
     if "overlay" in cfg and cfg["overlay"] not in (cfg.get("groupings") or [])[1:]:
         errs.append("'overlay' must name one of the groupings after the first")
+    if "overlay_note" in cfg:
+        if not (isinstance(cfg["overlay_note"], str) and cfg["overlay_note"].strip()):
+            errs.append("'overlay_note' must be a non-empty string")
+        if "overlay" not in cfg:
+            errs.append("'overlay_note' needs 'overlay'")
+    if "component_labels" in cfg:
+        cl = cfg["component_labels"]
+        if not (isinstance(cl, dict) and all(isinstance(k, str) and isinstance(v, str) and v.strip()
+                                             for k, v in cl.items())):
+            errs.append("'component_labels' must be {component: label}")
+        else:
+            from biblecore import components as _c
+            reg = _c.registry()
+            for k in sorted(cl):
+                if k not in reg or "toggle" not in reg[k].spec:
+                    errs.append(f"component_labels: '{k}' is not a toggle component")
     if "template" in cfg and not (isinstance(cfg["template"], str)
                                   and re.fullmatch(r"[0-9a-f]{7,40}", cfg["template"])):
         errs.append("'template' must be a bible-core commit hash (7-40 hex digits)")

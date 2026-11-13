@@ -96,6 +96,11 @@ def main(argv=None):
         for e in tier_errs:
             print("  ERROR (tiers)", e)
 
+    from biblecore import overlay
+    for e in overlay.validate(units_json, book()):
+        print("  ERROR (overlay)", e)
+        tier_errs.append(e)
+
     paths = sorted(glob.glob(os.path.join(book().path("units"), "unit-*.html")))
     if not paths:
         print("no built units to validate")

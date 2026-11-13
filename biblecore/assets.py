@@ -83,6 +83,18 @@ def law_text(text, on):
     return LAW_RE.sub(lambda m: m.group(1) if on else "", text)
 
 
+# And for the overlay's verse ranges (//overlayx:begin ... [//overlayx:else ...]
+# //overlayx:end): the begin text is kept by a book whose book.json sets
+# "overlay_note" (overlay.py), the else text (today's overlay) by every other.
+# web/overlay.css is appended to core.css for such a book only.
+OVERLAYX_RE = re.compile(r"^[ \t]*//overlayx:begin\n(.*?)(?:^[ \t]*//overlayx:else\n(.*?))?"
+                         r"^[ \t]*//overlayx:end\n", re.S | re.M)
+
+
+def overlayx_text(text, on):
+    return OVERLAYX_RE.sub(lambda m: m.group(1) if on else (m.group(2) or ""), text)
+
+
 def _write(path, text):
     old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
     if old != text:
@@ -112,7 +124,8 @@ def shell(b, css=None):
     css_dir = b.path("css")
     app = os.path.join(WEB, "app")
     ritual = "ritual" in b.components
-    src = {f: law_text(ritual_text(tier_text(_read(os.path.join(app, f)), b.tiers), ritual), b.law_chips)
+    ox = bool(b.cfg.get("overlay_note"))
+    src = {f: overlayx_text(law_text(ritual_text(tier_text(_read(os.path.join(app, f)), b.tiers), ritual), b.law_chips), ox)
            for f in sorted(os.listdir(app))
            if f.endswith(".js") and (b.tiers or f != "tiers.js") and (ritual or f != "tabmap.js")
            and (b.law_chips or f != "lawchip.js")}
@@ -170,7 +183,10 @@ def generated(b, comps=None):
         return {}
     from biblecore import theme
     comps = components.enabled(b) if comps is None else comps
-    sheets = {"core.css": _read(os.path.join(WEB, "core.css")),
+    core_css = _read(os.path.join(WEB, "core.css"))
+    if b.cfg.get("overlay_note"):
+        core_css += _read(os.path.join(WEB, "overlay.css"))
+    sheets = {"core.css": core_css,
               "components.css": components.css_bundle(comps)}
     division = theme.build_css(b)
     if division:

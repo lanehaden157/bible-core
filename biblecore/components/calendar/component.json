@@ -1,0 +1,10 @@
+{
+  "name": "calendar",
+  "summary": "the appointed times side by side: one feast, or the whole table, as Lev 23, Num 28-29 and Deut 16 each give it (date and what each passage requires)",
+  "classes": ["calendar", "cal-title", "row", "src", "date", "req", "take"],
+  "role": "verse-aside",
+  "selector": "aside.calendar",
+  "toggle": {"sym": "◷", "label": "calendar", "each": true, "cls": "cal-toggle",
+             "labels": {"default": "Calendar"}},
+  "since": "0.35.0"
+}

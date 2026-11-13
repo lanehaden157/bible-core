@@ -113,12 +113,21 @@ def css_bundle(comps):
     return "".join(parts)
 
 
+def _toggle(c, labels):
+    t = c.spec["toggle"]
+    if c.name in labels:        # book.json component_labels: the chip's word
+        t = {**t, "labels": {**t.get("labels", {}), "default": labels[c.name]}}
+    return t
+
+
 def app_manifest(comps):
+    from biblecore.book import book
+    labels = book().cfg.get("component_labels") or {}
     return {"_note": "Enabled components for the app shell (biblecore/components). "
                      "Generated; don't edit.",
             "components": [{"name": c.name, "role": c.spec["role"],
                             "selector": c.spec["selector"],
-                            **({"toggle": c.spec["toggle"]} if "toggle" in c.spec else {})}
+                            **({"toggle": _toggle(c, labels)} if "toggle" in c.spec else {})}
                            for c in comps]}
 
 

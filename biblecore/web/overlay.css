@@ -1,0 +1,8 @@
+
+/* the overlay with verse ranges (book.json "overlay_note"): added to core.css
+   for such a book only (assets.py) */
+.bm-brackets { row-gap: 2px; }
+.bm-key-note {
+  flex-basis: 100%; margin: 6px auto 0; max-width: 46em; text-align: center;
+  font-size: 12.5px; font-style: italic; color: var(--ink-soft);
+}

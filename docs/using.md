@@ -354,6 +354,24 @@ Two things came across from Matthew's time on it (0.9.0):
   `compare` (✦, several on one verse share a "Rendering" panel) and
   `synoptic` (✧, one chip per parallel).
 
+**Side by side (a book sets `"component_labels": {"synoptic": "Side by side"}`).**
+The `synoptic` box, with its chip reading "Side by side"; the other account
+can be a Hebrew-Bible passage (Deut 1:9–18 beside Exod 18:13–26).
+
+**Calendar (`"calendar"` in `components`).** `biblecore/calendar.json` lists
+each appointed time with the passages that date it and what each requires.
+`python -m biblecore.calendar` checks it. An `aside.calendar` box names a feast
+(`data-feast`) or `all` and copies each row's date and requirements from the
+file. A new feast is a core release.
+
+**Overlay with verse ranges (`"overlay"` plus `"overlay_note"`).** The note
+shows in the book map's key. Each `groupings[]` entry of the overlay kind may
+add `verses` (`{"4": "4:26", "30": "30:19; 31:28"}`, per member unit, inside
+its passage); members may be non-contiguous, and a unit may be in several
+entries. The map brackets the units, and a unit's placement line reads
+"◆ Treaty: witnesses (4:26)". `python -m biblecore validate` checks the shape.
+Without `overlay_note` the overlay behaves as before.
+
 A book's one-off fragment styling stays in its own `theme.css`. A grouping's
 display name is `label`, falling back to `name`.
 
