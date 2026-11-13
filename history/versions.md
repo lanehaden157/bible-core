@@ -64,3 +64,4 @@ One line per release; `tools/release.py` appends. History, not instructions.
 - 0.30.1: Doc budgets set to the files' real sizes and enforced for core-owned docs (tests/test_docs.py); keep-it-lean conventions in CLAUDE.md and BOOK_CLAUDE.md; port prints the retrofit recipe
 - 0.31.0: Tiers: opt-in tier/peak unit map, digest block, WEB expand, peaks/full toggle, tier outline, untr thread counts, card-condensed, field split with lens.md
 - 0.32.0: Tabernacle map and ritual: opt-in `ritual` component (ordered steps with data-who and data-at a map zone), shared to-scale map (tabmap.py, verse-cited) with holiness, who-may-enter and camp layers; header thumbnail, sheet on tap, tapping a step lights its zone.
+- 0.33.0: Law parallel: biblecore/laws.json + validator, opt-in `lawparallel` box (differences and reasons copied from the file), canon kind `law`, hub Laws page, Law behind this chips (meta `lawbriefs[]`, read from the hub; book.json `law_chips`).
