@@ -127,3 +127,11 @@ select, #q { font: inherit; font-size: 16px; padding: 6px 10px; border: 1px soli
   .page-h { font-size: 27px; }
   .tiles { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); }
 }
+
+/* laws */
+.law-passages { list-style: none; padding: 0; margin: 8px 0 0; }
+.law-passage { margin: 0 0 14px; padding-left: 12px; border-left: 3px solid var(--accent-bronze); }
+.law-passage p { margin: 0 0 4px; }
+.law-diff { list-style: none; padding: 0; margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+.law-diff li { margin: 2px 0; }
+.law-note { font-size: 14px; color: var(--ink-soft); margin-top: 4px; }

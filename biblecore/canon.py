@@ -6,8 +6,11 @@ data/canon.json holds two lists, each row tagged with where it came from:
 
   intertext   {from, to, kind, unit, note?, source}
               kind: quotation | allusion | echo | type-scene | story |
-                    character | reuse | mirror
+                    character | reuse | mirror | law
   typescenes  {id, ref, unit, note?, label?, source}
+  lawbriefs   {law, ref, brief, unit, source}   (only when a unit has any;
+              meta `lawbriefs[]`: a two-sentence brief of a law id keyed by a
+              verse range, read by the hub for "Law behind this" chips)
 
 `source` is "echo" for edges harvested from the built fragments' own
 `aside.echo` lines and roots[].echo fields (re-derived on every build, so
@@ -16,6 +19,8 @@ from `aside.story` boxes (one intertext row per reference in the box's
 par-ref, kind = its data-kind; a type-scene row for its data-scene),
 "mirror" for rows from `aside.mirror` boxes (kind "mirror": the anchor verse
 to each reference in the box's par-ref, the twin in the mirrored book), or
+"law" for rows from `aside.lawparallel` boxes (kind "law": the anchor verse
+to each row's span.src, another statement of the same law), or
 "meta" for rows the chat side put in
 a unit's meta block (`intertext[]`, `typescenes[]`), merged by the porter
 and kept until that unit is re-ported. bible-core's tools/canon_collect.py
@@ -31,8 +36,8 @@ import re
 
 from biblecore.book import book
 
-KINDS = ("quotation", "allusion", "echo", "type-scene", "story", "character", "reuse", "mirror")
-HARVESTED = ("echo", "story", "mirror")   # sources re-derived from the fragments on every build
+KINDS = ("quotation", "allusion", "echo", "type-scene", "story", "character", "reuse", "mirror", "law")
+HARVESTED = ("echo", "story", "mirror", "law")   # sources re-derived from the fragments on every build
 
 # Book names as fragments write them (English abbreviations, both
 # testaments). A ref needs one of these in front of it, so prose like
@@ -55,6 +60,7 @@ _MORE = re.compile(r"\s*([;,])\s*(?:(\d+):)?(\d+)(?:" + _DASH + r"(\d+(?::\d+)?)
 ECHO_RE = re.compile(r'<aside\s+class="echo"\s+data-anchor="(\d+):(\d+)"[^>]*>(.*?)</aside>', re.S)
 STORY_RE = re.compile(r'<aside\s+class="story"([^>]*)>(.*?)</aside>', re.S)
 MIRROR_RE = re.compile(r'<aside\s+class="mirror"([^>]*)>(.*?)</aside>', re.S)
+LAW_RE = re.compile(r'<aside\s+class="lawparallel"([^>]*)>(.*?)</aside>', re.S)
 CV_RE = re.compile(r"^\d+:\d+$")
 ID_RE = re.compile(r"^[a-z0-9-]+$")
 
@@ -179,6 +185,23 @@ def harvest_mirrors(html, n, abbrev=None):
     return rows
 
 
+def harvest_laws(html, n, abbrev=None):
+    """Intertext rows from one built fragment's aside.lawparallel boxes
+    (source "law", kind "law"): the anchor verse to each row's span.src."""
+    abbrev = abbrev or book().abbrev
+    rows = []
+    for attrs, body in LAW_RE.findall(html):
+        frm = _attr(attrs, "data-anchor")
+        if not frm or not CV_RE.match(frm):
+            continue    # the component check reports it; don't harvest junk
+        law = _attr(attrs, "data-law") or ""
+        for row in re.findall(r'<div class="row">(.*?)</div>', body, re.S):
+            for to in parse_refs(_span_text(row, "src")):
+                rows.append({"from": f"{abbrev} {frm}", "to": to, "kind": "law", "unit": n,
+                             "note": f"law {law}" if law else "", "source": "law"})
+    return rows
+
+
 # ------------------------------------------------------------ meta entries
 
 def validate_meta(meta):
@@ -208,6 +231,51 @@ def validate_meta(meta):
             errs.append(f"{where}: 'ref' must be a bare 'C:V' in this book")
         for k in set(e) - {"id", "ref", "note", "label"}:
             errs.append(f"{where}: unknown key '{k}' -- {{id, ref, note?, label?}}")
+    errs += validate_lawbriefs(meta)
+    return errs
+
+
+BRIEF_KEYS = {"law", "ref", "brief"}
+MAX_BRIEF = 400
+
+
+def validate_lawbriefs(meta):
+    """Problems with a meta block's optional lawbriefs[]: each {law, ref,
+    brief}, the ref inside one of that law's passages, at most two sentences."""
+    entries = meta.get("lawbriefs")
+    if entries is None:
+        return []
+    if not isinstance(entries, list):
+        return ["lawbriefs must be a list of {law, ref, brief}"]
+    from biblecore import laws, mirror
+    try:
+        table = laws.table()
+    except (OSError, ValueError, KeyError):
+        table = {}
+    errs = []
+    for i, e in enumerate(entries):
+        where = f"lawbriefs[{i}]"
+        if not isinstance(e, dict):
+            errs.append(f"{where}: must be an object {{law, ref, brief}}")
+            continue
+        for k in sorted(set(e) - BRIEF_KEYS):
+            errs.append(f"{where}: unknown key '{k}' -- {{law, ref, brief}}")
+        law = table.get(e.get("law"))
+        if not law:
+            errs.append(f"{where}: 'law' {e.get('law')!r} is not in the laws file")
+        sp = mirror.parse_span(e.get("ref"))
+        if sp is None:
+            errs.append(f"{where}: 'ref' must be a full reference like 'Deut 15:1–11'")
+        elif law and not laws.containing(law, sp):
+            errs.append(f"{where}: 'ref' {e['ref']} is not inside one of law {e['law']}'s passages")
+        b = e.get("brief")
+        if not isinstance(b, str) or not b.strip():
+            errs.append(f"{where}: needs a 'brief'")
+        else:
+            if len(b) > MAX_BRIEF or len(re.findall(r"[.!?](?:\s|$)", b)) > 2:
+                errs.append(f"{where}: a brief is at most two sentences ({MAX_BRIEF} characters)")
+            if laws.DATING_RE.search(b):
+                errs.append(f"{where}: no dating or source argument in a brief")
     return errs
 
 
@@ -239,14 +307,20 @@ def load():
             d = json.load(fh)
     except FileNotFoundError:
         d = {}
-    return {"intertext": d.get("intertext", []), "typescenes": d.get("typescenes", [])}
+    out = {"intertext": d.get("intertext", []), "typescenes": d.get("typescenes", [])}
+    if d.get("lawbriefs"):
+        out["lawbriefs"] = d["lawbriefs"]
+    return out
 
 
 def save(d):
+    briefs = d.get("lawbriefs")
     d = {"_note": "Canon rows for this book (biblecore/canon.py). 'echo' rows are "
                   "re-harvested every build; 'meta' rows come from ported meta blocks.",
          "intertext": sorted(d["intertext"], key=_sort_key),
          "typescenes": sorted(d["typescenes"], key=lambda r: (r["unit"], r["id"], r["ref"]))}
+    if briefs:      # absent for a book with none: its file is unchanged
+        d["lawbriefs"] = sorted(briefs, key=lambda r: (r["unit"], r["law"], r["ref"]))
     with open(_path(), "w", encoding="utf-8", newline="\n") as fh:
         json.dump(d, fh, indent=2, ensure_ascii=False)
         fh.write("\n")
@@ -266,6 +340,13 @@ def merge_meta(meta, n):
                       if not (r["source"] == "meta" and r["unit"] == n)] + it
     d["typescenes"] = [r for r in d["typescenes"]
                        if not (r["source"] == "meta" and r["unit"] == n)] + ts
+    briefs = [r for r in d.get("lawbriefs", []) if r["unit"] != n] + [
+        {"law": e["law"], "ref": e["ref"], "brief": e["brief"], "unit": n, "source": "meta"}
+        for e in meta.get("lawbriefs", []) or []]
+    if briefs:
+        d["lawbriefs"] = briefs
+    else:
+        d.pop("lawbriefs", None)
     save(d)
     return len(it), len(ts)
 
@@ -276,7 +357,7 @@ def main(argv=None):
     b = book()
     built = {u["n"] for u in um._load("units.json")["units"] if u.get("built")}
     d = load()
-    echo_rows, story_rows, story_ts, mirror_rows = [], [], [], []
+    echo_rows, story_rows, story_ts, mirror_rows, law_rows = [], [], [], [], []
     for n in sorted(built):
         path = b.unit_path(n)
         if os.path.exists(path):
@@ -287,13 +368,15 @@ def main(argv=None):
             story_rows += it
             story_ts += ts
             mirror_rows += harvest_mirrors(html, n)
+            law_rows += harvest_laws(html, n)
     d["intertext"] = ([r for r in d["intertext"] if r["source"] not in HARVESTED]
-                      + echo_rows + story_rows + mirror_rows)
+                      + echo_rows + story_rows + mirror_rows + law_rows)
     d["typescenes"] = [r for r in d["typescenes"] if r["source"] not in HARVESTED] + story_ts
     save(d)
     meta_n = sum(1 for r in d["intertext"] if r["source"] == "meta")
     print(f"canon: {len(echo_rows)} echo edge(s), {len(story_rows)} story edge(s), "
           + (f"{len(mirror_rows)} mirror edge(s), " if mirror_rows else "")
+          + (f"{len(law_rows)} law edge(s), " if law_rows else "")
           + f"{meta_n} meta edge(s), "
           f"{len(d['typescenes'])} type-scene instance(s) -> "
           f"{os.path.relpath(_path(), b.root)}")

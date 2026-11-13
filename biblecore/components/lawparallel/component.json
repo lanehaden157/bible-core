@@ -1,0 +1,10 @@
+{
+  "name": "lawparallel",
+  "summary": "a law restated elsewhere in the Torah: the other passages beside this one, with the stated differences and the text's own reasons",
+  "classes": ["lawparallel", "par-title", "row", "src", "txt", "diff", "why", "take"],
+  "role": "verse-aside",
+  "selector": "aside.lawparallel",
+  "toggle": {"sym": "§", "label": "law parallel", "each": true, "cls": "law-toggle",
+             "labels": {"default": "Law parallel"}},
+  "since": "0.33.0"
+}

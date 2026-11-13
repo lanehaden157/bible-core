@@ -8,6 +8,7 @@
      #/scene/<id>       a type-scene's instances
      #/intertext        the quotation/allusion/echo graph as a matrix + list
      #/paths, #/path/<id>  curated reading paths
+     #/laws, #/laws/<id>  every law the Torah restates, with its passages
      #/bridge           the Hebrew -> LXX -> NT lexical bridge
      #/search           references, lemmas across books, tracked threads
    No native script anywhere; lexicon glosses are identifiers. */
@@ -16,16 +17,18 @@
 // is rebuilt and pushed, and a stale cached copy is invisible
 const DATA = (f) => { const u = new URL(`../data/${f}`, import.meta.url); u.searchParams.set("v", Date.now()); return u; };
 const content = document.getElementById("content");
-let books = [], divisions = [], byOsis = new Map(), bySlug = new Map(), canon = {}, conc = null;
+let books = [], divisions = [], byOsis = new Map(), bySlug = new Map(), canon = {}, conc = null, lawData = { laws: [] };
 
 init();
 
 async function init() {
   try {
-    const [b, c] = await Promise.all([
+    const [b, c, l] = await Promise.all([
       fetch(DATA("books.json")).then((r) => r.json()),
       fetch(DATA("canon.json")).then((r) => r.json()),
+      fetch(DATA("laws.json")).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
+    if (l && Array.isArray(l.laws)) lawData = l;
     books = b.books;
     divisions = b.divisions || [];
     canon = c;
@@ -56,7 +59,7 @@ function route() {
   }
   const views = {
     "": home, book: bookView, arcs, thread: threadView, scene: sceneView,
-    intertext, paths, path: pathView, search, bridge,
+    intertext, paths, path: pathView, search, bridge, laws,
   };
   window.scrollTo(0, 0);
   (views[page || ""] || notFound)(arg);
@@ -271,6 +274,28 @@ function intertext() {
   };
   content.querySelectorAll("select").forEach((s) => s.addEventListener("change", draw));
   draw();
+}
+
+/* every law with its passages in Bible order; a passage links to its book's
+   unit where that is built. Differences and reasons are the text's own; a
+   dating or source debate sits behind "Debate" only. */
+function laws(id) {
+  document.title = "Laws — study hub";
+  const list = lawData.laws || [];
+  const passage = (p) => `<li class="law-passage">
+      <p><b>${refLink(p.ref)}</b> ${esc(p.summary)}</p>
+      <ul class="law-diff">${(p.differences || []).map((d) => `<li><span class="tag">differs</span> ${esc(d)}</li>`).join("")}
+        ${(p.reasons || []).map((r) => `<li><span class="tag">because</span> ${esc(r.why)} <span class="muted">${refLink(r.at)}</span></li>`).join("")}</ul>
+      ${p.footnote ? `<details class="law-note"><summary>Debate</summary><p>${esc(p.footnote)}</p></details>` : ""}</li>`;
+  content.innerHTML = `<h1 class="page-h">Laws</h1>
+    <p class="lede">A law the Torah states in more than one place, its passages in Bible order:
+      what differs between them and the reason the text itself gives. A passage links to its study
+      where that unit is built.</p>
+    ${list.length ? list.map((l) => `<section class="law" id="${esc(l.id)}"><h2>${esc(l.title)}</h2>
+      ${l.note ? `<p class="muted">${esc(l.note)}</p>` : ""}
+      <ol class="law-passages">${l.passages.map(passage).join("")}</ol></section>`).join("")
+      : `<p class="muted">No laws entered yet.</p>`}`;
+  if (id) requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
 }
 
 function paths() {

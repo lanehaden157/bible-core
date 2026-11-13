@@ -717,7 +717,7 @@ def port_one(n, dry, src=None, force=False, answers=None, write_invalid=False,
         fh.write(fragment)
     print(f"wrote {dest}")
     print(f"local hues: { {k: v['color'] for k, v in local_roots.items()} }")
-    if meta.get("intertext") or meta.get("typescenes"):
+    if meta.get("intertext") or meta.get("typescenes") or meta.get("lawbriefs"):
         from biblecore import canon
         n_it, n_ts = canon.merge_meta(meta, n)
         print(f"canon: {n_it} intertext edge(s), {n_ts} type-scene instance(s) "

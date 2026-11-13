@@ -205,13 +205,35 @@ lives in core, not the `web/` shell, so the dimensions, zone ids (`veil` is
 drawn "curtain") and the strip check share one module. `ritual` steps name a
 zone with `data-at`; tapping one lights it on the unit's map inset and sheet.
 
+**Laws and `lawparallel` (opt-in).** `biblecore/laws.json` is the one list of
+laws the Torah restates (a law id, its passages in Bible order, each with a
+summary, stated differences, the text's own reasons, and a `footnote` that is
+the only place a dating or source debate may go); `biblecore/laws.py`
+validates it. It lives in the package, not `canon/` or a book's `data/`:
+laws cross books, and the box check has to read the same file in every
+vendored book that the hub draws its law index from (`canon/` is not
+vendored). The cost is that a new law is a core release; briefs don't cost
+that. `aside.lawparallel` works like `mirror`, but its rows are copied: a
+row's `span.diff` and `span.why` must equal a difference or reason the file
+holds, and `data-at` must be this book's passage of the named law. Canon kind
+`law` (intertext rows from the box's `span.src` refs, source `law`). **Law
+behind this:** a law unit's meta `lawbriefs[]` (`{law, ref, brief}`, at most
+two sentences, ref inside one of the law's passages) is merged at port into
+`data/canon.json` (`lawbriefs`, written only when present), `hub_build.py`
+rolls the built units' briefs into the hub's `data/law-briefs.json` (with
+the unit's slug and site), and a book with `"law_chips": true` fetches it at
+page load (`app/lawchip.js`, between `//law:` marker lines like ritual) and
+chips each `aside.echo` whose target overlaps a brief's range. An unreachable
+hub or an empty file means no chip. The hub's `#/laws` page lists every law.
+A book without these gets no changed byte (tests/test_laws.py).
+
 **Optional components are enabled per book** in `book.json`. Each ships as
 one piece: CSS, a check, a JS handler and a style-reference snippet, in the
 same commit, and only when a unit actually wants it. **(learned:** Matthew
 `67b2712`: asides spliced inside unclosed glosses silently collapsed. And the
 port analysis found seven classes that had never been registered.**)** The
 known ones so far are `aside.echo` (Joshua); ring, correspondence table,
-itinerary, compare and `aside.synoptic` (Matthew); `digest` (tiers); `ritual` (Leviticus).
+itinerary, compare and `aside.synoptic` (Matthew); `digest` (tiers); `ritual` (Leviticus); `lawparallel` (Leviticus, Deuteronomy).
 
 ### Voice and balance (defaults)
 

@@ -20,6 +20,10 @@ Writes into the hub folder:
   data/canon.json      arcs, canon threads, type-scenes, intertext, paths
   data/concordance.json  Hebrew lemmas across books (F7) and every
                        book's tracked threads with counts
+  data/laws.json       biblecore/laws.json: the law index page's data
+  data/law-briefs.json each book's `lawbriefs` rows (data/canon.json) with
+                       the unit they come from; book sites read it at page
+                       load for their "Law behind this" chips
 
 Deterministic. Commit and push the hub repo afterwards.
 """
@@ -127,9 +131,41 @@ def concordance(books):
     return ordered
 
 
+# ------------------------------------------------------------------- laws
+
+def laws_data(path=None):
+    from biblecore import laws
+    return laws.load(path)
+
+
+def law_briefs(started, root=None, laws_path=None):
+    """{"briefs": [...]}: every started book's lawbriefs rows, each with the
+    unit that wrote it and where to link. A brief whose law is gone or whose
+    unit isn't built is left out (no chip points at nothing)."""
+    from biblecore import laws, mirror
+    table = laws.table(laws_data(laws_path))
+    root = root or BIBLE
+    out = []
+    for b in started:
+        d = _load(os.path.join(root, b["repo"], "data", "canon.json"), {}) or {}
+        units = {u["n"]: u for u in _load(os.path.join(root, b["repo"], "data", "units.json"),
+                                          {"units": []}).get("units", [])}
+        for r in d.get("lawbriefs", []) or []:
+            sp = mirror.parse_span(r.get("ref"))
+            u = units.get(r.get("unit"))
+            if not sp or r.get("law") not in table or not u or not u.get("built"):
+                continue
+            out.append(OrderedDict(
+                law=r["law"], ref=r["ref"], refbook=sp[0], span=[sp[1][0], sp[1][1], sp[2][0], sp[2][1]],
+                brief=r["brief"], book=b["osis"], slug=u["slug"], unit=u["n"], site=b["site"],
+                link="cv" if b["kind"] == "core" else "v"))
+    out.sort(key=lambda r: (r["refbook"], r["span"], r["law"]))
+    return {"briefs": out}
+
+
 # ------------------------------------------------------------------ build
 
-def build():
+def build(laws_path=None):
     books_cfg = canon_file("books")["books"]
     started = [b for b in books_cfg if b.get("repo") and os.path.isdir(os.path.join(BIBLE, b["repo"]))]
     entries = {b["osis"]: book_entry(b) for b in started}
@@ -158,7 +194,8 @@ def build():
         lemmas=concordance([entries[b["osis"]] | {"repo": b["repo"]} for b in started]),
     )
     return {"books.json": {"books": books, "divisions": divisions}, "canon.json": canon,
-            "concordance.json": conc}
+            "concordance.json": conc, "laws.json": laws_data(laws_path),
+            "law-briefs.json": law_briefs(started, laws_path=laws_path)}
 
 
 SOURCE_FILES = ["index.html", "app/hub.js", "css/hub.css", "README.md"]

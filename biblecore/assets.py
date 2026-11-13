@@ -73,6 +73,16 @@ def ritual_text(text, on):
     return RITUAL_RE.sub(lambda m: m.group(1) if on else "", text)
 
 
+# And for "Law behind this" chips (//law:begin ... //law:end), kept only by a
+# book whose book.json says "law_chips": true; app/lawchip.js is written only
+# for such a book.
+LAW_RE = re.compile(r"^[ \t]*//law:begin\n(.*?)^[ \t]*//law:end\n", re.S | re.M)
+
+
+def law_text(text, on):
+    return LAW_RE.sub(lambda m: m.group(1) if on else "", text)
+
+
 def _write(path, text):
     old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
     if old != text:
@@ -102,9 +112,10 @@ def shell(b, css=None):
     css_dir = b.path("css")
     app = os.path.join(WEB, "app")
     ritual = "ritual" in b.components
-    src = {f: ritual_text(tier_text(_read(os.path.join(app, f)), b.tiers), ritual)
+    src = {f: law_text(ritual_text(tier_text(_read(os.path.join(app, f)), b.tiers), ritual), b.law_chips)
            for f in sorted(os.listdir(app))
-           if f.endswith(".js") and (b.tiers or f != "tiers.js") and (ritual or f != "tabmap.js")}
+           if f.endswith(".js") and (b.tiers or f != "tiers.js") and (ritual or f != "tabmap.js")
+           and (b.law_chips or f != "lawchip.js")}
     out, hashes = {}, {}
 
     def render(name, stack):

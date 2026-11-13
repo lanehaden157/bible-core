@@ -78,7 +78,7 @@ always present, each a list.
 
 **`intertext[]`**: `{ref, to, kind, note?}`. `ref` bare `"C:V"` here, `to`
 like `"Ps 67:1"`, `kind`: `quotation`, `allusion`, `echo`, `type-scene`,
-`story`, `character`, `reuse`. Asides and root `echo` are harvested already:
+`story`, `character`, `reuse`, `law`. Asides and root `echo` are harvested already:
 list only what those don't say.
 
 **`typescenes[]`**: `{id, ref, note?, label?}`. `id` from the type-scene list

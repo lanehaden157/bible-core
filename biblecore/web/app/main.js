@@ -26,6 +26,9 @@ import * as tiers from "./tiers.js";
 //ritual:begin
 import * as tabmap from "./tabmap.js";
 //ritual:end
+//law:begin
+import * as lawchip from "./lawchip.js";
+//law:end
 
 const UNITS_URL = new URL("../data/units.json", import.meta.url);
 // written by the build from book.json "components" (biblecore/components):
@@ -96,6 +99,9 @@ async function init() {
     if (bookInfo.hub) {
       loadCanon(bookInfo.hub, bookInfo.slug);
       addHubLink(bookInfo.hub);
+//law:begin
+      lawchip.load(bookInfo.hub);
+//law:end
     }
     renderSources(bookInfo.language || manifest.language);
 //tiers:begin
@@ -522,6 +528,9 @@ async function loadUnit(unit, anchor) {
 //ritual:begin
   tabmap.mount(content);
 //ritual:end
+//law:begin
+  lawchip.mount(content);
+//law:end
   document.title = `Unit ${unit.n} · ${unit.title} — ${siteTitle()}`;
 
   rememberPosition(storagePrefix(), unit.slug, anchor && /^\d+:\d+$/.test(anchor) ? anchor : null);

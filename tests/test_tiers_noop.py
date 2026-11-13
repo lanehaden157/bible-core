@@ -148,6 +148,8 @@ def test_vendored_canon_files_are_unchanged_for_a_tierless_book():
     for rel in rels:
         old = subprocess.run(["git", "show", f"{BASE}:{rel}"], cwd=support.CORE, capture_output=True)
         new = open(os.path.join(support.CORE, rel), "rb").read()
+        if rel == "canon/contract.md":      # 0.33.0: the one added intertext kind, `law`
+            new = new.replace(b"`reuse`, `law`.", b"`reuse`.")
         if old.returncode or old.stdout.replace(b"\r\n", b"\n") != new.replace(b"\r\n", b"\n"):
             fails.append(f"{rel} differs from {BASE}")
     return fails

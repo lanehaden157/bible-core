@@ -18,7 +18,7 @@ from biblecore import book as bookmod
 _tmp = None
 # tiers.js is written only for a tiered book (tests/test_tiers.py)
 SHELL = ["index.html"] + [f"app/{f}" for f in sorted(os.listdir(os.path.join(assets.WEB, "app")))
-                          if f not in ("tiers.js", "tabmap.js")]
+                          if f not in ("tiers.js", "tabmap.js", "lawchip.js")]
 HASHED = re.compile(r"\?v=[0-9a-f]{10}\b")
 
 

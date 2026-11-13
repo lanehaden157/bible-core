@@ -1,0 +1,5 @@
+{
+  "_note": "Laws restated across books (biblecore/laws.py). Policy: a human adds a law; the validator checks it. Book-side law seeds are added here, then core is released and vendored.",
+  "version": 1,
+  "laws": []
+}

@@ -37,6 +37,10 @@ ALLOWED_KEYS = {
     # path, WEB text on expand). Absent = none of that exists in the build
     # or the shell (tiers.py)
     "tiers",
+    # true = this book's echoes into a law (biblecore/laws.json) get a "Law
+    # behind this" chip, from briefs the hub publishes. Absent = no chip code
+    # in the shell (lawchip.js)
+    "law_chips",
 }
 MIRROR_ENTRY_KEYS = {"with", "file"}
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
@@ -128,6 +132,8 @@ def validate_config(cfg):
                 errs.append("corpus: missing 'kind'")
     if "tiers" in cfg and not isinstance(cfg["tiers"], bool):
         errs.append("'tiers' must be true or false")
+    if "law_chips" in cfg and not isinstance(cfg["law_chips"], bool):
+        errs.append("'law_chips' must be true or false")
     for k in ("groupings", "components", "meta_keys"):
         if k in cfg and not (isinstance(cfg[k], list)
                              and all(isinstance(x, str) for x in cfg[k])):
@@ -288,6 +294,11 @@ class Book:
     def tiers(self):
         """True for a tiered book; every tier code path is gated on this."""
         return self.cfg.get("tiers") is True
+
+    @property
+    def law_chips(self):
+        """True when echoes into a law get a "Law behind this" chip."""
+        return self.cfg.get("law_chips") is True
 
     @property
     def mirrors(self):

@@ -149,6 +149,8 @@ CORE_TOP_LEVEL_KEYS = {
     "checks",
     # canon rows (G9), consumed at port like questions -- see canon.py
     "intertext", "typescenes",
+    # briefs of a law id keyed by verse range, consumed at port (laws.py)
+    "lawbriefs",
     # proposed mirror pairs, consumed at port (0.29.0) -- see mirror.py
     "mirror",
     # core version the unit was written against (D7) -- see contract.py

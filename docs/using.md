@@ -328,6 +328,22 @@ zone; a camp zone switches to the camp view. The plan is to scale from Exod
 every measurement with its verse. A book without `ritual` gets no map code,
 CSS or data file. Markup and zone ids: `components-reference.md`.
 
+**Laws (a book opts in with `"lawparallel"` in `components`, and/or
+`"law_chips": true`).** `biblecore/laws.json` lists each law the Torah
+restates: its passages in Bible order, each with a summary, stated
+differences and the text's own reasons (a dating or source debate only in
+`footnote`). `python -m biblecore.laws` checks it. A `lawparallel` box in a
+law's unit names the law (`data-law`) and its own passage (`data-at`), copies
+each row's difference and reason from the file, and fails the check on
+anything the file doesn't hold. A law unit also writes two-sentence briefs in
+its meta block, `lawbriefs[]` (`{law, ref, brief}`); `canon` merges them into
+`data/canon.json`, and the hub publishes them as `data/law-briefs.json`.
+A narrative book with `"law_chips": true` fetches that file from the hub at
+page load and puts a "Law behind this" chip on any `aside.echo` whose target
+falls in a brief's range; hub unreachable → no chip. A new brief needs no
+re-vendor, a new law does (the file is in the package). The hub's Laws page
+lists every law with links to the units where built.
+
 Two things came across from Matthew's time on it (0.9.0):
 - **Overlay grouping.** book.json `"overlay"` names a secondary grouping kind
   (Matthew: `"discourse"`). The shell draws it over the primary one: a
