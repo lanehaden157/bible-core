@@ -186,3 +186,23 @@ def test_sync_prunes_files_that_left_the_list():
     finally:
         support.joshua_book()
         shutil.rmtree(d, ignore_errors=True)
+
+
+def test_boundaries_sync_by_default_and_missing_pack_is_flagged():
+    d = tempfile.mkdtemp(prefix="bc-sync-")
+    try:
+        b = _book(d)
+        fails = []
+        if "candidate-boundaries.md" in sync.resolve(b):
+            fails.append("candidate-boundaries.md listed before it exists")
+        _touch(d, "candidate-boundaries.md", "canon-leads/canon-leads-unit-01.md",
+               "canon-leads/canon-leads-unit-02.md", "canon-leads/unit-pack-02.md")
+        if "candidate-boundaries.md" not in sync.resolve(b):
+            fails.append("candidate-boundaries.md not synced once it exists")
+        if not sync.role_for("candidate-boundaries.md", b):
+            fails.append("candidate-boundaries.md has no role")
+        if sync.missing_packs(b) != ["canon-leads/canon-leads-unit-01.md"]:
+            fails.append(f"missing_packs = {sync.missing_packs(b)}")
+        return fails
+    finally:
+        shutil.rmtree(d, ignore_errors=True)

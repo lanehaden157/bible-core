@@ -14,7 +14,8 @@ is so the first draft passes.
   drop. Fixed phrase the book repeats verbatim may be a thread.
 - Tag **every** occurrence with the one slug, also where the English differs.
   Tag follows the lexeme, not the gloss.
-- Every slug resolves in `threads-digest.md` or this fragment's `roots[]`.
+- Every slug resolves in `threads-digest.md`, this fragment's `roots[]` or its
+  `threads.promote[]`.
   `roots[]` = local roots only; never re-declare a tracked thread.
 - **Tag notable words that aren't threads:** a striking translation choice
   gets a `data-root` span + `roots[]` entry. Read for these deliberately.
@@ -28,6 +29,8 @@ is so the first draft passes.
   handoff, not memory.
 
 ## Ids, not strings
+
+Word-table `5930 a` = `5930a`. A bare id claims every variant; a suffixed id, one lexeme.
 
 Root = curated set of lemma ids in `roots.json`. Tracked occurrence carries
 its word id (`data-w`, from the word table). Never compare or hand-type
@@ -53,6 +56,10 @@ hard error. Zero native Hebrew or Greek script anywhere, attributes included.
 | grouping keys | | int | one per `book.json` grouping; looked up from unit map if omitted |
 | `questions` `checks` | | array | below |
 | `intertext` `typescenes` | | array | below |
+| `digest` | | str | tiered books; consumed into the `units.json` row |
+| `mirror` | | array | proposed pairs (`mirrors` books); consumed |
+| `lawbriefs` | | array | `lawparallel` rows |
+| `contract` | | str | porter-stamped |
 
 **`roots[]`**: `{root, translit, gloss, example?, echo?}`, no other keys.
 `root` matches `[a-z0-9-]+`.

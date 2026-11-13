@@ -20,6 +20,7 @@ Word table columns match OSHB's:
            distinct NT lemmas share a transliteration (ordered by first
            appearance in canonical order, so ids are stable across books)
   morph    "<pos>:<parse>" (lang/greek_morph.describe reads it)
+  eng_ref  English-numbered ref; the same as ref for the NT
 
 The reading text joins column 4 (the text with its punctuation), one verse
 per line: "Matt 1:1<TAB>Βίβλος γενέσεως …". SBLGNT's verse numbering is the
@@ -151,9 +152,9 @@ def build(b):
     with open(b.path("reading"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(reading) + "\n")
     with open(b.path("words"), "w", encoding="utf-8", newline="\n") as f:
-        f.write("word_id\tref\tsurface\tlemma\tmorph\n")
+        f.write("word_id\tref\tsurface\tlemma\tmorph\teng_ref\n")
         for row in words:
-            f.write("\t".join(row) + "\n")
+            f.write("\t".join((*row, row[1])) + "\n")  # NT numbering is English
     return {"verses": len(reading), "words": len(words)}
 
 

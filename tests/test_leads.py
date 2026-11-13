@@ -98,8 +98,20 @@ def test_output_has_no_native_hebrew_and_stays_short():
         md = open(path, encoding="utf-8").read()
     _check("no Hebrew script in the leads sheet", not re.search(r"[֐-׿]", md),
            re.findall(r"[֐-׿]+", md)[:5])
-    leads = md.count("\n- **")
+    leads = (md.split("### Rare words together")[0].count("\n- **")
+             + md.split("## Rare words (")[-1].count("\n- **"))
     _check("unit 2 stays a short reading list (<= 30 leads)", leads <= 30, leads)
+
+
+def test_scattered_leads_find_any_order_pairs():
+    uv = [(r, w) for r, w in BIBLE["Lev"] if r == "Lev.1.9"]
+    phrases = cl.phrase_leads(BIBLE, FREQ, uv)
+    sc = cl.scattered_leads(BIBLE, FREQ, uv, phrases)
+    hit = {ref for p in sc for ref, _x, _y in p["hits"]}
+    _check("Lev 1:9 pairs with Exod 29:18 in any order", "Exod.29.18" in hit, sorted(hit)[:10])
+    _check("no pair repeats a phrase lead",
+           not any({p["words"][0][0], p["words"][1][0]} == {a[0], b[0]}
+                   for p in sc for q in phrases for a, b in zip(q["words"], q["words"][1:])))
 
 
 def main():

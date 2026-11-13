@@ -21,7 +21,7 @@ You = research chat, fresh for this unit. Output: notes file
 - Sources: `resources.md` is start, not limit. Search web every pass, cite
   what you find. Read passage before giving a view; say where readings
   diverge + why. Name only sources `resources.md` lists or a search found.
-- Quotes: quotation marks only for wording read this chat (row VERIFIED).
+- Quotes: quotation marks only for wording read this chat (row VERIFIED; ENGLISH gets none).
   Else paraphrase.
 - Rulings: pack rules a wording → use it, don't re-ask.
 - Ask Lane only what blocks: scope, missing or contradictory file. Judgment
@@ -83,6 +83,7 @@ First line: `Unit NN, <passage>, notes file`.
 - **evidence:** shared words in transliteration + lemma ids from pack.
 - **wording read:** words actually read in target, or "not read".
 - **status:** VERIFIED (read this chat), SHEET (pack or leads only),
+  ENGLISH (wording read this chat in English only; no Hebrew seen),
   SECONDHAND (summary of a source), RECALLED (memory).
 - **strength:** strong, possible, weak.
 - **verdict:** ship (root echo, aside.echo, footnote, story box), keep as

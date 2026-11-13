@@ -83,3 +83,47 @@ def test_audit_warns_on_a_late_opener():
     t["opens"] = {"unit": 99, "ref": "99:1", "note": "late"}
     ws = audit.opener_warnings(threads, roots, units, audit.load_words())
     assert any(w.startswith(t["id"] + ":") for w in ws), ws
+
+
+def test_ruling_rows_take_bare_and_parenthesised_translit(tmp_path=None):
+    import os, tempfile
+    d = tempfile.mkdtemp()
+    p = os.path.join(d, "tc.md")
+    with open(p, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("## Glossary\n\n| word | Hebrew (translit.) | rendering | note |\n|---|---|---|---|\n"
+                 "| kipper | kipper | **cover** | n |\n"
+                 "| going up offering | ʿolah / ʿolot | **going up offering** | n |\n"
+                 "| old | עֹלָה (olah) | **x** | n |\n")
+    rows = unit_pack.ruling_rows(p)
+    toks = {r[1]: r[2] for r in rows}
+    assert toks["kipper"] == ["kipper"]
+    assert "ʿolah" in toks["going up offering"] and "ʿolot" in toks["going up offering"]
+    assert "olah" in toks["old"]
+    tied, _ = unit_pack.tie_rulings([("t.md", rows)], {unit_pack._skeleton("kipper")})
+    assert any("kipper" in t[2] for t in tied)
+
+
+def test_short_skeletons_tie_with_gutturals_and_whole_words():
+    forms = {"ha-ʿ̲olah", "ʾishsheh", "reaḥ", "niḥoaḥ", "lo", "kar"}
+    sks = {unit_pack._skeleton(f) for f in forms}
+    rows = [("t.md", [("g", "going up offering", ["ʿolah"], "L1"),
+                      ("g", "fire", ["ʾishsheh"], "L2"),
+                      ("g", "aroma", ["rêaḥ niḥoaḥ"], "L3"),
+                      ("g", "basin", ["kiyyor"], "L4"),
+                      ("g", "aroma2", ["rêaḥ ṭahor"], "L5")])]
+    tied, _ = unit_pack.tie_rulings(rows, sks, unit_forms=forms)
+    got = {t[2] for t in tied}
+    assert got == {"L1", "L2", "L3"}, got
+
+
+def test_masoretic_breaks_in_range_and_skipped_without_the_file():
+    import os, tempfile
+    from biblecore import book as bookmod
+    d = tempfile.mkdtemp()
+    b = bookmod.Book({"book": "Leviticus", "osis": "Lev", "slug": "leviticus", "language": "hebrew",
+                      "corpus": {"kind": "oshb", "pin": "morphhb@2.0.2", "word_ids": True}}, d)
+    assert unit_pack.masoretic_breaks(b, (1, 1), (1, 17)) == []
+    with open(os.path.join(d, "candidate-boundaries.md"), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("| # | Ref | Type |\n|---|---|---|\n| 1 | Lev 1:9 | setumah (ס) |\n"
+                 "| 2 | Lev 1:13 | petuhah (פ) |\n| 3 | Lev 2:3 | setumah (ס) |\n")
+    assert unit_pack.masoretic_breaks(b, (1, 1), (1, 17)) == [("1:9", "setumah"), ("1:13", "petuhah")]

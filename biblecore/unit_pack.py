@@ -130,14 +130,19 @@ def versification_notes(b, lo, hi):
 _ROW = re.compile(r"^\|(.+)\|\s*$")
 
 
-def _skeleton(s):
+def _skeleton(s, gutturals=False):
     """Consonant skeleton of a transliteration, for tying a ruling row to a
-    word: marks and vowels dropped, digraphs folded, doubles collapsed."""
+    word: marks and vowels dropped, digraphs folded, doubles collapsed.
+    `gutturals` keeps ʾ and ʿ (a short skeleton needs them to mean anything)."""
     import unicodedata
     s = s.lower().replace("ḥ", "h")          # chet is h here, so chat "ch" (chet) agrees
     s = "".join(c for c in unicodedata.normalize("NFD", s.lower())
                 if not unicodedata.combining(c))
-    s = re.sub(r"[ʾʿ'’`\-\s]", "", s)
+    if gutturals:
+        s = re.sub(r"['’`]", "ʾ", s)
+        s = re.sub(r"[\-\s]", "", s)
+    else:
+        s = re.sub(r"[ʾʿ'’`\-\s]", "", s)
     for a, b_ in (("ph", "p"), ("f", "p"), ("th", "t"), ("kh", "k"), ("ch", "h"),
                   ("sh", "s"), ("ts", "s"), ("tz", "s"), ("q", "k"),
                   ("w", "v"), ("c", "k")):
@@ -166,22 +171,59 @@ def ruling_rows(path):
             if len(cells) < 3 or set(cells[0]) <= set("-: ") or cells[0].lower() in ("word", "english"):
                 continue
             toks = []
-            for c in cells[1:3]:
-                for grp in re.findall(r"\(([^()]*)\)", c):
+            for i, c in enumerate(cells[1:3]):
+                groups = re.findall(r"\(([^()]*)\)", c)
+                if not groups and i == 0:    # a bare Hebrew cell is transliteration itself
+                    groups = [c]
+                for grp in groups:
                     toks += [t.strip() for t in re.split(r"[/,;]", grp) if t.strip()]
             rows.append((heading, cells[0], toks, ln))
     return rows
 
 
-def tie_rulings(row_sets, unit_skeletons, thread_keys=()):
+def masoretic_breaks(b, lo, hi):
+    """[(ref, kind)] from candidate-boundaries.md for verses in lo..hi
+    ((ch, v) pairs); [] when the book has no such file."""
+    path = b.path("boundaries")
+    if not os.path.exists(path):
+        return []
+    out = []
+    with open(path, encoding="utf-8") as fh:
+        for ln in fh:
+            m = re.match(r"\|\s*\d+\s*\|\s*(?:[\w. ]*?)\s*(\d+):(\d+)\s*\|\s*(petuhah|setumah)", ln)
+            if m and lo <= (int(m.group(1)), int(m.group(2))) <= hi:
+                out.append((f"{m.group(1)}:{m.group(2)}", m.group(3)))
+    return out
+
+
+def _tied(tok, unit_skeletons, segments):
+    """Does one transliteration token tie to the unit? A skeleton of 3+
+    letters is found inside a word's; a shorter one (ʿolah, ʾishsheh) must
+    equal a whole word or hyphen segment, with ʾ/ʿ kept and one present. A multi-word token
+    ties when every piece does, short ones allowed."""
+    pieces = tok.split()
+    for piece in pieces:
+        sk = _skeleton(piece)
+        if len(pieces) == 1 and len(sk) >= 3:
+            return any(sk in w for w in unit_skeletons)
+        strong = _skeleton(piece, gutturals=True)
+        if len(pieces) == 1 and not re.search("[ʾʿ]", strong):
+            return False                # a short skeleton with no guttural says too little
+        if len(strong) < (1 if len(pieces) > 1 else 2) or strong not in segments:
+            if not (len(sk) >= 3 and any(sk in w for w in unit_skeletons)):
+                return False
+    return bool(pieces)
+
+
+def tie_rulings(row_sets, unit_skeletons, thread_keys=(), unit_forms=()):
     """-> (tied [(file, heading, line)], untied [(file, headword)])."""
+    segments = {_skeleton(seg, gutturals=True) for f in unit_forms for seg in [f, *f.split("-")]}
     tied, untied = [], []
     for fname, rows in row_sets:
         for heading, head, toks, line in rows:
             hit = re.sub(r"[^a-z0-9]+", "-", head.lower()).strip("-") in thread_keys
             for t in toks:
-                sk = _skeleton(t)
-                if len(sk) >= 3 and any(sk in w for w in unit_skeletons):
+                if _tied(t, unit_skeletons, segments):
                     hit = True
                     break
             (tied if hit else untied).append(
@@ -277,7 +319,8 @@ def build_pack(b, n, min_count=MIN_COUNT):
     # rulings
     row_sets = [("translation-choices.md", ruling_rows(os.path.join(b.root, "translation-choices.md"))),
                 ("canon-conventions.md", ruling_rows(os.path.join(b.root, "canon-conventions.md")))]
-    tied, untied = tie_rulings(row_sets, skeletons, {t["id"] for t in thread_rows})
+    tied, untied = tie_rulings(row_sets, skeletons, {t["id"] for t in thread_rows},
+                              {f for k in unit_count for f in forms[k]})
 
     # source gaps
     gaps = ""
@@ -355,6 +398,13 @@ def build_pack(b, n, min_count=MIN_COUNT):
         L.append(body.strip())
     else:
         L.append(f"_No canon-leads-unit-{n:02d}.md yet: run `python -m biblecore leads {n}`._")
+
+    brk = masoretic_breaks(b, lo, hi)
+    if os.path.exists(b.path("boundaries")):
+        L += ["", "## Masoretic breaks", "",
+              "Paragraph breaks in the Hebrew text inside this unit (a break falls after the "
+              "verse named; petuhah = open, setumah = closed; from candidate-boundaries.md).", ""]
+        L += ([f"- {r}: {k}" for r, k in brk] if brk else ["_None inside this unit._"])
 
     if b.mirrors:
         from biblecore import mirror

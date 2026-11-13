@@ -18,6 +18,10 @@ of its morph code, H for Hebrew and A for Aramaic (Dan 2:4b-7:28, Ezra
 4:8-6:18 and 7:12-26, Jer 10:11, Gen 31:47). Lemma ids share Strong's one
 number space, so roots and the audit need nothing new. load_words() gives
 every row a `lang` from language_of(), and the word table stays as it is.
+
+The word table's last column, eng_ref, is the English-numbered ref ("Num.17.1"
+for Hebrew Num 16:36), from wlc/VerseMap.xml; equal to `ref` where numbering
+matches. Books regenerated before 0.37.0 lack it.
 """
 import csv
 import os
@@ -134,16 +138,25 @@ def parse(b, osis=None):
     return reading, words, boundaries
 
 
+def _eng_ref(ref, emap):
+    """The English-numbered ref for a corpus ref ('Num.17.1' -> 'Num.17.1'
+    unless the verse map moves it), the word table's eng_ref column."""
+    bk, c, v = ref.split(".")
+    ec, ev = emap.get((int(c), int(v)), (int(c), int(v)))
+    return f"{bk}.{ec}.{ev}"
+
+
 def build(b):
     """Write the book's reading text, word table and boundary list. Returns
     counts for the caller to check against a printed edition."""
     reading, words, boundaries = parse(b)
+    emap = versify.load(b.path("wlc")).get(b.osis, {})
     with open(b.path("reading"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(reading) + "\n")
     with open(b.path("words"), "w", encoding="utf-8", newline="\n") as f:
-        f.write("word_id\tref\tsurface\tlemma\tmorph\n")
+        f.write("word_id\tref\tsurface\tlemma\tmorph\teng_ref\n")
         for row in words:
-            f.write("\t".join(row) + "\n")
+            f.write("\t".join((*row, _eng_ref(row[1], emap))) + "\n")
     with open(b.path("boundaries"), "w", encoding="utf-8", newline="\n") as f:
         f.write("# Candidate paragraph-break boundaries (petuhah / setumah)\n\n")
         f.write("Raw list of every `x-pe` (petuhah, פ) and `x-samekh` (setumah, ס) "

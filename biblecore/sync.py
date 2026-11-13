@@ -24,6 +24,7 @@ import fnmatch
 import glob
 import json
 import os
+import re
 import shutil
 import subprocess
 from datetime import datetime, timezone
@@ -55,6 +56,7 @@ ROLES = [
     ("{slug}-versification.md", "verses whose English number differs from the corpus's (generated)"),
     ("{slug}-literary-unit-map.md", "the unit map: every unit's passage, title and grouping"),
     ("mirror-*.json", "the mirror pairs: which passages of the mirrored book each stretch of this one answers, with the shared words and Lane's strength (policy; a unit proposes new pairs in mirror[])"),
+    ("candidate-boundaries.md", "Masoretic paragraph breaks (petuḥah/setumah) for the whole book (generated)"),
     ("unit-pack-*.md", "one unit's lookup file: map entry, rulings, threads with computed first occurrences, lemma table, leads, source gaps (generated; read this instead of recalling ids)"),
     ("canon-leads-unit-*.md", "one unit's word leads and noun sweep for the research pass (generated)"),
 ]
@@ -83,6 +85,7 @@ DEFAULT_SYNC = [
     ("<data>/roots.json", True),
     ("<words>", True),
     ("{slug}-literary-unit-map.md", False),
+    ("<boundaries>", False),
     ("<data>/mirror-*.json", False),
     ("<canon_leads>/canon-leads-unit-*.md", False),
     ("<canon_leads>/unit-pack-*.md", False),
@@ -285,6 +288,15 @@ def status(b=None):
     return out
 
 
+def missing_packs(b=None):
+    """Synced canon-leads-unit-NN.md files with no unit-pack-NN.md beside them."""
+    b = b or book()
+    have = {Path(r).name for r in resolve(b)}
+    return [r for r in resolve(b)
+            if re.fullmatch(r"canon-leads-unit-\d+\.md", Path(r).name)
+            and Path(r).name.replace("canon-leads-unit-", "unit-pack-") not in have]
+
+
 def push_main(argv=None):
     root = Path(book().root)
     synced = Path(book().path("synced"))
@@ -298,6 +310,10 @@ def push_main(argv=None):
         shutil.copyfile(src, synced / Path(rel).name)
     for rel in missing:
         print(f"MISSING on disk (skipped): {rel}")
+    for rel in missing_packs():
+        n = Path(rel).stem.rsplit("-", 1)[-1]
+        print(f"warning: {rel} exists but has no unit pack: run "
+              f"`python -m biblecore unit-pack {int(n)}`")
     for name in orphans():
         (synced / name).unlink()
         print(f"removed from the mirror (no longer synced): {name}")

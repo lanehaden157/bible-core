@@ -19,7 +19,23 @@ def test_joshua_rebuild_is_byte_identical():
         counts = oshb.build(bookmod.Book(cfg, tmp))
         fails = []
         for name in ("Joshua-words.tsv", "Joshua-reading.txt", "candidate-boundaries.md"):
-            if support.read(os.path.join(tmp, name)) != support.read(os.path.join(support.JOSHUA, name)):
+            new = support.read(os.path.join(tmp, name))
+            old = support.read(os.path.join(support.JOSHUA, name))
+            if name.endswith(".tsv"):
+                rows = [ln.split("\t") for ln in new.splitlines()]
+                if rows[0][-1] != "eng_ref" or any(len(r) != 6 for r in rows):
+                    fails.append("words.tsv lacks the eng_ref column")
+                emap = oshb.versify.load(real.path("wlc")).get("Josh", {})
+                for r in rows[1:]:
+                    bk, c, v = r[1].split(".")
+                    ec, ev = emap.get((int(c), int(v)), (int(c), int(v)))
+                    if r[5] != f"{bk}.{ec}.{ev}":
+                        fails.append(f"eng_ref {r[5]} wrong for {r[1]}")
+                        break
+                if not old.startswith("word_id\tref\tsurface\tlemma\tmorph\teng_ref"):
+                    # Joshua's committed table predates the column: compare without it
+                    new = "\n".join("\t".join(r[:5]) for r in rows) + "\n"
+            if new != old:
                 fails.append(f"{name} differs from Joshua's committed copy")
         expected = {"verses": 658, "words": 10083, "pe": 52, "samekh": 42}
         if counts != expected:
