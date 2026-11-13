@@ -66,11 +66,11 @@ WHO = ["offerer", "priest", "high-priest", "people"]
 
 # who may enter (Lev 16, Num 18); zone -> who
 ACCESS = [
-    ("people", "the court as far as the altar", ["court", "entrance", "altar", "basin"],
-     "Lev 1:3-5 (the offerer brings it to the entrance and slaughters it); Num 18:3-4. "
+    ("people", "the court, up to the altar", ["court", "entrance"],
+     "Lev 1:3-5 (the offerer brings it to the entrance and slaughters it). "
      "Milgrom reads the limit as the altar (Fig. 8); the verses do not draw a line."),
-    ("priests", "the holy place", ["holy-place"],
-     "Exod 28:43; 30:19-20 (they wash at the basin first); Num 18:5, 7."),
+    ("priests", "the altar, the basin and the holy place", ["altar", "basin", "holy-place"],
+     "Exod 28:43; 30:19-20 (they wash at the basin first); Num 18:3-5, 7 (the altar is the priests' charge)."),
     ("high priest", "the holy of holies, once a year", ["veil", "most-holy"],
      "Lev 16:2-3, 16:34; Exod 30:10."),
 ]

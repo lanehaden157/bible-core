@@ -32,8 +32,8 @@
 [data-zone="holy-place"] { fill: color-mix(in srgb, var(--accent-bronze) 52%, var(--panel)); }
 [data-zone="veil"] { fill: color-mix(in srgb, var(--accent-bronze) 95%, var(--panel)); }
 [data-zone="most-holy"] { fill: color-mix(in srgb, var(--accent-bronze) 74%, var(--panel)); }
-.tm[data-layer="enter"] [data-zone="court"], .tm[data-layer="enter"] [data-zone="entrance"], .tm[data-layer="enter"] [data-zone="altar"], .tm[data-layer="enter"] [data-zone="basin"] { fill: color-mix(in srgb, var(--accent-jordan) 28%, var(--panel)); }
-.tm[data-layer="enter"] [data-zone="holy-place"] { fill: color-mix(in srgb, var(--accent-olive) 38%, var(--panel)); }
+.tm[data-layer="enter"] [data-zone="court"], .tm[data-layer="enter"] [data-zone="entrance"] { fill: color-mix(in srgb, var(--accent-jordan) 28%, var(--panel)); }
+.tm[data-layer="enter"] [data-zone="holy-place"], .tm[data-layer="enter"] [data-zone="altar"], .tm[data-layer="enter"] [data-zone="basin"] { fill: color-mix(in srgb, var(--accent-olive) 38%, var(--panel)); }
 .tm[data-layer="enter"] [data-zone="most-holy"], .tm[data-layer="enter"] [data-zone="veil"] { fill: color-mix(in srgb, var(--accent-clay) 40%, var(--panel)); }
 .tm .lit, .tm-thumb .lit, .tm-inset .lit { fill: color-mix(in srgb, var(--accent-clay) 78%, var(--panel)) !important; stroke: var(--ink); stroke-width: 2.4; }
 .tm .wall, .tm-thumb .wall, .tm-inset .wall { fill: none; stroke: var(--ink); stroke-width: .5; vector-effect: non-scaling-stroke; }
