@@ -22,7 +22,7 @@ def test_pack_has_the_sections_and_no_script():
     md, st = unit_pack.build_pack(book(), 1)
     for h in ("## Map entry", "## Versification", "## Rulings that apply",
               "## Tracked threads in this unit", "## Lemma table", "## Leads",
-              "## Known source gaps"):
+              "## Already cited from", "## Known source gaps"):
         assert h in md, h
     assert not any("֐" <= c <= "׿" for c in md), "native Hebrew in the pack"
     assert st["lemmas"] > 10 and st["threads"] > 3 and st["bytes"] < 40 * 1024

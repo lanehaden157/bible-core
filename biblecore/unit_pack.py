@@ -18,6 +18,10 @@ word table by lemma id.
 A book that declares `mirrors` in book.json also gets a "<Book> mirror"
 section (biblecore/mirror.py): the pairs whose side of this book overlaps the
 unit, the twin's word-by-word text, and the shared words as leads.
+
+An "Already cited from" section lists the canon rows anywhere (this book's and
+its siblings' canon.json and mirror files, bible-core's canon/) whose target
+falls inside the unit (biblecore/inbound.py).
 """
 import argparse
 import collections
@@ -355,6 +359,9 @@ def build_pack(b, n, min_count=MIN_COUNT):
     if b.mirrors:
         from biblecore import mirror
         L += [""] + mirror.pack_section(b, n, lo, hi, row)
+
+    from biblecore import inbound
+    L += [""] + inbound.pack_section(b, n, lo, hi)
 
     L += ["", "## Known source gaps", "", gaps or "_resources.md records none._", ""]
 

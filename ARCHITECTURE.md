@@ -227,6 +227,18 @@ chips each `aside.echo` whose target overlaps a brief's range. An unreachable
 hub or an empty file means no chip. The hub's `#/laws` page lists every law.
 A book without these gets no changed byte (tests/test_laws.py).
 
+**Inbound leads.** The unit pack's "Already cited from" section
+(`biblecore/inbound.py`) is the reverse of the outward word leads: every canon
+row (echo, story, mirror, law, intertext) whose *target* overlaps the unit,
+grouped by the book and unit that made it, with anchor, kind and note. No
+store of its own: it reads this book's `data/canon.json` and mirror files,
+those of every sibling folder with a `book.json`, and bible-core's
+`canon/intertext.json` when a `bible-core/` folder sits beside the book (a
+book vendored alone sees only its own rows). All refs are in displayed
+numbering already, so no map is applied. A row the unit made itself is left
+out, duplicates across stores are listed once, and none found says so in one
+line (tests/test_inbound.py).
+
 **Optional components are enabled per book** in `book.json`. Each ships as
 one piece: CSS, a check, a JS handler and a style-reference snippet, in the
 same commit, and only when a unit actually wants it. **(learned:** Matthew
