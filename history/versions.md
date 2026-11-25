@@ -73,3 +73,4 @@ One line per release; `tools/release.py` appends. History, not instructions.
 - 0.37.1: masoretic breaks use display numbering with [Heb C:V]; eng_ref docstring corrected
 - 0.38.0: Studio: the in-Claude-Code unit flow (/unit, /finish, builder, fact-checker, kit.py verse-keyed sources) for books with book.json "studio"; no cards or sync there
 - 0.38.1: Studio: unit skill runs on Sonnet; split_sources gap report limited to a source's covered range
+- 0.38.2: Studio: lessons loop; unit-pack map entry and short-ruling ties; checks skips NT refs; agent fixes from the unit 1 pilot
