@@ -71,3 +71,4 @@ One line per release; `tools/release.py` appends. History, not instructions.
 - 0.36.1: calendar.json: aroma of rest (rêaḥ niḥoaḥ, Lane's term).
 - 0.37.0: unit-pack ties bare transliteration and lists Masoretic breaks; candidate-boundaries.md syncs; sync warns on a missing pack; leads any-order pairs; words.tsv eng_ref column; contract/card doc gaps (digest, mirror, lawbriefs, promote ids, ENGLISH)
 - 0.37.1: masoretic breaks use display numbering with [Heb C:V]; eng_ref docstring corrected
+- 0.38.0: Studio: the in-Claude-Code unit flow (/unit, /finish, builder, fact-checker, kit.py verse-keyed sources) for books with book.json "studio"; no cards or sync there
