@@ -1,7 +1,8 @@
 """The instruction files core owns stay inside their size budgets
 (selftest.DOC_BUDGET_KB). A book's own files only warn (`biblecore test`,
 check `docs`); these fail, because every book and every chat loads them.
-To add a rule, cut one; raising a budget is Lane's call."""
+Budgets sit about 25% above the largest real file: a guard against rule
+creep, not a squeeze. Raising one is Lane's call."""
 import os
 
 import support
@@ -26,9 +27,9 @@ OWNED = {
 }
 # the template's field is held tighter than the book default (4): a book's
 # field grows with its own notes
-TEMPLATE_KB = {"field": 2.5}
+TEMPLATE_KB = {"field": 3}
 # core's own CLAUDE.md, read by every core session
-CORE_CLAUDE_KB = 5.5
+CORE_CLAUDE_KB = 6.5
 
 
 def _kb(rel):

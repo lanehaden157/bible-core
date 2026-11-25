@@ -5,8 +5,8 @@ description: Conductor for many {{BOOK}} units. One session per unit, about thre
 
 1. `python tools/unit_status.py`.
 2. Each unit in range not started, in order: `start_session` (`initiation: "user_asked"`, `use_worktree: true`, `context: "fresh"`, `model` a Sonnet id, title `{{BOOK}} unit N`, prompt `/unit N`). Max three before calls; the next starts when one reaches calls.
-3. Unit session reports:
+3. Unit session reports (they run in parallel; builds still go in unit order):
    - at calls → tell Lane which units wait, links, earliest first (early answers can change later units);
    - shipped → the next unit's session starts its build if it waited (`SendMessage` it).
-4. After each shipped unit: `python tools/lessons.py report`. Flagged `core`/`source` key → tell Lane, offer a session (report lines as brief); flagged `book` key → fix it before the next unit.
+4. After each shipped unit: `python tools/lessons.py report`. Flagged `core`/`source` key → tell Lane, offer a session for it (report lines as the brief); flagged `book` key → fix it before the next unit.
 5. Never answer Lane's calls. Never merge unit branches by hand.

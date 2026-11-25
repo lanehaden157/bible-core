@@ -3,6 +3,7 @@
     python tools/kit.py sources                    # keys, labels, section counts
     python tools/kit.py words 1:1-9                # per verse: English, words (translit, lemma, gloss, parsing), LXX English
     python tools/kit.py parts N [--cap 80]         # the unit's "whole" sources as files <= cap KB
+    python tools/kit.py keyverses N [--top 20]     # candidate key verses from work/NN/pack.md, most signals first
     python tools/kit.py extra N [--key 1:4,1:9]    # the "voices" sources over the unit (only sections touching the key verses with --key), one file each
     python tools/kit.py grep N TERM [TERM ...]     # every other source: only the lines where a term occurs, to work/NN/grep.md
     python tools/kit.py range 1:1-9 [--source a,b] [--cap 28] [--out FILE]
@@ -13,7 +14,7 @@ Vendored from bible-core (studio); the book's copy is overwritten on sync.
 Ranges: C:V, C:V-V, C:V-C:V, English numbering. Book codes are the WEB's
 (GEN EXO LEV NUM DEU JOS ... PSA ISA JER EZE ... MAT MAR LUK JOH ... REV).
 A source key also matches its numbered volumes (`milgrom` = milgrom-1, -2, -3).
-Reading rank: "whole" sources (`parts`), then "voices" (`extra`, key verses), then every other source (`grep`).
+Reading rank: "whole" sources (`parts`), then "voices" (`extra`, key verses; `keyverses` suggests them), then every other source (`grep`).
 Settings: book.json "studio" {"whole": [keys read whole per unit], "voices": [keys read by key verses],
 "lxx_numbering": "hebrew" when Brenton follows the Hebrew verse numbers}.
 `words` prints no native script: transliteration only.
@@ -171,6 +172,90 @@ def cmd_parts(n, cap):
             print(f"{f.relative_to(ROOT).as_posix()}  {f.stat().st_size // 1000} KB")
 
 
+def pack_text(n):
+    f = ROOT / "work" / f"{n:02d}" / "pack.md"
+    if not f.exists():
+        sys.exit(f"{f.relative_to(ROOT).as_posix()} missing: run `python -m biblecore unit-pack {n} --out work/{n:02d}/pack.md`")
+    return f.read_text("utf-8")
+
+
+def section(text, head):
+    m = re.search(rf"^#+ {head}.*?$(.*?)(?=^#{{1,3}} |\Z)", text, re.M | re.S)
+    return m.group(1) if m else ""
+
+
+def map_verses(line, lo, hi):
+    """Verses a map bullet names (C:V, C:V-V, C:V-C:V, 'vv. 3-5'), kept inside the unit."""
+    out = set()
+    for m in re.finditer(rf"(\d+):(\d+)(?:\s*{DASH}\s*(?:(\d+):)?(\d+))?", line):
+        c, a = int(m.group(1)), int(m.group(2))
+        c2 = int(m.group(3)) if m.group(3) else c
+        b = int(m.group(4)) if m.group(4) else a
+        if c2 == c:
+            out.update((c, k) for k in range(a, b + 1))
+        else:
+            out.update([(c, a), (c2, b)])
+    for m in re.finditer(rf"\bvv?\.\s*(\d+)(?:\s*{DASH}\s*(\d+))?", line):
+        c = lo // 1000
+        a = int(m.group(1))
+        out.update((c, k) for k in range(a, int(m.group(2) or a) + 1))
+    return {x for x in out if lo <= v(*x) <= hi}
+
+
+def cmd_keyverses(n, top=20):
+    """Candidates for `extra --key`: the verses where a tracked thread opens or pays off,
+    verses holding the pack's rare-word and phrase leads, verses a map bullet names.
+    Pair leads ("two rare words in a Torah verse") count once per verse, however many."""
+    lo, hi = unit_range(n)
+    text = pack_text(n)
+    sig = {}
+
+    def add(c, k, kind):
+        if lo <= v(c, k) <= hi:
+            sig.setdefault((c, k), []).append(kind)
+
+    for line in section(text, "Tracked threads in this unit").splitlines():   # thread opens
+        m = re.match(r"\|\s*`([^`]+)`\s*\|.*?\|\s*(\d+):(\d+) \(unit \d+\)\s*\|\s*yes\s*\|", line)
+        if m:
+            add(int(m.group(2)), int(m.group(3)), f"opens {m.group(1)}")
+    tj = ROOT / "data" / "threads.json"                                       # thread payoffs
+    if tj.exists():
+        for t in json.loads(tj.read_text("utf-8")).get("threads", []):
+            for p in t.get("payoffs") or []:
+                m = re.match(r"(\d+):(\d+)", str(p.get("ref", "")))
+                if p.get("unit") == n and m:
+                    add(int(m.group(1)), int(m.group(2)), f"payoff {t['id']}")
+    leads = [("Shared phrases", "phrase"), ("Rare words together", "pair"), (r"Rare words \(", "rare")]
+    for head, kind in leads:
+        body = section(text, head)
+        pairs = set()
+        for line in body.splitlines():
+            if not line.startswith("- **") or " — " not in line:
+                continue
+            refs = re.findall(r"(\d+):(\d+)", line.rsplit(" — ", 1)[1].split(";")[0])
+            word = re.match(r"- \*\*(.*?)\*\*", line).group(1)
+            for c, k in refs:
+                if kind == "pair":
+                    pairs.add((int(c), int(k)))
+                else:
+                    add(int(c), int(k), f"{kind} {word}")
+        for c, k in pairs:
+            add(c, k, "pair leads")
+    for line in section(text, "Map entry").splitlines():                       # map bullets
+        if line.startswith("- "):
+            for c, k in map_verses(line, lo, hi):
+                add(c, k, "map")
+    if not sig:
+        print("[no signals: the pack has no thread opens, leads or map bullets for this unit]")
+        return
+    rows = sorted(sig.items(), key=lambda kv: (-len(kv[1]), kv[0]))[:top]
+    for (c, k), kinds in rows:
+        print(f"{c}:{k}  {len(kinds)}  " + "; ".join(dict.fromkeys(kinds)))
+    pick = [x for x in rows if len(x[1]) >= 3] or rows[:8]
+    keys = ",".join(f"{c}:{k}" for (c, k), _ in sorted(pick))
+    print(f"\nStart from: python tools/kit.py extra {n} --key {keys}")
+
+
 def cmd_extra(n, key=None):
     r = unit_range(n)
     ks = [rng(x) for x in key.split(",")] if key else None
@@ -288,6 +373,8 @@ def main(a):
         cmd_words(rng(pos[1]))
     elif c == "parts":
         cmd_parts(int(pos[1]), int(opt.get("--cap", PARTS_KB)))
+    elif c == "keyverses":
+        cmd_keyverses(int(pos[1]), int(opt.get("--top", 20)))
     elif c == "extra":
         cmd_extra(int(pos[1]), opt.get("--key"))
     elif c == "grep":

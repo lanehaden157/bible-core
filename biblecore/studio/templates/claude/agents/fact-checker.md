@@ -18,4 +18,4 @@ Clear error → fix in place; judgment → log unsettled. About 25 tool calls, t
 
 `work/NN/factcheck.md`: | claim | where | source opened | result (ok/fixed/unsettled) | note |. End: `Checked: N, fixed: N, unsettled: N` + the unsettled list.
 
-Learn: each kind of error fixed or unsettled → `python tools/lessons.py add` (its docstring says how; reuse a key from `known`). Return the summary lines and a `Patterns:` line per key, RECURRING and REGRESSION first.
+Learn: each kind of error fixed or unsettled → `python tools/lessons.py add` (its docstring says how: owner book|core|source = where the fix belongs; reuse a key from `known`; only mistakes a rule could prevent, not one-off typos). Return the summary lines and a `Patterns:` line per key (status from the `add` output), RECURRING and REGRESSION first.

@@ -256,6 +256,46 @@ def test_tiered_reading_and_lint():
         shutil.rmtree(d, ignore_errors=True)
 
 
+def test_keyverses_from_the_pack():
+    d = _scratch()
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            studio.install(d)
+        os.makedirs(os.path.join(d, "work", "01"))
+        with open(os.path.join(d, "data", "threads.json"), "w", encoding="utf-8") as fh:
+            json.dump({"threads": [{"id": "cover", "payoffs": [{"unit": 1, "ref": "1:12"}, {"unit": 2, "ref": "2:3"}]}]}, fh)
+        nl = chr(10)
+        pack = nl.join([
+            "# Unit pack", "", "## Map entry", "", "**U01 · The model** 1:1-17", "- Peak at 1:9; also vv. 3-4", "",
+            "## Tracked threads in this unit", "",
+            "| thread | gloss | ids | first (unit) | opens here? | recorded opener | in this unit | book total |",
+            "|---|---|---|---|---|---|---|---|",
+            "| `aroma` | aroma | 7381 | 1:9 (unit 1) | yes | unit 1 (1:9) | 1:9 | 34 |",
+            "| `old` | old | 1 | 1:2 (unit 1) | no | unit 1 (1:2) | 1:5 | 3 |", "",
+            "## Leads", "", "intro", "",
+            "## Shared phrases with the Torah (1)", "",
+            "- **a b** (H1 + H2: x / y) — Lev 1:9, 1:13", " - Exod 1:1 — x", "",
+            "### Rare words together in a Torah verse, any order (2)", "",
+            "- **c + d** (H1 + H2) — Lev 1:9", "- **e + f** (H1 + H2) — Lev 1:9", "",
+            "## Rare words (1)", "", "- **w** (H5, x) — Lev 1:9; 8 verses in the Hebrew Bible", "",
+            "## Masoretic breaks", "", "- **z** — Lev 1:15", ""])
+        with open(os.path.join(d, "work", "01", "pack.md"), "w", encoding="utf-8") as fh:
+            fh.write(pack)
+        rc, out = _run(d, "tools/kit.py", "keyverses", "1")
+        rows = [l.split() for l in out.splitlines() if l[:1].isdigit()]
+        fails = []
+        if rc or not rows or rows[0][0] != "1:9" or rows[0][1] != "5":
+            fails.append(f"1:9 should lead with 5 signals (open, phrase, pair once, rare, map): {out}")
+        got = {r[0]: int(r[1]) for r in rows}
+        if got.get("1:12") != 1 or got.get("1:13") != 1 or got.get("1:3") != 1 or got.get("1:15"):
+            fails.append(f"payoff, phrase and map verses wrong (1:15 is a break, not a signal): {got}")
+        if "extra 1 --key 1:9" not in out:
+            fails.append(f"no starting command for extra: {out}")
+        return fails
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 TESTS = [test_validate, test_install_renders_and_guards_edits, test_studio_book_takes_no_chat_cards,
          test_tools_on_a_scratch_book, test_lessons_loop, test_tiered_reading_and_lint,
-         test_unit_pack_ties_short_rulings_and_reads_table_maps]
+         test_unit_pack_ties_short_rulings_and_reads_table_maps, test_keyverses_from_the_pack]

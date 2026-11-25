@@ -24,12 +24,15 @@ read Matthew's corpus and `archive/pipeline/` read-only.
 - Component `snippet.md` files are build-enforced: tighten wording only.
 
 Keeping them lean (`tests/test_docs.py` fails when a core-owned file passes
-its budget in `selftest.DOC_BUDGET_KB`; raising a budget is Lane's call):
+its budget in `selftest.DOC_BUDGET_KB`; raising one is Lane's call). Budgets
+sit ~25% above what the largest real file needs: a guard against rule creep,
+not a squeeze:
 
 - One home per rule: edit it where it lives, no second copy, no pointer
   paragraph. Each chat reads only its card, so a rule goes on the card of the
   chat that acts on it; all three chats → the field template.
-- Over budget → cut or move something to add something.
+- Over budget → cut what is redundant or move it; a rule worth having is a
+  reason to ask Lane for a bigger budget, not to leave it out.
 - A rule code can check → a check (`meta.py`, `handoff_check.py`,
   `selftest.py`), not prose. A recipe a command can print → the command.
 - Rule files say how it is: no dates, no "learned", no version history. That

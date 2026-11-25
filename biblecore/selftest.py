@@ -41,18 +41,20 @@ from biblecore.book import book
 FENCE_RE = re.compile(r"```html\n(.*?)```", re.S)
 
 # Instruction files a chat or session reads whole, in KB. Each addition looks
-# reasonable alone, so nothing else notices them adding up. Set just above the
-# files' real sizes: to add a rule, cut one. A book tightens or loosens one
-# with checks.doc_budget_kb (a warning there). For the files core owns the
-# budget is a hard test (tests/test_docs.py); raising one is Lane's call.
-DOC_BUDGET_KB = {"field": 4, "claude": 2, "style_reference": 6,
-                 "translation_choices": 16, "resources": 9,
-                 "card_research": 4.5, "card_verse": 5, "card_build": 2,
+# reasonable alone, so nothing else notices them adding up. Set about 25%
+# above what the largest real file needs (core's copy or a book's), so a rule
+# worth having is not left out to fit; the guard is against rules creeping
+# past that. A book tightens or loosens one with checks.doc_budget_kb (a
+# warning there). For the files core owns the budget is a hard test
+# (tests/test_docs.py); raising one is Lane's call.
+DOC_BUDGET_KB = {"field": 5.5, "claude": 2.5, "style_reference": 10,
+                 "translation_choices": 16.5, "resources": 11,
+                 "card_research": 5.5, "card_verse": 6, "card_build": 2.5,
                  "card_condensed": 3, "lens": 3,
-                 "contract": 10, "book_guide": 4.5,
+                 "contract": 12.5, "book_guide": 5.5,
                  # studio books (biblecore/studio): the /unit flow
-                 "skill_unit": 4.5, "skill_finish": 1, "agent_builder": 3,
-                 "agent_fact_checker": 1.5, "skill_build": 0.5}
+                 "skill_unit": 6.5, "skill_finish": 1.5, "agent_builder": 4,
+                 "agent_fact_checker": 2.5, "skill_build": 1}
 
 
 def _quiet(fn, *a):

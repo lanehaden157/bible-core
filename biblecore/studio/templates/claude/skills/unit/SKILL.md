@@ -12,14 +12,14 @@ Runs on Sonnet: from Opus, `start_session` a Sonnet one with `/unit N`.
 
 ## 1. Read
 
-- `python tools/lessons.py known`: this book's past mistakes.
-- `python -m biblecore unit-pack N --out work/NN/pack.md`. Read. Ids, rulings, threads, leads: copy, never recall.
+- `python tools/lessons.py known`: mistakes this book has made. Don't repeat them.
+- `python -m biblecore unit-pack N --out work/NN/pack.md`. Read. Ids, rulings, threads, leads, parallels: copy, never recall.
 - `lens.md`. Unit's map entry (`{{MAP}}`): passage, tier, stretches.
 - `python tools/kit.py words <range>`: English, each word's translit, lemma, gloss, parsing, LXX English. No native script in anything you write.
-- Sources by rank (`kit.py sources` marks tiers). Whole: `kit.py parts N`, Read `work/NN/parts/`. Voices: choose key verses (map, leads, threads), `kit.py extra N --key 1:4,1:9`, Read `work/NN/extra/`. Rest: `kit.py grep N term ...`, Read `work/NN/grep.md`; open a hit with `kit.py range`. Unopened → Source status.
-- Targets: `kit.py bible <CODE> <range> [--lxx]`, `python -m biblecore lxx <Book> <C:V>`. Web: voices missing here (`resources.md`).
-- Other books' Hebrew (pack leads) and NT Greek are never VERIFIED.
-- Long output → `| tail -40`. Scope doubt → call.
+- Sources by rank (`kit.py sources` marks tiers; `book.json` `studio` sets them). Whole: `kit.py parts N`, Read all of `work/NN/parts/`. Voices: `kit.py keyverses N` lists candidates (thread opens and payoffs, pack word and phrase leads, verses a map bullet names; most signals first). Add or drop verses you know matter, then `kit.py extra N --key <verses>` and Read `work/NN/extra/`. Rest: `kit.py grep N term ...`, Read `work/NN/grep.md`; open a hit with `kit.py range`. Unopened → Source status.
+- Targets: `kit.py bible <CODE> <range> [--lxx]` (WEB, or the LXX in English); `python -m biblecore lxx <Book> <C:V>` for a Hebrew book's Greek claims (the NT has no `lxx`). Web: voices the sources lack (`resources.md`).
+- Other books' Hebrew (pack leads) is SHEET or English, and NT Greek is English: neither is VERIFIED.
+- Long output → `| tail -40`. Scope doubt → a call, not a stop.
 
 ## 2. notes.md
 
@@ -41,8 +41,8 @@ End: **Source status** (read / secondhand / unavailable, by source).
 
 Read aloud: flowing prose, scene headings ok; no lists, tables, bold, digits (verse numbers, refs) or native script. Names spoken ("the book of Exodus"). Quotes only VERIFIED.
 
-- Briefing: placement, background, genre, words to watch, tensions, earlier passages leaned on (name only). Orient only. Full tier 600-900 words; condensed or digest 300-500, and no verse-by-verse.
-- Verse by verse (full tier; skip stretches the map marks condensed or digest): depth. Scripture roots and canon trajectories first; then wordplay, structures, background, commentators in dialogue. A verse that reaches an earlier passage: tell it there (background, match, differ, what this book does). Tensions open.
+- Briefing: placement, background, genre, words to watch, tensions, earlier passages leaned on (name, don't tell). Orient, don't resolve. Full tier 600-900 words; condensed or digest 300-500, and no verse-by-verse.
+- Verse by verse (full tier; skip stretches the map marks condensed or digest): depth. Scripture roots and canon trajectories first; then wordplay, structures, background, commentators in dialogue. A verse that reaches an earlier passage: tell it there (background, match, differ, what this book does). Tensions open. Devotion light.
 
 ## 4. Fact-check
 
@@ -52,7 +52,7 @@ Read aloud: flowing prose, scene headings ok; no lists, tables, bold, digits (ve
 
 Decide all you can (pack rulings, strong boxes, promotions: book-wide bias, retrofit cost).
 
-- `## Calls for Lane (N)`: numbered. Verse, 2-3 options, recommended first, one-line reason each. Only: provisional or unruled renderings, scope doubts, close-call promotions, unsettled fact-checks, tentative boxes (yes/no). 
+- `## Calls for Lane (N)`: numbered. Verse, 2-3 options, recommended first, one-line reason each. Only: provisional or unruled renderings, scope doubts, close-call promotions, unsettled fact-checks, tentative boxes (yes/no). An odd-looking ruling isn't a call. A call you can't decide: ask, don't guess; no answer yet → the unit waits at calls.
 - `## Decided without Lane`: one line each, why. Lane audits.
 - `## Answers`: empty till 6.
 
@@ -62,4 +62,4 @@ Lane away: `PushNotification` "Unit N: K calls ready", end turn. Here: AskUserQu
 
 ## 7. Build
 
-Answers in. Unit N-1 unshipped (`unit_status`) → say so, end turn. Else `start_session` (`user_asked`, `use_worktree: false`, `fresh`, a Sonnet `model`, title `{{BOOK}} unit N build`, prompt `/build N`), link it, end turn.
+Answers in. Unit N-1 unshipped (`unit_status`) → say so, end turn (builds go in unit order: N-1's promotions, threads and data feed this build; /finish resumes this one). Else `start_session` (`user_asked`, `use_worktree: false`, `fresh`, a Sonnet `model`, title `{{BOOK}} unit N build`, prompt `/build N`), link it, end turn.
