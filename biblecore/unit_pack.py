@@ -213,7 +213,13 @@ def masoretic_breaks(b, lo, hi):
     return out
 
 
-def _tied(tok, unit_skeletons, segments):
+def _plain(s):
+    import unicodedata
+    s = "".join(c for c in unicodedata.normalize("NFD", s.lower()) if not unicodedata.combining(c))
+    return re.sub(r"[^a-z]", "", s.replace("ḥ", "h"))
+
+
+def _tied(tok, unit_skeletons, segments, plain=frozenset()):
     """Does one transliteration token tie to the unit? A skeleton of 3+
     letters is found inside a word's; a shorter one (ʿolah, ʾishsheh) must
     equal a whole word or hyphen segment, with ʾ/ʿ kept and one present. A multi-word token
@@ -225,7 +231,7 @@ def _tied(tok, unit_skeletons, segments):
             return any(sk in w for w in unit_skeletons)
         strong = _skeleton(piece, gutturals=True)
         if len(pieces) == 1 and not re.search("[ʾʿ]", strong):
-            return len(strong) >= 2 and strong in segments   # short, no guttural: a whole word only
+            return len(strong) >= 2 and _plain(piece) in plain   # short, no guttural: the whole word, vowels too
         if len(strong) < (1 if len(pieces) > 1 else 2) or strong not in segments:
             if not (len(sk) >= 3 and any(sk in w for w in unit_skeletons)):
                 return False
@@ -235,12 +241,13 @@ def _tied(tok, unit_skeletons, segments):
 def tie_rulings(row_sets, unit_skeletons, thread_keys=(), unit_forms=()):
     """-> (tied [(file, heading, line)], untied [(file, headword)])."""
     segments = {_skeleton(seg, gutturals=True) for f in unit_forms for seg in [f, *f.split("-")]}
+    plain = {_plain(seg) for f in unit_forms for seg in [f, *f.split("-")]}
     tied, untied = [], []
     for fname, rows in row_sets:
         for heading, head, toks, line in rows:
             hit = re.sub(r"[^a-z0-9]+", "-", head.lower()).strip("-") in thread_keys
             for t in toks:
-                if _tied(t, unit_skeletons, segments):
+                if _tied(t, unit_skeletons, segments, plain):
                     hit = True
                     break
             (tied if hit else untied).append(
