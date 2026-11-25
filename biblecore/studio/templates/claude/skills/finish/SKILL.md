@@ -8,4 +8,5 @@ description: Conductor for many {{BOOK}} units. One session per unit, about thre
 3. Unit session reports:
    - at calls → tell Lane which units wait, links, earliest first (early answers can change later units);
    - shipped → `SendMessage` the next unit's session to resume its build if it waited.
-4. Never answer Lane's calls. Never merge unit branches by hand.
+4. After each shipped unit: `python tools/lessons.py report`. A flagged `core` or `source` key → tell Lane in one line and offer a session in bible-core (or the source converter) with the report lines as its brief; a flagged `book` key the unit session did not fix → fix it before the next unit starts.
+5. Never answer Lane's calls. Never merge unit branches by hand.

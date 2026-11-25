@@ -7,19 +7,21 @@ description: Do one {{BOOK}} unit: study it here (research, notes, briefing, ver
 
 You study. `fact-checker` checks. `builder` builds. NN = zero-pad. Files in
 `work/NN/`. Where it stands: `python tools/unit_status.py N`; resume at the
-first missing file. `CLAUDE.md` and `lens.md` win over this file.
+first missing file. `CLAUDE.md` and `lens.md` win over this file. Run book commands from the book's root (`cd` there; the shell can drift); file tools take absolute paths.
 Runs on Sonnet: in an Opus session, start a Sonnet session with `/unit N`
 instead (`start_session`, `model` a Sonnet id, effort medium).
 
 ## 1. Read
 
+- `python tools/lessons.py known`: mistakes this book has made. Don't repeat them.
 - `python -m biblecore unit-pack N --out work/NN/pack.md`. Read. Ids, rulings, threads, leads, parallels: copy, never recall.
 - `lens.md`. Unit's map entry (`{{MAP}}`): passage, tier, stretches.
 - `python tools/kit.py words <range>`: English, each word's transliteration, lemma, gloss, parsing, LXX English. Native script stays out of everything you write.
 - `python tools/kit.py parts N`, Read all `work/NN/parts/` (the sources read whole).
-- `python tools/kit.py extra N`, Read `work/NN/extra/` (every other source over the unit). Big file → Read in pieces, skim what repeats.
+- `python tools/kit.py extra N`, Read `work/NN/extra/` (every other source over the unit). Order: the verse-keyed sections for the unit's key verses first (`grep -n '^## '` lists them), then the rest in pieces; skim what repeats. Name what you did not open in **Source status**.
 - Targets: `kit.py bible <CODE> <range> [--lxx]`, `python -m biblecore lxx <Book> <C:V>`.
 - Web: voices the sources lack. Sites: `resources.md`.
+- Other books' Hebrew is only what the pack leads show (SHEET) or English; NT Greek is English (no `lxx` for the NT). Neither is VERIFIED.
 - Output long → `| tail -40`. Scope doubt → a call, not a stop.
 
 ## 2. notes.md
@@ -48,7 +50,7 @@ Read aloud by the app. Flowing prose. Scene headings ok. No bullets, bold, table
 
 ## 4. Fact-check
 
-`fact-checker` agent, unit N. Unsettled → calls. Its token use → `work/NN/cost.md`.
+`fact-checker` agent, unit N. Unsettled → calls. Its token use → `work/NN/cost.md`. It logs mistake kinds with `tools/lessons.py`; then `python tools/lessons.py report`: a flagged `book` key → fix that file (CLAUDE.md, lens.md, translation-choices.md) now, then `lessons.py resolve KEY --note`; a flagged `core` or `source` key → say so in your last message so Lane can send it on. Commit `lessons.jsonl` with the unit.
 
 ## 5. calls.md
 

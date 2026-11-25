@@ -85,7 +85,7 @@ def test_install_renders_and_guards_edits():
         text = open(unit, encoding="utf-8").read()
         if "{{" in text or "leviticus-literary-unit-map.md" not in text:
             fails.append("placeholders not filled in the unit skill")
-        for rel in ("tools/kit.py", "tools/split_sources.py", "tools/unit_status.py",
+        for rel in ("tools/kit.py", "tools/split_sources.py", "tools/unit_status.py", "tools/lessons.py",
                     ".claude/agents/builder.md", ".claude/agents/fact-checker.md"):
             if not os.path.exists(os.path.join(d, rel)):
                 fails.append(f"{rel} not installed")
@@ -159,5 +159,64 @@ def test_tools_on_a_scratch_book():
         shutil.rmtree(d, ignore_errors=True)
 
 
+def test_lessons_loop():
+    d = _scratch()
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            studio.install(d)
+        fails = []
+        add = ["tools/lessons.py", "add", "quote-unread", "--stage", "factcheck", "--owner", "book",
+               "--what", "quote not read", "--fix", "paraphrase"]
+        rc, out = _run(d, *add, "--unit", "1")
+        if "seen once" not in out:
+            fails.append(f"first lesson not 'seen once': {out}")
+        rc, out = _run(d, *add, "--unit", "2")
+        if "RECURRING" not in out:
+            fails.append(f"same key in a second unit not RECURRING: {out}")
+        rc, out = _run(d, "tools/lessons.py", "report")
+        if "owner: book" not in out or "quote-unread" not in out:
+            fails.append(f"report misses the recurring key: {out}")
+        _run(d, "tools/lessons.py", "resolve", "quote-unread", "--note", "lens.md rule")
+        rc, out = _run(d, "tools/lessons.py", "report")
+        if "0 to act on" not in out:
+            fails.append(f"resolved key still flagged: {out}")
+        rc, out = _run(d, *add, "--unit", "3")
+        if "REGRESSION" not in out:
+            fails.append(f"a repeat after resolve not REGRESSION: {out}")
+        rc, out = _run(d, "tools/lessons.py", "known")
+        if "quote-unread [REGRESSION]" not in out:
+            fails.append(f"known does not show the regression: {out}")
+        return fails
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def test_unit_pack_ties_short_rulings_and_reads_table_maps():
+    from biblecore import unit_pack as up
+    fails = []
+    segs = {up._skeleton(x, gutturals=True) for f in ("tamim", "zakar") for x in [f]}
+    if not up.tie_rulings([("t.md", [("Glossary", "tamim", ["tamim"], "| tamim |")])],
+                          {up._skeleton("tamim")}, (), {"tamim", "zakar"})[0]:
+        fails.append("a short ruling (tamim) with no guttural never ties")
+    d = _scratch()
+    try:
+        with open(os.path.join(d, "leviticus-literary-unit-map.md"), "w", encoding="utf-8") as fh:
+            rows = ["| # | Passage | Working title | Tier | Peak |", "|---|---|---|---|---|",
+                    "| 01 | 1:1-17 | The model | full | |", "| 02 | 2:1-16 | Grain | condensed | |", "",
+                    "- 01: full. The pattern.", "- 02: condensed."]
+            fh.write(chr(10).join(rows) + chr(10))
+
+        class B:
+            root = d
+            slug = "leviticus"
+        got = up.map_entry(B, 1)
+        if "The model" not in got or "The pattern" not in got or "Grain" in got:
+            fails.append(f"table-style map entry wrong: {got!r}")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+    return fails
+
+
 TESTS = [test_validate, test_install_renders_and_guards_edits, test_studio_book_takes_no_chat_cards,
-         test_tools_on_a_scratch_book]
+         test_tools_on_a_scratch_book, test_lessons_loop,
+         test_unit_pack_ties_short_rulings_and_reads_table_maps]

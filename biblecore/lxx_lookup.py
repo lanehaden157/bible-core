@@ -209,6 +209,10 @@ def main(argv=None):
     if not a.checks and not a.ref:
         ap.error("give a passage (Isa 22:22) or --checks UNIT")
 
+    if a.checks and book().language != "greek":
+        print("A Hebrew book's checks[] are Hebrew-corpus checks: run "
+              f"`python -m biblecore checks {a.checks}`. Use `lxx BOOK C:V --expect LEMMA` for one LXX claim.")
+        return 0
     from biblecore.leads import load_greek_corpus
     _nt, lxx, codes = load_greek_corpus()
 

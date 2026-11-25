@@ -10,7 +10,8 @@ dropped silently: every check comes back confirmed, partial, not found or
 unresolved (the ref names no verse), and each transliteration shows the lemma
 ids it resolved to, so Lane can see what was actually matched.
 
-Hebrew books read the Hebrew Bible (morphhb, as `leads` does). A Greek book's
+Hebrew books read the Hebrew Bible (morphhb, as `leads` does); an NT passage
+there is skipped (read it by hand). A Greek book's
 checks run against the LXX by `python -m biblecore lxx --checks`, which this
 command hands over to; an NT passage cited from a Greek book is reported as
 skipped there. A ref may name several passages ("Isa 38:10 / Wis 16:13"); their
@@ -109,6 +110,10 @@ def main(argv=None):
     bible = leads.load_bible()
     counts, lane = {}, []
     for c in checks:
+        if lxx_lookup.is_nt_ref(c.get("ref", "")):
+            print(f"{'SKIPPED':10} {c['ref']} — New Testament, not in the Hebrew corpus: read it by hand")
+            counts["skipped (NT)"] = counts.get("skipped (NT)", 0) + 1
+            continue
         r = run_check(bible, c)
         counts[r["status"]] = counts.get(r["status"], 0) + 1
         print(f"{r['status'].upper():10} {c.get('ref', '?')} — {c.get('claim', '').strip()}")

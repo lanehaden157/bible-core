@@ -107,7 +107,16 @@ def map_entry(b, n):
             break
         if on:
             out.append(ln)
-    return "\n".join(out).strip()
+    if out:
+        return "\n".join(out).strip()
+    # a map of an overview table plus `- NN: ...` bullets: the unit's row, then its bullets
+    row = re.compile(rf"^\|\s*0*{n}\s*\|")
+    bullet = re.compile(rf"^-\s*0*{n}:\s")
+    rows = [ln for ln in lines if row.match(ln)]
+    bullets = [ln for ln in lines if bullet.match(ln)]
+    hdr = next((ln for ln in lines if ln.startswith("| #")), "")
+    parts = ([hdr, "|---|---|---|---|---|"] if hdr and rows else []) + rows
+    return "\n".join(parts + ([""] if parts and bullets else []) + bullets).strip()
 
 
 def versification_notes(b, lo, hi):
@@ -216,7 +225,7 @@ def _tied(tok, unit_skeletons, segments):
             return any(sk in w for w in unit_skeletons)
         strong = _skeleton(piece, gutturals=True)
         if len(pieces) == 1 and not re.search("[ʾʿ]", strong):
-            return False                # a short skeleton with no guttural says too little
+            return len(strong) >= 2 and strong in segments   # short, no guttural: a whole word only
         if len(strong) < (1 if len(pieces) > 1 else 2) or strong not in segments:
             if not (len(sk) >= 3 and any(sk in w for w in unit_skeletons)):
                 return False
