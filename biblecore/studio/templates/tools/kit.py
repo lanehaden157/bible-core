@@ -3,7 +3,8 @@
     python tools/kit.py sources                    # keys, labels, section counts
     python tools/kit.py words 1:1-9                # per verse: English, words (translit, lemma, gloss, parsing), LXX English
     python tools/kit.py parts N [--cap 80]         # the unit's "whole" sources as files <= cap KB
-    python tools/kit.py extra N                    # every other source over the unit, one file each
+    python tools/kit.py extra N [--key 1:4,1:9]    # the "voices" sources over the unit (only sections touching the key verses with --key), one file each
+    python tools/kit.py grep N TERM [TERM ...]     # every other source: only the lines where a term occurs, to work/NN/grep.md
     python tools/kit.py range 1:1-9 [--source a,b] [--cap 28] [--out FILE]
     python tools/kit.py bible EXO 29:38-42 [--lxx] # WEB (or Brenton's LXX English) for any book
     python tools/kit.py calls N                    # the Calls for Lane section of work/NN/calls.md
@@ -12,7 +13,8 @@ Vendored from bible-core (studio); the book's copy is overwritten on sync.
 Ranges: C:V, C:V-V, C:V-C:V, English numbering. Book codes are the WEB's
 (GEN EXO LEV NUM DEU JOS ... PSA ISA JER EZE ... MAT MAR LUK JOH ... REV).
 A source key also matches its numbered volumes (`milgrom` = milgrom-1, -2, -3).
-Settings: book.json "studio" {"whole": [keys read whole per unit],
+Reading rank: "whole" sources (`parts`), then "voices" (`extra`, key verses), then every other source (`grep`).
+Settings: book.json "studio" {"whole": [keys read whole per unit], "voices": [keys read by key verses],
 "lxx_numbering": "hebrew" when Brenton follows the Hebrew verse numbers}.
 `words` prints no native script: transliteration only.
 """
@@ -83,6 +85,15 @@ def whole_keys():
     return expand(STUDIO.get("whole", []))
 
 
+def voice_keys():
+    return expand(STUDIO.get("voices", []))
+
+
+def rest_keys():
+    taken = set(whole_keys()) | set(voice_keys())
+    return [k for k in all_keys() if k not in taken]
+
+
 def records(key):
     f = SEC / f"{key}.jsonl"
     if not f.exists():
@@ -124,11 +135,12 @@ def write(path, text):
 # ---- commands -----------------------------------------------------------
 def cmd_sources():
     lab = labels()
-    whole = set(whole_keys())
+    whole, voices = set(whole_keys()), set(voice_keys())
     for k in all_keys():
         recs = records(k)
         n_intro = sum(1 for x in recs if (x["s"], x["e"]) == INTRO)
-        print(f"{k}{' (whole)' if k in whole else ''}: {len(recs)} sections"
+        tier = " (whole)" if k in whole else " (voice)" if k in voices else ""
+        print(f"{k}{tier}: {len(recs)} sections"
               f"{f', {n_intro} intro' if n_intro else ''}. {lab.get(k, '')}")
 
 
@@ -159,19 +171,40 @@ def cmd_parts(n, cap):
             print(f"{f.relative_to(ROOT).as_posix()}  {f.stat().st_size // 1000} KB")
 
 
-def cmd_extra(n):
+def cmd_extra(n, key=None):
     r = unit_range(n)
+    ks = [rng(x) for x in key.split(",")] if key else None
     out = ROOT / "work" / f"{n:02d}" / "extra"
     out.mkdir(parents=True, exist_ok=True)
-    lab, whole = labels(), set(whole_keys())
-    for key in all_keys():
-        if key in whole:
-            continue
-        recs = hits(key, r)
+    lab = labels()
+    for k in voice_keys():
+        recs = hits(k, r)
+        if ks:
+            recs = [x for x in recs if any(overlaps((x["s"], x["e"]), q) for q in ks)]
         if recs:
-            f = out / f"{key}.md"
-            write(f, f"# {key}, unit {n}\n\n{lab.get(key, '')}\n\n" + block(key, recs))
+            f = out / f"{k}.md"
+            write(f, f"# {k}, unit {n}\n\n{lab.get(k, '')}\n\n" + block(k, recs))
             print(f"{f.relative_to(ROOT).as_posix()}  {f.stat().st_size // 1000} KB")
+
+
+def cmd_grep(n, terms, cap=40):
+    r = unit_range(n)
+    pat = re.compile("|".join(re.escape(t) for t in terms), re.I)
+    text, seen = "", []
+    for k in rest_keys():
+        recs = hits(k, r)
+        seen.append(f"{k} ({len(recs)})")
+        for x in recs:
+            lines = x["text"].split("\n")
+            idx = [i for i, l in enumerate(lines) if pat.search(l)][:6]
+            if idx:
+                text += f"## {k}: {x['title']} [{fmt((x['s'], x['e']))}]\n\n"
+                text += "\n".join(f"- {lines[i].strip()[:400]}" for i in idx) + "\n\n"
+    f = ROOT / "work" / f"{n:02d}" / "grep.md"
+    f.parent.mkdir(parents=True, exist_ok=True)
+    head = f"# grep, unit {n}: {', '.join(terms)}\n\nSources scanned (sections in range): {'; '.join(seen)}\n\n"
+    write(f, (head + text)[: cap * 1000])
+    print(f"{f.relative_to(ROOT).as_posix()}  {f.stat().st_size // 1000} KB")
 
 
 def cmd_range(r, keys, cap, out=None):
@@ -256,7 +289,9 @@ def main(a):
     elif c == "parts":
         cmd_parts(int(pos[1]), int(opt.get("--cap", PARTS_KB)))
     elif c == "extra":
-        cmd_extra(int(pos[1]))
+        cmd_extra(int(pos[1]), opt.get("--key"))
+    elif c == "grep":
+        cmd_grep(int(pos[1]), pos[2:])
     elif c == "range":
         keys = expand(opt["--source"].split(",")) if "--source" in opt else all_keys()
         cmd_range(rng(pos[1]), keys, int(opt.get("--cap", CAP_KB)), opt.get("--out"))

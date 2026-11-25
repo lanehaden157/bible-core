@@ -85,7 +85,7 @@ def test_install_renders_and_guards_edits():
         text = open(unit, encoding="utf-8").read()
         if "{{" in text or "leviticus-literary-unit-map.md" not in text:
             fails.append("placeholders not filled in the unit skill")
-        for rel in ("tools/kit.py", "tools/split_sources.py", "tools/unit_status.py", "tools/lessons.py",
+        for rel in ("tools/kit.py", "tools/split_sources.py", "tools/unit_status.py", "tools/lessons.py", "tools/lint_study.py", ".claude/skills/build/SKILL.md",
                     ".claude/agents/builder.md", ".claude/agents/fact-checker.md"):
             if not os.path.exists(os.path.join(d, rel)):
                 fails.append(f"{rel} not installed")
@@ -217,6 +217,45 @@ def test_unit_pack_ties_short_rulings_and_reads_table_maps():
     return fails
 
 
+def test_tiered_reading_and_lint():
+    d = _scratch()
+    try:
+        cfg = json.load(open(os.path.join(d, "book.json"), encoding="utf-8"))
+        cfg["studio"] = {"whole": ["milgrom"], "voices": ["rashi"], "lxx_numbering": "hebrew"}
+        json.dump(cfg, open(os.path.join(d, "book.json"), "w", encoding="utf-8"))
+        with contextlib.redirect_stdout(io.StringIO()):
+            studio.install(d)
+        mk = os.path.join(d, "sources", "marked")
+        with open(os.path.join(mk, "rashi.txt"), "w", encoding="utf-8") as fh:
+            fh.write(chr(10).join(["#source: rashi", "#label: R", "@@ 1:1 | one", "Called first.",
+                                   "@@ 1:9 | nine", "Aroma text.", ""]))
+        with open(os.path.join(mk, "henry.txt"), "w", encoding="utf-8") as fh:
+            fh.write(chr(10).join(["#source: henry", "#label: H", "@@ 1:1-17 | ch", "A line.",
+                                   "The aroma of rest.", ""]))
+        _run(d, "tools/split_sources.py")
+        fails = []
+        rc, out = _run(d, "tools/kit.py", "extra", "1", "--key", "1:9")
+        txt = open(os.path.join(d, "work", "01", "extra", "rashi.md"), encoding="utf-8").read()
+        if "Aroma text" not in txt or "Called first" in txt:
+            fails.append(f"extra --key did not narrow to the key verse: {txt!r}")
+        rc, out = _run(d, "tools/kit.py", "grep", "1", "aroma")
+        g = open(os.path.join(d, "work", "01", "grep.md"), encoding="utf-8").read()
+        if "aroma of rest" not in g.lower() or "Aroma text" in g:
+            fails.append(f"grep covered the wrong sources: {g!r}")
+        rc, out = _run(d, "tools/kit.py", "sources")
+        if "milgrom-1 (whole)" not in out or "rashi (voice)" not in out:
+            fails.append(f"sources lacks the tiers: {out}")
+        os.makedirs(os.path.join(d, "work", "01"), exist_ok=True)
+        with open(os.path.join(d, "work", "01", "briefing.md"), "w", encoding="utf-8") as fh:
+            fh.write("- a bullet" + chr(10))
+        rc, out = _run(d, "tools/lint_study.py", "1")
+        if rc != 1 or "a bullet" not in out or "words" not in out:
+            fails.append(f"lint missed a bullet or the length: {out}")
+        return fails
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 TESTS = [test_validate, test_install_renders_and_guards_edits, test_studio_book_takes_no_chat_cards,
-         test_tools_on_a_scratch_book, test_lessons_loop,
+         test_tools_on_a_scratch_book, test_lessons_loop, test_tiered_reading_and_lint,
          test_unit_pack_ties_short_rulings_and_reads_table_maps]

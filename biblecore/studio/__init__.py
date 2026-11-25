@@ -14,9 +14,9 @@ in a tool of its own under another name. `.claude/studio.json` records what
 was installed, so an edit made in the book is noticed and not overwritten
 (the edit belongs in bible-core, or in the book's CLAUDE.md).
 
-book.json "studio": {"whole": [source keys read whole per unit; the rest by
-range], "lxx_numbering": "hebrew" (Brenton's English follows the Hebrew verse
-numbers)}. Both optional.
+book.json "studio": {"whole": [source keys read whole per unit], "voices": [keys read for
+the unit's key verses; every other source is searched by grep], "lxx_numbering":
+"hebrew" (Brenton's English follows the Hebrew verse numbers)}. All optional.
 """
 import argparse
 import hashlib
@@ -25,7 +25,7 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES = os.path.join(HERE, "templates")
-STUDIO_KEYS = {"whole", "lxx_numbering"}
+STUDIO_KEYS = {"whole", "voices", "lxx_numbering"}
 RECORD = ".claude/studio.json"
 
 
@@ -37,8 +37,9 @@ def validate(cfg):
     if not isinstance(s, dict):
         return ["'studio' must be an object ({} for the defaults)"]
     errs = [f"studio: unknown key '{k}' (known: {sorted(STUDIO_KEYS)})" for k in sorted(set(s) - STUDIO_KEYS)]
-    if "whole" in s and not (isinstance(s["whole"], list) and all(isinstance(x, str) for x in s["whole"])):
-        errs.append("studio.whole must be a list of source keys")
+    for k in ("whole", "voices"):
+        if k in s and not (isinstance(s[k], list) and all(isinstance(x, str) for x in s[k])):
+            errs.append(f"studio.{k} must be a list of source keys")
     if s.get("lxx_numbering", "english") not in ("english", "hebrew"):
         errs.append("studio.lxx_numbering must be 'english' or 'hebrew'")
     return errs

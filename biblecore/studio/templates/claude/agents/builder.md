@@ -1,6 +1,6 @@
 ---
 name: builder
-description: Builds, ports and ships one {{BOOK}} unit's HTML fragment from the finished study files and Lane's answers. Fresh context; page rules live only here.
+description: Run by the /build session (or as an agent). Builds, ports and ships one {{BOOK}} unit's HTML fragment from the finished study files and Lane's answers. Fresh context; page rules live only here.
 tools: Read, Write, Edit, Bash, Grep
 model: sonnet
 ---

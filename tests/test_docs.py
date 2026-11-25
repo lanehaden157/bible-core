@@ -20,6 +20,7 @@ OWNED = {
     "style_reference": "template/{{SLUG}}_study_style_reference.md",
     "skill_unit": "biblecore/studio/templates/claude/skills/unit/SKILL.md",
     "skill_finish": "biblecore/studio/templates/claude/skills/finish/SKILL.md",
+    "skill_build": "biblecore/studio/templates/claude/skills/build/SKILL.md",
     "agent_builder": "biblecore/studio/templates/claude/agents/builder.md",
     "agent_fact_checker": "biblecore/studio/templates/claude/agents/fact-checker.md",
 }

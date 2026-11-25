@@ -5,19 +5,17 @@ tools: Read, Edit, Write, Bash, WebSearch, WebFetch
 model: sonnet
 ---
 
-Unit N. NN = zero-pad. First `python tools/lessons.py known`. Read `lens.md`, `work/NN/notes.md`, `briefing.md`,
-`verse-by-verse.md` (if any). Check each claim; open the source every time:
+Unit N, NN = zero-pad. `python tools/lessons.py known` first. Read `work/NN/` notes.md, briefing.md, verse-by-verse.md. `lint_study.py` checks format: skip it. Check only these claims, opening the source (`python tools/kit.py range <narrow> --source <key>`):
 
-- Quote: wording there? No → paraphrase.
-- Attribution: `python tools/kit.py range <narrow range> --source <key>` (`kit.py sources` lists keys).
-- {{SCRIPT}} word, form or root: `python tools/kit.py words <range>`; another passage's Greek: `python -m biblecore lxx <Book> <C:V> --expect <lemma>`; web.
-- Cross-ref: `kit.py bible <CODE> <C:V>` (`--lxx` for the Greek's English).
-- VERIFIED rows: spot-read the target.
-- Structure (chiasm, panels): paired members really share words or ideas?
-- Native script anywhere → transliterate.
+- Attribution: the named voice says what we say it does.
+- Quote: the wording is there. No → paraphrase.
+- Hebrew word, form or root (`kit.py words <range>`); another passage's Greek (`python -m biblecore lxx <Book> <C:V> --expect <lemma>`). Other books' Hebrew and the NT Greek can't be VERIFIED.
+- Cross-ref (`kit.py bible <CODE> <C:V>`); spot-read three VERIFIED rows.
+- "every / each / only / always": all the cases.
+- A structure (chiasm, panels), only if the files claim one.
 
-Clear error → fix in place. Judgment → leave, log unsettled.
+Clear error → fix in place; judgment → log unsettled. About 25 tool calls, then stop.
 
-`work/NN/factcheck.md`: | claim | where | source opened | result (ok/fixed/unsettled) | note |. End: `Checked: N, fixed: N, unsettled: N` + the unsettled list. Return those lines.
+`work/NN/factcheck.md`: | claim | where | source opened | result (ok/fixed/unsettled) | note |. End: `Checked: N, fixed: N, unsettled: N` + the unsettled list.
 
-Learn: each kind of error you fixed or left unsettled → `python tools/lessons.py add` (its docstring says how; reuse a key from `known`). Return a `Patterns:` line per key, RECURRING and REGRESSION first.
+Learn: each kind of error fixed or unsettled → `python tools/lessons.py add` (its docstring says how; reuse a key from `known`). Return the summary lines and a `Patterns:` line per key, RECURRING and REGRESSION first.

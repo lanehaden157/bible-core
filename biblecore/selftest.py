@@ -52,7 +52,7 @@ DOC_BUDGET_KB = {"field": 4, "claude": 2, "style_reference": 6,
                  "contract": 10, "book_guide": 4.5,
                  # studio books (biblecore/studio): the /unit flow
                  "skill_unit": 4.5, "skill_finish": 1, "agent_builder": 3,
-                 "agent_fact_checker": 1.5}
+                 "agent_fact_checker": 1.5, "skill_build": 0.5}
 
 
 def _quiet(fn, *a):
@@ -213,10 +213,11 @@ def check_docs():
              "book_guide": os.path.join(b.root, "biblecore", "BOOK_CLAUDE.md"),
              "skill_unit": os.path.join(b.root, ".claude", "skills", "unit", "SKILL.md"),
              "skill_finish": os.path.join(b.root, ".claude", "skills", "finish", "SKILL.md"),
+             "skill_build": os.path.join(b.root, ".claude", "skills", "build", "SKILL.md"),
              "agent_builder": os.path.join(b.root, ".claude", "agents", "builder.md"),
              "agent_fact_checker": os.path.join(b.root, ".claude", "agents", "fact-checker.md")}
     if b.cfg.get("studio") is None:      # a chat-side book's .claude/ is its own
-        for k in ("skill_unit", "skill_finish", "agent_builder", "agent_fact_checker"):
+        for k in ("skill_unit", "skill_finish", "skill_build", "agent_builder", "agent_fact_checker"):
             paths[k] = None
     budget = {**DOC_BUDGET_KB, **b.check("doc_budget_kb")}
     over = []
