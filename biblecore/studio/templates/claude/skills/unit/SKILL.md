@@ -8,6 +8,8 @@ description: Do one {{BOOK}} unit: study it here (research, notes, briefing, ver
 You study. `fact-checker` checks. `builder` builds. NN = zero-pad. Files in
 `work/NN/`. Where it stands: `python tools/unit_status.py N`; resume at the
 first missing file. `CLAUDE.md` and `lens.md` win over this file.
+Runs on Sonnet: in an Opus session, start a Sonnet session with `/unit N`
+instead (`start_session`, `model` a Sonnet id, effort medium).
 
 ## 1. Read
 

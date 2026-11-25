@@ -133,6 +133,11 @@ def test_tools_on_a_scratch_book():
             fails.append(f"Hebrew 5:20-21 not mapped to English 6:1-2: {recs[2]}")
         if (recs[0]["s"], recs[0]["e"]) != (0, 0):
             fails.append("intro section not 0-0")
+        with open(os.path.join(d, "sources", "marked", "milgrom-3.txt"), "w", encoding="utf-8") as fh:
+            fh.write("#source: milgrom-3\n#label: v3\n@@ 23:1-4 | A\ntext\n@@ 25:1-2 | B\ntext\n")
+        rc, out = _run(d, "tools/split_sources.py", "--check", "milgrom-3")
+        if "ch. [24]" not in out or "ch. [1" in out:
+            fails.append(f"split_sources gaps should lie between a source's first and last chapter: {out}")
         rc, out = _run(d, "tools/kit.py", "range", "1:3", "--source", "milgrom")
         if "Burnt offering text" not in out or "General matters" in out:
             fails.append(f"kit range by volume prefix wrong: {out}")

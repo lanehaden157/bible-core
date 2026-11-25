@@ -144,13 +144,11 @@ def main(a):
     lf = OUT / "labels.json"
     labels = json.loads(lf.read_text("utf-8")) if lf.exists() else {}
     table = heb_to_eng()
-    n_ch = book_cfg().get("chapters")
     for f in files:
         meta, chunks = parse_marked(f, table)
         key = meta.get("source", f.stem)
         chs = coverage(chunks)
-        top = n_ch or max(chs, default=0)
-        gaps = [c for c in range(1, top + 1) if c not in chs]
+        gaps = [c for c in range(min(chs, default=1), max(chs, default=0) + 1) if c not in chs]
         print(f"{key}: {len(chunks)} sections, {sum(len(c[2]) for c in chunks) // 1000} KB"
               + (f", no section for ch. {gaps}" if gaps else ""))
         if check:
