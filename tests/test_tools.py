@@ -58,7 +58,7 @@ def test_vendor_diff_and_refusal_round_trip():
             fails.append("sync should refuse to overwrite local edits")
         return fails
     finally:
-        shutil.rmtree(d)
+        core_sync.rmtree(d)
 
 
 def test_new_book_registers_the_hub_row():
@@ -97,4 +97,4 @@ def test_new_book_registers_the_hub_row():
             pass
         return fails
     finally:
-        shutil.rmtree(d)
+        core_sync.rmtree(d)
