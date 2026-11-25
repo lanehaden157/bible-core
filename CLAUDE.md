@@ -19,6 +19,8 @@ read Matthew's corpus and `archive/pipeline/` read-only.
   `canon/conventions.md` → `canon-conventions.md`. All vendored + synced.
 - `biblecore/BOOK_CLAUDE.md`: shared book guide; a book's `CLAUDE.md` imports
   it and adds its differences.
+- `biblecore/studio/templates/`: a studio book's `/unit` flow (skills,
+  agents, tools), installed into the book; no cards there.
 - Component `snippet.md` files are build-enforced: tighten wording only.
 
 Keeping them lean (`tests/test_docs.py` fails when a core-owned file passes

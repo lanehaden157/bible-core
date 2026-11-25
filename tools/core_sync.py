@@ -33,6 +33,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 
@@ -57,25 +58,49 @@ RETIRED_FILES = ["core-workflow.md", "canon-handoff-template.md",
                  "canon-ledger-template.md", "canon-decisions.md"]
 
 
-def canon_files(book_root):
-    """The canon files this book takes: the shared ones, plus the tier
-    cards when its book.json opts in."""
-    files = dict(CANON_FILES)
+def _cfg(book_root):
     try:
         with open(os.path.join(book_root, "book.json"), encoding="utf-8") as fh:
-            if json.load(fh).get("tiers") is True:
-                files.update(TIER_CANON_FILES)
+            return json.load(fh)
     except (OSError, ValueError):
-        pass
+        return {}
+
+
+def canon_files(book_root):
+    """The canon files this book takes: the shared ones, plus the tier
+    cards when its book.json opts in. A studio book (book.json "studio")
+    takes no chat cards: its flow lives in .claude/ (biblecore/studio)."""
+    cfg = _cfg(book_root)
+    files = dict(CANON_FILES)
+    if cfg.get("tiers") is True:
+        files.update(TIER_CANON_FILES)
+    if isinstance(cfg.get("studio"), dict):
+        files = {s: d for s, d in files.items() if not s.startswith("card-")}
     return files
+
+
+def retired_files(book_root):
+    if isinstance(_cfg(book_root).get("studio"), dict):
+        return RETIRED_FILES + [d for s, d in {**CANON_FILES, **TIER_CANON_FILES}.items()
+                                if s.startswith("card-")]
+    return RETIRED_FILES
 
 
 def copy_canon_files(book_root):
     for src, dst in canon_files(book_root).items():
         shutil.copyfile(os.path.join(CORE, "canon", src), os.path.join(book_root, dst))
-    for name in RETIRED_FILES:
+    for name in retired_files(book_root):
         if os.path.exists(os.path.join(book_root, name)):
             os.remove(os.path.join(book_root, name))
+
+
+def rmtree(path):
+    """shutil.rmtree that clears the read-only bit first: OneDrive marks
+    folders read-only and copytree carries that into copies."""
+    def retry(fn, p, _exc):
+        os.chmod(p, stat.S_IWRITE)
+        fn(p)
+    shutil.rmtree(path, onerror=retry)
 
 
 def core_commit():
@@ -116,9 +141,12 @@ def plan(book_root):
         s, d = os.path.join(CORE, "canon", src), os.path.join(book_root, dst)
         if not os.path.exists(d) or not filecmp.cmp(s, d, shallow=False):
             acts.append(("update" if os.path.exists(d) else "add", f"../{dst}"))
-    for name in RETIRED_FILES:
+    for name in retired_files(book_root):
         if os.path.exists(os.path.join(book_root, name)):
             acts.append(("remove", f"../{name}"))
+    from biblecore import studio
+    if studio.is_studio(book_root):
+        acts += [(a, f"../{rel}") for a, rel in studio.plan(book_root)[0]]
     return acts
 
 
@@ -163,6 +191,16 @@ def vendor(book_root, check=False, allow_dirty=False):
             print("  ", ln)
         return 1
 
+    from biblecore import studio
+    if studio.is_studio(book_root):
+        edited = studio.plan(book_root)[1]
+        if edited:
+            print("studio files edited in the book -- move the change into bible-core "
+                  "or the book's CLAUDE.md first (`python -m biblecore studio --force` overwrites):")
+            for e in edited:
+                print("  ", e)
+            return 1
+
     acts = plan(book_root)
     for act, rel in acts:
         print(f"  {act:6} {rel}")
@@ -173,7 +211,7 @@ def vendor(book_root, check=False, allow_dirty=False):
     if acts:
         dst = os.path.join(book_root, "biblecore")
         if os.path.isdir(dst):
-            shutil.rmtree(dst)
+            rmtree(dst)
         shutil.copytree(os.path.join(CORE, "biblecore"), dst,
                         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
         copy_canon_files(book_root)
@@ -182,6 +220,8 @@ def vendor(book_root, check=False, allow_dirty=False):
         with open(os.path.join(dst, "CORE_VERSION"), "w", encoding="utf-8", newline="\n") as f:
             f.write(f"{__version__} {commit}{' +dirty' if dirty else ''}\n")
         print(f"vendored bible-core {__version__} ({commit[:10]}) into {dst}")
+        if studio.is_studio(book_root):
+            studio.install(book_root, log=lambda *_: None)
     if set_book_core(book_root):
         print("book.json \"core\" updated")
     return 0

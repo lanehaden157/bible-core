@@ -446,6 +446,15 @@ easy to add in `book.py`; keys nothing reads don't stay.
 
 ## 6. Workflow defaults (chat side + Claude Code)
 
+**Studio books** (book.json `"studio"`) skip everything below about the chat
+side: one Claude Code session studies a unit (`/unit N`), a `fact-checker`
+agent checks it, Lane answers calls in popups, a `builder` agent ports and
+ships; `/finish` runs several units' sessions. Sources sit git-ignored in
+`sources/`, one marked text per source indexed by verse
+(`tools/split_sources.py`), read through `tools/kit.py`. The files come from
+`biblecore/studio/` and are core's; the book's `CLAUDE.md` holds its
+differences. No cards, field or sync.
+
 The shared loop lives in `canon/workflow.md`, vendored into each book as
 `core-workflow.md` and synced to the project side (D6). The project's
 instruction field (`CHAT_SIDE_INSTRUCTIONS.md`, pasted by hand when Lane is told it changed; nothing tracks that) keeps only the

@@ -220,7 +220,16 @@ def mark_synced(rels):
     save_state(state)
 
 
+def _studio():
+    if book().cfg.get("studio") is not None:
+        print("studio book: no Claude.ai project, nothing to sync")
+        return True
+    return False
+
+
 def check_main(argv=None):
+    if _studio():
+        return 0
     args = list(argv or [])
     root = Path(book().root)
     tracked = resolve()
@@ -298,6 +307,8 @@ def missing_packs(b=None):
 
 
 def push_main(argv=None):
+    if _studio():
+        return 0
     root = Path(book().root)
     synced = Path(book().path("synced"))
     synced.mkdir(parents=True, exist_ok=True)

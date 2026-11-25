@@ -11,6 +11,10 @@ Joshua run the core's app shell and pipeline, and so does Matthew (its first
   the shared fragment contract, shared wording defaults. Each book gets a copy (`card-*.md`, `fragment-contract.md`,
   `canon-conventions.md`) that syncs to its project side.
 - `biblecore/BOOK_CLAUDE.md` — the shared book guide a book's `CLAUDE.md` imports.
+- `biblecore/studio/` — the in-Claude-Code flow for a book with book.json
+  `"studio"` (no project side, no cards): `/unit`, `/finish`, `builder`,
+  `fact-checker`, `tools/kit.py` (verse-keyed sources), installed by
+  `core_sync` or `python -m biblecore studio`. ARCHITECTURE.md §6.
 - `canon/*.json` — the canon registries: arcs, canon threads, intertext
   edges, type-scenes (ARCHITECTURE.md §2). `python tools/canon_collect.py`
   refreshes them from the books.

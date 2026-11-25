@@ -143,6 +143,8 @@ def fetch(b, force=False, check_only=False, base=None, log=print):
     ([] == every file is in place and matches its pin)."""
     problems = []
     names = BY_LANGUAGE.get(b.language, ())
+    if b.language == "hebrew" and b.cfg.get("studio") is not None:
+        names = ("lxx",)          # a studio book checks Greek claims with `lxx`
     if not names:
         log(f"nothing to fetch for a {b.language} book"
             + (" (morphhb comes from npm: package.json pins it)" if b.language == "hebrew" else ""))

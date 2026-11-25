@@ -19,6 +19,9 @@ import tempfile
 import time
 
 import support
+
+sys.path.insert(0, os.path.join(support.CORE, "tools"))
+import core_sync  # noqa: E402
 from template_book import make_book
 
 J = support.JOSHUA
@@ -98,7 +101,7 @@ def test_template_has_no_unfilled_placeholders_after_instantiation():
                     left.append(os.path.relpath(path, d))
         return [f"placeholder left in {x}" for x in left]
     finally:
-        shutil.rmtree(d)
+        core_sync.rmtree(d)
 
 
 def test_new_book_gets_the_ci_workflow_unchanged():
@@ -124,7 +127,7 @@ def test_new_book_gets_the_ci_workflow_unchanged():
             elif open(got, encoding="utf-8").read() != keep_language(text, language):
                 fails.append(f"new {language} book's {rel} differs from the template's")
         finally:
-            shutil.rmtree(d)
+            core_sync.rmtree(d)
     return fails
 
 
@@ -144,7 +147,7 @@ def test_new_book_gets_the_template_gitattributes():
             return [".gitattributes lacks '* text=auto eol=lf'"]
         return []
     finally:
-        shutil.rmtree(d)
+        core_sync.rmtree(d)
 
 
 def test_empty_book_builds():
@@ -164,7 +167,7 @@ def test_empty_book_builds():
                  if not os.path.exists(os.path.join(d, x))]
         return [f"first build wrote no {x}" for x in shell] + _crlf_written(d, since)
     finally:
-        shutil.rmtree(d)
+        core_sync.rmtree(d)
 
 
 def _drop_promotions(folder):
@@ -241,4 +244,4 @@ def test_joshua_from_template_reproduces_joshua():
         fails += _same_shell(d, J)
         return fails + _crlf_written(d, since)
     finally:
-        shutil.rmtree(d)
+        core_sync.rmtree(d)

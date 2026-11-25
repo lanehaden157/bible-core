@@ -18,6 +18,10 @@ OWNED = {
     "field": "template/CHAT_SIDE_INSTRUCTIONS.md",
     "claude": "template/CLAUDE.md",
     "style_reference": "template/{{SLUG}}_study_style_reference.md",
+    "skill_unit": "biblecore/studio/templates/claude/skills/unit/SKILL.md",
+    "skill_finish": "biblecore/studio/templates/claude/skills/finish/SKILL.md",
+    "agent_builder": "biblecore/studio/templates/claude/agents/builder.md",
+    "agent_fact_checker": "biblecore/studio/templates/claude/agents/fact-checker.md",
 }
 # the template's field is held tighter than the book default (4): a book's
 # field grows with its own notes

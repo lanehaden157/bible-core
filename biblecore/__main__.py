@@ -45,6 +45,8 @@ Commands:
   sync-check [--mark-synced [FILE ...]]
                         which chat-side files need syncing
   sync                  mirror chat-side files, commit, push
+  studio [--check|--force]
+                        a studio book's /unit flow files (.claude/, tools/kit.py ...)
   book                  the book's state (core pin, units, threads, sync)
                         and its resolved paths
 """
@@ -77,6 +79,7 @@ COMMANDS = {
     "migrate": ("biblecore.migrate", "main"),
     "test": ("biblecore.selftest", "main"),
     "fetch": ("biblecore.fetch", "main"),
+    "studio": ("biblecore.studio", "main"),
     "checks": ("biblecore.checks", "main"),
     "unit-pack": ("biblecore.unit_pack", "main"),
     "mirror": ("biblecore.mirror", "main"),

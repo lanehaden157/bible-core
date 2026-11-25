@@ -47,6 +47,9 @@ ALLOWED_KEYS = {
     # behind this" chip, from briefs the hub publishes. Absent = no chip code
     # in the shell (lawchip.js)
     "law_chips",
+    # an object = a studio book: units studied and built in Claude Code
+    # (/unit, /finish), no Claude.ai project; see biblecore/studio/
+    "studio",
 }
 MIRROR_ENTRY_KEYS = {"with", "file"}
 # Which verse numbering the book displays and cites: "kjv" (English Bibles;
@@ -138,6 +141,8 @@ def validate_config(cfg):
                 errs.append("corpus: missing 'kind'")
     if "tiers" in cfg and not isinstance(cfg["tiers"], bool):
         errs.append("'tiers' must be true or false")
+    from biblecore import studio
+    errs += studio.validate(cfg)
     if "law_chips" in cfg and not isinstance(cfg["law_chips"], bool):
         errs.append("'law_chips' must be true or false")
     for k in ("groupings", "components", "meta_keys"):
