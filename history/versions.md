@@ -75,3 +75,4 @@ One line per release; `tools/release.py` appends. History, not instructions.
 - 0.38.1: Studio: unit skill runs on Sonnet; split_sources gap report limited to a source's covered range
 - 0.38.2: Studio: lessons loop; unit-pack map entry and short-ruling ties; checks skips NT refs; agent fixes from the unit 1 pilot
 - 0.38.3: Studio: tiered source reading (whole/voices/grep), lint_study, narrower fact-checker, builder runs as a /build session
+- 0.38.4: Studio: doc budgets set by need (cut rules restored), kit.py keyverses suggests key verses from the pack, /build runs the lessons loop
